@@ -72,7 +72,7 @@ class VirtualPad:
 
 def fetch_pads(url, token, timeout):
     request = Request(url.rstrip("/") + "/api/state",
-                      headers={"Authorization": "Bearer " + token})
+                      headers={"Authorization": "Bearer " + token, "X-ROB-Receiver": "retropie"})
     with urlopen(request, timeout=timeout) as response:
         state = json.load(response)
     if not isinstance(state, dict):

@@ -1,6 +1,6 @@
 # R.O.B. Vision documentation
 
-**Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on a cabinet screen; the UNO Q camera reads its flashes; a browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. No physical robot or game pieces are planned. Only the browser simulation and local game-name resolver are currently implemented.
+**Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on a cabinet screen; the UNO Q camera will read its flashes; a browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. No physical robot or game pieces are planned. The UNO Q dashboard, RetroPie launch hooks, and both Gyromite gate controls have been tested. Camera capture with the intended hardware remains to be verified.
 
 Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [Technical Reference](../output/pdf/R.O.B.-Vision-Technical-Reference.pdf), and [Quick Reference](../output/pdf/R.O.B.-Vision-Quick-Reference.pdf).
 
@@ -11,6 +11,7 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 | Everyone | [Project README](../README.md) | Scope, preview, and document links. |
 | Everyone | [Virtual system contract](VIRTUAL_SYSTEM.md) | UNO Q, browser, virtual pieces, and game-link responsibilities. |
 | Player | [User guide](USER_GUIDE.md) | Preview controls and planned connected experience. |
+| Player and installer | [Setup guide](SETUP_GUIDE.md) | Pairing, camera placement, Test mode, and manual checks. |
 | Player | [Gameplay guide](GAMEPLAY_GUIDE.md) | Gyromite, Stack-Up, holders, spin, and virtual button rules. |
 | Player | [Quick reference](QUICK_REFERENCE.md) | Controls and indicators at a glance. |
 | Installer | [Installation guide](INSTALLATION_GUIDE.md) | Preview setup and planned UNO Q/game-host setup. |

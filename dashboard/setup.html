@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080f1d">
+  <title>R.O.B. Vision // Setup</title>
+  <link rel="stylesheet" href="style.css?v=setup-1">
+  <link rel="stylesheet" href="setup.css?v=setup-1">
+  <script src="setup.js?v=setup-1" defer></script>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <main class="app-shell setup-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">R<span>·</span>O<span>·</span>B</span><span class="brand-sub">SETUP <i>///</i> MK·01</span></div>
+      <nav class="page-nav" aria-label="Pages"><a href="/dashboard/">MISSION</a><a href="/dashboard/setup.html" aria-current="page">SETUP</a></nav>
+      <div class="top-status"><span class="status-dot"></span><span id="setup-connection">CONNECTING</span></div>
+    </header>
+    <div class="setup-hero"><p class="eyebrow">READY THE MISSION / 00</p><h1>Connect. Aim. Test.</h1><p>Prepare the RetroPie link and camera, then check each game control before playing.</p></div>
+    <section class="setup-card auth-card" id="auth-card" hidden>
+      <div class="section-head"><span>CONTROLLER ACCESS</span><span>UNO Q</span></div>
+      <p>Enter the R.O.B. Vision controller token to use Setup. It stays in this browser tab until you close it.</p>
+      <div class="setup-row"><input id="setup-token" type="password" autocomplete="off" aria-label="Controller token" placeholder="Controller token"><button id="connect-button" type="button">CONNECT</button></div>
+    </section>
+    <div class="setup-grid">
+      <section class="setup-card" aria-labelledby="pair-heading">
+        <div class="section-head"><span>01 / PAIR</span><span id="pair-link">CHECKING</span></div>
+        <h2 id="pair-heading">Pair RetroPie</h2>
+        <p>On RetroPie, run <code>python3 /home/pi/rob-vision/tools/retropie_pair.py</code>. It displays a six-digit code and a SHA-256 fingerprint for five minutes. Compare both here before pairing.</p>
+        <label>Console address<input id="pair-host" autocomplete="off" value="retropie.local" placeholder="retropie.local"></label>
+        <label>Six-digit code<input id="pair-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"></label>
+        <label>SHA-256 fingerprint<input id="pair-fingerprint" autocomplete="off" spellcheck="false" placeholder="64 hex characters from RetroPie"></label>
+        <div class="setup-row"><button id="pair-button" type="button">PAIR CONSOLE</button><button id="pair-refresh" type="button" class="quiet">CHECK LINK</button></div>
+        <p class="setup-feedback" id="pair-feedback" role="status">The receiver must be installed on RetroPie before pairing.</p>
+      </section>
+      <section class="setup-card" aria-labelledby="camera-heading">
+        <div class="section-head"><span>02 / CAMERA</span><span id="camera-state">OFFLINE</span></div>
+        <h2 id="camera-heading">Aim at the game screen</h2>
+        <p>Place the UNO Q camera so the game's optical flash area fills the green rectangle. A stable, bright image and at least 110 fps are needed for decoding.</p>
+        <div class="setup-camera"><img id="setup-frame" alt="Live UNO Q camera image with a green sampling rectangle" hidden><span id="camera-placeholder">CAMERA PREVIEW OFFLINE</span></div>
+        <div class="setup-stats"><span id="camera-device">NO CAMERA DETECTED</span><span id="camera-fps">0 FPS</span><span id="camera-brightness">0% SIGNAL</span></div>
+        <div class="setup-row"><button id="camera-toggle" type="button">START CAMERA CHECK</button></div>
+        <p class="setup-feedback" id="camera-feedback" role="status">Connect a camera to the UNO Q to check placement.</p>
+      </section>
+      <section class="setup-card" aria-labelledby="test-heading">
+        <div class="section-head"><span>03 / GAME SIGNAL</span><span id="test-state">WAITING</span></div>
+        <h2 id="test-heading">Check the game's Test mode</h2>
+        <p>Choose the game, open its Test mode, then arm this check. A decoded R.O.B. ready-light signal confirms the camera can read the flashes. The signal alone cannot identify the game's menu screen.</p>
+        <div class="setup-row"><button id="select-gyro" type="button" class="quiet">GYROMITE</button><button id="select-stack" type="button" class="quiet">STACK-UP</button><button id="arm-test" type="button">WATCH FOR READY LIGHT</button></div>
+        <p class="setup-feedback" id="test-feedback" role="status">Select a game and start the camera check first.</p>
+      </section>
+      <section class="setup-card" aria-labelledby="buttons-heading">
+        <div class="section-head"><span>04 / MANUAL TEST</span><span id="buttons-mode">SELECT A GAME</span></div>
+        <h2 id="buttons-heading">Try the controls</h2>
+        <p>These buttons change the virtual R.O.B. state. Gyromite gates also drive RetroPie's Controller 2 when paired and the game is running.</p>
+        <div id="setup-gates" hidden><p class="test-caption">GYROMITE / FAST GATES</p><div class="setup-row"><button data-setup-gate="red" type="button">LOWER RED</button><button data-setup-gate="blue" type="button">LOWER BLUE</button><button data-setup-gate="all" type="button" class="quiet">RELEASE BOTH</button></div></div>
+        <div id="setup-stack" hidden><p class="test-caption">STACK-UP / R.O.B. COMMANDS</p><div class="setup-command-grid"><button data-setup-command="LEFT" type="button">LEFT</button><button data-setup-command="RIGHT" type="button">RIGHT</button><button data-setup-command="UP" type="button">UP</button><button data-setup-command="DOWN" type="button">DOWN</button><button data-setup-command="OPEN" type="button">OPEN</button><button data-setup-command="CLOSE" type="button">CLOSE</button></div></div>
+        <p class="setup-feedback" id="buttons-feedback" role="status">Manual tests are available after selecting Gyromite or Stack-Up.</p>
+      </section>
+    </div>
+    <footer><span>R.O.B. VISION <b>·</b> SETUP</span><span>PAIR / CAMERA / SIGNAL / CONTROLS</span></footer>
+  </main>
+</body>
+</html>

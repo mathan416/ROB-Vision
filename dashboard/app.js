@@ -596,8 +596,6 @@
       $('controls-context').textContent = 'LIVE CONTROLLER / CAMERA OR MANUAL';
       document.querySelector('.vitals-card .live-text').textContent = '● CONTROLLER';
       document.querySelector('.stage-panel .chip').textContent = 'LIVE VIRTUAL MOTION';
-      document.querySelector('.observer-placeholder strong').textContent = snapshot.camera.state === 'capturing' ? `CAMERA CAPTURING · ${snapshot.camera.fps} FPS` : 'GAME CAMERA OFFLINE';
-      document.querySelector('.observer-placeholder small').textContent = snapshot.camera.message;
       $('fixture-note').textContent = $('fixture-note').textContent.replaceAll('Game link offline.', 'Game-host buttons pending.');
       $('gyro-a-value').textContent = robot?.pads?.red ? 'SPINNING / PRESSED' : $('gyro-a-value').textContent;
       $('gyro-b-value').textContent = robot?.pads?.blue ? 'SPINNING / PRESSED' : $('gyro-b-value').textContent;

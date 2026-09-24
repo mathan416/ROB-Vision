@@ -6,6 +6,8 @@ R.O.B. Vision brings Nintendo's Robotic Operating Buddy to life as a **virtual r
 
 On the UNO Q, **R.O.B. Vision** is its own Arduino App Lab app, listed alongside VirtualGlove. Start it from **My Apps**, then open `http://arduiain.local` on a laptop, phone, or tablet. The direct `http://arduiain.local:8766/dashboard/` address also works; both use the same controller and game state. Enter the controller token stored in the UNO Q's `~/.config/rob-vision/environment`. App Lab on this UNO Q starts only one app at a time, so VirtualGlove must be stopped before starting R.O.B. Vision. Refresh **My Apps** after installation if the new tile does not appear. Do not enable the separate `rob-vision.service` while running the App Lab app because both would claim port 8766.
 
+The [Setup page](dashboard/setup.html) provides RetroPie pairing, camera alignment, Test mode ready-light acknowledgement, Gyromite red/blue pad checks, and Stack-Up command checks. The Mission page keeps the live robot, Fast Gates, and a Game Table beside Pose Preview and System Vitals. See the [Setup guide](docs/SETUP_GUIDE.md).
+
 ## Try the live controller
 
 From this folder, run `python3 -m controller.service`. Open [the live dashboard](http://127.0.0.1:8766/dashboard/) and choose **Stack-Up** or **Gyromite**. The controls now send actions to the controller; reloading the page restores its current state. The Activity Feed distinguishes manual actions from decoded camera actions. **Home** resets the selected virtual game. **Emergency Stop** stops capture and clears the game session.

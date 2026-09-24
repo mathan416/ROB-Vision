@@ -4,6 +4,12 @@ import argparse
 import json
 import os
 import glob
+import hashlib
+import http.client
+import ipaddress
+import re
+import socket
+import ssl
 import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -34,6 +40,42 @@ def capture_devices():
     return devices
 
 
+def pair_retropie(host, code, fingerprint, token, port=8768):
+    """Send the controller token only after checking the console's TLS fingerprint."""
+    if not isinstance(host, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]{0,252}", host):
+        raise ValueError("Enter a RetroPie hostname or local IP address.")
+    if not isinstance(code, str) or not re.fullmatch(r"[0-9]{6}", code):
+        raise ValueError("Enter the six-digit code shown on RetroPie.")
+    fingerprint = re.sub(r"[^0-9a-fA-F]", "", str(fingerprint)).lower()
+    if len(fingerprint) != 64:
+        raise ValueError("Enter the console's 64-character SHA-256 fingerprint.")
+    if not isinstance(port, int) or not 1 <= port <= 65535:
+        raise ValueError("Invalid pairing port.")
+    if not token:
+        raise ValueError("Configure a controller token before pairing.")
+    addresses = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
+    if not addresses or any(not ipaddress.ip_address(item[4][0]).is_private for item in addresses):
+        raise ValueError("Pairing is available only on a private network.")
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+    connection = http.client.HTTPSConnection(addresses[0][4][0], port, context=context, timeout=8)
+    try:
+        connection.connect()
+        actual = hashlib.sha256(connection.sock.getpeercert(binary_form=True)).hexdigest()
+        if actual != fingerprint:
+            raise ValueError("Console fingerprint does not match. Pairing stopped before sending the token.")
+        body = json.dumps({"code": code, "token": token}).encode()
+        connection.request("POST", "/pair", body=body, headers={"Content-Type": "application/json"})
+        response = connection.getresponse()
+        result = json.load(response)
+        if response.status != 200 or result.get("paired") is not True:
+            raise ValueError(result.get("error", "Console did not confirm pairing."))
+        return {"paired": True, "host": host}
+    finally:
+        connection.close()
+
+
 class Controller:
     def __init__(self):
         self.lock = threading.RLock()
@@ -49,6 +91,10 @@ class Controller:
         self.capture_stop = threading.Event()
         self.capture_thread = None
         self.preview_frame = None
+        self.receiver_last_seen = 0.0
+        self.receiver_name = None
+        self.test_armed_at = 0.0
+        self.test_ready_at = 0.0
 
     def event(self, kind, message, command=None):
         self.sequence += 1
@@ -65,7 +111,25 @@ class Controller:
                 self.devices_checked_at = monotonic()
             return {"schema": 1, "sequence": self.sequence, "game": self.game,
                     "robot": self.stack.snapshot() if self.game == "stack_up" else self.gyro.snapshot() if self.game == "gyromite" else None,
-                    "camera": dict(self.camera), "events": list(self.events)}
+                    "camera": dict(self.camera), "events": list(self.events),
+                    "link": {"online": monotonic() - self.receiver_last_seen < 3.0,
+                             "receiver": self.receiver_name},
+                    "test": {"armed": bool(self.test_armed_at), "ready": self.test_ready_at >= self.test_armed_at > 0,
+                             "ready_at": self.test_ready_at}}
+
+    def receiver_seen(self, name):
+        with self.lock:
+            self.receiver_name = name[:64]
+            self.receiver_last_seen = monotonic()
+
+    def arm_test(self):
+        with self.lock:
+            if self.game is None:
+                raise ValueError("Select Gyromite or Stack-Up before arming the test.")
+            self.test_armed_at = monotonic()
+            self.test_ready_at = 0.0
+            self.event("test", "Watching for the game's R.O.B. ready-light signal.")
+            return self.snapshot()
 
     def select(self, game):
         if game not in (None, "gyromite", "stack_up"):
@@ -74,6 +138,7 @@ class Controller:
             self.game = game
             self.stack, self.gyro = StackState(), GyroState()
             self.decoder.reset()
+            self.test_armed_at = self.test_ready_at = 0.0
             self.event("session", f"{game or 'No game'} selected; virtual pieces reset.")
             return self.snapshot()
 
@@ -84,6 +149,8 @@ class Controller:
             if self.game == "gyromite" and any(self.gyro.assisted_until.values()) and command != "READY":
                 raise ValueError("Release Gate Assist before moving R.O.B. with commands.")
             if command == "READY":
+                if source == "camera" and self.test_armed_at:
+                    self.test_ready_at = monotonic()
                 self.event("ready", "R.O.B. ready-light signal received; no movement.", command)
             else:
                 normalized = command.removesuffix("_GYRO").removesuffix("_STACK")
@@ -267,6 +334,8 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                 if not self.authorized():
                     return
                 if path == "/api/state":
+                    if self.headers.get("X-ROB-Receiver") == "retropie":
+                        controller.receiver_seen("RetroPie")
                     return self.respond(200, controller.snapshot())
                 if path == "/api/camera/frame":
                     with controller.lock:
@@ -319,6 +388,10 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                     result = controller.command(data["command"])
                 elif path == "/api/gate-assist":
                     result = controller.gate_assist(data["color"], data["pressed"])
+                elif path == "/api/test/arm":
+                    result = controller.arm_test()
+                elif path == "/api/pair":
+                    result = pair_retropie(data["host"], data["code"], data["fingerprint"], token)
                 elif path == "/api/camera/start":
                     result = controller.start_camera(int(data.get("index", 0)), data.get("roi"))
                 elif path == "/api/camera/stop":
@@ -326,7 +399,7 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                 else:
                     return self.respond(404, {"error": "Unknown endpoint."})
                 self.respond(200, result)
-            except (ValueError, KeyError, TypeError, RuntimeError) as exc:
+            except (ValueError, KeyError, TypeError, RuntimeError, OSError, http.client.HTTPException) as exc:
                 self.respond(400, {"error": str(exc)})
 
     server = ThreadingHTTPServer((host, port), Handler)

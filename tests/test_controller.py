@@ -62,6 +62,16 @@ class ModelTests(unittest.TestCase):
         controller.select("gyromite")
         self.assertEqual(controller.command("READY")["robot"]["station"], 2)
 
+    def test_setup_ready_signal_and_receiver_status(self):
+        controller = Controller()
+        controller.select("stack_up")
+        self.assertFalse(controller.arm_test()["test"]["ready"])
+        self.assertFalse(controller.command("READY", "manual")["test"]["ready"])
+        self.assertTrue(controller.command("READY", "camera")["test"]["ready"])
+        controller.receiver_seen("RetroPie")
+        self.assertTrue(controller.snapshot()["link"]["online"])
+        self.assertFalse(controller.select("gyromite")["test"]["armed"])
+
     def test_held_unspun_gyro_press_releases_on_lift(self):
         model = GyroState()
         model.apply("DOWN")

@@ -8,10 +8,8 @@
   let busy = false;
   let available = true;
   let suspended = false;
-  let token = '';
-  let previewUrl = null;
-  let previewBusy = false;
-  let lastPreview = 0;
+  let token = sessionStorage.getItem('rob-vision-token') || '';
+  let lastCameraState = null;
   const headers = () => ({ 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) });
   async function request(path, data) {
     const response = await fetch(path, { method: data === undefined ? 'GET' : 'POST', headers: headers(), ...(data === undefined ? {} : { body: JSON.stringify(data) }), cache: 'no-store' });
@@ -25,29 +23,6 @@
     return result;
   }
   function showError(error) { $('controller-status').textContent = error.message; }
-  async function refreshPreview() {
-    if (previewBusy || Date.now() - lastPreview < 1000) return;
-    previewBusy = true;
-    lastPreview = Date.now();
-    try {
-      const response = await fetch('/api/camera/frame', { headers: token ? { Authorization: `Bearer ${token}` } : {}, cache: 'no-store' });
-      if (response.status !== 200) return;
-      const next = URL.createObjectURL(await response.blob());
-      const previous = previewUrl;
-      previewUrl = next;
-      $('camera-frame').src = next;
-      $('camera-frame').hidden = false;
-      document.querySelector('.observer-placeholder').classList.add('has-frame');
-      if (previous) URL.revokeObjectURL(previous);
-    } catch (_error) { /* Diagnostic preview must never interrupt optical control. */ }
-    finally { previewBusy = false; }
-  }
-  function clearPreview() {
-    $('camera-frame').hidden = true;
-    document.querySelector('.observer-placeholder').classList.remove('has-frame');
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    previewUrl = null;
-  }
   function accept(snapshot) {
     latest = snapshot;
     connected = true;
@@ -59,13 +34,10 @@
       button.setAttribute('aria-pressed', String(active));
       button.textContent = `${active ? 'RAISE' : 'LOWER'} ${color.toUpperCase()}`;
     }
-    $('camera-button').hidden = false;
-    $('camera-button').textContent = snapshot.camera.state === 'capturing' ? 'STOP CAMERA' : 'START CAMERA';
-    if (snapshot.camera.state === 'capturing') refreshPreview(); else clearPreview();
     const noCamera = snapshot.camera.platform === 'linux' && !snapshot.camera.devices.length;
     $('controller-status').textContent = snapshot.camera.state === 'fault' ? snapshot.camera.message : noCamera ? 'CONTROLLER READY · NO CAMERA ATTACHED' : snapshot.game ? `${snapshot.game === 'stack_up' ? 'STACK-UP' : 'GYROMITE'} · ${snapshot.camera.state.toUpperCase()} · ${snapshot.camera.fps} FPS` : 'CONTROLLER READY · SELECT A GAME';
-    if (snapshot.sequence !== lastSequence || snapshot.camera.state !== $('camera-button').dataset.state) {
-      $('camera-button').dataset.state = snapshot.camera.state;
+    if (snapshot.sequence !== lastSequence || snapshot.camera.state !== lastCameraState) {
+      lastCameraState = snapshot.camera.state;
       lastSequence = snapshot.sequence;
       window.RobDashboard.applyLive(snapshot);
       const recent = snapshot.events.at(-1);
@@ -87,7 +59,7 @@
     busy = true;
     try { accept(await request('/api/state')); }
     catch (error) {
-      if (connected) { connected = false; clearPreview(); window.RobDashboard.leaveLive(); $('camera-button').hidden = true; $('gate-assist').hidden = true; showError(error); }
+      if (connected) { connected = false; window.RobDashboard.leaveLive(); $('gate-assist').hidden = true; showError(error); }
       else if (!$('controller-token').hidden) showError(error);
     } finally { busy = false; }
   }
@@ -95,7 +67,6 @@
     try { const snapshot = await request(path, data); if (!suspended) accept(snapshot); }
     catch (error) { showError(error); }
   }
-  $('camera-button').addEventListener('click', () => act(latest?.camera.state === 'capturing' ? '/api/camera/stop' : '/api/camera/start', {}));
   document.querySelectorAll('[data-gate]').forEach((button) => button.addEventListener('click', () => {
     if (!latest || latest.game !== 'gyromite') return;
     const color = button.dataset.gate;
@@ -107,7 +78,7 @@
     const color = { '1': 'red', '2': 'blue', '0': 'all' }[event.key];
     if (color) { event.preventDefault(); act('/api/gate-assist', { color, pressed: color === 'all' ? false : !latest.robot?.assist?.[color] }); }
   });
-  $('controller-token').addEventListener('keydown', (event) => { if (event.key === 'Enter') { token = event.target.value; poll(); } });
+  $('controller-token').addEventListener('keydown', (event) => { if (event.key === 'Enter') { token = event.target.value.trim(); sessionStorage.setItem('rob-vision-token', token); poll(); } });
   window.RobLive = {
     hasService() { return connected; },
     select(mode) { suspended = false; act('/api/game', { game: mode === 'stack' ? 'stack_up' : 'gyromite' }); },
@@ -118,7 +89,7 @@
     },
     reset() { if (latest?.game) act('/api/game', { game: latest.game }); },
     stop() { act('/api/camera/stop', {}).then(() => act('/api/game', { game: null })); },
-    disconnect() { suspended = true; clearPreview(); $('gate-assist').hidden = true; if (latest) act('/api/game', { game: null }); window.RobDashboard.leaveLive(); }
+    disconnect() { suspended = true; $('gate-assist').hidden = true; if (latest) act('/api/game', { game: null }); window.RobDashboard.leaveLive(); }
   };
   poll();
   setInterval(poll, 500);

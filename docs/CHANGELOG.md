@@ -1,5 +1,11 @@
 # R.O.B. Vision changelog
 
+## Setup and live controls — 24 September 2026
+
+- Added a Setup page with certificate-pinned one-time RetroPie pairing, receiver status, camera alignment preview, game Test mode ready-light acknowledgement, Gyromite Fast Gates, and six Stack-Up command checks.
+- Moved the Game Table beside Pose Preview and System Vitals, and removed the secondary camera tile from Mission Control.
+- Verified both Gyromite gate colors during live Game A play. UNO Q camera capture remains unverified until a camera is attached.
+
 ## Local controller and camera path — 24 September 2026
 
 - Moved Pose Preview above System Vitals and made its live controls send commands to an authoritative Python controller service.

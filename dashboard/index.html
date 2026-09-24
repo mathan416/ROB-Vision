@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080f1d">
   <title>R.O.B. Vision // Mission Control</title>
-  <link rel="stylesheet" href="style.css?v=fast-gates-1">
+  <link rel="stylesheet" href="style.css?v=setup-1">
   <script src="stack-model.js" defer></script>
-  <script src="app.js?v=fast-gates-1" defer></script>
-  <script src="live.js?v=fast-gates-1" defer></script>
+  <script src="app.js?v=setup-1" defer></script>
+  <script src="live.js?v=setup-1" defer></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
   <main class="app-shell">
     <header class="topbar">
       <div class="brand"><span class="brand-mark">R<span>·</span>O<span>·</span>B</span><span class="brand-sub">MISSION CONTROL <i>///</i> MK·01</span></div>
-      <div class="top-status"><span class="status-dot"></span><span id="connection">OPTICAL + LAN / SIMULATED</span><span class="top-separator"></span><span id="clock">00:00:00</span></div>
+      <nav class="page-nav" aria-label="Pages"><a href="/dashboard/" aria-current="page">MISSION</a><a href="/dashboard/setup.html">SETUP</a></nav><div class="top-status"><span class="status-dot"></span><span id="connection">OPTICAL + LAN / SIMULATED</span><span class="top-separator"></span><span id="clock">00:00:00</span></div>
     </header>
     <div class="main-grid">
       <section class="stage-panel" aria-label="Robot visualization">
@@ -184,11 +184,11 @@
           <p id="mode-description">Watch R.O.B. spin two gyros, recover each once, then return both to their holders.</p>
           <button class="primary-button" id="demo-button" type="button"><span>▶</span><span class="demo-label">RUN DEMO SEQUENCE</span><span class="arrow">↗</span></button>
         </section>
-        <section class="controls-panel"><div class="section-head"><span id="controls-title">POSE PREVIEW</span><span id="controls-context">MANUAL SIMULATION / NO GAME COMMANDS</span></div><div class="controller-link"><span id="controller-status">LOCAL PREVIEW · NO CONTROLLER</span><button id="camera-button" type="button" hidden>START CAMERA</button><input id="controller-token" type="password" placeholder="Controller token" aria-label="Controller token" hidden></div><div class="control-buttons"><button type="button" data-action="left">↶ <span>TURN LEFT</span></button><button type="button" data-action="right">↷ <span>TURN RIGHT</span></button><button type="button" data-action="raise">↑ <span>ARMS UP</span></button><button type="button" data-action="lower">↓ <span>ARMS DOWN</span></button><button type="button" data-action="grip">◇ <span id="grip-label">TOGGLE GRIP</span></button><button type="button" id="home-button">⌂ <span>HOME</span></button></div><div class="gate-assist" id="gate-assist" hidden><div class="gate-assist-head"><strong>FAST GATES</strong><small>Tap to lower or raise · auto releases after 60 seconds</small></div><div class="gate-assist-buttons"><button type="button" data-gate="red" aria-pressed="false">LOWER RED</button><button type="button" data-gate="blue" aria-pressed="false">LOWER BLUE</button><button type="button" data-gate="all">RELEASE BOTH</button></div></div><button class="stop-button" id="stop-button" type="button">■ <span>EMERGENCY STOP</span></button></section>
-        <section class="vitals-card"><div class="section-head"><span>SYSTEM VITALS</span><span class="live-text">● SIMULATION</span></div><div class="vital"><span>OPTICAL COMMAND</span><strong id="optical-value">SIMULATED</strong></div><div class="vital-track"><i id="optical-bar"></i></div><div class="vital"><span>HEAD + BODY TURN</span><strong id="head-value">0°</strong></div><div class="vital-track"><i id="head-bar"></i></div><div class="vital"><span>ARM POSITION</span><strong id="arm-value">HOME</strong></div><div class="vital-track"><i id="arm-bar"></i></div><div class="vital"><span>GRIP</span><strong id="grip-value">OPEN</strong></div><div class="vital-track"><i id="grip-bar"></i></div><div id="gyro-vitals"><div class="vital"><span>GYRO A / RED PAD</span><strong id="gyro-a-value">IDLE / RELEASED</strong></div><div class="vital-track"><i id="gyro-a-bar"></i></div><div class="vital"><span>GYRO B / BLUE PAD</span><strong id="gyro-b-value">IDLE / RELEASED</strong></div><div class="vital-track"><i id="gyro-b-bar"></i></div><small class="gyro-vitals-note">Virtual spin and button states; no game link</small></div></section>
       </aside>
     </div>
-    <section class="world-panel" aria-label="Game table and optional game camera">
+    <div class="status-grid">
+        <section class="controls-panel"><div class="section-head"><span id="controls-title">POSE PREVIEW</span><span id="controls-context">MANUAL SIMULATION / NO GAME COMMANDS</span></div><div class="controller-link"><span id="controller-status">LOCAL PREVIEW · NO CONTROLLER</span><input id="controller-token" type="password" placeholder="Controller token" aria-label="Controller token" hidden></div><div class="control-buttons"><button type="button" data-action="left">↶ <span>TURN LEFT</span></button><button type="button" data-action="right">↷ <span>TURN RIGHT</span></button><button type="button" data-action="raise">↑ <span>ARMS UP</span></button><button type="button" data-action="lower">↓ <span>ARMS DOWN</span></button><button type="button" data-action="grip">◇ <span id="grip-label">TOGGLE GRIP</span></button><button type="button" id="home-button">⌂ <span>HOME</span></button></div><div class="gate-assist" id="gate-assist" hidden><div class="gate-assist-head"><strong>FAST GATES</strong><small>Tap to lower or raise · auto releases after 60 seconds</small></div><div class="gate-assist-buttons"><button type="button" data-gate="red" aria-pressed="false">LOWER RED</button><button type="button" data-gate="blue" aria-pressed="false">LOWER BLUE</button><button type="button" data-gate="all">RELEASE BOTH</button></div></div><button class="stop-button" id="stop-button" type="button">■ <span>EMERGENCY STOP</span></button></section>
+    <section class="world-panel" aria-label="Game table">
       <div class="section-head"><span id="world-title">GAME TABLE / SIMULATED PIECES</span><span id="fixture-mode-label">GYROMITE SETUP</span></div>
       <div class="world-grid">
         <div class="fixture-scene" id="fixture-scene">
@@ -210,13 +210,11 @@
           <div class="fixture-empty" id="free-fixture" hidden><strong>POSE LAB</strong><span>Just R.O.B. and his motion controls. No game pieces or commands are connected.</span></div>
           <div class="fixture-note" id="fixture-note">Two gyros, one spinner, and two button trays. Positions are illustrative.</div>
         </div>
-        <div class="observer-tile">
-          <div class="observer-header"><span>GAME CAMERA / OPTIONAL</span><span>SECONDARY VIEW</span></div>
-          <div class="observer-placeholder" role="img" aria-label="Game-screen camera alignment preview"><img id="camera-frame" alt="Camera view with the optical sampling region outlined" hidden><span class="observer-icon">◎</span><strong>GAME CAMERA OFFLINE</strong><small>The UNO Q camera will watch the game screen for commands.</small></div>
-          <div class="observer-footer">The UNO Q camera watches the game screen for commands. Detailed timing appears in diagnostics.</div>
-        </div>
       </div>
     </section>
+
+        <section class="vitals-card"><div class="section-head"><span>SYSTEM VITALS</span><span class="live-text">● SIMULATION</span></div><div class="vital"><span>OPTICAL COMMAND</span><strong id="optical-value">SIMULATED</strong></div><div class="vital-track"><i id="optical-bar"></i></div><div class="vital"><span>HEAD + BODY TURN</span><strong id="head-value">0°</strong></div><div class="vital-track"><i id="head-bar"></i></div><div class="vital"><span>ARM POSITION</span><strong id="arm-value">HOME</strong></div><div class="vital-track"><i id="arm-bar"></i></div><div class="vital"><span>GRIP</span><strong id="grip-value">OPEN</strong></div><div class="vital-track"><i id="grip-bar"></i></div><div id="gyro-vitals"><div class="vital"><span>GYRO A / RED PAD</span><strong id="gyro-a-value">IDLE / RELEASED</strong></div><div class="vital-track"><i id="gyro-a-bar"></i></div><div class="vital"><span>GYRO B / BLUE PAD</span><strong id="gyro-b-value">IDLE / RELEASED</strong></div><div class="vital-track"><i id="gyro-b-bar"></i></div><small class="gyro-vitals-note">Virtual spin and button states; no game link</small></div></section>
+    </div>
     <div class="bottom-grid">
       <section class="event-panel"><div class="section-head"><span>ACTIVITY FEED</span><span id="event-count">001 EVENTS</span></div><ol id="event-list" aria-live="polite"><li><time>00:00:00</time><span>Simulation initialized. R.O.B. is ready.</span></li></ol></section>
     </div>
