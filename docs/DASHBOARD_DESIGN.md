@@ -22,7 +22,7 @@ The current static preview has been checked in a browser at 390 px and 820 px wi
 
 The UNO Q, not the browser, owns the game session and virtual robot state. Publish a versioned snapshot on connection, then ordered events with session ID, monotonic sequence, timestamp, and freshness. Include game/mode, optical decode and rejection reason, accepted primitive, virtual pose/grip, gyro or disc locations, virtual pad states, RetroPie receiver status, and faults. Browser clients render this stream and can reconnect without changing game state. Optional operator controls send bounded intents through the same virtual controller.
 
-If observer video is enabled, deliver it separately at an adaptive low rate. The command decoder must consume the head camera's original timestamped frames locally on the UNO Q rather than a browser video stream. The user should be able to hide either preview without disrupting optical decoding or motion.
+The local controller now offers a small, low-rate JPEG camera preview with the sampled region outlined. It is a framing aid in the secondary Game Camera tile. The command decoder consumes original timestamped frames locally, never the browser preview, so a missing or hidden preview does not interrupt optical decoding or motion. The preview is not recorded by default and requires the controller token on a LAN deployment.
 
 ## Current preview boundary
 

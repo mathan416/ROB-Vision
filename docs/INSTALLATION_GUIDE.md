@@ -2,7 +2,7 @@
 
 **Available now:** the local browser preview, exact-name resolver, and Python controller service with optional OpenCV camera capture. **Planned:** validated UNO Q deployment and paired Gyromite game receiver. No physical R.O.B. assembly or motor calibration is needed.
 
-For a local controller trial, run `python3 -m controller.service` from the project folder and open `http://127.0.0.1:8766/dashboard/`. Select a game and try a command; reload to confirm the controller retains state. Install `requirements-camera.txt` to enable **Start Camera**. If serving over LAN, set `ROB_VISION_TOKEN` and pass `--host 0.0.0.0`; the dashboard asks for the token. The optional `tools/notify_game.py` helper can send exact RetroPie launch names but is not installed into the cabinet hooks automatically. The existing standalone preview at `dashboard/index.html` stays available without the service.
+For a local controller trial, run `python3 -m controller.service` from the project folder and open `http://127.0.0.1:8766/dashboard/`. Select a game and try a command; reload to confirm the controller retains state. Install `requirements-camera.txt` to enable **Start Camera**. The secondary camera tile shows a low-rate framing image with the sample region outlined; use `--camera-index` and `--camera-roi x,y,width,height` to start capture with a chosen crop. The reported fps is the delivered rate, not the requested rate. If serving over LAN, set `ROB_VISION_TOKEN` and pass `--host 0.0.0.0`; the dashboard asks for the token. The optional `tools/notify_game.py` helper can send exact RetroPie launch names but is not installed into the cabinet hooks automatically. The existing standalone preview at `dashboard/index.html` stays available without the service.
 
 ## Open the preview
 

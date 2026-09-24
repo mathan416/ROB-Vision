@@ -9,6 +9,9 @@
   let available = true;
   let suspended = false;
   let token = '';
+  let previewUrl = null;
+  let previewBusy = false;
+  let lastPreview = 0;
   const headers = () => ({ 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) });
   async function request(path, data) {
     const response = await fetch(path, { method: data === undefined ? 'GET' : 'POST', headers: headers(), ...(data === undefined ? {} : { body: JSON.stringify(data) }), cache: 'no-store' });
@@ -22,11 +25,35 @@
     return result;
   }
   function showError(error) { $('controller-status').textContent = error.message; }
+  async function refreshPreview() {
+    if (previewBusy || Date.now() - lastPreview < 1000) return;
+    previewBusy = true;
+    lastPreview = Date.now();
+    try {
+      const response = await fetch('/api/camera/frame', { headers: token ? { Authorization: `Bearer ${token}` } : {}, cache: 'no-store' });
+      if (response.status !== 200) return;
+      const next = URL.createObjectURL(await response.blob());
+      const previous = previewUrl;
+      previewUrl = next;
+      $('camera-frame').src = next;
+      $('camera-frame').hidden = false;
+      document.querySelector('.observer-placeholder').classList.add('has-frame');
+      if (previous) URL.revokeObjectURL(previous);
+    } catch (_error) { /* Diagnostic preview must never interrupt optical control. */ }
+    finally { previewBusy = false; }
+  }
+  function clearPreview() {
+    $('camera-frame').hidden = true;
+    document.querySelector('.observer-placeholder').classList.remove('has-frame');
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = null;
+  }
   function accept(snapshot) {
     latest = snapshot;
     connected = true;
     $('camera-button').hidden = false;
     $('camera-button').textContent = snapshot.camera.state === 'capturing' ? 'STOP CAMERA' : 'START CAMERA';
+    if (snapshot.camera.state === 'capturing') refreshPreview(); else clearPreview();
     $('controller-status').textContent = snapshot.camera.state === 'fault' ? snapshot.camera.message : snapshot.game ? `${snapshot.game === 'stack_up' ? 'STACK-UP' : 'GYROMITE'} · ${snapshot.camera.state.toUpperCase()} · ${snapshot.camera.fps} FPS` : 'CONTROLLER READY · SELECT A GAME';
     if (snapshot.sequence !== lastSequence || snapshot.camera.state !== $('camera-button').dataset.state) {
       $('camera-button').dataset.state = snapshot.camera.state;
@@ -51,7 +78,7 @@
     busy = true;
     try { accept(await request('/api/state')); }
     catch (error) {
-      if (connected) { connected = false; window.RobDashboard.leaveLive(); $('camera-button').hidden = true; showError(error); }
+      if (connected) { connected = false; clearPreview(); window.RobDashboard.leaveLive(); $('camera-button').hidden = true; showError(error); }
     } finally { busy = false; }
   }
   async function act(path, data) {
@@ -70,7 +97,7 @@
     },
     reset() { if (latest?.game) act('/api/game', { game: latest.game }); },
     stop() { act('/api/camera/stop', {}).then(() => act('/api/game', { game: null })); },
-    disconnect() { suspended = true; if (latest) act('/api/game', { game: null }); window.RobDashboard.leaveLive(); }
+    disconnect() { suspended = true; clearPreview(); if (latest) act('/api/game', { game: null }); window.RobDashboard.leaveLive(); }
   };
   poll();
   setInterval(poll, 500);

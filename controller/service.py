@@ -29,6 +29,7 @@ class Controller:
         self.camera = {"state": "offline", "fps": 0, "brightness": 0, "last_frame": None, "message": "Camera not started."}
         self.capture_stop = threading.Event()
         self.capture_thread = None
+        self.preview_frame = None
 
     def event(self, kind, message, command=None):
         self.sequence += 1
@@ -114,6 +115,7 @@ class Controller:
         def capture_loop():
             previous = None
             fps = 0.0
+            last_preview = 0.0
             try:
                 while not self.capture_stop.is_set():
                     ok, frame = capture.read()
@@ -137,13 +139,25 @@ class Controller:
                         self.camera["fps"] = round(fps, 1)
                         self.camera["message"] = "Frame rate below 120 fps; optical commands may be missed." if fps and fps < 110 else "Watching for complete optical commands."
                     self.sample(timestamp, brightness)
+                    if timestamp - last_preview >= .5:
+                        preview = frame.copy()
+                        x0, y0 = int(x * width), int(y * height)
+                        x1, y1 = int((x + w) * width), int((y + h) * height)
+                        cv2.rectangle(preview, (x0, y0), (x1, y1), (84, 225, 117), 2)
+                        ok_jpeg, encoded = cv2.imencode(".jpg", preview, [cv2.IMWRITE_JPEG_QUALITY, 68])
+                        if ok_jpeg:
+                            with self.lock:
+                                self.preview_frame = encoded.tobytes()
+                        last_preview = timestamp
             except Exception as exc:
                 with self.lock:
+                    self.preview_frame = None
                     self.camera.update(state="fault", message=str(exc))
                     self.event("fault", f"Camera fault: {exc}")
             finally:
                 capture.release()
                 with self.lock:
+                    self.preview_frame = None
                     if self.camera["state"] != "fault":
                         self.camera.update(state="offline", message="Camera stopped.")
                         self.event("camera", "Camera stopped.")
@@ -160,13 +174,13 @@ class Controller:
         return self.snapshot()
 
 
-def serve(host="127.0.0.1", port=8766, token=None, camera_index=None):
+def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi=None):
     if host not in ("127.0.0.1", "localhost", "::1") and not token:
         raise ValueError("A bearer token is required when serving over the network.")
     controller = Controller()
     if camera_index is not None:
         try:
-            controller.start_camera(camera_index)
+            controller.start_camera(camera_index, camera_roi)
         except RuntimeError as exc:
             print(f"Camera startup failed: {exc}", flush=True)
 
@@ -198,6 +212,20 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None):
                     return
                 if path == "/api/state":
                     return self.respond(200, controller.snapshot())
+                if path == "/api/camera/frame":
+                    with controller.lock:
+                        frame = controller.preview_frame
+                    if frame is None:
+                        self.send_response(204)
+                        self.end_headers()
+                        return
+                    self.send_response(200)
+                    self.send_header("Content-Type", "image/jpeg")
+                    self.send_header("Cache-Control", "no-store")
+                    self.send_header("Content-Length", str(len(frame)))
+                    self.end_headers()
+                    self.wfile.write(frame)
+                    return
                 return self.respond(404, {"error": "Unknown endpoint."})
             if path == "/":
                 self.send_response(302)
@@ -258,5 +286,7 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=8766)
     parser.add_argument("--token", default=os.environ.get("ROB_VISION_TOKEN"))
     parser.add_argument("--camera-index", type=int, help="Open this camera on the main thread at startup (useful on macOS).")
+    parser.add_argument("--camera-roi", help="Normalized x,y,width,height crop, e.g. 0.2,0.2,0.6,0.6")
     args = parser.parse_args()
-    serve(args.host, args.port, args.token, args.camera_index)
+    roi = [float(value) for value in args.camera_roi.split(",")] if args.camera_roi else None
+    serve(args.host, args.port, args.token, args.camera_index, roi)
