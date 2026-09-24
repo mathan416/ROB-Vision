@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080f1d">
+  <title>R.O.B. Vision // Mission Control</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="stack-model.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="live.js" defer></script>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">R<span>·</span>O<span>·</span>B</span><span class="brand-sub">MISSION CONTROL <i>///</i> MK·01</span></div>
+      <div class="top-status"><span class="status-dot"></span><span id="connection">OPTICAL + LAN / SIMULATED</span><span class="top-separator"></span><span id="clock">00:00:00</span></div>
+    </header>
+    <div class="main-grid">
+      <section class="stage-panel" aria-label="Robot visualization">
+        <div class="panel-heading"><div><p class="eyebrow">LIVE MODEL / 01</p><h1>Meet your <em>co-pilot.</em></h1></div><span class="chip">SIMULATED MOTION</span></div>
+        <div class="stage" id="stage">
+          <div class="stage-grid"></div><div class="stage-halo"></div>
+          <div class="stage-label top-left">3/4 ACCESSORY STAGE<br><strong id="stage-action-label">HOME / 00</strong></div>
+          <div class="stage-label top-right">CAMERA / SCREEN<br><strong id="tracking-label">NOT CONNECTED</strong></div>
+          <svg id="robot-svg" class="robot-svg" viewBox="0 0 650 590" role="img" aria-label="R.O.B.-inspired robot with two opposing hands moving matching Gyromite gyros or Stack-Up discs between accessory stations">
+            <defs>
+              <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f3f6f9"/><stop offset=".43" stop-color="#acb8c8"/><stop offset="1" stop-color="#60738b"/></linearGradient>
+              <linearGradient id="body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e5e9ee"/><stop offset=".55" stop-color="#8997a9"/><stop offset="1" stop-color="#536478"/></linearGradient>
+              <linearGradient id="dark" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#344454"/><stop offset="1" stop-color="#101f31"/></linearGradient>
+              <radialGradient id="eye"><stop stop-color="#b9faff"/><stop offset=".45" stop-color="#58dae8"/><stop offset="1" stop-color="#126a89"/></radialGradient>
+              <g id="gyro-body">
+                <path d="M-3 7 H3 V15 L0 21 L-3 15Z" fill="#dbe5df" stroke="#f6f7ed" stroke-width="1.4"/>
+                <ellipse cy="11" rx="22" ry="7" fill="#273844" opacity=".62"/>
+                <path d="M-21 4 Q0 11 21 4 L21 12 Q0 21 -21 12Z" fill="#d7e1dd" stroke="#f4f5e9" stroke-width="1.5"/>
+                <path d="M-18 11 L-18 15 M-12 14 L-12 17 M-5 16 L-5 18 M4 16 L4 18 M11 14 L11 17 M18 11 L18 15" stroke="#6a7473" stroke-width="2" opacity=".8"/>
+                <ellipse cy="5" rx="22" ry="8" fill="#e8eeeb" stroke="#f7f7ed" stroke-width="2"/>
+                <ellipse cy="3" rx="18.5" ry="6" fill="#883c4a" stroke="#5f3441" stroke-width="1"/>
+                <ellipse cy="2" rx="14" ry="4" fill="#9d4853" stroke="#bb7375" stroke-width=".7"/>
+                <ellipse cy="1" rx="7" ry="2.4" fill="#6e303e" opacity=".75"/>
+                <ellipse cy="5" rx="6" ry="2.8" fill="#bdcac4" stroke="#f7f8ed" stroke-width="1"/>
+                <path d="M-4 5 L-4 -29 Q0 -32 4 -29 L4 5Z" fill="#e6e9de" stroke="#f7f8ed" stroke-width="1.5"/>
+                <path d="M1 -27 L1 3" stroke="#9aa7a4" stroke-width="1" opacity=".7"/>
+                <ellipse cy="-29" rx="4" ry="1.6" fill="#f8f9ef"/>
+              </g>
+              <filter id="glow"><feGaussianBlur stdDeviation="8"/></filter>
+            </defs>
+            <ellipse cx="325" cy="553" rx="270" ry="25" fill="#16bde6" opacity=".14" filter="url(#glow)"/>
+            <ellipse cx="325" cy="553" rx="274" ry="29" fill="#091a2b" opacity=".72"/>
+            <g id="stage-ground" opacity=".48">
+              <path d="M102 520 Q325 449 548 520 L603 573 Q325 608 47 573Z" fill="#163148" stroke="#41677d" stroke-width="2"/>
+              <path d="M325 465 L325 580 M325 465 L108 566 M325 465 L535 566 M145 540 Q325 486 505 540 M84 560 Q325 505 566 560" fill="none" stroke="#81bbcb" stroke-width="1.2" opacity=".25"/>
+            </g>
+            <g class="column" id="column-visual">
+              <path d="M278 288 L372 288 L390 502 Q325 521 260 502Z" fill="url(#body)" stroke="#eaf1f2" stroke-width="3"/>
+              <path d="M295 302 L355 302 L367 492 Q325 502 283 492Z" fill="url(#dark)" opacity=".8"/>
+              <path d="M306 330 L344 330 M304 360 L346 360 M302 390 L348 390 M300 420 L350 420 M298 450 L352 450" stroke="#8495a4" stroke-width="5" opacity=".8"/>
+              <rect x="282" y="278" width="86" height="30" rx="9" fill="#d7e0e8" stroke="#f7fbff" stroke-width="3"/>
+            </g>
+            <g id="accessory-platform">
+              <path d="M232 516 L379 516 L420 539 L398 565 L259 565 L225 541Z" fill="url(#dark)" stroke="#a6bcc6" stroke-width="3"/>
+              <path d="M232 516 L379 516 L420 539 L261 542 L225 541Z" fill="url(#metal)" stroke="#edf5f5" stroke-width="3"/>
+              <path d="M261 542 L420 539 L398 565 L259 565Z" fill="#516a7a" stroke="#a9bec7" stroke-width="2"/>
+              <path d="M287 548 L366 548 M294 553 L359 553" stroke="#1b3346" stroke-width="3" stroke-linecap="round"/>
+              <rect x="304" y="557" width="42" height="4" rx="2" fill="#d65c55"/><circle cx="275" cy="554" r="3" fill="#72d3e4"/>
+              <g id="scene-gyro">
+                <path d="M226 530 L178 541 L144 536 M226 539 L174 553 L139 547" fill="none" stroke="#c2d1d7" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M225 530 L177 541 L144 536 M225 539 L174 553 L139 547" fill="none" stroke="#586e7d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                <g class="station" id="scene-second-dock">
+                  <path d="M132 492 L132 541 Q145 547 158 541 L158 492Z" fill="url(#body)" stroke="#e3ecee" stroke-width="2"/>
+                  <ellipse cx="145" cy="541" rx="13" ry="5" fill="#48687b"/>
+                  <ellipse cx="145" cy="490" rx="39" ry="12" fill="#152b3d" stroke="#eff5f3" stroke-width="5"/>
+                  <ellipse cx="145" cy="487" rx="31" ry="8" fill="#8d4654" stroke="#b8cbd0" stroke-width="2"/>
+                </g>
+                <g class="station" id="scene-source-gyro">
+                  <path d="M211 520 L211 554 Q225 562 239 554 L239 520Z" fill="url(#body)" stroke="#e3ecee" stroke-width="2"/>
+                  <ellipse cx="225" cy="554" rx="14" ry="5" fill="#48687b"/>
+                  <ellipse cx="225" cy="520" rx="43" ry="13" fill="#132b3d" stroke="#f0f5f2" stroke-width="5"/>
+                  <ellipse cx="225" cy="517" rx="34" ry="9" fill="#914555" stroke="#afc6c9" stroke-width="2"/>
+                </g>
+                <g class="station" id="scene-spinner">
+                  <path d="M379 523 L433 497 M384 533 L437 506" fill="none" stroke="#d1e0e1" stroke-width="14" stroke-linecap="round"/>
+                  <path d="M379 523 L433 497 M384 533 L437 506" fill="none" stroke="#557385" stroke-width="6" stroke-linecap="round" stroke-dasharray="8 6"/>
+                  <path d="M432 500 L432 538 Q445 546 458 538 L458 500Z" fill="url(#body)" stroke="#e3efec" stroke-width="3"/>
+                  <ellipse cx="445" cy="541" rx="17" ry="6" fill="#496a7b"/>
+                  <ellipse cx="445" cy="500" rx="36" ry="12" fill="#dcebea" stroke="#f7faf6" stroke-width="3"/>
+                  <ellipse cx="445" cy="497" rx="27" ry="8" fill="#2c4a5c" stroke="#7397a5" stroke-width="2"/>
+                  <ellipse cx="445" cy="495" rx="17" ry="5" fill="#142d41"/>
+                  <circle cx="445" cy="495" r="4" fill="#df806a"/>
+                </g>
+                <path d="M302 525 L281 543 L269 569 M339 527 L369 543 L382 569" fill="none" stroke="#d6e0df" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M302 525 L281 543 L269 569 M339 527 L369 543 L382 569" fill="none" stroke="#5b7484" stroke-width="7" stroke-linecap="round" stroke-dasharray="8 6"/>
+                <path d="M251 559 L398 559 L409 576 L241 576Z" fill="url(#body)" stroke="#edf4f0" stroke-width="3"/>
+                <path d="M260 568 L389 568" stroke="#47657a" stroke-width="3"/><circle cx="247" cy="569" r="2" fill="#c8dfe2"/><circle cx="401" cy="569" r="2" fill="#c8dfe2"/>
+                <g class="station" id="scene-target-gyro">
+                  <path d="M285 554 L285 541" stroke="#d7e4e1" stroke-width="8" stroke-linecap="round"/>
+                  <ellipse cx="285" cy="541" rx="29" ry="10" fill="#842f3d" stroke="#eac2b6" stroke-width="3"/>
+                  <ellipse cx="285" cy="538" rx="23" ry="7" fill="#f47666"/>
+                </g>
+                <g class="station" id="scene-blue-tray">
+                  <path d="M370 554 L370 541" stroke="#d7e4e1" stroke-width="8" stroke-linecap="round"/>
+                  <ellipse cx="370" cy="541" rx="29" ry="10" fill="#225d78" stroke="#acd9e6" stroke-width="3"/>
+                  <ellipse cx="370" cy="538" rx="23" ry="7" fill="#43bce8"/>
+                </g>
+                <text x="164" y="576" text-anchor="middle">GYRO HOLDERS / LEFT</text><text x="464" y="559" text-anchor="middle">SPINNER / RIGHT</text><text x="325" y="584" text-anchor="middle">BUTTONS / FRONT</text>
+              </g>
+              <g id="scene-stack">
+                <g id="stack-linkage" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M281 541 L149 507 M281 551 L149 517 M298 541 L230 524 M298 551 L230 534 M352 541 L410 521 M352 551 L410 531 M369 541 L500 507 M369 551 L500 517" stroke="#cbdadb" stroke-width="9"/>
+                  <path d="M281 541 L149 507 M281 551 L149 517 M298 541 L230 524 M298 551 L230 534 M352 541 L410 521 M352 551 L410 531 M369 541 L500 507 M369 551 L500 517" stroke="#587587" stroke-width="5"/>
+                  <path d="M204 521 L204 531 M265 533 L265 543 M381 531 L381 541 M445 521 L445 531" stroke="#e1e9e8" stroke-width="3"/>
+                  <path d="M279 546 H371" stroke="#d9e5e5" stroke-width="13"/>
+                  <path d="M279 546 H371" stroke="#607b89" stroke-width="7"/>
+                  <circle cx="281" cy="546" r="3" fill="#dbe7e7" stroke="none"/><circle cx="369" cy="546" r="3" fill="#dbe7e7" stroke="none"/>
+                </g>
+                <g class="stack-stations">
+                  <g id="stack-tray-1" transform="translate(145 493)"><path d="M-10 3 L-10 52 Q0 60 10 52 L10 3Z" fill="url(#body)" stroke="#dcebea" stroke-width="2"/><ellipse cy="1" rx="35" ry="11" fill="#e4eeed" stroke="#f5faf7" stroke-width="2"/><ellipse class="tray-ring" cy="-1" rx="26" ry="7" fill="#314b59" stroke="#708c97" stroke-width="2"/><ellipse cy="-2" rx="18" ry="4" fill="#10283b"/></g>
+                  <g id="stack-tray-2" transform="translate(230 516)"><path d="M-10 3 L-10 39 Q0 47 10 39 L10 3Z" fill="url(#body)" stroke="#dcebea" stroke-width="2"/><ellipse cy="1" rx="34" ry="11" fill="#e4eeed" stroke="#f5faf7" stroke-width="2"/><ellipse class="tray-ring" cy="-1" rx="25" ry="7" fill="#314b59" stroke="#708c97" stroke-width="2"/><ellipse cy="-2" rx="17" ry="4" fill="#10283b"/></g>
+                  <g id="stack-tray-3" transform="translate(325 525)"><path d="M-12 3 L-12 32 Q0 40 12 32 L12 3Z" fill="url(#body)" stroke="#dcebea" stroke-width="2"/><ellipse cy="1" rx="36" ry="12" fill="#e4eeed" stroke="#f5faf7" stroke-width="2"/><ellipse class="tray-ring" cy="-1" rx="27" ry="8" fill="#314b59" stroke="#708c97" stroke-width="2"/><ellipse cy="-2" rx="19" ry="5" fill="#10283b"/></g>
+                  <g id="stack-tray-4" transform="translate(410 512)"><path d="M-10 3 L-10 42 Q0 50 10 42 L10 3Z" fill="url(#body)" stroke="#dcebea" stroke-width="2"/><ellipse cy="1" rx="34" ry="11" fill="#e4eeed" stroke="#f5faf7" stroke-width="2"/><ellipse class="tray-ring" cy="-1" rx="25" ry="7" fill="#314b59" stroke="#708c97" stroke-width="2"/><ellipse cy="-2" rx="17" ry="4" fill="#10283b"/></g>
+                  <g id="stack-tray-5" transform="translate(500 493)"><path d="M-10 3 L-10 52 Q0 60 10 52 L10 3Z" fill="url(#body)" stroke="#dcebea" stroke-width="2"/><ellipse cy="1" rx="35" ry="11" fill="#e4eeed" stroke="#f5faf7" stroke-width="2"/><ellipse class="tray-ring" cy="-1" rx="26" ry="7" fill="#314b59" stroke="#708c97" stroke-width="2"/><ellipse cy="-2" rx="18" ry="4" fill="#10283b"/></g>
+                </g>
+                <g id="stack-colors"></g>
+                <text x="145" y="560" text-anchor="middle">TRAY 1</text><text x="230" y="571" text-anchor="middle">TRAY 2</text><text x="325" y="576" text-anchor="middle">TRAY 3</text><text x="410" y="570" text-anchor="middle">TRAY 4</text><text x="500" y="560" text-anchor="middle">TRAY 5</text>
+              </g>
+              <g id="second-gyro-prop" class="gyro-piece" transform="translate(145 469) scale(.85)"><use href="#gyro-body"/><ellipse class="gyro-spin-ring" cy="4" rx="25" ry="9" fill="none" stroke="#a4f7ff" stroke-width="3" stroke-dasharray="11 9"/></g>
+              <g id="move-prop" transform="translate(225 496)">
+                <g id="gyro-prop" class="gyro-piece"><use href="#gyro-body"/><ellipse class="gyro-spin-ring" cy="4" rx="25" ry="9" fill="none" stroke="#a4f7ff" stroke-width="3" stroke-dasharray="11 9"/></g>
+                <g id="disc-prop"></g>
+              </g>
+            </g>
+            <g id="arm-carriage" transform="translate(0 0)">
+              <rect x="267" y="292" width="116" height="52" rx="21" fill="url(#body)" stroke="#eef7fb" stroke-width="4"/>
+              <rect x="290" y="302" width="70" height="31" rx="10" fill="url(#dark)" stroke="#83a0ae" stroke-width="3"/>
+              <path id="left-arm-body" d="M285 318 L245 381 L282 449" fill="none" stroke="url(#metal)" stroke-width="27" stroke-linecap="round" stroke-linejoin="round"/>
+              <path id="right-arm-body" d="M365 318 L405 381 L368 449" fill="none" stroke="url(#metal)" stroke-width="27" stroke-linecap="round" stroke-linejoin="round"/>
+              <path id="left-arm-glint" d="M285 318 L245 381 L282 449" fill="none" stroke="#e8f5f7" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+              <path id="right-arm-glint" d="M365 318 L405 381 L368 449" fill="none" stroke="#e8f5f7" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+              <circle id="left-elbow" cx="245" cy="381" r="10" fill="#536a7e" stroke="#e8f2f3" stroke-width="3"/><circle id="right-elbow" cx="405" cy="381" r="10" fill="#536a7e" stroke="#e8f2f3" stroke-width="3"/>
+              <circle cx="285" cy="317" r="24" fill="#34495d" stroke="#e2edf2" stroke-width="7"/><circle cx="365" cy="317" r="24" fill="#34495d" stroke="#e2edf2" stroke-width="7"/>
+              <circle cx="285" cy="317" r="8" fill="#c9dfe8"/><circle cx="365" cy="317" r="8" fill="#c9dfe8"/>
+              <g id="left-hand" transform="translate(282 453)"><path d="M5 -14 L-9 -14 Q-19 -13 -19 -3 L-19 8 Q-18 17 -9 17 L5 17 L5 8 L-8 8 L-8 -4 L5 -4Z" fill="url(#body)" stroke="#ecf7f8" stroke-width="3"/><path d="M5 -6 L5 10" stroke="#7595a4" stroke-width="3"/></g>
+              <g id="right-hand" transform="translate(368 453) scale(-1 1)"><path d="M5 -14 L-9 -14 Q-19 -13 -19 -3 L-19 8 Q-18 17 -9 17 L5 17 L5 8 L-8 8 L-8 -4 L5 -4Z" fill="url(#body)" stroke="#ecf7f8" stroke-width="3"/><path d="M5 -6 L5 10" stroke="#7595a4" stroke-width="3"/></g>
+            </g>
+            <g id="head" transform="rotate(0 325 265)">
+              <rect x="296" y="254" width="58" height="47" rx="15" fill="#4c6076" stroke="#c9d6e0" stroke-width="5"/>
+              <path d="M232 126 Q325 87 418 126 L438 230 Q430 268 325 274 Q220 268 212 230Z" fill="url(#body)" stroke="#f1f5f7" stroke-width="5"/>
+              <path d="M239 122 Q325 88 411 122 L400 142 Q325 116 250 142Z" fill="#f6f8f9" opacity=".78"/>
+              <path d="M215 183 Q325 162 435 183 L427 238 Q325 261 223 238Z" fill="url(#dark)" stroke="#d5e1e8" stroke-width="4"/>
+              <path d="M220 189 Q325 171 430 189" fill="none" stroke="#4d6678" stroke-width="4"/>
+              <ellipse cx="271" cy="211" rx="35" ry="31" fill="#081b2a" stroke="#859eac" stroke-width="5"/>
+              <ellipse cx="379" cy="211" rx="35" ry="31" fill="#081b2a" stroke="#859eac" stroke-width="5"/>
+              <ellipse class="eye-core" cx="271" cy="211" rx="20" ry="19" fill="url(#eye)"/>
+              <ellipse class="eye-core" cx="379" cy="211" rx="20" ry="19" fill="url(#eye)"/>
+              <ellipse cx="265" cy="204" rx="7" ry="6" fill="#e8ffff" opacity=".85"/><ellipse cx="373" cy="204" rx="7" ry="6" fill="#e8ffff" opacity=".85"/>
+              <path d="M302 256 Q325 263 348 256" fill="none" stroke="#425a6f" stroke-width="4"/>
+              <circle id="head-led" cx="325" cy="149" r="6" fill="#ed6f73"/>
+              <path d="M223 148 L196 152 L196 221 L223 225 M427 148 L454 152 L454 221 L427 225" fill="url(#metal)" stroke="#e5eef3" stroke-width="4"/>
+            </g>
+          </svg>
+          <div class="piece-focus" aria-live="polite"><span class="piece-focus-title"><span id="focus-type">GAME PIECE</span> <b id="focus-action">READY</b></span><div class="piece-focus-body"><span id="focus-art" class="focus-art gyro" aria-hidden="true"></span><span><strong id="focus-name">GYRO A</strong><small id="focus-location">HOLDER → SPINNER → TRAY</small></span></div></div>
+          <div class="floor-marker one">TWO HANDS / ONE GRIP</div><div class="floor-marker two" id="floor-action">PICK → PLACE</div>
+        </div>
+        <div class="stage-footer"><span><b class="tiny-led"></b> ROBOT MODEL / PERSPECTIVE VIEW</span><span id="stage-caption">Waiting for a mission.</span><span><i>●</i> INTERACTIVE PREVIEW</span></div>
+      </section>
+      <aside class="sidebar">
+        <section class="mission-card">
+          <div class="section-head"><span>ACTIVE MISSION</span><span class="round-index">01</span></div>
+          <div class="mission-symbol">✦</div>
+          <h2 id="mission-title">Ready when you are.</h2>
+          <p id="mission-description">Choose an accessory and give R.O.B. a mission. Every movement will play out here in real time.</p>
+          <div class="mission-progress"><div id="progress-fill"></div></div>
+          <div class="mission-meta"><span id="mission-step">STANDBY</span><span id="progress-text">0 / 0</span></div>
+        </section>
+        <section class="mode-card">
+          <div class="section-head"><span>ACCESSORY BAY</span><span>02 / 03</span></div>
+          <div class="mode-tabs" role="group" aria-label="Scene mode"><button type="button" data-mode="gyro" class="active">GYROMITE</button><button type="button" data-mode="stack">STACK-UP</button><button type="button" data-mode="free">POSE LAB</button></div>
+          <div class="accessory-art mode-gyro" id="accessory-art" aria-hidden="true">
+            <div class="gyro gyro-red"></div><div class="gyro gyro-second"></div><div class="platform"></div>
+            <div class="stack-kit"><i class="mini-tray"></i><i class="mini-tray"></i><i class="mini-tray"></i><i class="mini-tray"></i><i class="mini-tray"></i><span id="mini-stacks"></span></div>
+            <svg class="pose-kit" viewBox="0 0 220 80" aria-hidden="true"><path d="M20 61H78M142 61h58" stroke="#577f8f" stroke-width="2"/><path d="M76 58L65 42L58 49M144 58l11-16 7 7" fill="none" stroke="#d9e7e8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><rect x="79" y="35" width="62" height="34" rx="11" fill="#b7c9cd" stroke="#f1f6f2" stroke-width="3"/><rect x="73" y="5" width="74" height="32" rx="10" fill="#d4dfe0" stroke="#f1f6f2" stroke-width="3"/><rect x="79" y="10" width="62" height="23" rx="7" fill="#152c3e"/><circle cx="98" cy="21" r="7" fill="#8fe5f2"/><circle cx="122" cy="21" r="7" fill="#8fe5f2"/><circle cx="98" cy="21" r="3" fill="#efffff"/><circle cx="122" cy="21" r="3" fill="#efffff"/><path d="M102 43h16M102 51h16" stroke="#47677a" stroke-width="3" stroke-linecap="round"/><circle cx="58" cy="49" r="5" fill="#eaf4f1"/><circle cx="162" cy="49" r="5" fill="#eaf4f1"/></svg>
+          </div>
+          <p id="mode-description">Watch R.O.B. spin two gyros, recover each once, then return both to their holders.</p>
+          <button class="primary-button" id="demo-button" type="button"><span>▶</span><span class="demo-label">RUN DEMO SEQUENCE</span><span class="arrow">↗</span></button>
+        </section>
+        <section class="controls-panel"><div class="section-head"><span id="controls-title">POSE PREVIEW</span><span id="controls-context">MANUAL SIMULATION / NO GAME COMMANDS</span></div><div class="controller-link"><span id="controller-status">LOCAL PREVIEW · NO CONTROLLER</span><button id="camera-button" type="button" hidden>START CAMERA</button><input id="controller-token" type="password" placeholder="Controller token" aria-label="Controller token" hidden></div><div class="control-buttons"><button type="button" data-action="left">↶ <span>TURN LEFT</span></button><button type="button" data-action="right">↷ <span>TURN RIGHT</span></button><button type="button" data-action="raise">↑ <span>ARMS UP</span></button><button type="button" data-action="lower">↓ <span>ARMS DOWN</span></button><button type="button" data-action="grip">◇ <span id="grip-label">TOGGLE GRIP</span></button><button type="button" id="home-button">⌂ <span>HOME</span></button></div><button class="stop-button" id="stop-button" type="button">■ <span>EMERGENCY STOP</span></button></section>
+        <section class="vitals-card"><div class="section-head"><span>SYSTEM VITALS</span><span class="live-text">● SIMULATION</span></div><div class="vital"><span>OPTICAL COMMAND</span><strong id="optical-value">SIMULATED</strong></div><div class="vital-track"><i id="optical-bar"></i></div><div class="vital"><span>HEAD + BODY TURN</span><strong id="head-value">0°</strong></div><div class="vital-track"><i id="head-bar"></i></div><div class="vital"><span>ARM POSITION</span><strong id="arm-value">HOME</strong></div><div class="vital-track"><i id="arm-bar"></i></div><div class="vital"><span>GRIP</span><strong id="grip-value">OPEN</strong></div><div class="vital-track"><i id="grip-bar"></i></div><div id="gyro-vitals"><div class="vital"><span>GYRO A / RED PAD</span><strong id="gyro-a-value">IDLE / RELEASED</strong></div><div class="vital-track"><i id="gyro-a-bar"></i></div><div class="vital"><span>GYRO B / BLUE PAD</span><strong id="gyro-b-value">IDLE / RELEASED</strong></div><div class="vital-track"><i id="gyro-b-bar"></i></div><small class="gyro-vitals-note">Virtual spin and button states; no game link</small></div></section>
+      </aside>
+    </div>
+    <section class="world-panel" aria-label="Game table and optional game camera">
+      <div class="section-head"><span id="world-title">GAME TABLE / SIMULATED PIECES</span><span id="fixture-mode-label">GYROMITE SETUP</span></div>
+      <div class="world-grid">
+        <div class="fixture-scene" id="fixture-scene">
+          <div class="fixture-set" id="gyro-fixture">
+            <div class="fixture-station"><div class="station-art dock"><i class="piece gyro-red" id="red-dock-piece"></i></div><b>GYRO A HOLDER</b></div>
+            <div class="fixture-station"><div class="station-art spinner"><svg class="spinner-platform" viewBox="0 0 100 75" aria-hidden="true"><path d="M43 51 L43 68 Q50 72 57 68 L57 51Z" fill="#889ca7" stroke="#dce9e9" stroke-width="2"/><ellipse cx="50" cy="69" rx="12" ry="3" fill="#496b7a"/><ellipse cx="50" cy="52" rx="37" ry="13" fill="#dce9e8" stroke="#f5faf6" stroke-width="2"/><ellipse cx="50" cy="50" rx="28" ry="8" fill="#2c4a5c" stroke="#7397a5" stroke-width="2"/><ellipse cx="50" cy="49" rx="18" ry="5" fill="#142d41"/><circle cx="50" cy="49" r="3" fill="#df806a"/></svg><i class="piece gyro-red" id="red-spinner-piece" hidden></i></div><b>SPINNER</b></div>
+            <div class="fixture-station"><div class="station-art tray red"><i class="piece gyro-red" id="red-tray-piece" hidden></i></div><b>RED BUTTON</b></div>
+            <div class="fixture-station"><div class="station-art dock"><i class="piece gyro-red" id="second-dock-piece"></i></div><b>GYRO B HOLDER</b></div>
+            <div class="fixture-station"><div class="station-art tray blue"><i class="piece gyro-red" id="blue-tray-piece" hidden></i></div><b>BLUE BUTTON</b></div>
+          </div>
+          <div class="fixture-set" id="stack-fixture" hidden>
+            <div class="fixture-station"><div class="station-art stack-tray"></div><b>TRAY 1</b></div>
+            <div class="fixture-station"><div class="station-art stack-tray"></div><b>TRAY 2</b></div>
+            <div class="fixture-station"><div class="station-art stack-tray"></div><b>TRAY 3 / START</b></div>
+            <div class="fixture-station"><div class="station-art stack-tray"></div><b>TRAY 4</b></div>
+            <div class="fixture-station"><div class="station-art stack-tray"></div><b>TRAY 5</b></div>
+            <div id="table-held-stack" aria-label="Discs held by R.O.B."></div>
+          </div>
+          <div class="fixture-empty" id="free-fixture" hidden><strong>POSE LAB</strong><span>Just R.O.B. and his motion controls. No game pieces or commands are connected.</span></div>
+          <div class="fixture-note" id="fixture-note">Two gyros, one spinner, and two button trays. Positions are illustrative.</div>
+        </div>
+        <div class="observer-tile">
+          <div class="observer-header"><span>GAME CAMERA / OPTIONAL</span><span>SECONDARY VIEW</span></div>
+          <div class="observer-placeholder" role="img" aria-label="No game-screen camera connected"><span class="observer-icon">◎</span><strong>GAME CAMERA OFFLINE</strong><small>The UNO Q camera will watch the game screen for commands.</small></div>
+          <div class="observer-footer">The UNO Q camera watches the game screen for commands. Detailed timing appears in diagnostics.</div>
+        </div>
+      </div>
+    </section>
+    <div class="bottom-grid">
+      <section class="event-panel"><div class="section-head"><span>ACTIVITY FEED</span><span id="event-count">001 EVENTS</span></div><ol id="event-list" aria-live="polite"><li><time>00:00:00</time><span>Simulation initialized. R.O.B. is ready.</span></li></ol></section>
+    </div>
+    <footer><span>R.O.B. VISION <b>·</b> ORIGINAL MAKER CONCEPT</span><span>UNO Q / GAME LINK OFFLINE <b>///</b> V0.1 DESIGN STUDY</span></footer>
+  </main>
+</body>
+</html>

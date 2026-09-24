@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "games": {
+    "Gyromite (World).7z": "gyromite",
+    "Gyromite (World).zip": "gyromite",
+    "Gyromite (World).nes": "gyromite",
+    "Stack-Up (World).7z": "stack_up",
+    "Stack-Up (World).zip": "stack_up",
+    "Stack-Up (World).nes": "stack_up"
+  }
+}

@@ -1,0 +1,42 @@
+# R.O.B. Vision changelog
+
+## Local controller and camera path — 24 September 2026
+
+- Moved Pose Preview above System Vitals and made its live controls send commands to an authoritative Python controller service.
+- Added ROM-pattern optical decoding, optional OpenCV camera capture with measured fps, exact-name launch notification, and shared Stack-Up/Gyromite virtual state.
+- Added a live dashboard at port 8766 while retaining the static scripted preview. Camera and button-return hardware remain to be validated.
+- Added synthetic decoder/model tests and updated the user and technical guides.
+
+## Stack-Up grouped carries — 24 September 2026
+
+- Added a browser virtual Stack-Up controller with five ordered tray stacks, six height levels, five stations, open/closed hands, and an ordered carried disc segment. Invalid moves leave the model unchanged.
+- Updated the demo to transfer red alone, then blue and white together. Live Model, Accessory Bay, and Game Table now render the same changing disc state.
+- Made the Stack-Up command buttons interactive in local simulation and added five model tests for grouped carries, conservation, bounds, and blocked moves.
+- Renamed Free Play to Pose Lab and removed its stray gyro artwork; it remains a character-only motion sandbox.
+
+## Virtual robot scope and finite Gyromite demo — 24 September 2026
+
+- Confirmed the UNO Q will own a virtual R.O.B. and accessory state; no physical robot or game pieces are planned. Earlier physical-build entries below are historical and superseded.
+- Added an unspun held one-gate press, independent gyro spin-down, one re-spin recovery per gyro, and final return to both holders. The scripted demo now stops.
+- Reworked the user, system, network, setup, and verification guides around the virtual controller and its Gyromite LAN button return path.
+
+## Display direction update — 24 September 2026
+
+- Made a responsive browser dashboard on laptop, iPad, or phone the primary display, replacing the planned base-mounted panel.
+- Added a game-table illustration for both accessory sets and a small placeholder for an optional camera facing the physical robot. The head camera remains dedicated to game-screen flashes and alignment diagnostics.
+- Updated hardware, network, player, and verification guides for this display arrangement. The preview is still simulated; no live video or telemetry is connected.
+
+## Design preview 0.1 — 24 September 2026
+
+- Created the original interactive dashboard simulation with three accessory modes, direct controls, activity feed, and simulated stop/reset.
+- Chose a close R.O.B. silhouette; the initial base-display idea was superseded by the browser dashboard above.
+- Defined the UNO Q Linux/MCU split and Wi-Fi/Ethernet cabinet connection.
+- Made a head camera watching Gyromite and Stack-Up flashes on a modern LCD/OLED the primary game input; emulator hooks remain optional.
+- Defined sensor-confirmed tray feedback to a RetroPie virtual second controller.
+- Added design-stage user, gameplay, installation, hardware, technical, configuration, troubleshooting, verification, safety, rights, and quick-reference guides.
+- Incorporated the original R.O.B. instruction manual as a cited historical reference for optical test/ready/busy behavior, setup hazards, and modern display acceptance tests.
+- Incorporated the Gyromite instruction booklet as a cited reference for Direct/Game A/Game B flow, two-gyro play, fixture roles, and tray/button mapping tests.
+- Incorporated the Stack-Up instruction booklet scan as a cited reference for five numbered trays, ring-shaped pieces, Direct/Memory/Bingo modes, Memory timing, and Bingo's ambiguous simultaneous-command case.
+- Added a local, exact-filename Gyromite/Stack-Up launch resolver and registry for the supplied `.zip`, `.7z`, and `.nes` names, plus tests and a planned RetroPie start/end notification contract. No hook or network receiver is installed.
+
+No physical robot, camera decoder, network receiver, ROM interface, or installer is included in this version.
