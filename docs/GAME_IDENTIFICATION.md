@@ -1,6 +1,6 @@
 # Game identification from RetroPie launch events
 
-**Status: installed on the dedicated `retropie.local` test machine.** The real Gyromite launch selected the game on the UNO Q. Controlled start/end calls selected and cleared both games; the real exit remains to be observed. The game still flashes commands for the camera to decode. Launch identification supplies context and does not replace optical input.
+**Status: installed on the dedicated `retropie.local` test machine.** A real Gyromite launch selected the game on the UNO Q, and a subsequent real exit cleared it. Controlled start/end calls selected and cleared both games. The game still flashes commands for the camera to decode. Launch identification supplies context and does not replace optical input.
 
 ## Decision
 
@@ -12,7 +12,7 @@ The checked-in [registry](../config/games.json) covers the user's `Gyromite (Wor
 
 ## Resolver and live check
 
-The [resolver](../tools/identify_game.py) accepts the same four launch arguments used by RetroPie and prints a small JSON event. The [sender](../tools/notify_game.py) authenticates to the UNO Q using the token file and sends the event without blocking game launch on failure. On 24 September 2026, a real EmulationStation Gyromite launch used the `.7z` archive and selected `gyromite` on the UNO Q. Synthetic calls of the installed hooks selected and cleared both games. A real exit has not yet been observed.
+The [resolver](../tools/identify_game.py) accepts the same four launch arguments used by RetroPie and prints a small JSON event. The [sender](../tools/notify_game.py) authenticates to the UNO Q using the token file and sends the event with bounded retries. On 24 September 2026, a real EmulationStation Gyromite launch used the `.7z` archive and selected `gyromite` on the UNO Q. The next real exit cleared the selected game. Controlled calls of the installed hooks also selected and cleared both games.
 
 ```sh
 python3 tools/identify_game.py start nes lr-fceumm "/roms/nes/Gyromite (World).zip" ""

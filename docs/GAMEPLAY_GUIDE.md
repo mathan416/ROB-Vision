@@ -1,6 +1,6 @@
 # R.O.B. Vision gameplay guide
 
-**Status: scripted preview and connected controller prototype.** R.O.B., the gyros, spinner, pads, trays, and discs exist only in the virtual model. The UNO Q controller owns their state and updates the browser. A red pad press/release has reached RetroPie's virtual joystick; camera timing and actual game gate response remain unverified.
+**Status: scripted preview and connected controller prototype.** R.O.B., the gyros, spinner, pads, trays, and discs exist only in the virtual model. The UNO Q controller owns their state and updates the browser. Red and blue pad presses reached RetroPie's virtual joystick, and a user observed a gate respond in Game A. Camera timing remains unverified.
 
 ## Gyromite
 
