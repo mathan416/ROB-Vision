@@ -4,6 +4,8 @@
 
 For a local controller trial, run `python3 -m controller.service` from the project folder and open `http://127.0.0.1:8766/dashboard/`. Select a game and try a command; reload to confirm the controller retains state. Install `requirements-camera.txt` to enable **Start Camera**. The secondary camera tile shows a low-rate framing image with the sample region outlined; use `--camera-index` and `--camera-roi x,y,width,height` to start capture with a chosen crop. The reported fps is the delivered rate, not the requested rate. If serving over LAN, set `ROB_VISION_TOKEN` and pass `--host 0.0.0.0`; the dashboard asks for the token. The optional `tools/notify_game.py` helper can send exact RetroPie launch names but is not installed into the cabinet hooks automatically. The existing standalone preview at `dashboard/index.html` stays available without the service.
 
+On the UNO Q, the user service template in `deploy/rob-vision.service` keeps this controller separate from VirtualGlove. Its secret lives in `/home/arduino/.config/rob-vision/environment` with owner-only permissions. It binds port 8766 on the LAN and requires a token for API calls. Camera capture cannot start until a real capture camera appears; `/dev/video0` and `/dev/video1` may be codec devices on UNO Q and are deliberately excluded. Installing OpenCV and checking a camera's delivered fps are separate hardware steps.
+
 ## Open the preview
 
 From the project directory, serve the files locally with `python3 -m http.server 8000` and open `http://localhost:8000/dashboard/` on the same computer. Select a mode and run its finite demo. **Home** resets the preview; the browser **Emergency Stop** cancels only local scripted actions. The existing preview does not connect to the cabinet or UNO Q.

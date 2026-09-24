@@ -80,6 +80,7 @@
     try { accept(await request('/api/state')); }
     catch (error) {
       if (connected) { connected = false; clearPreview(); window.RobDashboard.leaveLive(); $('camera-button').hidden = true; showError(error); }
+      else if (!$('controller-token').hidden) showError(error);
     } finally { busy = false; }
   }
   async function act(path, data) {
