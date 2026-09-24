@@ -54,7 +54,8 @@
     $('camera-button').hidden = false;
     $('camera-button').textContent = snapshot.camera.state === 'capturing' ? 'STOP CAMERA' : 'START CAMERA';
     if (snapshot.camera.state === 'capturing') refreshPreview(); else clearPreview();
-    $('controller-status').textContent = snapshot.camera.state === 'fault' ? snapshot.camera.message : snapshot.game ? `${snapshot.game === 'stack_up' ? 'STACK-UP' : 'GYROMITE'} · ${snapshot.camera.state.toUpperCase()} · ${snapshot.camera.fps} FPS` : 'CONTROLLER READY · SELECT A GAME';
+    const noCamera = snapshot.camera.platform === 'linux' && !snapshot.camera.devices.length;
+    $('controller-status').textContent = snapshot.camera.state === 'fault' ? snapshot.camera.message : noCamera ? 'CONTROLLER READY · NO CAMERA ATTACHED' : snapshot.game ? `${snapshot.game === 'stack_up' ? 'STACK-UP' : 'GYROMITE'} · ${snapshot.camera.state.toUpperCase()} · ${snapshot.camera.fps} FPS` : 'CONTROLLER READY · SELECT A GAME';
     if (snapshot.sequence !== lastSequence || snapshot.camera.state !== $('camera-button').dataset.state) {
       $('camera-button').dataset.state = snapshot.camera.state;
       lastSequence = snapshot.sequence;

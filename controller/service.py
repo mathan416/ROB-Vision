@@ -3,6 +3,8 @@
 import argparse
 import json
 import os
+import glob
+import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -17,6 +19,21 @@ ROOT = Path(__file__).resolve().parents[1]
 MIME = {".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml"}
 
 
+def capture_devices():
+    """List likely V4L2 cameras, omitting the UNO Q's video codec nodes."""
+    devices = []
+    for path in sorted(glob.glob("/dev/video*")):
+        name_file = Path("/sys/class/video4linux") / Path(path).name / "name"
+        try:
+            name = name_file.read_text().strip()
+        except OSError:
+            name = Path(path).name
+        if any(word in name.casefold() for word in ("encoder", "decoder", "codec")):
+            continue
+        devices.append({"path": path, "name": name})
+    return devices
+
+
 class Controller:
     def __init__(self):
         self.lock = threading.RLock()
@@ -26,7 +43,9 @@ class Controller:
         self.decoder = OpticalDecoder()
         self.sequence = 0
         self.events = []
-        self.camera = {"state": "offline", "fps": 0, "brightness": 0, "last_frame": None, "message": "Camera not started."}
+        self.camera = {"state": "offline", "fps": 0, "brightness": 0, "last_frame": None,
+                       "devices": capture_devices(), "platform": sys.platform, "message": "Camera not started."}
+        self.devices_checked_at = monotonic()
         self.capture_stop = threading.Event()
         self.capture_thread = None
         self.preview_frame = None
@@ -38,6 +57,9 @@ class Controller:
 
     def snapshot(self):
         with self.lock:
+            if monotonic() - self.devices_checked_at > 5:
+                self.camera["devices"] = capture_devices()
+                self.devices_checked_at = monotonic()
             return {"schema": 1, "sequence": self.sequence, "game": self.game,
                     "robot": self.stack.snapshot() if self.game == "stack_up" else self.gyro.snapshot() if self.game == "gyromite" else None,
                     "camera": dict(self.camera), "events": list(self.events)}
@@ -85,6 +107,21 @@ class Controller:
     def start_camera(self, index=0, roi=None):
         if self.capture_thread and self.capture_thread.is_alive():
             return self.snapshot()
+        if roi is not None and (not isinstance(roi, list) or len(roi) != 4 or
+                                any(not isinstance(value, (int, float)) for value in roi)):
+            raise ValueError("ROI must contain four normalized numbers.")
+        if roi is not None and (min(roi) < 0 or max(roi) > 1 or roi[2] <= 0 or roi[3] <= 0 or
+                                roi[0] + roi[2] > 1 or roi[1] + roi[3] > 1):
+            raise ValueError("ROI must fit inside the camera frame.")
+        devices = capture_devices()
+        if os.name == "posix" and Path("/sys/class/video4linux").exists():
+            if not devices:
+                with self.lock:
+                    self.camera.update(state="fault", message="No camera capture device is attached. Video codec nodes are not cameras.")
+                    self.event("fault", self.camera["message"])
+                raise RuntimeError(self.camera["message"])
+            if index == 0:
+                index = devices[0]["path"]
         try:
             import cv2
         except ImportError as exc:
@@ -92,12 +129,6 @@ class Controller:
                 self.camera.update(state="fault", message="OpenCV is not installed on this controller.")
                 self.event("fault", self.camera["message"])
             raise RuntimeError("OpenCV is needed for camera capture. Install opencv-python on the controller.") from exc
-        if roi is not None and (not isinstance(roi, list) or len(roi) != 4 or
-                                any(not isinstance(value, (int, float)) for value in roi)):
-            raise ValueError("ROI must contain four normalized numbers.")
-        if roi is not None and (min(roi) < 0 or max(roi) > 1 or roi[2] <= 0 or roi[3] <= 0 or
-                                roi[0] + roi[2] > 1 or roi[1] + roi[3] > 1):
-            raise ValueError("ROI must fit inside the camera frame.")
         capture = cv2.VideoCapture(index)
         if not capture.isOpened():
             capture.release()
