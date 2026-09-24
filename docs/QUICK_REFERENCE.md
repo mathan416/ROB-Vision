@@ -1,6 +1,6 @@
 # R.O.B. Vision quick reference
 
-**R.O.B. is virtual.** The UNO Q dashboard and RetroPie Gyromite Controller 2 link are running. The blue gate was observed responding in Game A. UNO Q camera capture and a separate red gate check remain to be verified.
+**R.O.B. is virtual.** The UNO Q dashboard and RetroPie Gyromite Controller 2 link are running. The player confirmed that both red and blue gate controls work in Game A. UNO Q camera capture remains to be verified.
 
 ## Preview controls
 
