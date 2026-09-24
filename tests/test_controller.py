@@ -75,6 +75,32 @@ class ModelTests(unittest.TestCase):
         model.apply("UP")
         self.assertEqual(model.snapshot()["pads"], {"red": False, "blue": False})
 
+    def test_gate_assist_is_immediate_and_expires(self):
+        controller = Controller()
+        controller.select("gyromite")
+        blue = controller.gate_assist("blue", True)
+        self.assertEqual(blue["robot"]["pads"], {"red": False, "blue": True})
+        self.assertEqual(blue["robot"]["pieces"]["b"], "blue_pad")
+        red = controller.gate_assist("red", True)
+        self.assertEqual(red["robot"]["pads"], {"red": True, "blue": True})
+        controller.gate_assist("blue", False)
+        self.assertEqual(controller.snapshot()["robot"]["pads"], {"red": True, "blue": False})
+        controller.gyro.assisted_until["red"] = 0.01
+        expired = controller.snapshot()
+        self.assertEqual(expired["robot"]["pads"], {"red": False, "blue": False})
+        self.assertEqual(expired["robot"]["pieces"], {"a": "holder_a", "b": "holder_b"})
+        self.assertIn("timed out", expired["events"][-1]["message"])
+
+    def test_gate_assist_rejects_other_game_and_camera_capture(self):
+        controller = Controller()
+        controller.select("stack_up")
+        with self.assertRaises(ValueError):
+            controller.gate_assist("red", True)
+        controller.select("gyromite")
+        controller.camera["state"] = "capturing"
+        with self.assertRaises(ValueError):
+            controller.gate_assist("red", True)
+
     def test_camera_trace_reaches_shared_stack_state(self):
         controller = Controller()
         controller.select("stack_up")

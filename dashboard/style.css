@@ -147,6 +147,18 @@
 .sidebar .control-buttons button{min-width:0;min-height:52px;padding:5px 2px}
 .sidebar .control-buttons button span{font-size:7px;line-height:1.15}
 .sidebar .stop-button{float:none;align-self:flex-end}
+.gate-assist[hidden]{display:none}
+.gate-assist{margin-top:12px;padding-top:10px;border-top:1px solid #36566a;width:100%}
+.gate-assist-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;color:#a9cada}
+.gate-assist-head strong{font:800 10px 'DM Sans',sans-serif;letter-spacing:.14em}
+.gate-assist-head small{font:600 9px 'DM Sans',sans-serif;color:#8eb4c4;text-align:right}
+.gate-assist-buttons{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:9px}
+.gate-assist-buttons button{min-height:42px;border:1px solid #567686;background:#163447;color:#e7f4f5;font:800 9px 'DM Sans',sans-serif;letter-spacing:.06em;cursor:pointer}
+.gate-assist-buttons [data-gate="red"]{border-color:#b96f67;color:#ffd5cc}
+.gate-assist-buttons [data-gate="blue"]{border-color:#5ca7c3;color:#c9f2ff}
+.gate-assist-buttons [aria-pressed="true"]{background:#e58a6c;color:#132337;border-color:#ffd2bd}
+.gate-assist-buttons [data-gate="blue"][aria-pressed="true"]{background:#72cae8;color:#102939;border-color:#c9f2ff}
+.gate-assist-buttons button:focus-visible{outline:2px solid #f8f1b0;outline-offset:2px}
 .bottom-grid .event-panel{width:100%;margin-top:0}
 @media(max-width:1050px){.stage-panel .stage{min-height:490px}}
 @media(max-width:760px){.stage-panel .stage{height:440px;min-height:440px}.sidebar{grid-template-rows:auto auto auto}.sidebar .controls-panel{grid-column:1/-1}}

@@ -79,7 +79,40 @@ class GyroState:
     held: str | None = None
     pieces: dict = field(default_factory=lambda: {"a": "holder_a", "b": "holder_b"})
     spinning_until: dict = field(default_factory=lambda: {"a": 0.0, "b": 0.0})
+    assisted_until: dict = field(default_factory=lambda: {"red": 0.0, "blue": 0.0})
     spin_seconds: float = 55.0
+
+    def expire_assist(self):
+        expired = []
+        now = monotonic()
+        for color, which in (("red", "a"), ("blue", "b")):
+            if self.assisted_until[color] and self.assisted_until[color] <= now:
+                self.assisted_until[color] = 0.0
+                self.spinning_until[which] = 0.0
+                self.pieces[which] = f"holder_{which}"
+                expired.append(color)
+        return expired
+
+    def assist_gate(self, color, pressed):
+        if color not in ("red", "blue") or not isinstance(pressed, bool):
+            raise ValueError("Choose a red or blue gate and a pressed state.")
+        self.expire_assist()
+        which = "a" if color == "red" else "b"
+        if pressed:
+            if self.held or self.pieces[which] != f"holder_{which}":
+                raise ValueError("Return the gyro to its holder before using Gate Assist.")
+            if f"{color}_pad" in self.pieces.values():
+                raise ValueError("That pad already holds a gyro.")
+            self.pieces[which] = f"{color}_pad"
+            self.assisted_until[color] = monotonic() + 60.0
+            self.spinning_until[which] = self.assisted_until[color]
+            self.station = 3 if color == "red" else 4
+            self.height = 2
+            self.grip = "open"
+        elif self.assisted_until[color]:
+            self.assisted_until[color] = 0.0
+            self.spinning_until[which] = 0.0
+            self.pieces[which] = f"holder_{which}"
 
     def snapshot(self):
         now = monotonic()
@@ -95,7 +128,8 @@ class GyroState:
                 if station == f"{color}_pad":
                     pads[color] = True
         return {"station": self.station, "height": self.height, "grip": self.grip,
-                "held": self.held, "pieces": dict(self.pieces), "spinning": spinning, "pads": pads}
+                "held": self.held, "pieces": dict(self.pieces), "spinning": spinning, "pads": pads,
+                "assist": {color: self.assisted_until[color] > now for color in pads}}
 
     def apply(self, command):
         if command not in COMMANDS:

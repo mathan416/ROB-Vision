@@ -57,6 +57,9 @@ class Controller:
 
     def snapshot(self):
         with self.lock:
+            if self.game == "gyromite":
+                for color in self.gyro.expire_assist():
+                    self.event("assist", f"{color.title()} Gate Assist timed out; button released.")
             if monotonic() - self.devices_checked_at > 5:
                 self.camera["devices"] = capture_devices()
                 self.devices_checked_at = monotonic()
@@ -78,6 +81,8 @@ class Controller:
         with self.lock:
             if self.game is None:
                 raise ValueError("Select a game before sending commands.")
+            if self.game == "gyromite" and any(self.gyro.assisted_until.values()) and command != "READY":
+                raise ValueError("Release Gate Assist before moving R.O.B. with commands.")
             if command == "READY":
                 self.event("ready", "R.O.B. ready-light signal received; no movement.", command)
             else:
@@ -94,6 +99,21 @@ class Controller:
                     self.event("action", f"{source.title()} command: {normalized}.", normalized)
             return self.snapshot()
 
+    def gate_assist(self, color, pressed):
+        with self.lock:
+            if self.game != "gyromite":
+                raise ValueError("Gate Assist is only available in Gyromite.")
+            if self.camera["state"] == "capturing":
+                raise ValueError("Stop the camera before using manual Gate Assist.")
+            if color == "all" and pressed is False:
+                for gate in ("red", "blue"):
+                    self.gyro.assist_gate(gate, False)
+                self.event("assist", "Both Gate Assist buttons released.")
+            else:
+                self.gyro.assist_gate(color, pressed)
+                self.event("assist", f"{color.title()} Gate Assist {'pressed' if pressed else 'released'}.")
+            return self.snapshot()
+
     def sample(self, timestamp, brightness):
         with self.lock:
             self.camera["brightness"] = round(brightness, 3)
@@ -107,6 +127,11 @@ class Controller:
     def start_camera(self, index=0, roi=None):
         if self.capture_thread and self.capture_thread.is_alive():
             return self.snapshot()
+        with self.lock:
+            if self.game == "gyromite" and any(self.gyro.assisted_until.values()):
+                for color in ("red", "blue"):
+                    self.gyro.assist_gate(color, False)
+                self.event("assist", "Gate Assist released before camera capture.")
         if roi is not None and (not isinstance(roi, list) or len(roi) != 4 or
                                 any(not isinstance(value, (int, float)) for value in roi)):
             raise ValueError("ROI must contain four normalized numbers.")
@@ -292,6 +317,8 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                     result = controller.select(game)
                 elif path == "/api/command":
                     result = controller.command(data["command"])
+                elif path == "/api/gate-assist":
+                    result = controller.gate_assist(data["color"], data["pressed"])
                 elif path == "/api/camera/start":
                     result = controller.start_camera(int(data.get("index", 0)), data.get("roi"))
                 elif path == "/api/camera/stop":

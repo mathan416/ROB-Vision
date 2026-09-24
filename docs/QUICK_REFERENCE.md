@@ -1,6 +1,6 @@
 # R.O.B. Vision quick reference
 
-**R.O.B. is virtual.** A local controller and optional camera path are available for trials; UNO Q capture timing and Gyromite game feedback are not yet verified. The browser preview is also available.
+**R.O.B. is virtual.** The UNO Q dashboard and RetroPie Gyromite Controller 2 link are running. The blue gate was observed responding in Game A. UNO Q camera capture and a separate red gate check remain to be verified.
 
 ## Preview controls
 
@@ -12,6 +12,10 @@
 | Pose Preview | Try R.O.B.'s movement locally in Gyromite or Pose Lab. |
 | Home | Reset all virtual pieces, buttons, pose, and timers. |
 | Emergency Stop / Reset Stop | Cancel or re-enable the local simulation. |
+
+## Fast Gates during live Gyromite
+
+Open `http://arduiain.local/dashboard/`. **Lower Blue** or **Lower Red** presses that gate immediately; tap it again to raise it. **Release Both** raises both. Keyboard: **2** blue, **1** red, **0** release both. Each press releases after 60 seconds, and leaving the game releases both. The controls appear when Gyromite is selected and camera capture is stopped. Use **Home** first if a gyro has been moved with the regular controls.
 
 ## Planned connected loop
 

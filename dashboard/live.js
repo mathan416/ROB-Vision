@@ -51,6 +51,14 @@
   function accept(snapshot) {
     latest = snapshot;
     connected = true;
+    const assist = snapshot.game === 'gyromite' && snapshot.camera.state !== 'capturing';
+    $('gate-assist').hidden = !assist;
+    for (const color of ['red', 'blue']) {
+      const button = document.querySelector(`[data-gate="${color}"]`);
+      const active = Boolean(snapshot.robot?.assist?.[color]);
+      button.setAttribute('aria-pressed', String(active));
+      button.textContent = `${active ? 'RAISE' : 'LOWER'} ${color.toUpperCase()}`;
+    }
     $('camera-button').hidden = false;
     $('camera-button').textContent = snapshot.camera.state === 'capturing' ? 'STOP CAMERA' : 'START CAMERA';
     if (snapshot.camera.state === 'capturing') refreshPreview(); else clearPreview();
@@ -79,7 +87,7 @@
     busy = true;
     try { accept(await request('/api/state')); }
     catch (error) {
-      if (connected) { connected = false; clearPreview(); window.RobDashboard.leaveLive(); $('camera-button').hidden = true; showError(error); }
+      if (connected) { connected = false; clearPreview(); window.RobDashboard.leaveLive(); $('camera-button').hidden = true; $('gate-assist').hidden = true; showError(error); }
       else if (!$('controller-token').hidden) showError(error);
     } finally { busy = false; }
   }
@@ -88,6 +96,17 @@
     catch (error) { showError(error); }
   }
   $('camera-button').addEventListener('click', () => act(latest?.camera.state === 'capturing' ? '/api/camera/stop' : '/api/camera/start', {}));
+  document.querySelectorAll('[data-gate]').forEach((button) => button.addEventListener('click', () => {
+    if (!latest || latest.game !== 'gyromite') return;
+    const color = button.dataset.gate;
+    act('/api/gate-assist', { color, pressed: color === 'all' ? false : !latest.robot?.assist?.[color] });
+  }));
+  document.addEventListener('keydown', (event) => {
+    if (!connected || latest?.game !== 'gyromite' || latest?.camera.state === 'capturing' || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.target instanceof Element && event.target.closest('input, textarea, [contenteditable="true"]')) return;
+    const color = { '1': 'red', '2': 'blue', '0': 'all' }[event.key];
+    if (color) { event.preventDefault(); act('/api/gate-assist', { color, pressed: color === 'all' ? false : !latest.robot?.assist?.[color] }); }
+  });
   $('controller-token').addEventListener('keydown', (event) => { if (event.key === 'Enter') { token = event.target.value; poll(); } });
   window.RobLive = {
     hasService() { return connected; },
@@ -99,7 +118,7 @@
     },
     reset() { if (latest?.game) act('/api/game', { game: latest.game }); },
     stop() { act('/api/camera/stop', {}).then(() => act('/api/game', { game: null })); },
-    disconnect() { suspended = true; clearPreview(); if (latest) act('/api/game', { game: null }); window.RobDashboard.leaveLive(); }
+    disconnect() { suspended = true; clearPreview(); $('gate-assist').hidden = true; if (latest) act('/api/game', { game: null }); window.RobDashboard.leaveLive(); }
   };
   poll();
   setInterval(poll, 500);
