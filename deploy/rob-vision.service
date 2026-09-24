@@ -8,6 +8,7 @@ Type=simple
 WorkingDirectory=/home/arduino/ArduinoApps/rob-vision
 EnvironmentFile=/home/arduino/.config/rob-vision/environment
 Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/home/arduino/ArduinoApps/rob-vision/.deps
 ExecStart=/usr/bin/python3 -m controller.service --host 0.0.0.0 --port 8766
 Restart=on-failure
 RestartSec=3
