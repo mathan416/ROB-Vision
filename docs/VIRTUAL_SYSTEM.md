@@ -11,7 +11,7 @@
 | Cabinet display and emulator | Render the original game's optical flashes and accept ordinary controller input. |
 | UNO Q camera service (planned) | Capture a timestamped region of the cabinet display; decode a complete optical command or reject it. |
 | UNO Q virtual robot controller (planned) | Apply one validated command to a bounded virtual pose, two gyro states, or five Stack-Up discs; publish ordered state events. |
-| Gyromite return path (planned) | Send the controller's virtual red/blue pad state over LAN to a paired virtual Controller 2 receiver; release on disconnect, exit, or stale messages. |
+| Gyromite return path (installed on `retropie.local`) | Poll the UNO Q's virtual red/blue pad state over LAN into a virtual Controller 2; release on game exit, missing game process, or sustained stale reads. Actual gate mapping remains to be checked in the game. |
 | Browser dashboard | Render the robot, accessories, game pieces, controls, status, and event history from the UNO Q's state stream. Multiple screens observe the same session. |
 | Optional RetroPie launch hook | Supply an exact, configured game identity on launch/exit; it does not replace optical command decoding. |
 

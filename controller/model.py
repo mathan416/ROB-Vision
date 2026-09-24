@@ -87,7 +87,12 @@ class GyroState:
         pads = {"red": False, "blue": False}
         for key, place in self.pieces.items():
             for color in pads:
-                if place == f"{color}_pad" and (spinning[key] or self.held == key and self.height <= 2):
+                if place == f"{color}_pad" and spinning[key]:
+                    pads[color] = True
+        if self.held and self.height <= 2:
+            station = GYRO_STATIONS[self.station - 1]
+            for color in pads:
+                if station == f"{color}_pad":
                     pads[color] = True
         return {"station": self.station, "height": self.height, "grip": self.grip,
                 "held": self.held, "pieces": dict(self.pieces), "spinning": spinning, "pads": pads}

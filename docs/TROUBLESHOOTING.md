@@ -19,4 +19,4 @@
 5. **Browser shows stale state:** reconnect for a fresh UNO Q snapshot; do not guess position from an old animation.
 6. **Return link fails:** both virtual buttons should release; repair pairing or network freshness before continuing.
 
-The UNO Q and game receiver are planned. No connected-system diagnostic commands are implemented yet. Preserve timestamps and event sequences when reporting a future issue, but do not include pairing secrets or ROM files.
+On the dedicated test setup, check the UNO Q panel at `http://arduiain.local` and the RetroPie receiver with `systemctl status rob-vision-controller2.service`. The virtual pad should appear as `/dev/input/js1` while the existing player controller remains `/dev/input/js0`. If the game context remains selected after exit, rerun the installed `runcommand-onend.sh` hook and inspect `/dev/shm/runcommand.log` for a timeout. Preserve timestamps and event sequences when reporting an issue, but do not include pairing secrets or ROM files.

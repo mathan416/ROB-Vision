@@ -1,6 +1,6 @@
 # R.O.B. Vision gameplay guide
 
-**Status: scripted preview and local live controller prototype.** R.O.B., the gyros, spinner, pads, trays, and discs exist only in the virtual model. The controller service can own their state and update the browser; target UNO Q camera timing and the Gyromite game return path remain unverified.
+**Status: scripted preview and connected controller prototype.** R.O.B., the gyros, spinner, pads, trays, and discs exist only in the virtual model. The UNO Q controller owns their state and updates the browser. A red pad press/release has reached RetroPie's virtual joystick; camera timing and actual game gate response remain unverified.
 
 ## Gyromite
 
@@ -8,7 +8,7 @@ The [original Gyromite booklet](https://www.digitpress.com/library/manuals/nes/g
 
 The manual explicitly says a gyro **does not need to spin to operate only one gate**. R.O.B. can hold an unspun gyro on the virtual pad, then lift it to release that pad. If both gates must be controlled, spinning one gyro lets it stay upright on one pad while R.O.B. uses his hands to put the other on the other pad. A gyro that is no longer needed belongs on its holder. The spinner is a means to free R.O.B.'s hands, not an obligatory step for every pad press.
 
-**Available preview:** the finite Gyromite demo shows an unspun held press, a two-gyro spin relay, separate spin-down and one recovery for each gyro, then a tidy return to both holders. It stops at `COMPLETE`. The spin lifetime is illustrative. Select **Home** to reset. The browser's virtual button indicators do not yet reach the game.
+**Available preview:** the finite Gyromite demo shows an unspun held press, a two-gyro spin relay, separate spin-down and one recovery for each gyro, then a tidy return to both holders. It stops at `COMPLETE`. The spin lifetime is illustrative. Select **Home** to reset. In the connected setup, UNO Q pad state reaches RetroPie's virtual Controller 2; the browser's local-only preview does not drive that receiver.
 
 **Planned live controller:** the UNO Q maintains the locations and spin phases of Gyro A and B. It derives red and blue virtual button states from those modeled conditions and sends them over LAN to a paired virtual Controller 2 receiver. It releases both buttons on game exit, connection loss, stale packets, or mode change. The exact red/blue-to-Controller-2 A/B mapping remains a bench measurement with the running game. Optical command decoding controls R.O.B.'s virtual actions; a launch hook may supply the game ID. The controller must keep game context and modeled piece state distinct from unknown on-screen professor or gate positions.
 

@@ -62,6 +62,19 @@ class ModelTests(unittest.TestCase):
         controller.select("gyromite")
         self.assertEqual(controller.command("READY")["robot"]["station"], 2)
 
+    def test_held_unspun_gyro_press_releases_on_lift(self):
+        model = GyroState()
+        model.apply("DOWN")
+        model.apply("DOWN")
+        model.apply("CLOSE")
+        model.apply("UP")
+        model.apply("RIGHT")
+        self.assertEqual(model.snapshot()["pads"], {"red": False, "blue": False})
+        model.apply("DOWN")
+        self.assertEqual(model.snapshot()["pads"], {"red": True, "blue": False})
+        model.apply("UP")
+        self.assertEqual(model.snapshot()["pads"], {"red": False, "blue": False})
+
     def test_camera_trace_reaches_shared_stack_state(self):
         controller = Controller()
         controller.select("stack_up")
