@@ -4,7 +4,7 @@ R.O.B. Vision brings Nintendo's Robotic Operating Buddy to life as a **virtual r
 
 **Available now:** the interactive preview, a local controller service, ROM-derived optical decoder, optional OpenCV camera capture, shared virtual Stack-Up and Gyromite state, and a dashboard that follows that controller over HTTP. The camera path and Gyromite game-host button return have not been validated on hardware. The original preview remains available separately.
 
-On the UNO Q, **R.O.B. Vision** is its own Arduino App Lab app, listed alongside VirtualGlove. Its App Lab entry uses the existing controller when it is already running, or starts it when needed. App Lab on this UNO Q starts only one app at a time, so VirtualGlove must be stopped in App Lab before starting R.O.B. Vision there. The independent R.O.B. Vision controller remains available at `http://arduiain.local:8766/dashboard/`; enter the controller token stored in the UNO Q's `~/.config/rob-vision/environment`. Refresh **My Apps** after installation if the new tile does not appear.
+On the UNO Q, **R.O.B. Vision** is its own Arduino App Lab app, listed alongside VirtualGlove. Start it from **My Apps**; App Lab runs the controller and publishes its dashboard at `http://arduiain.local:8766/dashboard/`. Enter the controller token stored in the UNO Q's `~/.config/rob-vision/environment`. App Lab on this UNO Q starts only one app at a time, so VirtualGlove must be stopped before starting R.O.B. Vision. Refresh **My Apps** after installation if the new tile does not appear. Do not enable the separate `rob-vision.service` while running the App Lab app because both would claim port 8766.
 
 ## Try the live controller
 
