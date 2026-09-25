@@ -6,6 +6,8 @@
   let previewBusy = false;
   let polling = false;
   let pairExpanded = false;
+  let lastReceiverOnline = null;
+  let linkChecking = false;
   let cameraBusy = false;
   const headers = () => ({ 'Content-Type': 'application/json' });
 
@@ -47,7 +49,11 @@
     $('pair-connected').hidden = !receiverOnline || pairExpanded;
     $('pair-details').hidden = receiverOnline && !pairExpanded;
     $('pair-cancel').hidden = !receiverOnline;
-    if (receiverOnline && !pairExpanded) message('pair-feedback', 'Pairing is complete. Continue to the camera check.');
+    if (receiverOnline !== lastReceiverOnline) {
+      message('pair-feedback', receiverOnline ? 'RetroPie receiver is online. Continue to the camera check.' :
+        'No recent RetroPie receiver heartbeat. Check its power and network connection.');
+      lastReceiverOnline = receiverOnline;
+    }
     message('camera-state', snapshot.camera.state.toUpperCase());
     message('camera-device', snapshot.camera.devices?.[0]?.name || 'NO CAMERA DETECTED');
     message('camera-fps', `${snapshot.camera.fps || 0} FPS`);
@@ -95,8 +101,24 @@
       clearFrame();
     } finally { polling = false; }
   }
-  $('pair-refresh').addEventListener('click', poll);
-  $('pair-refresh-offline').addEventListener('click', poll);
+  async function checkLink() {
+    if (linkChecking) return;
+    linkChecking = true;
+    $('pair-refresh').disabled = true;
+    $('pair-refresh-offline').disabled = true;
+    message('pair-feedback', 'Checking the latest RetroPie receiver heartbeat…');
+    try {
+      const snapshot = await api('/api/state');
+      render(snapshot);
+      const checkedAt = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+      message('pair-feedback', snapshot.link?.online ?
+        `Checked ${checkedAt}: RetroPie receiver heartbeat is current. Link ready.` :
+        `Checked ${checkedAt}: no recent RetroPie receiver heartbeat. Check RetroPie's power and network.`);
+    } catch (error) { message('pair-feedback', `Link check failed: ${error.message}`); }
+    finally { linkChecking = false; $('pair-refresh').disabled = false; $('pair-refresh-offline').disabled = false; }
+  }
+  $('pair-refresh').addEventListener('click', checkLink);
+  $('pair-refresh-offline').addEventListener('click', checkLink);
   $('pair-change').addEventListener('click', () => { pairExpanded = true; if (state) render(state); });
   $('pair-cancel').addEventListener('click', () => { pairExpanded = false; if (state) render(state); });
   $('pair-button').addEventListener('click', async () => {
