@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import sys
 import threading
+import math
 from http.client import HTTPConnection
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -37,7 +38,7 @@ def preferred_camera_roi() -> list[float] | None:
             return None
     try:
         roi = [float(part) for part in value.split(",")]
-        if (len(roi) != 4 or any(not 0 <= part <= 1 for part in roi)
+        if (len(roi) != 4 or any(not math.isfinite(part) or not 0 <= part <= 1 for part in roi)
                 or roi[2] <= 0 or roi[3] <= 0
                 or roi[0] + roi[2] > 1 or roi[1] + roi[3] > 1):
             raise ValueError

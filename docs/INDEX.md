@@ -1,5 +1,7 @@
 # R.O.B. Vision documentation
 
+[Latest release review](RELEASE_REVIEW_2026-09-25.md) records the code cleanup, local checks, and live validation still needed before a general release.
+
 **Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on RetroPie; its rendered NES frames carry complete R.O.B. commands to the UNO Q, while the attached camera can preview and check the screen. A browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. No physical robot or game pieces are planned. Both games' six commands were decoded during live Direct play, and Gyromite's gate controls were tested in Game A. Camera-only movement reception remains experimental.
 
 Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [Technical Reference](../output/pdf/R.O.B.-Vision-Technical-Reference.pdf), [Matrix Display Guide](../output/pdf/R.O.B.-Vision-Matrix-Display-Guide.pdf), and [Quick Reference](../output/pdf/R.O.B.-Vision-Quick-Reference.pdf).

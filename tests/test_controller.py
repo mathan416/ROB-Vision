@@ -57,6 +57,10 @@ class OpticalTests(unittest.TestCase):
             self.assertEqual(preferred_camera_roi(), [0.4, 0.30, 0.055, 0.06])
         with patch.dict('os.environ', {'ROB_VISION_CAMERA_ROI': '0.99,0.30,0.055,0.06'}):
             self.assertIsNone(preferred_camera_roi())
+        with patch.dict('os.environ', {'ROB_VISION_CAMERA_ROI': 'nan,0.30,0.055,0.06'}):
+            self.assertIsNone(preferred_camera_roi())
+        with self.assertRaises(ValueError):
+            Controller().start_camera(roi=[float('nan'), 0.3, 0.055, 0.06])
 
     def test_sustained_test_flashes_are_distinct_from_commands(self):
         for fps in (60, 120):

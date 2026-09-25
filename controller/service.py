@@ -7,6 +7,7 @@ import glob
 import hashlib
 import http.client
 import ipaddress
+import math
 import re
 import socket
 import ssl
@@ -24,7 +25,9 @@ from .kiyo_camera import configure_kiyo_pro
 from tools.identify_game import identify, load_registry
 
 ROOT = Path(__file__).resolve().parents[1]
-MIME = {".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml"}
+MIME = {".html": "text/html", ".js": "text/javascript", ".css": "text/css",
+        ".svg": "image/svg+xml", ".pdf": "application/pdf", ".png": "image/png",
+        ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".ttf": "font/ttf"}
 KIYO_CAPTURE_MODES = {"mjpg480": ("MJPG", 640, 480), "yuyv720": ("YUYV", 1280, 720)}
 
 
@@ -108,8 +111,6 @@ class Controller:
         self.camera_roi = camera_roi
         self.preview_frame = None
         self.camera_trace = deque(maxlen=1800)
-        self.wide_camera_trace = deque(maxlen=1800)
-        self.camera_stripe_trace = deque(maxlen=900)
         self.receiver_last_seen = 0.0
         self.receiver_name = None
         self.frame_hook_last_seen = 0.0
@@ -175,7 +176,7 @@ class Controller:
             self.frame_hook_game = game
             self.frame_hook_last_seen = monotonic()
             self.event("decoded", f"Game frame decoded: {command} ({pattern}).", command)
-            return self.command(command, "emulator", pattern)
+            return self.command(command, "emulator")
 
     def arm_test(self):
         with self.lock:
@@ -206,7 +207,7 @@ class Controller:
             self.event("session", f"{game or 'No game'} selected; virtual pieces reset.")
             return self.snapshot()
 
-    def command(self, command, source="manual", pattern=None):
+    def command(self, command, source="manual"):
         with self.lock:
             if self.game is None:
                 raise ValueError("Select a game before sending commands.")
@@ -249,14 +250,9 @@ class Controller:
                 self.event("assist", f"{color.title()} Gate Assist {'pressed' if pressed else 'released'}.")
             return self.snapshot()
 
-    def sample(self, timestamp, brightness, wide_brightness=None, stripe_brightness=None):
+    def sample(self, timestamp, brightness):
         with self.lock:
             self.camera_trace.append((round(timestamp, 6), round(brightness, 4)))
-            if wide_brightness is not None:
-                self.wide_camera_trace.append((round(timestamp, 6), round(wide_brightness, 4)))
-            if stripe_brightness is not None:
-                self.camera_stripe_trace.append((round(timestamp, 6),
-                                                 [round(value, 4) for value in stripe_brightness]))
             self.camera["brightness"] = round(brightness, 3)
             self.camera["last_frame"] = time()
             if self.test_armed_at and self.test_flash_detector.feed(timestamp, brightness):
@@ -270,7 +266,7 @@ class Controller:
             detection = self.decoder.feed(timestamp, brightness, self.game)
             if detection:
                 self.event("decoded", f"Flash decoded: {detection.command} ({detection.pattern}).", detection.command)
-                self.command(detection.command, "camera", detection.pattern)
+                self.command(detection.command, "camera")
             return detection
 
     def start_camera(self, index=0, roi=None):
@@ -290,7 +286,8 @@ class Controller:
                     self.gyro.assist_gate(color, False)
                 self.event("assist", "Gate Assist released before camera capture.")
         if roi is not None and (not isinstance(roi, list) or len(roi) != 4 or
-                                any(not isinstance(value, (int, float)) for value in roi)):
+                                any(type(value) not in (int, float) or not math.isfinite(value)
+                                    for value in roi)):
             raise ValueError("ROI must contain four normalized numbers.")
         if roi is not None and (min(roi) < 0 or max(roi) > 1 or roi[2] <= 0 or roi[3] <= 0 or
                                 roi[0] + roi[2] > 1 or roi[1] + roi[3] > 1):
@@ -349,8 +346,6 @@ class Controller:
             self.test_flash_seen_at = 0.0
             self.preview_frame = None
             self.camera_trace.clear()
-            self.wide_camera_trace.clear()
-            self.camera_stripe_trace.clear()
             self.camera.update(state="capturing", message="Measuring frame timing; aim at the flash area.",
                                fps=0, brightness=0, last_frame=None)
             self.event("camera", f"Camera {index} opened.")
@@ -373,17 +368,6 @@ class Controller:
                     # this display. Measure green above both other channels.
                     b, g, r, _ = cv2.mean(crop)
                     brightness = max(0.0, min(1.0, (g - max(r, b)) / 255))
-                    # The wide view covers the game display when the camera is
-                    # aimed at it, while the small crop stays on a dark patch.
-                    wb, wg, wr, _ = cv2.mean(frame[:height // 2, :])
-                    wide_brightness = max(0.0, min(1.0, (wg - max(wr, wb)) / 255))
-                    screen = frame[:int(height * .47), int(width * .20):int(width * .75)]
-                    stripe_brightness = []
-                    for stripe in range(12):
-                        band = screen[stripe * screen.shape[0] // 12:
-                                      (stripe + 1) * screen.shape[0] // 12, :]
-                        sb, sg, sr, _ = cv2.mean(band)
-                        stripe_brightness.append(max(0.0, min(1.0, (sg - max(sr, sb)) / 255)))
                     frame_times.append(timestamp)
                     while frame_times and timestamp - frame_times[0] > 4:
                         frame_times.popleft()
@@ -397,7 +381,7 @@ class Controller:
                             "Near 60 fps: timing drift can still miss a one-frame flash; verify commands in Test mode."
                             if fps else "Measuring camera frame rate."
                         )
-                    self.sample(timestamp, brightness, wide_brightness, stripe_brightness)
+                    self.sample(timestamp, brightness)
                     if timestamp - last_preview >= .5:
                         x0, y0 = int(x * width), int(y * height)
                         x1, y1 = int((x + w) * width), int((y + h) * height)
@@ -541,11 +525,7 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                 if path == "/api/camera/trace":
                     with controller.lock:
                         trace = list(controller.camera_trace)
-                        wide_trace = list(controller.wide_camera_trace)
-                        stripe_trace = list(controller.camera_stripe_trace)
-                    return self.respond(200, {"samples": trace, "wide_samples": wide_trace,
-                                              "stripe_samples": stripe_trace,
-                                              "roi": controller.camera_roi})
+                    return self.respond(200, {"samples": trace, "roi": controller.camera_roi})
                 return self.respond(404, {"error": "Unknown endpoint."})
             if path == "/":
                 self.send_response(302)
@@ -561,6 +541,7 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
             body = file.read_bytes()
             self.send_response(200)
             self.send_header("Content-Type", MIME.get(file.suffix, "application/octet-stream"))
+            self.send_header("Cache-Control", "no-cache")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)

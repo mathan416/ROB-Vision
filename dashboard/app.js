@@ -4,7 +4,7 @@
   const StackModel = window.RobStackModel;
   let stackState = StackModel.create();
   const state = { mode: 'gyro', live: false, head: 0, arms: 0, turn: 0, depth: 1, grip: false, manualActive: false, manualCommand: null, stopped: false, running: false, timer: null, recoveryTimer: null, recoveryQueue: [], recoveryCount: { a: 0, b: 0 }, cleanupStarted: false, sequence: null, step: -1, prop: { x: 225, y: 496, scale: 1 }, propFrame: null, secondProp: { x: 145, y: 469, scale: .85 }, secondPropFrame: null, motion: { turn: 0, arms: 0, grip: 0, head: 0, depth: 1 }, motionFrame: null };
-  // Preview timing is illustrative; the future virtual controller will own these states on UNO Q.
+  // Local demo timing is illustrative; live sessions use the UNO Q controller state.
   const GYRO_SPIN_MS = 55000;
   const gyros = { a: { startedAt: null, phase: 'idle' }, b: { startedAt: null, phase: 'idle' } };
   let gyroTimer = null;
