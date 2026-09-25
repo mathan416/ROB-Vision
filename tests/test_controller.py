@@ -1,6 +1,9 @@
 import sys
+import time
+import types
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from controller.model import StackState, GyroState
@@ -44,6 +47,46 @@ class OpticalTests(unittest.TestCase):
 
 
 class ModelTests(unittest.TestCase):
+    def test_camera_reconnect_reopens_after_capture_failure(self):
+        captures = []
+
+        class FailedCapture:
+            def __init__(self, _index):
+                self.released = False
+                captures.append(self)
+
+            def isOpened(self):
+                return True
+
+            def set(self, _property, _value):
+                pass
+
+            def read(self):
+                return False, None
+
+            def release(self):
+                self.released = True
+
+        fake_cv2 = types.SimpleNamespace(VideoCapture=FailedCapture, CAP_PROP_FPS=5)
+        with patch.dict(sys.modules, {"cv2": fake_cv2}), patch("controller.service.capture_devices", return_value=[{"path": "/dev/video9", "name": "Test camera"}]):
+            controller = Controller()
+            controller.start_camera()
+            controller.capture_thread.join(timeout=1)
+            self.assertEqual(controller.snapshot()["camera"]["state"], "fault")
+            controller.reconnect_camera()
+            controller.capture_thread.join(timeout=1)
+            self.assertEqual(len(captures), 2)
+            self.assertTrue(all(capture.released for capture in captures))
+            self.assertEqual(controller.snapshot()["camera"]["state"], "fault")
+
+    def test_camera_stop_resets_stale_fault_readings(self):
+        with patch("controller.service.capture_devices", return_value=[]):
+            controller = Controller()
+            controller.camera.update(state="fault", fps=90, brightness=.7, last_frame=time.time())
+            camera = controller.stop_camera()["camera"]
+            self.assertEqual(camera["state"], "offline")
+            self.assertEqual((camera["fps"], camera["brightness"], camera["last_frame"]), (0, 0, None))
+
     def test_stack_group_carry_and_rejection(self):
         state = StackState()
         for _ in range(3):

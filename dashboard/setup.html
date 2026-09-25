@@ -7,7 +7,7 @@
   <title>R.O.B. Vision // Setup</title>
   <link rel="stylesheet" href="style.css?v=setup-3">
   <link rel="stylesheet" href="setup.css?v=setup-3">
-  <script src="setup.js?v=setup-4" defer></script>
+  <script src="setup.js?v=camera-reconnect-2" defer></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -41,7 +41,7 @@
         <p>Place the UNO Q camera so the game's optical flash area fills the green rectangle. A stable, bright image and at least 110 fps are needed for decoding.</p>
         <div class="setup-camera"><img id="setup-frame" alt="Live UNO Q camera image with a green sampling rectangle" hidden><span id="camera-placeholder">CAMERA PREVIEW OFFLINE</span></div>
         <div class="setup-stats"><span id="camera-device">NO CAMERA DETECTED</span><span id="camera-fps">0 FPS</span><span id="camera-brightness">0% SIGNAL</span></div>
-        <div class="setup-row"><button id="camera-toggle" type="button">START CAMERA CHECK</button></div>
+        <div class="setup-row"><button id="camera-toggle" type="button">START CAMERA CHECK</button><button id="camera-reconnect" type="button" class="quiet">RESET &amp; RECONNECT</button></div>
         <p class="setup-feedback" id="camera-feedback" role="status">Connect a camera to the UNO Q to check placement.</p>
       </section>
       <section class="setup-card" aria-labelledby="test-heading">

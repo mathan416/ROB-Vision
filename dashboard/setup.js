@@ -6,6 +6,7 @@
   let previewBusy = false;
   let polling = false;
   let pairExpanded = false;
+  let cameraBusy = false;
   const headers = () => ({ 'Content-Type': 'application/json' });
 
   async function api(path, data) {
@@ -52,7 +53,10 @@
     message('camera-fps', `${snapshot.camera.fps || 0} FPS`);
     message('camera-brightness', `${Math.round((snapshot.camera.brightness || 0) * 100)}% SIGNAL`);
     message('camera-feedback', snapshot.camera.message);
-    $('camera-toggle').textContent = snapshot.camera.state === 'capturing' ? 'STOP CAMERA CHECK' : 'START CAMERA CHECK';
+    $('camera-toggle').textContent = snapshot.camera.state === 'capturing' ? 'STOP CAMERA CHECK' :
+      snapshot.camera.state === 'fault' ? 'CLEAR CAMERA FAULT' : 'START CAMERA CHECK';
+    $('camera-toggle').disabled = cameraBusy;
+    $('camera-reconnect').disabled = cameraBusy;
     if (snapshot.camera.state !== 'capturing') clearFrame();
     const game = snapshot.game;
     message('buttons-mode', game ? game.replace('_', '-').toUpperCase() : 'SELECT A GAME');
@@ -109,7 +113,18 @@
     } catch (error) { message('pair-feedback', error.message); }
     finally { button.disabled = false; }
   });
-  $('camera-toggle').addEventListener('click', () => act(state?.camera.state === 'capturing' ? '/api/camera/stop' : '/api/camera/start', {}, 'camera-feedback'));
+  async function cameraAction(path) {
+    if (cameraBusy) return;
+    cameraBusy = true;
+    $('camera-toggle').disabled = true;
+    $('camera-reconnect').disabled = true;
+    message('camera-feedback', path === '/api/camera/reconnect' ? 'Resetting camera and scanning for a connection…' : 'Updating camera…');
+    try { render(await api(path, {})); }
+    catch (error) { message('camera-feedback', error.message); poll(); }
+    finally { cameraBusy = false; $('camera-toggle').disabled = false; $('camera-reconnect').disabled = false; }
+  }
+  $('camera-toggle').addEventListener('click', () => cameraAction(state?.camera.state === 'offline' ? '/api/camera/start' : '/api/camera/stop'));
+  $('camera-reconnect').addEventListener('click', () => cameraAction('/api/camera/reconnect'));
   $('select-gyro').addEventListener('click', () => act('/api/game', { game: 'gyromite' }, 'test-feedback'));
   $('select-stack').addEventListener('click', () => act('/api/game', { game: 'stack_up' }, 'test-feedback'));
   $('arm-test').addEventListener('click', () => act('/api/test/arm', {}, 'test-feedback'));

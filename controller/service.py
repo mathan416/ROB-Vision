@@ -90,6 +90,9 @@ class Controller:
         self.devices_checked_at = monotonic()
         self.capture_stop = threading.Event()
         self.capture_thread = None
+        self.camera_control_lock = threading.Lock()
+        self.camera_index = 0
+        self.camera_roi = None
         self.preview_frame = None
         self.receiver_last_seen = 0.0
         self.receiver_name = None
@@ -192,8 +195,14 @@ class Controller:
             return detection
 
     def start_camera(self, index=0, roi=None):
+        with self.camera_control_lock:
+            return self._start_camera(index, roi)
+
+    def _start_camera(self, index=0, roi=None):
         if self.capture_thread and self.capture_thread.is_alive():
-            return self.snapshot()
+            if self.camera["state"] == "capturing":
+                return self.snapshot()
+            raise RuntimeError("The previous camera session is still closing. Try reconnecting again.")
         with self.lock:
             if self.game == "gyromite" and any(self.gyro.assisted_until.values()):
                 for color in ("red", "blue"):
@@ -205,11 +214,17 @@ class Controller:
         if roi is not None and (min(roi) < 0 or max(roi) > 1 or roi[2] <= 0 or roi[3] <= 0 or
                                 roi[0] + roi[2] > 1 or roi[1] + roi[3] > 1):
             raise ValueError("ROI must fit inside the camera frame.")
+        self.camera_index = index
+        self.camera_roi = roi
         devices = capture_devices()
+        with self.lock:
+            self.camera["devices"] = devices
+            self.devices_checked_at = monotonic()
         if os.name == "posix" and Path("/sys/class/video4linux").exists():
             if not devices:
                 with self.lock:
-                    self.camera.update(state="fault", message="No camera capture device is attached. Video codec nodes are not cameras.")
+                    self.camera.update(state="fault", fps=0, brightness=0, last_frame=None,
+                                       message="No camera capture device is attached. Video codec nodes are not cameras.")
                     self.event("fault", self.camera["message"])
                 raise RuntimeError(self.camera["message"])
             if index == 0:
@@ -218,21 +233,25 @@ class Controller:
             import cv2
         except ImportError as exc:
             with self.lock:
-                self.camera.update(state="fault", message="OpenCV is not installed on this controller.")
+                self.camera.update(state="fault", fps=0, brightness=0, last_frame=None,
+                                   message="OpenCV is not installed on this controller.")
                 self.event("fault", self.camera["message"])
             raise RuntimeError("OpenCV is needed for camera capture. Install opencv-python on the controller.") from exc
         capture = cv2.VideoCapture(index)
         if not capture.isOpened():
             capture.release()
             with self.lock:
-                self.camera.update(state="fault", message=f"Camera {index} could not be opened.")
+                self.camera.update(state="fault", fps=0, brightness=0, last_frame=None,
+                                   message=f"Camera {index} could not be opened.")
                 self.event("fault", self.camera["message"])
             raise RuntimeError(f"Camera {index} could not be opened.")
         capture.set(cv2.CAP_PROP_FPS, 120)
         self.capture_stop.clear()
         with self.lock:
             self.decoder.reset()
-            self.camera.update(state="capturing", message="Measuring frame timing; aim at the flash area.", fps=0)
+            self.preview_frame = None
+            self.camera.update(state="capturing", message="Measuring frame timing; aim at the flash area.",
+                               fps=0, brightness=0, last_frame=None)
             self.event("camera", f"Camera {index} opened.")
 
         def capture_loop():
@@ -275,14 +294,14 @@ class Controller:
             except Exception as exc:
                 with self.lock:
                     self.preview_frame = None
-                    self.camera.update(state="fault", message=str(exc))
+                    self.camera.update(state="fault", fps=0, brightness=0, last_frame=None, message=str(exc))
                     self.event("fault", f"Camera fault: {exc}")
             finally:
                 capture.release()
                 with self.lock:
                     self.preview_frame = None
                     if self.camera["state"] != "fault":
-                        self.camera.update(state="offline", message="Camera stopped.")
+                        self.camera.update(state="offline", fps=0, brightness=0, last_frame=None, message="Camera stopped.")
                         self.event("camera", "Camera stopped.")
 
         self.capture_thread = threading.Thread(target=capture_loop, daemon=True)
@@ -290,11 +309,31 @@ class Controller:
         return self.snapshot()
 
     def stop_camera(self):
+        with self.camera_control_lock:
+            return self._stop_camera()
+
+    def _stop_camera(self):
         self.capture_stop.set()
-        if self.capture_thread:
+        if self.capture_thread and self.capture_thread.is_alive():
             self.capture_thread.join(timeout=2)
-        self.decoder.reset()
+            if self.capture_thread.is_alive():
+                with self.lock:
+                    self.camera.update(state="fault", message="Camera did not stop. Check the connection and try again.")
+                    self.event("fault", self.camera["message"])
+                raise RuntimeError(self.camera["message"])
+        with self.lock:
+            self.preview_frame = None
+            self.decoder.reset()
+            self.camera.update(state="offline", fps=0, brightness=0, last_frame=None,
+                               devices=capture_devices(), message="Camera stopped. Reconnect to scan for a camera again.")
+            self.devices_checked_at = monotonic()
         return self.snapshot()
+
+    def reconnect_camera(self):
+        with self.camera_control_lock:
+            index, roi = self.camera_index, self.camera_roi
+            self._stop_camera()
+            return self._start_camera(index, roi)
 
 
 def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi=None):
@@ -413,6 +452,8 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                     result = controller.start_camera(int(data.get("index", 0)), data.get("roi"))
                 elif path == "/api/camera/stop":
                     result = controller.stop_camera()
+                elif path == "/api/camera/reconnect":
+                    result = controller.reconnect_camera()
                 else:
                     return self.respond(404, {"error": "Unknown endpoint."})
                 self.respond(200, result)
