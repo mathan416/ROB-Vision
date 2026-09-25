@@ -1,5 +1,11 @@
 # R.O.B. Vision changelog
 
+## UNO Q host helper counterparts — 24 September 2026
+
+- Added R.O.B. Vision versions of the VirtualGlove camera recovery, shutdown, and early-start host files, plus the companion early-start script. Paths, markers, enrollment, and service names are project-specific.
+- Kept the network-hub safeguard for the camera recovery helper: when camera-port power cycling is unavailable, it refuses to reset a hub that carries Ethernet. Added isolated tests for enrollment, that refusal, and a supported camera-port cycle.
+- Documented that the host helpers are not yet installed or wired into the Setup page's camera reconnect action.
+
 ## Unattended two-game verification — 24 September 2026
 
 - Added independent optical-command-to-model flow tests for Gyromite and Stack-Up, including pad release, grouped block transfer, collision rejection, and game-specific command isolation.

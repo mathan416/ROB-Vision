@@ -1,0 +1,19 @@
+# Project: R.O.B. Vision
+# File: deploy/uno-q/rob-vision-system-shutdown.path
+# Purpose: Watch for the fixed R.O.B. Vision shutdown-request file on the UNO Q host.
+# Author: Iain Bennett
+# Copyright (c) 2026 Iain Bennett
+# SPDX-License-Identifier: MIT
+# Change log:
+#   2026-09-03 - Added with standardized source documentation.
+# Full history: docs/CHANGELOG.md and Git history.
+
+[Unit]
+Description=Watch for a R.O.B. Vision system shutdown request
+
+[Path]
+PathExists=/home/arduino/ArduinoApps/rob-vision/data/shutdown-request
+Unit=rob-vision-system-shutdown.service
+
+[Install]
+WantedBy=multi-user.target
