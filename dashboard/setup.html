@@ -18,28 +18,28 @@
       <nav class="page-nav" aria-label="Pages"><a href="index.html">MISSION</a><a href="setup.html" aria-current="page">SETUP</a><a href="help.html">HELP</a></nav>
       <div class="top-status" data-connection="connecting"><span class="status-dot"></span><span id="setup-connection">CONTROLLER / CONNECTING</span></div>
     </header>
-    <div class="setup-hero"><p class="eyebrow">READY THE MISSION / 00</p><h1>Connect. Link. Test.</h1><p>Pair RetroPie, check the game-frame link, and try each game control before playing.</p></div>
+    <div class="setup-hero"><p class="eyebrow">READY THE MISSION / 00</p><h1>Connect. Link. Test.</h1><p>Pair your game console, check the game-frame link, and try each game control before playing.</p></div>
     <div class="setup-grid">
       <section class="setup-card" aria-labelledby="pair-heading">
-        <div class="section-head"><span>01 / CONSOLE LINK</span><span id="pair-link">RETROPIE UNKNOWN</span></div>
-        <h2 id="pair-heading">Connect RetroPie</h2>
+        <div class="section-head"><span>01 / CONSOLE LINK</span><span id="pair-link">CONSOLE UNKNOWN</span></div>
+        <h2 id="pair-heading">Connect your console</h2>
         <div id="pair-connected" hidden>
-          <p class="pair-success">RetroPie is already paired and its receiver is online. You can continue to the game-frame check.</p>
+          <p class="pair-success">Your console receiver is online. You can continue to the game-frame check.</p>
           <div class="setup-row"><button id="pair-change" type="button" class="quiet">PAIR ANOTHER CONSOLE</button><button id="pair-refresh" type="button" class="quiet">CHECK LINK</button></div>
         </div>
         <div id="pair-details" hidden>
-          <p>On RetroPie, run <code>python3 /home/pi/rob-vision/tools/retropie_pair.py</code>. It displays a six-digit code and a SHA-256 fingerprint for five minutes. Compare both here before pairing.</p>
-          <label>Console address<input id="pair-host" autocomplete="off" value="retropie.local" placeholder="retropie.local"></label>
+          <p>Run the pairing command on your console: RetroPie <code>python3 /home/pi/rob-vision/tools/retropie_pair.py</code>, or Batocera <code>python3 /userdata/system/rob-vision/tools/retropie_pair.py --platform batocera</code>. Compare its six-digit code and SHA-256 fingerprint here.</p>
+          <label>Console address<input id="pair-host" autocomplete="off" placeholder="retropie.local or batocera.local"></label>
           <label>Six-digit code<input id="pair-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"></label>
-          <label>SHA-256 fingerprint<input id="pair-fingerprint" autocomplete="off" spellcheck="false" placeholder="64 hex characters from RetroPie"></label>
+          <label>SHA-256 fingerprint<input id="pair-fingerprint" autocomplete="off" spellcheck="false" placeholder="64 hex characters from the console"></label>
           <div class="setup-row"><button id="pair-button" type="button">PAIR CONSOLE</button><button id="pair-refresh-offline" type="button" class="quiet">CHECK LINK</button><button id="pair-cancel" type="button" class="quiet" hidden>BACK TO STATUS</button></div>
         </div>
-        <p class="setup-feedback" id="pair-feedback" role="status">The receiver must be installed on RetroPie before pairing.</p><a class="setup-help-link" href="help.html#pairing">NEED HELP PAIRING? ↗</a>
+        <p class="setup-feedback" id="pair-feedback" role="status">Install the receiver on your console before pairing.</p><a class="setup-help-link" href="help.html#pairing">NEED HELP PAIRING? ↗</a>
       </section>
       <section class="setup-card" aria-labelledby="frames-heading">
         <div class="section-head"><span>02 / GAME FRAMES</span><span id="frame-state">GAME FRAMES WAITING</span></div>
         <h2 id="frames-heading">Check automatic movement</h2>
-        <p>Launch Gyromite or Stack-Up using its R.O.B. Vision emulator choice in RetroPie. The game-frame link reads the rendered light commands directly and sends R.O.B.'s movements to the UNO Q.</p>
+        <p>Launch Gyromite or Stack-Up using its R.O.B. Vision emulator choice. The game-frame link reads the rendered light commands directly and sends R.O.B.'s movements to the UNO Q.</p>
         <p class="setup-feedback" id="frame-feedback" role="status">Launch a supported game to check the frame link.</p><a class="setup-help-link" href="help.html#frames">GAME-FRAME HELP ↗</a>
       </section>
       <section class="setup-card" aria-labelledby="test-heading">

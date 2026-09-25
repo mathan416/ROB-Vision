@@ -34,7 +34,8 @@ def main():
             raise ValueError("Controller token is not configured")
         payload = event(args.action, args.system, args.rom, load_registry() if args.action == "start" else {})
         request = Request(args.url.rstrip("/") + "/api/launch", data=json.dumps(payload).encode(),
-                          headers={"Content-Type": "application/json", "Authorization": "Bearer " + token}, method="POST")
+                          headers={"Content-Type": "application/json", "Authorization": "Bearer " + token,
+                                   "X-ROB-Receiver": os.environ.get("ROB_VISION_RECEIVER", "retropie")}, method="POST")
         for attempt in range(args.attempts):
             try:
                 with urlopen(request, timeout=args.timeout) as response:

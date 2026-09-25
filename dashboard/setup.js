@@ -31,8 +31,8 @@
     $('pair-details').hidden = receiverOnline && !pairExpanded;
     $('pair-cancel').hidden = !receiverOnline;
     if (receiverOnline !== lastReceiverOnline) {
-      message('pair-feedback', receiverOnline ? 'RetroPie receiver is online. Continue to the game-frame check.' :
-        'No recent RetroPie receiver heartbeat. Check its power and network connection.');
+      message('pair-feedback', receiverOnline ? 'Console receiver is online. Continue to the game-frame check.' :
+        'No recent console receiver heartbeat. Check its power and network connection.');
       lastReceiverOnline = receiverOnline;
     }
     message('frame-state', status.frames(snapshot));
@@ -79,7 +79,7 @@
       const preview = location.protocol === 'file:';
       message('setup-connection', preview ? status.preview : status.offline);
       $('setup-connection').closest('.top-status').dataset.connection = preview ? 'preview' : 'offline';
-      message('pair-link', 'RETROPIE UNKNOWN');
+      message('pair-link', 'CONSOLE UNKNOWN');
       $('pair-link').dataset.state = 'unknown';
       message('frame-state', 'GAME FRAMES UNKNOWN');
       message('test-state', 'SIGNAL UNKNOWN');
@@ -95,14 +95,14 @@
     linkChecking = true;
     $('pair-refresh').disabled = true;
     $('pair-refresh-offline').disabled = true;
-    message('pair-feedback', 'Checking the latest RetroPie receiver heartbeat…');
+    message('pair-feedback', 'Checking the latest console receiver heartbeat…');
     try {
       const snapshot = await api('/api/state');
       render(snapshot);
       const checkedAt = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
       message('pair-feedback', snapshot.link?.online ?
-        `Checked ${checkedAt}: RetroPie receiver heartbeat is current. Link ready.` :
-        `Checked ${checkedAt}: no recent RetroPie receiver heartbeat. Check RetroPie's power and network.`);
+        `Checked ${checkedAt}: console receiver heartbeat is current. Link ready.` :
+        `Checked ${checkedAt}: no recent console receiver heartbeat. Check the console's power and network.`);
     } catch (error) { message('pair-feedback', `Link check failed: ${error.message}`); }
     finally { linkChecking = false; $('pair-refresh').disabled = false; $('pair-refresh-offline').disabled = false; }
   }
@@ -116,7 +116,7 @@
     message('pair-feedback', 'Checking the console fingerprint and pairing…');
     try {
       const result = await api('/api/pair', { host: $('pair-host').value.trim(), code: $('pair-code').value.trim(), fingerprint: $('pair-fingerprint').value.trim() });
-      message('pair-feedback', result.paired ? 'Pairing complete. Waiting for the RetroPie receiver to reconnect.' : 'Pairing was not confirmed.');
+      message('pair-feedback', result.paired ? 'Pairing complete. Waiting for the console receiver to reconnect.' : 'Pairing was not confirmed.');
       if (result.paired) pairExpanded = false;
       $('pair-code').value = '';
       $('pair-fingerprint').value = '';

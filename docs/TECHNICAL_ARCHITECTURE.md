@@ -28,6 +28,12 @@ The Gyromite pad reducer derives red and blue from gyro location/spin or a held 
 
 The same classified frames recognize Gyromite's sustained green Test field or Stack-Up's alternating Test frames. While Setup's Test check is armed, the receiver reports a recent Test signal in its authenticated heartbeat and the UNO Q blinks R.O.B.'s red light. A separate READY command lights it steadily. Neither Test indication moves the model. FCEUmm remains selected for both registered games on the test RetroPie. Nestopia's Gyromite Player 2 return still needs a Game A check; see the [Nestopia report](NESTOPIA_FRAME_LINK_TEST_2026-09-25.md).
 
+## Batocera host
+
+Batocera 43.1 x86_64 uses the same frame decoder, UNO Q model, and uinput receiver. Its separate `ROBVision` service installs packaged x86_64 wrappers for stock FCEUmm and Nestopia in a runtime core overlay. The `zz-robvision-game` hook reports exact Gyromite/Stack-Up launch and exit events. It coexists with VirtualGlove's service, hook, and Super Glove Ball core. Batocera generates `retroarchcustom.cfg` after game-start hooks, so the service detects its virtual pad at startup and writes Gyromite-only `retroarch.*` per-ROM overrides to persistent `batocera.conf`. The generated game config then contains Player 2 index 5 on the tested console, A button 1, and B button 0. The index is detected rather than hardcoded.
+
+Both console receivers identify themselves in authenticated heartbeats, launch events, and decoded commands. The UNO Q accepts frame commands from the active game's console and rejects the other. The inactive receiver releases its virtual Gyromite pad state. If both consoles are online, the status shows the active game's source; while idle, it may show either online receiver.
+
 ## HTTP and trust boundary
 
 Trusted-LAN browser controls use `/api/game`, `/api/command`, `/api/gate-assist`, and `/api/test/arm` without a token. The browser reads `/api/state` and matrix status. JSON and same-origin checks protect browser writes. `/api/launch` and `/api/emulator/command` require the shared token. Pairing uses a time-limited code and verified TLS certificate fingerprint to deliver it. Keep ports 80 and 8766 off untrusted networks.

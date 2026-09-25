@@ -3,7 +3,7 @@
   'use strict';
   const gameName = game => game === 'gyromite' ? 'GYROMITE' : game === 'stack_up' ? 'STACK-UP' : 'CONTROLLER';
   const connection = snapshot => `${gameName(snapshot?.game)} / CONNECTED`;
-  const receiver = snapshot => `RETROPIE ${snapshot?.link?.online ? 'ONLINE' : 'OFFLINE'}`;
+  const receiver = snapshot => `${String(snapshot?.link?.receiver || 'CONSOLE').toUpperCase()} ${snapshot?.link?.online ? 'ONLINE' : 'OFFLINE'}`;
   const frames = snapshot => snapshot?.input?.frame_hook ? 'GAME FRAMES LINKED' : 'GAME FRAMES WAITING';
   const test = snapshot => snapshot?.test?.flash_active ? 'TEST SIGNAL SEEN' :
     snapshot?.test?.ready ? 'READY SIGNAL SEEN' : snapshot?.test?.armed ? 'WATCHING' : 'WAITING';

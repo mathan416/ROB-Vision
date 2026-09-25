@@ -81,7 +81,7 @@
       const preview = location.protocol === 'file:' || !available;
       $('connection').textContent = preview ? status.preview : status.offline;
       $('connection').closest('.top-status').dataset.connection = preview ? 'preview' : 'offline';
-      $('controller-status').textContent = preview ? 'LOCAL PREVIEW · NO CONTROLLER' : 'CONTROLLER OFFLINE · GAME FRAMES UNKNOWN · RETROPIE UNKNOWN';
+      $('controller-status').textContent = preview ? 'LOCAL PREVIEW · NO CONTROLLER' : 'CONTROLLER OFFLINE · GAME FRAMES UNKNOWN · CONSOLE UNKNOWN';
     } finally { busy = false; }
   }
   async function act(path, data) {

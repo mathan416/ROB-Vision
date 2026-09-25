@@ -16,11 +16,16 @@ PROXY_CORES = frozenset((
     b"/home/pi/rob-vision/build/rob_vision_fceumm_libretro.so",
     b"/home/pi/rob-vision/build/rob_vision_nestopia_libretro.so",
 ))
+BATOCERA_PROXY_CORES = frozenset((
+    b"/usr/lib/libretro/robvision_fceumm_libretro.so",
+    b"/usr/lib/libretro/robvision_nestopia_libretro.so",
+))
+BATOCERA_CONFIG = b"/userdata/system/configs/retroarch/retroarchcustom.cfg"
 SOCKET_PATH = Path("/run/rob-vision/frames.sock")
 
 
-def sender_game(pid, registry, proc_root=Path("/proc")):
-    """Trust only the active RetroPie process running our proxy for a known ROM."""
+def sender_game(pid, registry, proc_root=Path("/proc"), platform="retropie"):
+    """Trust only an active game process running our proxy for a known ROM."""
     if type(pid) is not int or pid < 1:
         return None
     try:
@@ -29,21 +34,26 @@ def sender_game(pid, registry, proc_root=Path("/proc")):
         return None
     if not args or Path(os.fsdecode(args[0])).name != "retroarch":
         return None
-    if b"/dev/shm/retroarch.cfg" not in args:
+    if platform == "retropie" and b"/dev/shm/retroarch.cfg" not in args:
         return None
-    if not any(args[i] == b"-L" and args[i + 1] in PROXY_CORES
+    if platform == "batocera" and BATOCERA_CONFIG not in args:
+        return None
+    cores = BATOCERA_PROXY_CORES if platform == "batocera" else PROXY_CORES
+    if not any(args[i] == b"-L" and args[i + 1] in cores
                for i in range(len(args) - 1)):
         return None
     for arg in args[1:]:
         rom = os.fsdecode(arg)
-        if rom.casefold().startswith("/home/pi/retropie/roms/nes/"):
+        root = "/userdata/roms/nes/" if platform == "batocera" else "/home/pi/retropie/roms/nes/"
+        if rom.casefold().startswith(root):
             return identify("nes", rom, registry)
     return None
 
 
 class FrameHookServer:
-    def __init__(self, registry, path=SOCKET_PATH):
+    def __init__(self, registry, path=SOCKET_PATH, platform="retropie"):
         self.registry = registry
+        self.platform = platform
         self.path = Path(path)
         self.lock = threading.RLock()
         self.running = False
@@ -67,7 +77,8 @@ class FrameHookServer:
         try:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_PASSCRED, 1)
             sock.bind(str(self.path))
-            os.chown(self.path, -1, pwd.getpwnam("pi").pw_gid)
+            if self.platform == "retropie":
+                os.chown(self.path, -1, pwd.getpwnam("pi").pw_gid)
             os.chmod(self.path, 0o660)
             sock.settimeout(.3)
         except Exception:
@@ -114,7 +125,7 @@ class FrameHookServer:
         now = monotonic()
         with self.lock:
             if pid != self.sender_pid or now - self.last_process_check >= .5:
-                game = sender_game(pid, self.registry)
+                game = sender_game(pid, self.registry, platform=self.platform)
                 self.last_process_check = now
                 if pid != self.sender_pid or game != self.game:
                     self.decoder.reset()

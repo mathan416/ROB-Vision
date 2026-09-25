@@ -73,6 +73,19 @@ class FrameTests(unittest.TestCase):
         controller.emulator_command('gyromite', '0001011111011', 123, 440)
         self.assertFalse(controller.snapshot()['test']['armed'])
 
+    def test_active_console_rejects_other_console_frames(self):
+        controller = Controller()
+        controller.select('stack_up')
+        controller.active_receiver = 'batocera'
+        controller.receiver_seen('Batocera', 'stack_up')
+        controller.receiver_seen('RetroPie', 'stack_up')
+        self.assertEqual(controller.snapshot()['link']['receiver'], 'Batocera')
+        with self.assertRaisesRegex(ValueError, 'another console'):
+            controller.emulator_command('stack_up', '0001011101010', 123, 400, 'retropie')
+        self.assertEqual(controller.stack.station, 3)
+        controller.emulator_command('stack_up', '0001011101010', 123, 400, 'batocera')
+        self.assertEqual(controller.stack.station, 4)
+
 
 class ModelTests(unittest.TestCase):
     def test_stack_group_carry_and_rejection(self):

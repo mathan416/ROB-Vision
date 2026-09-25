@@ -4,7 +4,7 @@
 
 ## Before you begin
 
-- Use an Arduino UNO Q with App Lab and a standard RetroPie machine with the `pi` account and `/opt/retropie/configs`. The UNO Q needs Python 3.9 or newer; RetroPie needs Python 3.7 or newer. Direct cloning needs `git` on each device; the SSH archive transfer below does not. RetroPie also needs `gcc`, `openssl`, `modprobe`, systemd, and at least one installed NES libretro core: `lr-fceumm` or `lr-nestopia`.
+- Use an Arduino UNO Q with App Lab and either standard RetroPie with the `pi` account and `/opt/retropie/configs`, or Batocera 43.1 x86_64. The UNO Q needs Python 3.9 or newer; RetroPie needs Python 3.7 or newer. Direct cloning needs `git` on each device; the SSH archive transfer below does not. RetroPie also needs `gcc`, `openssl`, `modprobe`, systemd, and at least one installed NES libretro core: `lr-fceumm` or `lr-nestopia`.
 - Supply your own legally obtained Gyromite or Stack-Up ROM with an exact filename listed in `config/games.json`. The repository and installer contain no ROMs.
 - Keep both devices on a trusted local network. Exit any NES game before installation or upgrade. The UNO Q installer stops and restarts R.O.B. Vision automatically; stop any other App Lab app first. The UNO Q can run only one App Lab app at a time on the tested device.
 - The GitHub repository is currently private. A direct clone on a device requires a GitHub account with access and authenticated Git on that device. You can instead send the source from an authorized computer over SSH without copying GitHub credentials to either device.
@@ -64,6 +64,18 @@ To upgrade, exit the games, update each `~/rob-vision-src` checkout, and rerun t
 **Live installer check:** On `retropie.local` (Python 3.7), the installer migrated the original standalone hooks, rebuilt both wrappers, preserved the paired token, restarted the receiver, and detected virtual joystick 1. A repeat installation left one managed hook per event and one Controller 2 mapping. Installed launch/end hooks selected and cleared Gyromite and Stack-Up on the UNO Q. The controller reported an authenticated online receiver after the restart. The exact published `dev` archive was transferred over SSH and installed successfully. A direct unauthenticated GitHub clone failed because the repository is private; the check did not run a new gameplay session or exercise first-time pairing on a blank RetroPie.
 
 **UNO Q installer check:** On `arduiain.local` (Python 3.13), an in-place upgrade automatically stopped the running R.O.B. Vision app through App Lab, installed the update, compiled and uploaded the sketch, and restarted the app. Mission, Setup, Help, and controller endpoints returned HTTP 200; `/api/matrix/state` reported an available, connected bridge in idle mode. The pairing token matched the previous app, and RetroPie remained paired and online. Earlier upgrades confirmed that `.deps` and `.cache` survive. Rollback on a failed App Lab start passed an installer test; it has not been forced on the live UNO Q. A blank-device first install remains untested.
+
+## Install on Batocera
+
+On Batocera 43.1 x86_64, copy this checkout to a persistent path outside `/userdata/system/rob-vision`, then run as root while no game is open:
+
+```sh
+python3 scripts/install_batocera.py --controller your-uno-q.local
+```
+
+The installer enables a separate `ROBVision` service and launch hook, adds bundled x86_64 FCEUmm and Nestopia frame wrappers, and selects FCEUmm for the exact registered ROM filenames. It leaves VirtualGlove's service and Super Glove Ball choice intact. To pair for the first time, run `python3 /userdata/system/rob-vision/tools/retropie_pair.py --platform batocera`, then enter its code and fingerprint on Setup. The service detects the virtual pad and saves **Gyromite-only** RetroArch Player 2 overrides in Batocera's persistent per-ROM settings. Batocera regenerates its live RetroArch config on every launch, so editing `retroarchcustom.cfg` by hand will not persist.
+
+The test Batocera installed and repeated the bundled installer, loaded both wrappers for each game through real launches, selected Stack-Up's FCEUmm wrapper without an explicit core override, retained Gyromite's Player 2 index and A/B mapping after config generation, and showed **Batocera online / game frames linked** on the UNO Q during Stack-Up. A live Batocera gate-response test and full playthrough are still open. See the [Batocera deployment guide](../deploy/batocera/README.md) for core choice and architecture limits.
 
 ## UNO Q and browser
 

@@ -1,0 +1,48 @@
+#!/bin/sh
+# Persistent Batocera service. VirtualGlove may already provide writable core overlays.
+set -eu
+APP=/userdata/system/rob-vision
+RUN=/run/rob-vision
+
+mounted_at() { awk -v target="$1" '$2 == target { found=1 } END { exit !found }' /proc/mounts; }
+overlay() {
+    target="$1"; name="$2"
+    if mounted_at "$target"; then return; fi
+    mkdir -p "$RUN/$name-upper" "$RUN/$name-work" "$RUN/$name-merged"
+    mount -t overlay "robvision-$name" -o "lowerdir=$target,upperdir=$RUN/$name-upper,workdir=$RUN/$name-work" "$RUN/$name-merged"
+    mount --bind "$RUN/$name-merged" "$target"
+}
+start() {
+    mkdir -p "$RUN"
+    overlay /usr/lib/libretro core
+    overlay /usr/share/libretro/info info
+    for core in fceumm nestopia; do
+        [ -f "$APP/build/robvision_${core}_libretro.so" ] || continue
+        cp "$APP/build/robvision_${core}_libretro.so" "/usr/lib/libretro/robvision_${core}_libretro.so"
+        cp "/usr/share/libretro/info/${core}_libretro.info" "/usr/share/libretro/info/robvision_${core}_libretro.info"
+        chmod 755 "/usr/lib/libretro/robvision_${core}_libretro.so"
+        chmod 644 "/usr/share/libretro/info/robvision_${core}_libretro.info"
+    done
+    [ -s "$APP/token" ] || return 0
+    if [ -f "$RUN/receiver.pid" ] && kill -0 "$(cat "$RUN/receiver.pid")" 2>/dev/null; then return 0; fi
+    modprobe uinput 2>/dev/null || :
+    ROB_VISION_URL="$(cat "$APP/controller.url")" \
+    ROB_VISION_TOKEN_FILE="$APP/token" \
+    python3 "$APP/tools/retropie_controller2.py" --platform batocera \
+        >>"$APP/receiver.log" 2>&1 &
+    echo "$!" >"$RUN/receiver.pid"
+    python3 "$APP/tools/batocera.py" configure || echo "R.O.B. Vision: virtual Controller 2 override needs attention" >&2
+}
+stop() {
+    if [ -f "$RUN/receiver.pid" ]; then
+        kill "$(cat "$RUN/receiver.pid")" 2>/dev/null || :
+        rm -f "$RUN/receiver.pid"
+    fi
+}
+case "${1:-}" in
+    start) start ;;
+    stop) stop ;;
+    restart) stop; start ;;
+    status) [ -f "$RUN/receiver.pid" ] && kill -0 "$(cat "$RUN/receiver.pid")" 2>/dev/null ;;
+    *) echo "Usage: $0 {start|stop|restart|status}" >&2; exit 2 ;;
+esac

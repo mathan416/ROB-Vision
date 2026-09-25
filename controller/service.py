@@ -27,9 +27,9 @@ MIME = {".html": "text/html", ".js": "text/javascript", ".css": "text/css",
 def pair_retropie(host, code, fingerprint, token, port=8768):
     """Send the controller token only after checking the console's TLS fingerprint."""
     if not isinstance(host, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]{0,252}", host):
-        raise ValueError("Enter a RetroPie hostname or local IP address.")
+        raise ValueError("Enter a console hostname or local IP address.")
     if not isinstance(code, str) or not re.fullmatch(r"[0-9]{6}", code):
-        raise ValueError("Enter the six-digit code shown on RetroPie.")
+        raise ValueError("Enter the six-digit code shown on the console.")
     fingerprint = re.sub(r"[^0-9a-fA-F]", "", str(fingerprint)).lower()
     if len(fingerprint) != 64:
         raise ValueError("Enter the console's 64-character SHA-256 fingerprint.")
@@ -70,6 +70,7 @@ class Controller:
         self.events = []
         self.receiver_last_seen = 0.0
         self.receiver_name = None
+        self.active_receiver = None
         self.frame_hook_last_seen = 0.0
         self.frame_hook_game = None
         self.frame_hook_commands = deque(maxlen=128)
@@ -104,6 +105,11 @@ class Controller:
 
     def receiver_seen(self, name, frame_hook_game=None, test_signal_game=None):
         with self.lock:
+            if self.active_receiver and name.casefold() != self.active_receiver:
+                return
+            if (not self.active_receiver and self.receiver_name and name != self.receiver_name
+                    and monotonic() - self.receiver_last_seen < 3.0):
+                return
             self.receiver_name = name[:64]
             self.receiver_last_seen = monotonic()
             if frame_hook_game == self.game and frame_hook_game in ("gyromite", "stack_up"):
@@ -115,8 +121,10 @@ class Controller:
                         self.event("test", "Game-frame Test signal detected; R.O.B. light blinking.")
                         self.test_signal_announced = True
 
-    def emulator_command(self, game, pattern, sender_pid, frame_index):
+    def emulator_command(self, game, pattern, sender_pid, frame_index, receiver="retropie"):
         with self.lock:
+            if self.active_receiver and receiver != self.active_receiver:
+                raise ValueError("Frame command came from another console.")
             if game != self.game or game not in ALLOWED:
                 raise ValueError("Frame command does not match the selected game.")
             command = PATTERNS.get(pattern)
@@ -256,8 +264,10 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None):
             path = urlsplit(self.path).path
             if path.startswith("/api/"):
                 if path == "/api/state":
-                    if self.headers.get("X-ROB-Receiver") == "retropie" and token and self.headers.get("Authorization") == f"Bearer {token}":
-                        controller.receiver_seen("RetroPie", self.headers.get("X-ROB-Frame-Hook"),
+                    receiver = self.headers.get("X-ROB-Receiver")
+                    if receiver in ("retropie", "batocera") and token and self.headers.get("Authorization") == f"Bearer {token}":
+                        controller.receiver_seen("RetroPie" if receiver == "retropie" else "Batocera",
+                                                 self.headers.get("X-ROB-Frame-Hook"),
                                                  self.headers.get("X-ROB-Test-Signal"))
                     return self.respond(200, controller.snapshot())
                 if path == "/api/matrix/state":
@@ -296,14 +306,26 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None):
                 data = json.loads(self.rfile.read(size) or b"{}")
                 if path == "/api/game":
                     result = controller.select(data.get("game"))
+                    with controller.lock:
+                        controller.active_receiver = None
                 elif path == "/api/launch":
+                    receiver = self.headers.get("X-ROB-Receiver", "retropie")
+                    if receiver not in ("retropie", "batocera"):
+                        raise ValueError("Unknown console receiver.")
+                    if data.get("event") == "end" and controller.active_receiver not in (None, receiver):
+                        return self.respond(200, controller.snapshot())
                     game = identify(data.get("system", ""), data.get("rom", ""), load_registry()) if data.get("event") == "start" else None
                     result = controller.select(game)
+                    with controller.lock:
+                        controller.active_receiver = receiver if game else None
+                        controller.receiver_name = "RetroPie" if receiver == "retropie" else "Batocera"
+                        controller.receiver_last_seen = 0.0
                 elif path == "/api/command":
                     result = controller.command(data["command"])
                 elif path == "/api/emulator/command":
                     result = controller.emulator_command(data["game"], data["pattern"],
-                                                         data["sender_pid"], data["frame_index"])
+                                                         data["sender_pid"], data["frame_index"],
+                                                         self.headers.get("X-ROB-Receiver", "retropie"))
                 elif path == "/api/gate-assist":
                     result = controller.gate_assist(data["color"], data["pressed"])
                 elif path == "/api/test/arm":

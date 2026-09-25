@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One-time, fingerprint-checked pairing for a prepared RetroPie receiver."""
+"""One-time, fingerprint-checked pairing for a prepared console receiver."""
 
 import argparse
 import hashlib
@@ -32,10 +32,14 @@ def install_token(token, destination):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Pair this RetroPie with R.O.B. Vision.")
+    parser = argparse.ArgumentParser(description="Pair this console with R.O.B. Vision.")
     parser.add_argument("--port", type=int, default=8768)
-    parser.add_argument("--token-file", type=Path, default=Path.home() / ".config/rob-vision/token")
+    parser.add_argument("--platform", choices=("retropie", "batocera"), default="retropie")
+    parser.add_argument("--token-file", type=Path)
     args = parser.parse_args()
+    if args.token_file is None:
+        args.token_file = (Path("/userdata/system/rob-vision/token") if args.platform == "batocera"
+                           else Path.home() / ".config/rob-vision/token")
     code = f"{secrets.randbelow(1_000_000):06d}"
     expires = time.monotonic() + 300
     with tempfile.TemporaryDirectory(prefix="rob-vision-pair-") as directory:
@@ -62,7 +66,9 @@ def main():
                         raise ValueError("Incorrect pairing code.")
                     install_token(data.get("token"), args.token_file)
                     try:
-                        subprocess.run(["sudo", "-n", "systemctl", "restart", "rob-vision-controller2.service"],
+                        restart = (["batocera-services", "restart", "ROBVision"] if args.platform == "batocera"
+                                   else ["sudo", "-n", "systemctl", "restart", "rob-vision-controller2.service"])
+                        subprocess.run(restart,
                                        check=True, timeout=15, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                     except (OSError, subprocess.SubprocessError):
                         pass  # The receiver can also pick up the token on its next restart.

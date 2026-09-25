@@ -1,0 +1,18 @@
+#!/bin/sh
+# Batocera launch hook. Invoked after generated RetroArch configuration exists.
+APP=/userdata/system/rob-vision
+[ "${2:-}" = nes ] || exit 0
+case "${5##*/}" in
+    'Gyromite (World).7z'|'Gyromite (World).zip'|'Gyromite (World).nes'|'Stack-Up (World).7z'|'Stack-Up (World).zip'|'Stack-Up (World).nes') ;;
+    *) exit 0 ;;
+esac
+case "${1:-}" in
+    gameStart) action=start ;;
+    gameStop) action=end ;;
+    *) exit 0 ;;
+esac
+ROB_VISION_URL="$(cat "$APP/controller.url")" \
+ROB_VISION_TOKEN_FILE="$APP/token" \
+ROB_VISION_RECEIVER=batocera \
+python3 "$APP/tools/notify_game.py" "$action" "${2:-}" "${3:-}" "${5:-}" \
+    --timeout 0.3 --attempts 1 >/dev/null 2>&1 || :

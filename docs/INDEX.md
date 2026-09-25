@@ -2,7 +2,7 @@
 
 [Latest release review](RELEASE_REVIEW_2026-09-25.md) records the code cleanup, local checks, and live validation still needed before a general release.
 
-**Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on RetroPie; its rendered NES frames carry complete R.O.B. commands to the UNO Q. A browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. No physical robot or game pieces are planned. Both games' six commands were decoded during live Direct play, and Gyromite's gate controls were tested in Game A.
+**Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on RetroPie or Batocera; its rendered NES frames carry complete R.O.B. commands to the UNO Q. A browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. No physical robot or game pieces are planned. Both games' six commands were decoded during live Direct play, and Gyromite's gate controls were tested in Game A.
 
 Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [Technical Reference](../output/pdf/R.O.B.-Vision-Technical-Reference.pdf), [Matrix Display Guide](../output/pdf/R.O.B.-Vision-Matrix-Display-Guide.pdf), and [Quick Reference](../output/pdf/R.O.B.-Vision-Quick-Reference.pdf).
 
@@ -20,7 +20,7 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 | Player and installer | [UNO Q matrix display design](UNO_Q_MATRIX_DISPLAY.md) | Implemented matrix software and pending visual checks. |
 | Player | [Gameplay guide](GAMEPLAY_GUIDE.md) | Gyromite, Stack-Up, holders, spin, and virtual button rules. |
 | Player | [Quick reference](QUICK_REFERENCE.md) | Controls and indicators at a glance. |
-| Installer | [Installation guide](INSTALLATION_GUIDE.md) | Installed UNO Q/RetroPie frame-link setup. |
+| Installer | [Installation guide](INSTALLATION_GUIDE.md) | Installed UNO Q, RetroPie, and Batocera frame-link setup. |
 | Developer | [Technical architecture](TECHNICAL_ARCHITECTURE.md) | State, commands, return path, and failure behavior. |
 | Developer | [Configuration reference](CONFIGURATION_REFERENCE.md) | Code defaults, deployed settings, and calibration. |
 | Tester | [Verification plan](VERIFICATION_PLAN.md) | Evidence before claiming a connected game works. |
@@ -35,7 +35,7 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 - [Dashboard design](DASHBOARD_DESIGN.md): robot art, accessory layout, and live state.
 - [Gyromite manual notes](GYROMITE_MANUAL_NOTES.md), [Stack-Up manual notes](STACK_UP_MANUAL_NOTES.md), and [historical manual notes](HISTORICAL_MANUAL_NOTES.md): original behavior and game modes.
 - [UNO Q setup](HARDWARE_BUILD_GUIDE.md) and [parts plan](parts-plan.md): controller, power, and network hardware only.
-- [UNO Q host helpers](../deploy/uno-q/README.md) and [RetroPie deployment](../deploy/retropie/README.md): installed and optional system services.
+- [UNO Q host helpers](../deploy/uno-q/README.md), [RetroPie deployment](../deploy/retropie/README.md), and [Batocera deployment](../deploy/batocera/README.md): installed and optional system services.
 - [Unattended engineering test report](UNATTENDED_TEST_REPORT_2026-09-24.md): synthetic optical and model evidence.
 - [Live optical test report](LIVE_OPTICAL_TEST_2026-09-25.md): archived camera research; no longer part of the runtime.
 - [Game-frame link report](FRAME_LINK_TEST_2026-09-25.md): live per-ROM frame decoding and model actions.

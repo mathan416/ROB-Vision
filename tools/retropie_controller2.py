@@ -18,7 +18,7 @@ from urllib.request import Request, urlopen
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from identify_game import identify, load_registry
-from tools.retropie_frame_hook import FrameHookServer
+from tools.retropie_frame_hook import BATOCERA_CONFIG, BATOCERA_PROXY_CORES, FrameHookServer
 
 
 def ioctl_write(number, size):
@@ -76,8 +76,8 @@ class VirtualPad:
             os.close(self.fd)
 
 
-def fetch_state(url, token, timeout, frame_hook_game=None, test_signal_game=None):
-    headers = {"Authorization": "Bearer " + token, "X-ROB-Receiver": "retropie"}
+def fetch_state(url, token, timeout, frame_hook_game=None, test_signal_game=None, platform="retropie"):
+    headers = {"Authorization": "Bearer " + token, "X-ROB-Receiver": platform}
     if frame_hook_game in ("gyromite", "stack_up"):
         headers["X-ROB-Frame-Hook"] = frame_hook_game
     if test_signal_game == frame_hook_game and test_signal_game in ("gyromite", "stack_up"):
@@ -102,8 +102,8 @@ def pads_from_state(state):
     return pads["red"], pads["blue"]
 
 
-def running_game(registry, proc_root=Path("/proc")):
-    """Read the active RetroPie RetroArch command, never a background test run."""
+def running_game(registry, proc_root=Path("/proc"), platform="retropie"):
+    """Read the active RetroArch command, never a background test run."""
     for pid in os.listdir(proc_root):
         if not pid.isdigit():
             continue
@@ -113,11 +113,18 @@ def running_game(registry, proc_root=Path("/proc")):
             continue
         if not arguments or Path(os.fsdecode(arguments[0])).name != "retroarch":
             continue
-        if b"/dev/shm/retroarch.cfg" not in arguments:
+        if platform == "retropie" and b"/dev/shm/retroarch.cfg" not in arguments:
+            continue
+        if platform == "batocera" and BATOCERA_CONFIG not in arguments:
+            continue
+        if platform == "batocera" and not any(arguments[i] == b"-L" and
+                arguments[i + 1] in BATOCERA_PROXY_CORES
+                for i in range(len(arguments) - 1)):
             continue
         for argument in arguments[1:]:
             rom = os.fsdecode(argument)
-            if not rom.casefold().startswith("/home/pi/retropie/roms/"):
+            root = "/userdata/roms/" if platform == "batocera" else "/home/pi/retropie/roms/"
+            if not rom.casefold().startswith(root):
                 continue
             system = Path(rom).parent.name
             game = identify(system, rom, registry)
@@ -126,20 +133,22 @@ def running_game(registry, proc_root=Path("/proc")):
     return None
 
 
-def sync_game(url, token, system, rom, timeout):
+def sync_game(url, token, system, rom, timeout, platform="retropie"):
     """Replay a known launch after the UNO Q restarts mid-game."""
     payload = json.dumps({"event": "start", "system": system, "rom": Path(rom).name}).encode()
     request = Request(url.rstrip("/") + "/api/launch", data=payload,
-                      headers={"Content-Type": "application/json", "Authorization": "Bearer " + token}, method="POST")
+                      headers={"Content-Type": "application/json", "Authorization": "Bearer " + token,
+                               "X-ROB-Receiver": platform}, method="POST")
     with urlopen(request, timeout=timeout) as response:
         response.read()
 
 
-def send_frame_command(url, token, item, timeout):
+def send_frame_command(url, token, item, timeout, platform="retropie"):
     payload = json.dumps({key: item[key] for key in
                           ("game", "pattern", "sender_pid", "frame_index")}).encode()
     request = Request(url.rstrip("/") + "/api/emulator/command", data=payload,
-                      headers={"Content-Type": "application/json", "Authorization": "Bearer " + token},
+                      headers={"Content-Type": "application/json", "Authorization": "Bearer " + token,
+                               "X-ROB-Receiver": platform},
                       method="POST")
     with urlopen(request, timeout=timeout) as response:
         response.read()
@@ -154,6 +163,7 @@ def main():
     parser.add_argument("--timeout", type=float, default=0.25)
     parser.add_argument("--stale-after", type=float, default=0.75)
     parser.add_argument("--swap-buttons", action="store_true")
+    parser.add_argument("--platform", choices=("retropie", "batocera"), default="retropie")
     args = parser.parse_args()
     if args.interval <= 0 or args.timeout <= 0 or args.stale_after <= args.timeout:
         parser.error("interval/timeout must be positive and stale-after must exceed timeout")
@@ -170,7 +180,7 @@ def main():
     signal.signal(signal.SIGINT, stop)
     pad = VirtualPad()
     registry = load_registry()
-    hook = FrameHookServer(registry)
+    hook = FrameHookServer(registry, platform=args.platform)
     hook.start()
     desired = (False, False)
     last_good = 0.0
@@ -178,23 +188,29 @@ def main():
     next_process_check = 0.0
     next_sync = 0.0
     pending_frames = deque()
+    state = {}
     try:
         while running:
             started = time.monotonic()
             if started >= next_process_check:
-                active_game = running_game(registry)
+                active_game = running_game(registry, platform=args.platform)
                 next_process_check = started + .25
             try:
                 hook_game = hook.recent_game()
                 state = fetch_state(args.url, token, args.timeout,
                                     hook_game if active_game and hook_game == active_game[0] else None,
-                                    hook.recent_test_game())
-                desired = pads_from_state(state)
+                                    hook.recent_test_game(), platform=args.platform)
+                selected_receiver = (state.get("link") or {}).get("receiver", "").casefold()
+                if selected_receiver not in ("", args.platform):
+                    desired = (False, False)
+                    hook_game = None
+                else:
+                    desired = pads_from_state(state)
                 last_good = time.monotonic()
-                if active_game and state.get("game") != active_game[0] and started >= next_sync:
+                if active_game and (selected_receiver in ("", args.platform) or state.get("game") is None) and state.get("game") != active_game[0] and started >= next_sync:
                     next_sync = started + 2.0
                     try:
-                        sync_game(args.url, token, active_game[1], active_game[2], args.timeout)
+                        sync_game(args.url, token, active_game[1], active_game[2], args.timeout, args.platform)
                     except (OSError, ValueError):
                         pass
             except (OSError, ValueError, json.JSONDecodeError):
@@ -206,13 +222,14 @@ def main():
             while pending_frames:
                 item = pending_frames[0]
                 if (not active_game or active_game[0] != item["game"] or
+                        (state.get("link") or {}).get("receiver", "").casefold() not in ("", args.platform) or
                         time.monotonic() - item["created_at"] > 1.0):
                     pending_frames.popleft()
                     continue
                 if time.monotonic() < item.get("next_try", 0.0):
                     break
                 try:
-                    send_frame_command(args.url, token, item, args.timeout)
+                    send_frame_command(args.url, token, item, args.timeout, args.platform)
                     pending_frames.popleft()
                 except (OSError, ValueError):
                     item["next_try"] = time.monotonic() + .2
