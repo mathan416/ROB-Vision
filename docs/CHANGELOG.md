@@ -1,5 +1,11 @@
 # R.O.B. Vision changelog
 
+## Unattended two-game verification — 24 September 2026
+
+- Added independent optical-command-to-model flow tests for Gyromite and Stack-Up, including pad release, grouped block transfer, collision rejection, and game-specific command isolation.
+- Made the RetroPie receiver recover the active game after a UNO Q restart by reading the exact RetroPie RetroArch launch and replaying the authenticated launch event. Verified recovery against a live Gyromite session; virtual buttons remain released when no matching Gyromite process is active.
+- Booted the supplied Stack-Up ROM in a displayless RetroArch smoke test and confirmed the supplied ZIP ROM hashes match the documented command tables. See the [unattended test report](UNATTENDED_TEST_REPORT_2026-09-24.md) for evidence and remaining camera/display limits.
+
 ## UNO Q matrix display — 24 September 2026
 
 - Added an App Lab microcontroller sketch for the built-in 13×8 blue matrix: startup hourglass, idle eyes, Gyromite and Stack-Up title marks with animated eyes, Test `T`, pairing `P`, and fault `X`.

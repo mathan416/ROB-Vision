@@ -14,6 +14,8 @@ import time
 from pathlib import Path
 from urllib.request import Request, urlopen
 
+from identify_game import identify, load_registry
+
 
 def ioctl_write(number, size):
     return (1 << 30) | (size << 16) | (ord("U") << 8) | number
@@ -70,14 +72,20 @@ class VirtualPad:
             os.close(self.fd)
 
 
-def fetch_pads(url, token, timeout):
+def fetch_state(url, token, timeout):
     request = Request(url.rstrip("/") + "/api/state",
                       headers={"Authorization": "Bearer " + token, "X-ROB-Receiver": "retropie"})
     with urlopen(request, timeout=timeout) as response:
         state = json.load(response)
     if not isinstance(state, dict):
         raise ValueError("Controller response is not an object")
-    if state.get("schema") != 1 or state.get("game") != "gyromite":
+    if state.get("schema") != 1:
+        raise ValueError("Unsupported controller state schema")
+    return state
+
+
+def pads_from_state(state):
+    if state.get("game") != "gyromite":
         return False, False
     pads = (state.get("robot") or {}).get("pads") or {}
     if not isinstance(pads.get("red"), bool) or not isinstance(pads.get("blue"), bool):
@@ -85,22 +93,37 @@ def fetch_pads(url, token, timeout):
     return pads["red"], pads["blue"]
 
 
-def gyromite_running():
-    """Do not inject buttons into a different game or an idle RetroPie menu."""
-    for pid in os.listdir("/proc"):
+def running_game(registry, proc_root=Path("/proc")):
+    """Read the active RetroPie RetroArch command, never a background test run."""
+    for pid in os.listdir(proc_root):
         if not pid.isdigit():
             continue
         try:
-            arguments = (Path("/proc") / pid / "cmdline").read_bytes().split(b"\0")
+            arguments = (proc_root / pid / "cmdline").read_bytes().split(b"\0")
         except (OSError, PermissionError):
             continue
         if not arguments or Path(os.fsdecode(arguments[0])).name != "retroarch":
             continue
+        if b"/dev/shm/retroarch.cfg" not in arguments:
+            continue
         for argument in arguments[1:]:
-            rom = os.fsdecode(argument).casefold()
-            if rom.startswith("/home/pi/retropie/roms/nes/gyromite (world).") and rom.endswith((".zip", ".7z", ".nes")):
-                return True
-    return False
+            rom = os.fsdecode(argument)
+            if not rom.casefold().startswith("/home/pi/retropie/roms/"):
+                continue
+            system = Path(rom).parent.name
+            game = identify(system, rom, registry)
+            if game:
+                return game, system, rom
+    return None
+
+
+def sync_game(url, token, system, rom, timeout):
+    """Replay a known launch after the UNO Q restarts mid-game."""
+    payload = json.dumps({"event": "start", "system": system, "rom": Path(rom).name}).encode()
+    request = Request(url.rstrip("/") + "/api/launch", data=payload,
+                      headers={"Content-Type": "application/json", "Authorization": "Bearer " + token}, method="POST")
+    with urlopen(request, timeout=timeout) as response:
+        response.read()
 
 
 def main():
@@ -126,18 +149,32 @@ def main():
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
     pad = VirtualPad()
+    registry = load_registry()
     desired = (False, False)
     last_good = 0.0
+    active_game = None
+    next_process_check = 0.0
+    next_sync = 0.0
     try:
         while running:
             started = time.monotonic()
+            if started >= next_process_check:
+                active_game = running_game(registry)
+                next_process_check = started + .25
             try:
-                desired = fetch_pads(args.url, token, args.timeout)
+                state = fetch_state(args.url, token, args.timeout)
+                desired = pads_from_state(state)
                 last_good = time.monotonic()
+                if active_game and state.get("game") != active_game[0] and started >= next_sync:
+                    next_sync = started + 2.0
+                    try:
+                        sync_game(args.url, token, active_game[1], active_game[2], args.timeout)
+                    except (OSError, ValueError):
+                        pass
             except (OSError, ValueError, json.JSONDecodeError):
                 if time.monotonic() - last_good > args.stale_after:
                     desired = (False, False)
-            if not gyromite_running():
+            if not active_game or active_game[0] != "gyromite":
                 desired = (False, False)
             pad.update(*desired, swap=args.swap_buttons)
             if running:
