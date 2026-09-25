@@ -1,5 +1,9 @@
 # R.O.B. Vision changelog
 
+## Unified Mission and Setup status — 24 September 2026
+
+- Both pages now use the same short game/controller top-bar label, including **GYROMITE / CONNECTED**. RetroPie, camera, and Test indicators use shared wording; controller loss clears stale Setup statuses.
+
 ## Built-in Help — 24 September 2026
 
 - Added a searchable Help page inside the dashboard with setup, Gyromite, Stack-Up, controls, status, troubleshooting, and FAQ content. Linked it from Mission and Setup, with contextual Setup links.

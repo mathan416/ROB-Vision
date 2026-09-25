@@ -4,7 +4,7 @@ The running Mission page puts virtual R.O.B. and the accessories first. A browse
 
 ## Mission layout
 
-The large Live Model animates R.O.B.'s connected shoulders, shared opposing hands, head turn, and vertical carriage. Accessory Bay and Game Table show the same gyro or block state. Gyromite has two holders, a spinner, red/blue pads, and two gyros; Stack-Up has five trays and all five blocks. Pose Preview, Game Table, and System Vitals are grouped beneath the model. The Activity Feed distinguishes manual, optical, and link events. The selected game and RetroPie connection are separate statuses: `GYROMITE SELECTED / RETROPIE ONLINE` is expected when Gyromite is selected and the receiver is polling.
+The large Live Model animates R.O.B.'s connected shoulders, shared opposing hands, head turn, and vertical carriage. Accessory Bay and Game Table show the same gyro or block state. Gyromite has two holders, a spinner, red/blue pads, and two gyros; Stack-Up has five trays and all five blocks. Pose Preview, Game Table, and System Vitals are grouped beneath the model. The Activity Feed distinguishes manual, optical, and link events. The selected game and RetroPie connection are separate statuses: `GYROMITE / CONNECTED` means Gyromite is selected and the browser reaches the UNO Q. The separate **RETROPIE ONLINE/OFFLINE** indicator reports receiver polling.
 
 Fast Gates appears during live Gyromite when camera capture is stopped. Blue (`2`), red (`1`), and Release Both (`0`) act immediately; each hold expires after 60 seconds. A manual pose preview or scripted demo is not evidence of a decoded game command. Demo mode can run while RetroPie is paired and idle; a game launch stops it.
 

@@ -39,3 +39,5 @@
 @media(max-width:530px){.setup-card{padding:16px}.setup-hero{padding-bottom:17px}.setup-card button{flex:1}.setup-command-grid button{min-width:0}}
 
 .setup-help-link{display:inline-block;margin-top:9px;color:#86ded7;text-decoration:none;border-bottom:1px solid #528d8b;padding-bottom:3px;font:800 10px "DM Sans",sans-serif;letter-spacing:.09em}.setup-help-link:hover{color:#fff;border-color:#fff}
+
+#pair-link[data-state="offline"],#camera-state[data-state="fault"]{color:#f4a99a}#pair-link[data-state="unknown"],#camera-state[data-state="unknown"],#camera-state[data-state="missing"]{color:#d9af75}

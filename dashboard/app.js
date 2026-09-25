@@ -426,8 +426,8 @@
     $('arm-bar').style.width = `${50 + state.arms * .9}%`;
     $('grip-value').textContent = state.grip ? 'CLOSED' : 'OPEN';
     $('grip-bar').style.width = state.grip ? '91%' : '14%';
-    $('tracking-label').textContent = 'NOT CONNECTED';
-    $('optical-value').textContent = state.running ? 'SCRIPTED DEMO' : 'NOT CONNECTED';
+    $('tracking-label').textContent = 'PREVIEW ONLY';
+    $('optical-value').textContent = state.running ? 'SCRIPTED DEMO' : 'PREVIEW ONLY';
     $('optical-bar').style.width = state.running ? '75%' : '12%';
     $('gyro-vitals').hidden = state.mode !== 'gyro';
     $('controls-title').textContent = state.mode === 'stack' ? 'STACK-UP COMMANDS' : 'POSE PREVIEW';
@@ -585,21 +585,20 @@
       $('mission-title').textContent = robot ? `Live ${state.mode === 'stack' ? 'Stack-Up' : 'Gyromite'}` : 'Select a game';
       $('mission-description').textContent = robot ? snapshot.events.at(-1)?.message || 'Watching for game commands.' : 'Choose Gyromite or Stack-Up in the Accessory Bay.';
       $('stage-caption').textContent = $('mission-description').textContent;
-      $('mission-step').textContent = snapshot.camera.state === 'capturing' ? 'WATCHING' : 'CAMERA OFFLINE';
+      const status = window.RobStatus;
+      $('mission-step').textContent = status.testSignal(snapshot) ? status.test(snapshot) : status.camera(snapshot);
       $('progress-text').textContent = `#${snapshot.sequence}`;
       render();
       const flashing = Boolean(snapshot.test?.flash_active);
       const ready = Boolean(snapshot.test?.ready) && !flashing;
       $('stage').classList.toggle('test-flashing', flashing);
       $('stage').classList.toggle('test-ready', ready);
-      if (flashing) $('mission-step').textContent = 'TEST FLASHES';
-      else if (ready) $('mission-step').textContent = 'READY LIGHT';
+      if (flashing || ready) $('mission-step').textContent = status.test(snapshot);
       $('demo-button').disabled = true;
       document.querySelectorAll('[data-mode]').forEach((tab) => { tab.disabled = true; });
-      $('tracking-label').textContent = flashing ? 'TEST FLASHES DETECTED' : ready ? 'READY LIGHT SEEN' : snapshot.camera.state === 'capturing' ? 'CAMERA ACTIVE' : 'CAMERA OFFLINE';
-      $('optical-value').textContent = snapshot.camera.state === 'capturing' ? `${snapshot.camera.fps} FPS` : 'CAMERA OFFLINE';
-      const gameName = snapshot.game === 'stack_up' ? 'STACK-UP' : 'GYROMITE';
-      $('connection').textContent = `${gameName} SELECTED / ${snapshot.link?.online ? 'RETROPIE ONLINE' : 'RETROPIE OFFLINE'}`;
+      $('tracking-label').textContent = status.testSignal(snapshot) ? status.test(snapshot) : status.camera(snapshot);
+      $('optical-value').textContent = snapshot.camera.state === 'capturing' ? `${snapshot.camera.fps} FPS` : status.camera(snapshot);
+      $('connection').textContent = status.connection(snapshot);
       document.querySelector('.gyro-vitals-note').textContent = snapshot.link?.online ? 'Virtual pad states sent to RetroPie Controller 2' : 'Virtual spin and button states; game link offline';
       $('controls-context').textContent = 'LIVE CONTROLLER / CAMERA OR MANUAL';
       document.querySelector('.vitals-card .live-text').textContent = '● CONTROLLER';
@@ -608,7 +607,7 @@
       $('gyro-a-value').textContent = robot?.pads?.red ? 'SPINNING / PRESSED' : $('gyro-a-value').textContent;
       $('gyro-b-value').textContent = robot?.pads?.blue ? 'SPINNING / PRESSED' : $('gyro-b-value').textContent;
     },
-    leaveLive() { state.live = false; $('stage').classList.remove('test-flashing', 'test-ready'); home(); document.querySelectorAll('[data-mode]').forEach((tab) => { tab.disabled = false; }); $('connection').textContent = 'OPTICAL + LAN / SIMULATED'; document.querySelector('.vitals-card .live-text').textContent = '● SIMULATION'; document.querySelector('.stage-panel .chip').textContent = 'SIMULATED MOTION'; document.querySelector('.gyro-vitals-note').textContent = 'Virtual spin and button states; no game link'; }
+    leaveLive() { state.live = false; $('stage').classList.remove('test-flashing', 'test-ready'); home(); document.querySelectorAll('[data-mode]').forEach((tab) => { tab.disabled = false; }); $('connection').textContent = window.RobStatus.preview; $('connection').closest('.top-status').dataset.connection = 'preview'; document.querySelector('.vitals-card .live-text').textContent = '● SIMULATION'; document.querySelector('.stage-panel .chip').textContent = 'SIMULATED MOTION'; document.querySelector('.gyro-vitals-note').textContent = 'Virtual spin and button states; no game link'; }
   };
   $('event-list').querySelector('time').textContent = time();
   function tick() { $('clock').textContent = time(); } tick(); setInterval(tick, 1000); render();

@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const $ = (id) => document.getElementById(id);
+  const status = window.RobStatus;
   let connected = false;
   let latest = null;
   let lastSequence = -1;
@@ -24,11 +25,14 @@
   function accept(snapshot) {
     latest = snapshot;
     connected = true;
+    $('connection').textContent = status.connection(snapshot);
+    $('connection').closest('.top-status').dataset.connection = 'connected';
     if (!snapshot.game) {
       $('gate-assist').hidden = true;
       if (liveGame) window.RobDashboard.leaveLive();
-      $('connection').textContent = `NO GAME SELECTED / ${snapshot.link?.online ? 'RETROPIE ONLINE' : 'RETROPIE OFFLINE'}`;
-      $('controller-status').textContent = 'CONTROLLER READY · NO GAME SELECTED';
+      $('connection').textContent = status.connection(snapshot);
+      $('connection').closest('.top-status').dataset.connection = 'connected';
+      $('controller-status').textContent = `NO GAME SELECTED · ${status.camera(snapshot)} · ${status.receiver(snapshot)}`;
       liveGame = null;
       lastSequence = snapshot.sequence;
       lastCameraState = snapshot.camera.state;
@@ -45,11 +49,7 @@
       button.setAttribute('aria-pressed', String(active));
       button.textContent = `${active ? 'RAISE' : 'LOWER'} ${color.toUpperCase()}`;
     }
-    const noCamera = snapshot.camera.platform === 'linux' && !snapshot.camera.devices.length;
-    const gameName = snapshot.game === 'stack_up' ? 'STACK-UP' : 'GYROMITE';
-    $('controller-status').textContent = snapshot.camera.state === 'fault' ? `${gameName} · ${snapshot.camera.message}` :
-      noCamera ? `${gameName} SELECTED · NO CAMERA ATTACHED` :
-      `${gameName} · ${snapshot.camera.state.toUpperCase()} · ${snapshot.camera.fps} FPS`;
+    $('controller-status').textContent = status.controllerDetail(snapshot);
     const testLightMode = snapshot.test?.flash_active ? 'flashing' : snapshot.test?.ready ? 'ready' : 'off';
     if (snapshot.sequence !== lastSequence || snapshot.camera.state !== lastCameraState || Boolean(snapshot.link?.online) !== lastLinkOnline || testLightMode !== lastTestLightMode) {
       lastCameraState = snapshot.camera.state;
@@ -76,7 +76,12 @@
     busy = true;
     try { accept(await request('/api/state')); }
     catch (error) {
-      if (connected) { connected = false; if (liveGame) window.RobDashboard.leaveLive(); liveGame = null; $('gate-assist').hidden = true; $('connection').textContent = 'CONTROLLER OFFLINE / RETROPIE UNKNOWN'; showError(error); }
+      if (connected && liveGame) window.RobDashboard.leaveLive();
+      connected = false; liveGame = null; latest = null; $('gate-assist').hidden = true;
+      const preview = location.protocol === 'file:' || !available;
+      $('connection').textContent = preview ? status.preview : status.offline;
+      $('connection').closest('.top-status').dataset.connection = preview ? 'preview' : 'offline';
+      $('controller-status').textContent = preview ? 'LOCAL PREVIEW · NO CONTROLLER' : 'CONTROLLER OFFLINE · CAMERA UNKNOWN · RETROPIE UNKNOWN';
     } finally { busy = false; }
   }
   async function act(path, data) {

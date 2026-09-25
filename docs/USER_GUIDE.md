@@ -6,7 +6,7 @@
 
 Start **R.O.B. Vision** in UNO Q App Lab, then open `http://arduiain.local/dashboard/` on a laptop, phone, or tablet. App Lab runs one app at a time on this UNO Q; stop VirtualGlove before starting R.O.B. Vision. The direct `http://arduiain.local:8766/dashboard/` address reaches the same controller. A page opened from `file://` is an offline preview and does not show live RetroPie state.
 
-Mission keeps the animated R.O.B. as the main view. Accessory Bay and Game Table show his virtual game pieces. Pose Preview and System Vitals sit beside the Game Table; the Activity Feed reports controller actions. A label such as **GYROMITE SELECTED / RETROPIE ONLINE** means a game is selected and the authenticated RetroPie receiver recently polled. It does not mean the camera is reading valid commands.
+Mission keeps the animated R.O.B. as the main view. Accessory Bay and Game Table show his virtual game pieces. Pose Preview and System Vitals sit beside the Game Table; the Activity Feed reports controller actions. A label such as **GYROMITE / CONNECTED** means Gyromite is selected and this browser can reach the UNO Q. RetroPie status appears separately as **RETROPIE ONLINE** or **RETROPIE OFFLINE**; neither label proves the camera is reading valid commands.
 
 ## Try the demonstration
 

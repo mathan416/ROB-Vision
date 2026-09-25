@@ -218,3 +218,5 @@
     min-height:0;
   }
 }
+
+.top-status[data-connection="offline"] .status-dot{background:#f07873;box-shadow:0 0 11px #f07873}.top-status[data-connection="preview"] .status-dot,.top-status[data-connection="connecting"] .status-dot{background:#eab26c;box-shadow:0 0 11px #eab26c}

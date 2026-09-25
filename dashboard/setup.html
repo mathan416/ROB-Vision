@@ -7,7 +7,8 @@
   <title>R.O.B. Vision // Setup</title>
   <link rel="stylesheet" href="style.css?v=setup-3">
   <link rel="stylesheet" href="setup.css?v=help-1">
-  <script src="setup.js?v=matrix-1" defer></script>
+  <script src="status.js?v=status-1" defer></script>
+  <script src="setup.js?v=status-1" defer></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -15,12 +16,12 @@
     <header class="topbar">
       <div class="brand"><span class="brand-mark">R<span>·</span>O<span>·</span>B</span><span class="brand-sub">SETUP <i>///</i> MK·01</span></div>
       <nav class="page-nav" aria-label="Pages"><a href="index.html">MISSION</a><a href="setup.html" aria-current="page">SETUP</a><a href="help.html">HELP</a></nav>
-      <div class="top-status"><span class="status-dot"></span><span id="setup-connection">CONNECTING</span></div>
+      <div class="top-status" data-connection="connecting"><span class="status-dot"></span><span id="setup-connection">CONTROLLER / CONNECTING</span></div>
     </header>
     <div class="setup-hero"><p class="eyebrow">READY THE MISSION / 00</p><h1>Connect. Aim. Test.</h1><p>Prepare the RetroPie link and camera, then check each game control before playing.</p></div>
     <div class="setup-grid">
       <section class="setup-card" aria-labelledby="pair-heading">
-        <div class="section-head"><span>01 / CONSOLE LINK</span><span id="pair-link">CHECKING</span></div>
+        <div class="section-head"><span>01 / CONSOLE LINK</span><span id="pair-link">RETROPIE UNKNOWN</span></div>
         <h2 id="pair-heading">Connect RetroPie</h2>
         <div id="pair-connected" hidden>
           <p class="pair-success">RetroPie is already paired and its receiver is online. You can continue to the camera check.</p>
@@ -36,7 +37,7 @@
         <p class="setup-feedback" id="pair-feedback" role="status">The receiver must be installed on RetroPie before pairing.</p><a class="setup-help-link" href="help.html#pairing">NEED HELP PAIRING? ↗</a>
       </section>
       <section class="setup-card" aria-labelledby="camera-heading">
-        <div class="section-head"><span>02 / CAMERA</span><span id="camera-state">OFFLINE</span></div>
+        <div class="section-head"><span>02 / CAMERA</span><span id="camera-state">CAMERA UNKNOWN</span></div>
         <h2 id="camera-heading">Aim at the game screen</h2>
         <p>Place the UNO Q camera so the game's optical flash area fills the green rectangle. Use the camera's 60 fps mode with short exposure, then check the delivered rate and Test mode. A 30 fps camera can miss one-frame flashes; even 60 fps needs a real-game command check.</p>
         <div class="setup-camera"><img id="setup-frame" alt="Live UNO Q camera image with a green sampling rectangle" hidden><span id="camera-placeholder">CAMERA PREVIEW OFFLINE</span></div>

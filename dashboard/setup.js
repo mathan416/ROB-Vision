@@ -1,6 +1,7 @@
 (() => {
   'use strict';
   const $ = (id) => document.getElementById(id);
+  const status = window.RobStatus;
   let state = null;
   let previewUrl = null;
   let previewBusy = false;
@@ -16,6 +17,7 @@
   async function api(path, data) {
     const response = await fetch(path, { method: data === undefined ? 'GET' : 'POST', headers: headers(),
       ...(data === undefined ? {} : { body: JSON.stringify(data) }), cache: 'no-store' });
+    if (response.status === 404 && path === '/api/state') throw new Error('Controller not available.');
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Controller request failed.');
     return result;
@@ -45,9 +47,11 @@
   }
   function render(snapshot) {
     state = snapshot;
-    message('setup-connection', `${snapshot.game ? snapshot.game.replace('_', '-').toUpperCase() : 'CONTROLLER'} / CONNECTED`);
+    message('setup-connection', status.connection(snapshot));
+    $('setup-connection').closest('.top-status').dataset.connection = 'connected';
     const receiverOnline = Boolean(snapshot.link?.online);
-    message('pair-link', receiverOnline ? 'RECEIVER ONLINE' : 'RECEIVER OFFLINE');
+    message('pair-link', status.receiver(snapshot));
+    $('pair-link').dataset.state = receiverOnline ? 'online' : 'offline';
     $('pair-connected').hidden = !receiverOnline || pairExpanded;
     $('pair-details').hidden = receiverOnline && !pairExpanded;
     $('pair-cancel').hidden = !receiverOnline;
@@ -56,8 +60,9 @@
         'No recent RetroPie receiver heartbeat. Check its power and network connection.');
       lastReceiverOnline = receiverOnline;
     }
-    message('camera-state', snapshot.camera.state.toUpperCase());
-    message('camera-device', snapshot.camera.devices?.[0]?.name || 'NO CAMERA DETECTED');
+    message('camera-state', status.camera(snapshot));
+    $('camera-state').dataset.state = status.camera(snapshot) === 'NO CAMERA DETECTED' ? 'missing' : snapshot.camera.state;
+    message('camera-device', snapshot.camera.devices?.[0]?.name || 'NO CAPTURE DEVICE');
     message('camera-fps', `${snapshot.camera.fps || 0} FPS`);
     message('camera-brightness', `${Math.round((snapshot.camera.brightness || 0) * 100)}% SIGNAL`);
     message('camera-feedback', snapshot.camera.message);
@@ -84,7 +89,7 @@
     $('test-light').classList.toggle('flashing', flashing || previewActive && !ready);
     $('test-light').classList.toggle('ready', ready);
     message('test-led-label', flashing ? 'R.O.B. LIGHT FLASHING' : ready ? 'R.O.B. LIGHT ON' : previewActive ? 'PREVIEW ONLY · FLASHING' : 'R.O.B. LIGHT OFF');
-    message('test-state', flashing ? 'TEST FLASHES SEEN' : ready ? 'READY SIGNAL SEEN' : snapshot.test?.armed ? 'WATCHING' : 'WAITING');
+    message('test-state', status.test(snapshot));
     message('test-feedback', flashing ? 'Alternating Test-mode flashes detected. R.O.B.’s red light blinks; his arms do not move.' :
       ready ? 'A separate ready-light command was decoded. R.O.B.’s red light stays on; his arms do not move.' :
       previewActive ? 'This is a visual preview only. No camera signal was detected.' :
@@ -94,7 +99,7 @@
   }
   async function act(path, data, feedback, success) {
     try { render(await api(path, data)); if (feedback && success) message(feedback, success); }
-    catch (error) { message(feedback || 'setup-connection', error.message); }
+    catch (error) { message(feedback || 'pair-feedback', error.message); }
   }
   async function poll() {
     if (polling) return;
@@ -102,11 +107,25 @@
     try { render(await api('/api/state')); }
     catch (error) {
       state = null;
+      lastReceiverOnline = null;
       $('pair-connected').hidden = true;
       $('pair-details').hidden = true;
-      message('setup-connection', error.message);
-      message('pair-link', 'CONTROLLER OFFLINE');
-      message('pair-feedback', 'The UNO Q controller is unavailable. Start R.O.B. Vision in App Lab.');
+      const preview = location.protocol === 'file:';
+      message('setup-connection', preview ? status.preview : status.offline);
+      $('setup-connection').closest('.top-status').dataset.connection = preview ? 'preview' : 'offline';
+      message('pair-link', 'RETROPIE UNKNOWN');
+      $('pair-link').dataset.state = 'unknown';
+      message('camera-state', 'CAMERA UNKNOWN');
+      $('camera-state').dataset.state = 'unknown';
+      message('camera-device', 'NO CAPTURE DEVICE');
+      message('camera-fps', '0 FPS');
+      message('camera-brightness', '0% SIGNAL');
+      message('test-state', 'SIGNAL UNKNOWN');
+      message('buttons-mode', 'SELECT A GAME');
+      $('setup-gates').hidden = true; $('setup-stack').hidden = true;
+      message('pair-feedback', preview ? 'Local preview only. Open Setup on the UNO Q for live checks.' : 'The UNO Q controller is unavailable. Start R.O.B. Vision in App Lab.');
+      message('camera-feedback', 'Camera status is unavailable until the controller reconnects.');
+      message('test-feedback', 'Game signal status is unavailable until the controller reconnects.');
       clearFrame();
     } finally { polling = false; }
   }

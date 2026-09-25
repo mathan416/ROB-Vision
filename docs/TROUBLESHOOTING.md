@@ -5,8 +5,8 @@ First check which page is open: `http://arduiain.local/dashboard/` is live; a `f
 | Symptom | Check |
 | --- | --- |
 | App does not start, port 8766 in use | Stop VirtualGlove or the separate `rob-vision.service`; App Lab and that service cannot both bind the port. |
-| `GYROMITE SELECTED / RETROPIE ONLINE` but no robot movement | Game identity and receiver link are present. Camera command capture is separate; open Setup to check camera, Test signal, and delivered fps. |
-| Setup says connected but Mission does not show a game | A receiver can be online with no active game. Launch a registered ROM; then reload Mission if needed. |
+| `GYROMITE / CONNECTED` but no robot movement | The game is selected and the UNO Q controller is reachable. Check the separate RetroPie link status; camera command capture is separate; open Setup to check camera, Test signal, and delivered fps. |
+| RetroPie is online but no game is selected | A receiver can be online with no active game. Launch a registered ROM; then reload Mission if needed. |
 | No camera or black preview | Check physical camera connection, device selection, exposure, and Setup's green sampling rectangle. **Reset & Reconnect** retries OpenCV; it does not reset USB power. |
 | Test light never blinks | Enter the game's Test mode, select **Watch Test Flashes**, align the crop, and check measured fps and brightness. A red-light preview is only an animation demonstration. |
 | Movement command is missed | Capture timing is a known limit. At 30 fps one-frame flashes cannot be reliably decoded; even 60 fps with jitter rejected some valid synthetic commands. Do not compensate by accepting ambiguous traces. |
