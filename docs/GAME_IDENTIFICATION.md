@@ -1,6 +1,6 @@
 # Game identification from RetroPie launch events
 
-**Status: installed on the dedicated `retropie.local` test machine.** A real Gyromite launch selected the game on the UNO Q, and a subsequent real exit cleared it. Controlled start/end calls selected and cleared both games. The game still flashes commands for the camera to decode. Launch identification supplies context and does not replace optical input.
+**Status: installed on the dedicated `retropie.local` test machine.** Real Gyromite and Stack-Up launches selected the matching game on the UNO Q, and exits cleared it. Controlled start/end calls selected and cleared both games. The game still flashes commands for the camera to decode. Launch identification supplies context and does not replace optical input.
 
 ## Decision
 
@@ -40,7 +40,7 @@ Gyromite's paired tray-to-Controller-2 return path remains separate from this la
 ## Remaining validation
 
 1. Simulate all six registered archive/member basenames, an unrelated NES ROM, and another system; verify only intended games match.
-2. Confirm the remaining archive formats and Stack-Up through the real RetroPie UI; the Gyromite `.7z` launch/exit and controlled hook calls have already been checked.
+2. Confirm extracted `.nes` files through the real RetroPie UI; Gyromite and Stack-Up archives have already been launched and identified.
 3. Verify start, exit, unknown game, back-to-back game launches, missed acknowledgement, and sender/robot restart. No stale game may stay armed.
 4. Confirm all existing cabinet runcommand actions still execute in their original order and that hook failure never prevents the game from starting.
 5. Validate camera-observed Test and movement flashes for both selected games on the intended display.

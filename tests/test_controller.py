@@ -135,6 +135,20 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(sum(event['message'].startswith('Test-mode optical signal detected')
                              for event in snapshot['events']), 1)
 
+    def test_stack_up_alternating_test_signal_does_not_move_blocks(self):
+        controller = Controller()
+        controller.select('stack_up')
+        controller.camera['state'] = 'capturing'
+        controller.arm_test()
+        initial = controller.snapshot()['robot']
+        for sample in range(120):
+            controller.sample((sample + .5) / 60, .59 if sample % 2 else .01)
+        snapshot = controller.snapshot()
+        self.assertTrue(snapshot['test']['flash_active'])
+        self.assertEqual(snapshot['robot'], initial)
+        self.assertEqual(sum(event['message'].startswith('Test-mode optical signal detected')
+                             for event in snapshot['events']), 1)
+
     def test_camera_reconnect_reopens_after_capture_failure(self):
         captures = []
         requested_rates = []

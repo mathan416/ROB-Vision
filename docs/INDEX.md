@@ -1,6 +1,6 @@
 # R.O.B. Vision documentation
 
-**Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on a cabinet screen; the UNO Q camera will read its flashes; a browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. No physical robot or game pieces are planned. The UNO Q dashboard, RetroPie launch hooks, and both Gyromite gate controls have been tested. The attached camera recognized Gyromite Test mode at about 60 fps; movement decoding remains unverified.
+**Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on a cabinet screen; the UNO Q camera will read its flashes; a browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. No physical robot or game pieces are planned. The UNO Q dashboard, RetroPie launch hooks, and both Gyromite gate controls have been tested. The attached camera recognized both games' Test modes at about 60 fps; movement decoding remains unverified.
 
 Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [Technical Reference](../output/pdf/R.O.B.-Vision-Technical-Reference.pdf), [Matrix Display Guide](../output/pdf/R.O.B.-Vision-Matrix-Display-Guide.pdf), and [Quick Reference](../output/pdf/R.O.B.-Vision-Quick-Reference.pdf).
 

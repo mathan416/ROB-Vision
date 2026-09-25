@@ -16,7 +16,7 @@ The current scripted preview applies one virtual command per step. It first move
 
 | Mode | Booklet behavior | Virtual design implication |
 | --- | --- | --- |
-| Test | Optical aiming signal | Reuse camera calibration and readiness check. |
+| Test | Optical aiming signal over the ROBOT BLOCK artwork | Press Select to open the mode list, select Test, then Start. The live camera recognized alternating green/white frames at about 60 fps without a virtual movement. |
 | Direct | Professor lands on six command keys | Decode and display left, right, up, down, open, or close. Player scores/advances with Start after arrangement. |
 | Memory | Up to 100 programmed commands at selected speed, then `END` | Measure cadence; the current model applies commands immediately and has no bounded queue. Report misses during camera validation. `END` is a programming marker, not a robot movement flash. |
 | Bingo, one player | Row or column completion sends a command | Apply only a complete validated optical command. |

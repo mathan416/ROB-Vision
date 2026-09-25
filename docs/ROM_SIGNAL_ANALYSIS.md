@@ -28,7 +28,7 @@ The screen flashes represent **one robot primitive per command**, not a complete
 
 The eight-bit command byte is the message after the five leading bits: for example, open is `$EE`, close `$BE`, left `$BA`, right `$EA`, Gyromite up/down `$BB/$FB`, Stack-Up up/down `$FA/$AE`, and ready light `$EB`. The ready-light message is a status operation. It must never move an axis.
 
-The live Gyromite Test screen presented a sustained green field in the camera crop. The virtual head light now blinks after detecting a sustained green field or regular Test alternation; a separately decoded ready-light command produces a steady light. These are status indications, not motion commands. Stack-Up Test mode has not been reached on the test console.
+The live Gyromite Test screen presented a sustained green field in the camera crop. Stack-Up Test alternated green and white on the ROBOT BLOCK artwork. The virtual head light blinks after detecting either signal; a separately decoded ready-light command produces a steady light. These are status indications, not motion commands.
 
 ### ROM evidence
 
@@ -41,7 +41,7 @@ These addresses refer to the CPU view of these exact 32 KiB program images (`$80
 ## Implemented decoder and camera validation
 
 1. The OpenCV service samples a fixed central 60% region by default; `--camera-roi` changes it. It uses green dominance over the red and blue channels, not sprite or text recognition. Automatic region finding and a second background region are not implemented.
-2. The current service requests 60 fps and reports delivered fps. Synthetic tests at 60 fps with jitter accepted 667/900 valid transmissions correctly and rejected 233; zero were misclassified in that run. At 30 fps, all 900 were rejected. The attached camera delivered about 60 fps. Gyromite Test mode was recognized, but six spaced Direct-mode commands produced no decoded actions.
+2. The current service requests 60 fps and reports delivered fps. Synthetic tests at 60 fps with jitter accepted 667/900 valid transmissions correctly and rejected 233; zero were misclassified in that run. At 30 fps, all 900 were rejected. The attached camera delivered about 60 fps. Both games' Test signals were recognized, but six spaced Gyromite Direct-mode commands produced no decoded actions. Stack-Up movement commands remain unverified.
 3. Turn samples into a frame-clocked dark/bright sequence. Search for the complete `000101` preamble, then four variable bits at the specified positions with the three required intervening green bits. Require plausible bit widths and a complete message; reject missing, merged, or ambiguous samples.
 4. Accept only the action set for the identified game. A Gyromite two-level move and a Stack-Up one-level move are distinct actions. Keep the ready-light and test flashes outside the motion path. Ignore arbitrary game brightness changes that fail the full pattern.
 5. A complete accepted transmission produces one controller event. Separate identical transmissions remain valid, including in Stack-Up Memory.
