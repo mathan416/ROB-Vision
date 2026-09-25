@@ -1,5 +1,10 @@
 # R.O.B. Vision changelog
 
+## UNO Q network status counterpart — 24 September 2026
+
+- Added R.O.B. Vision versions of the VirtualGlove host Wi-Fi status sampler, service, and timer. They publish physical Wi-Fi/Ethernet link health and broadcast addresses without network names or credentials.
+- Verified the sampler once on the UNO Q and validated the service and timer with systemd. The existing Avahi daemon already provides `arduiain.local`; no mDNS configuration was replaced.
+
 ## UNO Q host helper counterparts — 24 September 2026
 
 - Added R.O.B. Vision versions of the VirtualGlove camera recovery, shutdown, and early-start host files, plus the companion early-start script. Paths, markers, enrollment, and service names are project-specific.

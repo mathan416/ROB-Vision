@@ -10,6 +10,8 @@ The App Lab project also contains `sketch/sketch.ino` and `sketch/sketch.yaml`. 
 
 R.O.B. Vision's matching UNO Q camera recovery, shutdown, and early-start host files are in [deploy/uno-q](../deploy/uno-q/README.md). They are separate from VirtualGlove's host services and are not installed by the App Lab project. The current browser camera reconnect action is a software capture retry; USB recovery needs the host helper and a later app request integration.
 
+The same folder includes a R.O.B. Vision Wi-Fi/Ethernet status sampler and five-second timer. The UNO Q's existing Avahi daemon supplies `arduiain.local`; the sampler reports physical-link health and broadcast addresses but does not configure mDNS. Its timer is not installed yet.
+
 ## Open the preview
 
 From the project directory, serve the files locally with `python3 -m http.server 8000` and open `http://localhost:8000/dashboard/` on the same computer. Select a mode and run its finite demo. **Home** resets the preview; the browser **Emergency Stop** cancels only local scripted actions. The existing preview does not connect to the cabinet or UNO Q.

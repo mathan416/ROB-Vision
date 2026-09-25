@@ -1,0 +1,25 @@
+# Project: R.O.B. Vision
+# File: deploy/uno-q/rob-vision-wifi-status.service
+# Purpose: Sample host Wi-Fi carrier state with no privileged network operations.
+# Author: Iain Bennett
+# Copyright (c) 2026 Iain Bennett
+# SPDX-License-Identifier: MIT
+# Full history: docs/CHANGELOG.md and Git history.
+# Change log:
+#   2026-09-11 - Permit read-only IPv4 interface inspection for discovery metadata.
+#   2026-09-06 - Publish independent host Wi-Fi health for the idle matrix.
+[Unit]
+Description=R.O.B. Vision network link status
+ConditionPathIsDirectory=/home/arduino/ArduinoApps/rob-vision/data
+
+[Service]
+Type=oneshot
+User=arduino
+Group=arduino
+ExecStart=/usr/bin/python3 /usr/local/libexec/rob-vision-wifi-status
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/arduino/ArduinoApps/rob-vision/data
+RestrictAddressFamilies=AF_UNIX AF_INET
+TimeoutStartSec=5
