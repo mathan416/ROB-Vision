@@ -12,6 +12,7 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 | Everyone | [Virtual system contract](VIRTUAL_SYSTEM.md) | UNO Q, browser, virtual pieces, and game-link responsibilities. |
 | Player | [User guide](USER_GUIDE.md) | Preview controls and planned connected experience. |
 | Player and installer | [Setup guide](SETUP_GUIDE.md) | Pairing, camera placement, Test mode, and manual checks. |
+| Player and installer | [UNO Q matrix display design](UNO_Q_MATRIX_DISPLAY.md) | Planned hourglass, animated eyes, game, Test, pairing, and fault indications; current implementation status. |
 | Player | [Gameplay guide](GAMEPLAY_GUIDE.md) | Gyromite, Stack-Up, holders, spin, and virtual button rules. |
 | Player | [Quick reference](QUICK_REFERENCE.md) | Controls and indicators at a glance. |
 | Installer | [Installation guide](INSTALLATION_GUIDE.md) | Preview setup and planned UNO Q/game-host setup. |
