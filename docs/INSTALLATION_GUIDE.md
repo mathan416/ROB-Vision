@@ -4,9 +4,19 @@
 
 ## Before you begin
 
-- Use an Arduino UNO Q with App Lab and a standard RetroPie machine with the `pi` account and `/opt/retropie/configs`. The UNO Q needs Python 3.9 or newer; RetroPie needs Python 3.7 or newer. Both need `git`. RetroPie also needs `gcc`, `openssl`, `modprobe`, systemd, and at least one installed NES libretro core: `lr-fceumm` or `lr-nestopia`.
+- Use an Arduino UNO Q with App Lab and a standard RetroPie machine with the `pi` account and `/opt/retropie/configs`. The UNO Q needs Python 3.9 or newer; RetroPie needs Python 3.7 or newer. Direct cloning needs `git` on each device; the SSH archive transfer below does not. RetroPie also needs `gcc`, `openssl`, `modprobe`, systemd, and at least one installed NES libretro core: `lr-fceumm` or `lr-nestopia`.
 - Supply your own legally obtained Gyromite or Stack-Up ROM with an exact filename listed in `config/games.json`. The repository and installer contain no ROMs.
 - Keep both devices on a trusted local network. Stop the R.O.B. Vision App Lab app and exit any NES game before installation or upgrade. The UNO Q can run only one App Lab app at a time on the tested device.
+- The GitHub repository is currently private. A direct clone on a device requires a GitHub account with access and authenticated Git on that device. You can instead send the source from an authorized computer over SSH without copying GitHub credentials to either device.
+
+For the SSH transfer option, run these commands **on a computer with a local checkout of `dev`**, replacing the device names. They create only the source folders used by the installer:
+
+```sh
+git archive --format=tar dev | ssh arduino@your-uno-q.local 'mkdir -p /home/arduino/rob-vision-src && tar -xf - -C /home/arduino/rob-vision-src'
+git archive --format=tar dev | ssh pi@your-retropie.local 'mkdir -p /home/pi/rob-vision-src && tar -xf - -C /home/pi/rob-vision-src'
+```
+
+Then skip each `git clone` command below and run its installer command. For an upgrade using this option, transfer the new archive again before rerunning the installer.
 
 ## Install on the UNO Q
 
@@ -49,7 +59,7 @@ In RetroPie's per-game emulator selection, choose `lr-robvision-fceumm` or `lr-r
 
 To upgrade, exit the games, stop the UNO Q app, update each `~/rob-vision-src` checkout, rerun the corresponding installer, and restart the App Lab app. Existing pairing is preserved. The RetroPie installer restarts the receiver when a token already exists; no fresh pairing is needed unless the UNO Q token changed.
 
-**Live installer check:** On `retropie.local` (Python 3.7), the installer migrated the original standalone hooks, rebuilt both wrappers, preserved the paired token, restarted the receiver, and detected virtual joystick 1. A repeat installation left one managed hook per event and one Controller 2 mapping. Installed launch/end hooks selected and cleared Gyromite and Stack-Up on the UNO Q. The controller reported an authenticated online receiver after the restart. The check did not run a new gameplay session or exercise a first-time pairing on a blank RetroPie.
+**Live installer check:** On `retropie.local` (Python 3.7), the installer migrated the original standalone hooks, rebuilt both wrappers, preserved the paired token, restarted the receiver, and detected virtual joystick 1. A repeat installation left one managed hook per event and one Controller 2 mapping. Installed launch/end hooks selected and cleared Gyromite and Stack-Up on the UNO Q. The controller reported an authenticated online receiver after the restart. The exact published `dev` archive was transferred over SSH and installed successfully. A direct unauthenticated GitHub clone failed because the repository is private; the check did not run a new gameplay session or exercise first-time pairing on a blank RetroPie.
 
 ## UNO Q and browser
 
