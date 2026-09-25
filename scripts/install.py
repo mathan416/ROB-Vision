@@ -19,6 +19,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from urllib.request import urlopen
 
 
 SOURCE = Path(__file__).resolve().parents[1]
@@ -154,13 +155,34 @@ def valid_controller(value: str) -> str:
     return value
 
 
-def app_lab_running() -> bool:
+def app_lab_status() -> tuple[str | None, bool]:
     result = subprocess.run(["arduino-app-cli", "app", "list", "--format", "json"],
                             check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             universal_newlines=True)
     listing = json.loads(result.stdout)
-    return any(app.get("name") == "R.O.B. Vision" and app.get("status") == "running"
-               for app in listing.get("apps", []))
+    apps = listing.get("apps", [])
+    status = next((app.get("status") for app in apps if app.get("name") == "R.O.B. Vision"), None)
+    other_running = any(app.get("status") == "running" and app.get("name") != "R.O.B. Vision"
+                        for app in apps)
+    return status, other_running
+
+
+def app_lab_action(action: str, destination: Path) -> None:
+    run("arduino-app-cli", "app", action, str(destination))
+
+
+def wait_for_uno(seconds: float = 30) -> None:
+    deadline = time.monotonic() + seconds
+    while True:
+        try:
+            with urlopen("http://127.0.0.1:8766/api/state", timeout=2) as response:
+                if response.status == 200:
+                    return
+        except OSError:
+            pass
+        if time.monotonic() >= deadline:
+            raise RuntimeError("App Lab started R.O.B. Vision, but its controller did not become ready.")
+        time.sleep(0.5)
 
 
 def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
@@ -170,49 +192,77 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
         raise RuntimeError("Run the UNO Q installer as the arduino user, without sudo.")
     if not destination.parent.is_dir():
         raise RuntimeError("ArduinoApps was not found. Install or enable UNO Q App Lab first.")
-    if app_lab_running():
-        raise RuntimeError("Stop R.O.B. Vision in App Lab before installing or upgrading.")
     if destination.is_symlink() or source.resolve() == destination.resolve():
         raise RuntimeError("Install from a separate checkout; the App Lab destination cannot be the source.")
     for required in ("app.yaml", "python/main.py", "sketch/sketch.ino", "dashboard/index.html"):
         if not (source / required).is_file():
             raise RuntimeError(f"Incomplete checkout: missing {required}")
-    # A private sibling is staged before replacing the App Lab app. Preserve its token.
-    with tempfile.TemporaryDirectory(prefix=".rob-vision-stage-", dir=destination.parent) as directory:
-        staged = Path(directory) / "rob-vision"
-        staged.mkdir()
-        for name in ("app.yaml",):
-            shutil.copy2(source / name, staged / name)
-        for name in ("controller", "python", "dashboard", "config", "tools", "sketch", "docs", "output"):
-            if (source / name).exists():
-                shutil.copytree(source / name, staged / name,
-                                ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store", "._*"))
-        for name in ("data", ".deps", ".cache"):
-            if (destination / name).is_dir():
-                shutil.copytree(destination / name, staged / name, symlinks=True)
-        data = staged / "data"
-        data.mkdir(exist_ok=True)
-        data.chmod(0o700)
-        token = data / "controller-token"
-        if not token.exists():
-            write_file(token, secrets.token_urlsafe(48) + "\n", 0o600)
-        else:
-            token.chmod(0o600)
-        backup = destination.with_name("rob-vision.previous")
-        if backup.exists():
-            backup = destination.with_name(f"rob-vision.previous-{os.getpid()}-{secrets.token_hex(3)}")
-        if destination.exists():
-            os.replace(destination, backup)
-        try:
-            os.replace(staged, destination)
-        except Exception:
-            if backup.exists():
-                os.replace(backup, destination)
-            raise
-    print(f"UNO Q app installed at {destination}")
+    status, other_running = app_lab_status()
+    if other_running:
+        raise RuntimeError("Stop the other running App Lab app before installing R.O.B. Vision.")
+    was_running = status == "running"
+    backup = destination.with_name("rob-vision.previous")
+    if backup.exists():
+        backup = destination.with_name(f"rob-vision.previous-{os.getpid()}-{secrets.token_hex(3)}")
+    replaced = False
+    try:
+        if was_running:
+            print("Stopping R.O.B. Vision in App Lab.", flush=True)
+            app_lab_action("stop", destination)
+        # Stage a private sibling while the app is stopped, preserving its token and App Lab files.
+        with tempfile.TemporaryDirectory(prefix=".rob-vision-stage-", dir=destination.parent) as directory:
+            staged = Path(directory) / "rob-vision"
+            staged.mkdir()
+            shutil.copy2(source / "app.yaml", staged / "app.yaml")
+            for name in ("controller", "python", "dashboard", "config", "tools", "sketch", "docs", "output"):
+                if (source / name).exists():
+                    shutil.copytree(source / name, staged / name,
+                                    ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store", "._*"))
+            for name in ("data", ".deps", ".cache"):
+                if (destination / name).is_dir():
+                    shutil.copytree(destination / name, staged / name, symlinks=True)
+            data = staged / "data"
+            data.mkdir(exist_ok=True)
+            data.chmod(0o700)
+            token = data / "controller-token"
+            if not token.exists():
+                write_file(token, secrets.token_urlsafe(48) + "\n", 0o600)
+            else:
+                token.chmod(0o600)
+            if destination.exists():
+                os.replace(destination, backup)
+            try:
+                os.replace(staged, destination)
+            except Exception:
+                if backup.exists():
+                    os.replace(backup, destination)
+                raise
+            replaced = True
+        print("Starting R.O.B. Vision in App Lab.", flush=True)
+        app_lab_action("start", destination)
+        wait_for_uno()
+    except Exception as error:
+        if replaced and backup.exists():
+            try:
+                app_lab_action("stop", destination)
+            except (OSError, subprocess.CalledProcessError):
+                pass
+            failed = destination.with_name(f"rob-vision.failed-{os.getpid()}-{secrets.token_hex(3)}")
+            os.replace(destination, failed)
+            os.replace(backup, destination)
+            if was_running:
+                app_lab_action("start", destination)
+                wait_for_uno()
+            raise RuntimeError(f"Installation failed; previous app restored. Candidate retained at {failed}.") from error
+        if was_running and destination.exists():
+            if app_lab_status()[0] != "running":
+                app_lab_action("start", destination)
+                wait_for_uno()
+        raise
+    print(f"UNO Q app installed and running at {destination}")
     if backup.exists():
         print(f"Previous app retained at {backup}; remove it after checking the new app.")
-    print("Start R.O.B. Vision in App Lab, then open /dashboard/setup.html on your UNO Q.")
+    print("Open /dashboard/setup.html on your UNO Q.")
 
 
 def pi_owned(path: Path, user: str = "pi") -> None:

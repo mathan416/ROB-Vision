@@ -7,7 +7,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from scripts.install import (app_lab_running, configure_player2, copy_tree_merge, hook_event, install_uno, installed_controller, managed_text,
+from scripts.install import (app_lab_status, configure_player2, copy_tree_merge, hook_event, install_uno, installed_controller, managed_text,
                              remove_legacy_hook, update_managed, valid_controller)
 
 
@@ -123,10 +123,13 @@ class InstallerTests(unittest.TestCase):
             (source / "sketch/sketch.ino").write_text("// sketch\n")
             (source / "dashboard/index.html").write_text("<main>one</main>\n")
             destination.parent.mkdir()
+            actions = []
             with patch("scripts.install.sys.platform", "linux"), \
                  patch("scripts.install.os.geteuid", return_value=1000), \
                  patch("scripts.install.pwd.getpwuid", return_value=SimpleNamespace(pw_name="arduino")), \
-                 patch("scripts.install.app_lab_running", return_value=False):
+                 patch("scripts.install.app_lab_status", side_effect=[(None, False), ("running", False)]), \
+                 patch("scripts.install.app_lab_action", side_effect=lambda action, _path: actions.append(action)), \
+                 patch("scripts.install.wait_for_uno"):
                 install_uno(source, destination)
                 token = (destination / "data/controller-token").read_text()
                 (destination / ".deps").mkdir()
@@ -143,11 +146,43 @@ class InstallerTests(unittest.TestCase):
             self.assertTrue((destination / "data").is_dir())
             self.assertEqual((destination / ".deps/bridge.txt").read_text(), "installed")
             self.assertEqual((destination / ".cache/app-compose.yaml").read_text(), "generated")
+            self.assertEqual(actions, ["start", "stop", "start"])
 
     def test_running_app_is_detected_from_app_lab(self):
         sample = '{"apps":[{"name":"R.O.B. Vision","status":"running"}]}'
         with patch("scripts.install.subprocess.run", return_value=SimpleNamespace(stdout=sample)):
-            self.assertTrue(app_lab_running())
+            self.assertEqual(app_lab_status(), ("running", False))
+
+    def test_failed_upgrade_restores_and_restarts_previous_app(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            destination = root / "ArduinoApps/rob-vision"
+            for name in ("python", "sketch", "dashboard"):
+                (source / name).mkdir(parents=True)
+            (source / "app.yaml").write_text("name: R.O.B. Vision\n")
+            (source / "python/main.py").write_text("pass\n")
+            (source / "sketch/sketch.ino").write_text("// sketch\n")
+            (source / "dashboard/index.html").write_text("new\n")
+            destination.mkdir(parents=True)
+            (destination / "dashboard").mkdir()
+            (destination / "dashboard/index.html").write_text("old\n")
+            actions = []
+            starts = [False, True]
+            def action(name, _path):
+                actions.append(name)
+                if name == "start" and not starts.pop(0):
+                    raise RuntimeError("simulated App Lab start failure")
+            with patch("scripts.install.sys.platform", "linux"), \
+                 patch("scripts.install.os.geteuid", return_value=1000), \
+                 patch("scripts.install.pwd.getpwuid", return_value=SimpleNamespace(pw_name="arduino")), \
+                 patch("scripts.install.app_lab_status", return_value=("running", False)), \
+                 patch("scripts.install.app_lab_action", side_effect=action), \
+                 patch("scripts.install.wait_for_uno"):
+                with self.assertRaisesRegex(RuntimeError, "previous app restored"):
+                    install_uno(source, destination)
+            self.assertEqual((destination / "dashboard/index.html").read_text(), "old\n")
+            self.assertEqual(actions, ["stop", "start", "stop", "start"])
 
 
 if __name__ == "__main__":

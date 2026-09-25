@@ -6,7 +6,7 @@
 - Added a post-pairing step that detects the virtual Controller 2 joystick and writes its NES mapping without changing Player 1. Adjusted the installer for RetroPie's Python 3.7 and for the virtual joystick's brief restart delay.
 - Ran an in-place upgrade and repeat install on `retropie.local`: both wrappers built, the paired receiver stayed online, Gyromite and Stack-Up launch/end hooks selected and cleared the UNO Q game, and joystick 1 was mapped once. A blank-device install and new gameplay session remain untested.
 - Confirmed the published `dev` archive installs over the existing SSH link. The private repository requires GitHub authentication for a direct clone, so the guide now offers an SSH archive transfer path that keeps GitHub credentials off the devices.
-- Ran two in-place UNO Q App Lab upgrades on `arduiain.local`, preserving the controller token and generated dependency/cache folders. The app and matrix bridge restarted, the three panel pages responded, and RetroPie stayed paired. The installer now refuses an upgrade while the app is running.
+- Ran two in-place UNO Q App Lab upgrades on `arduiain.local`, preserving the controller token and generated dependency/cache folders. A further live upgrade verified automatic App Lab stop and restart, connected matrix bridge, working panel pages, and preserved RetroPie pairing. The installer restores the previous app if the new version fails to start.
 
 ## Buddy in the guides — 25 September 2026
 

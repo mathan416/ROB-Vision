@@ -12,7 +12,7 @@ The [Setup page](dashboard/setup.html) pairs RetroPie, shows receiver and game-f
 
 ## Install (development preview)
 
-The installer currently supports an Arduino UNO Q running App Lab and a standard RetroPie installation with the `pi` account. It does not include ROMs or emulator cores. The UNO Q needs Python 3.9 or newer; RetroPie needs Python 3.7 or newer, `gcc`, `openssl`, and either `lr-fceumm` or `lr-nestopia`. Stop R.O.B. Vision in App Lab and exit any NES game before installing or upgrading.
+The installer currently supports an Arduino UNO Q running App Lab and a standard RetroPie installation with the `pi` account. It does not include ROMs or emulator cores. The UNO Q needs Python 3.9 or newer; RetroPie needs Python 3.7 or newer, `gcc`, `openssl`, and either `lr-fceumm` or `lr-nestopia`. The UNO Q installer stops and restarts R.O.B. Vision automatically. Exit any NES game before installing or upgrading.
 
 The GitHub repository is currently private, so cloning requires an account with access and working GitHub authentication on each device. To keep GitHub credentials off the devices, transfer a clean archive from an authorized computer as shown in the [installation guide](docs/INSTALLATION_GUIDE.md). With GitHub access configured, clone this `dev` branch separately on each device. On the **UNO Q**, sign in as `arduino` and run:
 
@@ -21,7 +21,7 @@ git clone --branch dev https://github.com/mathan416/ROB-Vision.git ~/rob-vision-
 python3 ~/rob-vision-src/scripts/install.py uno-q
 ```
 
-Start **R.O.B. Vision** in App Lab and open `http://<your-uno-q-name>.local/dashboard/setup.html`. On **RetroPie**, sign in as `pi` and run (replace the controller name):
+The installer starts **R.O.B. Vision** in App Lab. Open `http://<your-uno-q-name>.local/dashboard/setup.html`. On **RetroPie**, sign in as `pi` and run (replace the controller name):
 
 ```sh
 git clone --branch dev https://github.com/mathan416/ROB-Vision.git ~/rob-vision-src
