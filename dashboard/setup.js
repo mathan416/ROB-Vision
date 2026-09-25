@@ -9,6 +9,7 @@
   let linkChecking = false;
   let previewActive = false;
   let previewTimer = null;
+  let removingId = null;
   const headers = () => ({ 'Content-Type': 'application/json' });
 
   async function api(path, data) {
@@ -20,12 +21,80 @@
     return result;
   }
   function message(id, value) { $(id).textContent = value; }
+  function renderConsoles(consoles) {
+    const list = $('console-list');
+    const rows = Array.isArray(consoles) ? consoles : [];
+    const signature = JSON.stringify(rows.map(item => [item.id, item.online, item.active, item.host, item.legacy, removingId]));
+    if (list.dataset.signature === signature) return;
+    list.dataset.signature = signature;
+    list.replaceChildren();
+    message('console-count', `${rows.length} SAVED`);
+    if (!rows.length) {
+      const empty = document.createElement('p');
+      empty.textContent = 'No consoles paired yet.';
+      list.append(empty);
+      return;
+    }
+    for (const item of rows) {
+      const row = document.createElement('div');
+      row.className = `console-item${item.active ? ' active' : ''}`;
+      const identity = document.createElement('div');
+      identity.className = 'console-identity';
+      const name = document.createElement('span');
+      name.className = 'console-name';
+      name.textContent = item.name;
+      const host = document.createElement('span');
+      host.className = 'console-host';
+      host.textContent = item.host || (item.legacy ? 'Older shared pairing' : 'Console address unknown');
+      identity.append(name, host);
+      const meta = document.createElement('div');
+      meta.className = 'console-meta';
+      const badge = document.createElement('span');
+      badge.className = `console-state${item.online ? ' online' : ''}`;
+      badge.textContent = item.active ? 'PLAYING' : item.online ? 'ONLINE' : 'OFFLINE';
+      meta.append(badge);
+      if (removingId === item.id) {
+        const confirm = document.createElement('button');
+        confirm.type = 'button';
+        confirm.className = 'console-confirm';
+        confirm.textContent = 'CONFIRM REMOVE';
+        confirm.addEventListener('click', async () => {
+          confirm.disabled = true;
+          try {
+            render(await api('/api/consoles/remove', { id: item.id }));
+            message('pair-feedback', `${item.name} pairing removed. Its saved key no longer works.`);
+            removingId = null;
+            if (state) render(state);
+          } catch (error) { message('pair-feedback', error.message); confirm.disabled = false; }
+        });
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'console-remove';
+        cancel.textContent = 'CANCEL';
+        cancel.addEventListener('click', () => { removingId = null; if (state) render(state); });
+        meta.append(confirm, cancel);
+      } else {
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'console-remove';
+        remove.textContent = 'REMOVE';
+        remove.setAttribute('aria-label', `Remove ${item.name} pairing ${item.host || ''}`);
+        remove.addEventListener('click', () => { removingId = item.id; if (state) render(state); });
+        meta.append(remove);
+      }
+      row.append(identity, meta);
+      list.append(row);
+    }
+  }
   function render(snapshot) {
     state = snapshot;
     message('setup-connection', status.connection(snapshot));
     $('setup-connection').closest('.top-status').dataset.connection = 'connected';
-    const receiverOnline = Boolean(snapshot.link?.online);
-    message('pair-link', status.receiver(snapshot));
+    const consoles = snapshot.link?.consoles || [];
+    renderConsoles(consoles);
+    const onlineCount = consoles.filter(item => item.online).length;
+    const receiverOnline = onlineCount > 0 || Boolean(snapshot.link?.online);
+    message('pair-link', consoles.length > 1 ? `${onlineCount} OF ${consoles.length} ONLINE` : status.receiver(snapshot));
     $('pair-link').dataset.state = receiverOnline ? 'online' : 'offline';
     $('pair-connected').hidden = !receiverOnline || pairExpanded;
     $('pair-details').hidden = receiverOnline && !pairExpanded;
@@ -80,6 +149,7 @@
       message('setup-connection', preview ? status.preview : status.offline);
       $('setup-connection').closest('.top-status').dataset.connection = preview ? 'preview' : 'offline';
       message('pair-link', 'CONSOLE UNKNOWN');
+      renderConsoles([]);
       $('pair-link').dataset.state = 'unknown';
       message('frame-state', 'GAME FRAMES UNKNOWN');
       message('test-state', 'SIGNAL UNKNOWN');
@@ -100,9 +170,11 @@
       const snapshot = await api('/api/state');
       render(snapshot);
       const checkedAt = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
-      message('pair-feedback', snapshot.link?.online ?
-        `Checked ${checkedAt}: console receiver heartbeat is current. Link ready.` :
-        `Checked ${checkedAt}: no recent console receiver heartbeat. Check the console's power and network.`);
+      const consoles = snapshot.link?.consoles || [];
+      const online = consoles.filter(item => item.online).length;
+      message('pair-feedback', online ?
+        `Checked ${checkedAt}: ${online} of ${consoles.length} paired consoles online.` :
+        `Checked ${checkedAt}: no paired console is online. Check power and network.`);
     } catch (error) { message('pair-feedback', `Link check failed: ${error.message}`); }
     finally { linkChecking = false; $('pair-refresh').disabled = false; $('pair-refresh-offline').disabled = false; }
   }

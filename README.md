@@ -35,6 +35,8 @@ Enter the displayed code and certificate fingerprint on the UNO Q Setup page. Th
 
 Batocera 43.1 x86_64 is supported alongside RetroPie. The installer selects the R.O.B. Vision FCEUmm wrapper for the exact Gyromite and Stack-Up ROM names, with Nestopia available as a per-game choice. It adds a separate Batocera service and launch hook; VirtualGlove's installation and Super Glove Ball choice remain intact. Install and pair using the [Batocera guide](deploy/batocera/README.md). Live launch, frame-link, and Gyromite Controller 2 configuration checks passed on the test Batocera machine; a full Batocera playthrough remains to be checked.
 
+Setup's **Console Link** lists paired consoles individually, including online status. Use **Pair Another Console** to add one and **Remove** to revoke one console's credential without disconnecting the others. Only one console supplies the active game at a time.
+
 ## Play through RetroPie
 
 Install the [RetroPie receiver and launch choices](deploy/retropie/README.md), then pair the console on Setup. For a supported game, select `lr-robvision-fceumm` or `lr-robvision-nestopia` in RetroPie's emulator selection. These entries use the installed original cores through a small frame wrapper; they are not separate emulators. The plain `lr-fceumm` and `lr-nestopia` entries play the game without R.O.B. Vision's automatic movement link.

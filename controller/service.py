@@ -18,13 +18,14 @@ from urllib.parse import urlsplit
 
 from .model import GyroState, StackState
 from .optical import ALLOWED, PATTERNS
+from .pairings import PairingStore, PLATFORMS
 from tools.identify_game import identify, load_registry
 
 ROOT = Path(__file__).resolve().parents[1]
 MIME = {".html": "text/html", ".js": "text/javascript", ".css": "text/css",
         ".svg": "image/svg+xml", ".pdf": "application/pdf", ".png": "image/png",
         ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".ttf": "font/ttf"}
-def pair_retropie(host, code, fingerprint, token, port=8768):
+def pair_retropie(host, code, fingerprint, token, console_id, port=8768):
     """Send the controller token only after checking the console's TLS fingerprint."""
     if not isinstance(host, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]{0,252}", host):
         raise ValueError("Enter a console hostname or local IP address.")
@@ -49,19 +50,22 @@ def pair_retropie(host, code, fingerprint, token, port=8768):
         actual = hashlib.sha256(connection.sock.getpeercert(binary_form=True)).hexdigest()
         if actual != fingerprint:
             raise ValueError("Console fingerprint does not match. Pairing stopped before sending the token.")
-        body = json.dumps({"code": code, "token": token}).encode()
+        body = json.dumps({"code": code, "token": token, "console_id": console_id}).encode()
         connection.request("POST", "/pair", body=body, headers={"Content-Type": "application/json"})
         response = connection.getresponse()
         result = json.load(response)
         if response.status != 200 or result.get("paired") is not True:
             raise ValueError(result.get("error", "Console did not confirm pairing."))
-        return {"paired": True, "host": host}
+        platform = result.get("platform")
+        if platform not in PLATFORMS or result.get("console_id") != console_id:
+            raise ValueError("Update the console receiver before pairing it again.")
+        return {"paired": True, "host": host, "platform": platform, "id": console_id}
     finally:
         connection.close()
 
 
 class Controller:
-    def __init__(self):
+    def __init__(self, pairings=None):
         self.lock = threading.RLock()
         self.game = None
         self.stack = StackState()
@@ -71,6 +75,8 @@ class Controller:
         self.receiver_last_seen = 0.0
         self.receiver_name = None
         self.active_receiver = None
+        self.active_console_id = None
+        self.pairings = pairings
         self.frame_hook_last_seen = 0.0
         self.frame_hook_game = None
         self.frame_hook_commands = deque(maxlen=128)
@@ -93,7 +99,8 @@ class Controller:
                     "robot": self.stack.snapshot() if self.game == "stack_up" else self.gyro.snapshot() if self.game == "gyromite" else None,
                     "events": list(self.events),
                     "link": {"online": monotonic() - self.receiver_last_seen < 3.0,
-                             "receiver": self.receiver_name},
+                             "receiver": self.receiver_name,
+                             "consoles": self.pairings.list_public(self.active_console_id) if self.pairings else []},
                     "input": {"frame_hook": self.frame_hook_active()},
                     "test": {"armed": bool(self.test_armed_at), "ready": self.test_ready_at >= self.test_armed_at > 0,
                              "ready_at": self.test_ready_at,
@@ -103,8 +110,10 @@ class Controller:
     def frame_hook_active(self):
         return self.frame_hook_game == self.game and monotonic() - self.frame_hook_last_seen < 1.0
 
-    def receiver_seen(self, name, frame_hook_game=None, test_signal_game=None):
+    def receiver_seen(self, name, frame_hook_game=None, test_signal_game=None, console_id=None):
         with self.lock:
+            if self.active_console_id and console_id != self.active_console_id:
+                return
             if self.active_receiver and name.casefold() != self.active_receiver:
                 return
             if (not self.active_receiver and self.receiver_name and name != self.receiver_name
@@ -121,8 +130,10 @@ class Controller:
                         self.event("test", "Game-frame Test signal detected; R.O.B. light blinking.")
                         self.test_signal_announced = True
 
-    def emulator_command(self, game, pattern, sender_pid, frame_index, receiver="retropie"):
+    def emulator_command(self, game, pattern, sender_pid, frame_index, receiver="retropie", console_id=None):
         with self.lock:
+            if self.active_console_id and console_id != self.active_console_id:
+                raise ValueError("Frame command came from another console.")
             if self.active_receiver and receiver != self.active_receiver:
                 raise ValueError("Frame command came from another console.")
             if game != self.game or game not in ALLOWED:
@@ -212,10 +223,11 @@ class Controller:
             return self.snapshot()
 
 
-def serve(host="127.0.0.1", port=8766, token=None, matrix=None):
+def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=None):
     if host not in ("127.0.0.1", "localhost", "::1") and not token:
         raise ValueError("A bearer token is required when serving over the network.")
-    controller = Controller()
+    pairings = PairingStore(pairing_path or ROOT / "data/paired-consoles.json", token or "")
+    controller = Controller(pairings)
     matrix_stop = threading.Event()
     matrix_thread = None
     if matrix is not None:
@@ -238,7 +250,9 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None):
             self.wfile.write(body)
 
         def authorized(self):
-            if token and self.headers.get("Authorization") != f"Bearer {token}":
+            self.console_identity = (pairings.verify(self.headers) if token else
+                                     {"id": "legacy:retropie", "platform": "retropie", "host": ""})
+            if self.console_identity is None:
                 self.respond(401, {"error": "Controller token required."})
                 return False
             return True
@@ -264,11 +278,13 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None):
             path = urlsplit(self.path).path
             if path.startswith("/api/"):
                 if path == "/api/state":
-                    receiver = self.headers.get("X-ROB-Receiver")
-                    if receiver in ("retropie", "batocera") and token and self.headers.get("Authorization") == f"Bearer {token}":
+                    identity = pairings.verify(self.headers) if token else None
+                    if identity:
+                        receiver = identity["platform"]
+                        pairings.seen(identity["id"])
                         controller.receiver_seen("RetroPie" if receiver == "retropie" else "Batocera",
                                                  self.headers.get("X-ROB-Frame-Hook"),
-                                                 self.headers.get("X-ROB-Test-Signal"))
+                                                 self.headers.get("X-ROB-Test-Signal"), identity["id"])
                     return self.respond(200, controller.snapshot())
                 if path == "/api/matrix/state":
                     return self.respond(200, matrix.status() if matrix is not None else
@@ -308,16 +324,17 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None):
                     result = controller.select(data.get("game"))
                     with controller.lock:
                         controller.active_receiver = None
+                        controller.active_console_id = None
                 elif path == "/api/launch":
-                    receiver = self.headers.get("X-ROB-Receiver", "retropie")
-                    if receiver not in ("retropie", "batocera"):
-                        raise ValueError("Unknown console receiver.")
-                    if data.get("event") == "end" and controller.active_receiver not in (None, receiver):
+                    receiver = self.console_identity["platform"]
+                    console_id = self.console_identity["id"]
+                    if data.get("event") == "end" and controller.active_console_id not in (None, console_id):
                         return self.respond(200, controller.snapshot())
                     game = identify(data.get("system", ""), data.get("rom", ""), load_registry()) if data.get("event") == "start" else None
                     result = controller.select(game)
                     with controller.lock:
                         controller.active_receiver = receiver if game else None
+                        controller.active_console_id = console_id if game else None
                         controller.receiver_name = "RetroPie" if receiver == "retropie" else "Batocera"
                         controller.receiver_last_seen = 0.0
                 elif path == "/api/command":
@@ -325,7 +342,7 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None):
                 elif path == "/api/emulator/command":
                     result = controller.emulator_command(data["game"], data["pattern"],
                                                          data["sender_pid"], data["frame_index"],
-                                                         self.headers.get("X-ROB-Receiver", "retropie"))
+                                                         self.console_identity["platform"], self.console_identity["id"])
                 elif path == "/api/gate-assist":
                     result = controller.gate_assist(data["color"], data["pressed"])
                 elif path == "/api/test/arm":
@@ -334,10 +351,26 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None):
                     if matrix is not None:
                         matrix.show_pairing()
                     try:
-                        result = pair_retropie(data["host"], data["code"], data["fingerprint"], token)
+                        console_id, console_token = pairings.new_credentials()
+                        result = pair_retropie(data["host"], data["code"], data["fingerprint"],
+                                               console_token, console_id)
+                        pairings.add(console_id, console_token, result["platform"], result["host"])
                     finally:
                         if matrix is not None:
                             matrix.clear_pairing()
+                elif path == "/api/consoles/remove":
+                    console_id = data.get("id")
+                    if not isinstance(console_id, str):
+                        raise ValueError("Choose a console to remove.")
+                    pairings.remove(console_id)
+                    with controller.lock:
+                        if controller.active_console_id == console_id:
+                            controller.select(None)
+                            controller.active_console_id = None
+                            controller.active_receiver = None
+                            controller.receiver_name = None
+                            controller.receiver_last_seen = 0.0
+                    result = controller.snapshot()
                 elif path == "/api/matrix/pairing":
                     if not isinstance(data.get("active"), bool):
                         raise ValueError("Choose whether pairing is active.")

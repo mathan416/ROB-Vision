@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#080f1d">
   <title>R.O.B. Vision // Setup</title>
   <link rel="stylesheet" href="style.css?v=setup-3">
-  <link rel="stylesheet" href="setup.css?v=help-1">
+  <link rel="stylesheet" href="setup.css?v=consoles-1">
   <script src="status.js?v=status-2" defer></script>
-  <script src="setup.js?v=status-1" defer></script>
+  <script src="setup.js?v=consoles-1" defer></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -23,6 +23,8 @@
       <section class="setup-card" aria-labelledby="pair-heading">
         <div class="section-head"><span>01 / CONSOLE LINK</span><span id="pair-link">CONSOLE UNKNOWN</span></div>
         <h2 id="pair-heading">Connect your console</h2>
+        <div class="console-list-head"><span>PAIRED CONSOLES</span><span id="console-count">0 SAVED</span></div>
+        <div id="console-list" class="console-list" aria-live="polite"><p>No consoles paired yet.</p></div>
         <div id="pair-connected" hidden>
           <p class="pair-success">Your console receiver is online. You can continue to the game-frame check.</p>
           <div class="setup-row"><button id="pair-change" type="button" class="quiet">PAIR ANOTHER CONSOLE</button><button id="pair-refresh" type="button" class="quiet">CHECK LINK</button></div>
@@ -54,7 +56,7 @@
       <section class="setup-card" aria-labelledby="buttons-heading">
         <div class="section-head"><span>04 / MANUAL TEST</span><span id="buttons-mode">SELECT A GAME</span></div>
         <h2 id="buttons-heading">Try the controls</h2>
-        <p>These buttons change the virtual R.O.B. state. Gyromite gates also drive RetroPie's Controller 2 when paired and the game is running.</p>
+        <p>These buttons change the virtual R.O.B. state. Gyromite gates also drive the playing console's Controller 2 when paired and the game is running.</p>
         <div id="setup-gates" hidden><p class="test-caption">GYROMITE / FAST GATES</p><div class="setup-row"><button data-setup-gate="red" type="button">LOWER RED</button><button data-setup-gate="blue" type="button">LOWER BLUE</button><button data-setup-gate="all" type="button" class="quiet">RELEASE BOTH</button></div></div>
         <div id="setup-stack" hidden><p class="test-caption">STACK-UP / R.O.B. COMMANDS</p><div class="setup-command-grid"><button data-setup-command="LEFT" type="button">LEFT</button><button data-setup-command="RIGHT" type="button">RIGHT</button><button data-setup-command="UP" type="button">UP</button><button data-setup-command="DOWN" type="button">DOWN</button><button data-setup-command="OPEN" type="button">OPEN</button><button data-setup-command="CLOSE" type="button">CLOSE</button></div></div>
         <p class="setup-feedback" id="buttons-feedback" role="status">Manual tests are available after selecting Gyromite or Stack-Up.</p><a class="setup-help-link" href="help.html#controls">CONTROL GUIDE ↗</a>

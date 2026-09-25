@@ -31,6 +31,13 @@ def install_token(token, destination):
             pass
 
 
+def install_console_id(console_id, destination):
+    if (not isinstance(console_id, str) or len(console_id) != 32 or
+            any(char not in "0123456789abcdef" for char in console_id)):
+        raise ValueError("Invalid console ID.")
+    install_token(console_id, destination)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Pair this console with R.O.B. Vision.")
     parser.add_argument("--port", type=int, default=8768)
@@ -40,6 +47,7 @@ def main():
     if args.token_file is None:
         args.token_file = (Path("/userdata/system/rob-vision/token") if args.platform == "batocera"
                            else Path.home() / ".config/rob-vision/token")
+    console_id_file = args.token_file.with_name("console-id")
     code = f"{secrets.randbelow(1_000_000):06d}"
     expires = time.monotonic() + 300
     with tempfile.TemporaryDirectory(prefix="rob-vision-pair-") as directory:
@@ -64,7 +72,13 @@ def main():
                     if not secrets.compare_digest(str(data.get("code", "")), code):
                         self.server.failed_attempts += 1
                         raise ValueError("Incorrect pairing code.")
-                    install_token(data.get("token"), args.token_file)
+                    console_id = data.get("console_id")
+                    offered_token = data.get("token")
+                    if (not isinstance(offered_token, str) or not 16 <= len(offered_token) <= 256 or
+                            any(char.isspace() for char in offered_token)):
+                        raise ValueError("Invalid controller token.")
+                    install_console_id(console_id, console_id_file)
+                    install_token(offered_token, args.token_file)
                     try:
                         restart = (["batocera-services", "restart", "ROBVision"] if args.platform == "batocera"
                                    else ["sudo", "-n", "systemctl", "restart", "rob-vision-controller2.service"])
@@ -72,7 +86,8 @@ def main():
                                        check=True, timeout=15, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                     except (OSError, subprocess.SubprocessError):
                         pass  # The receiver can also pick up the token on its next restart.
-                    self.reply(200, {"paired": True})
+                    self.reply(200, {"paired": True, "platform": args.platform,
+                                     "console_id": console_id})
                     self.server.paired = True
                 except (ValueError, TypeError, json.JSONDecodeError) as exc:
                     self.reply(400, {"error": str(exc)})

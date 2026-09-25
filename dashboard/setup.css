@@ -35,3 +35,18 @@
 .setup-help-link{display:inline-block;margin-top:9px;color:#86ded7;text-decoration:none;border-bottom:1px solid #528d8b;padding-bottom:3px;font:800 10px "DM Sans",sans-serif;letter-spacing:.09em}.setup-help-link:hover{color:#fff;border-color:#fff}
 
 #pair-link[data-state="offline"]{color:#f4a99a}#pair-link[data-state="unknown"]{color:#d9af75}
+
+.console-list-head{display:flex;justify-content:space-between;gap:12px;margin:20px 0 8px;color:#81d7d1;font:800 10px 'DM Sans',sans-serif;letter-spacing:.12em}
+.console-list{display:grid;gap:8px}
+.console-list>p{margin:0;padding:13px;border:1px dashed #486e80;color:#9cbdc9}
+.console-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid #3c6274;background:#0a2030}
+.console-item.active{border-color:#6ac6bd;background:#103b43}
+.console-identity{min-width:0}
+.console-name{display:block;color:#ecf8f6;font:800 13px 'DM Sans',sans-serif;letter-spacing:.04em}
+.console-host{display:block;color:#9bbac6;font:600 11px 'DM Sans',sans-serif;overflow-wrap:anywhere;margin-top:3px}
+.console-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.console-state{color:#9fb8c5;font:800 10px 'DM Sans',sans-serif;letter-spacing:.09em}
+.console-state.online{color:#86dfc7}
+.console-item .console-remove{min-height:31px;padding:6px 9px;background:transparent;border-color:#6c7f89;color:#d3e2e7}
+.console-item .console-confirm{min-height:31px;padding:6px 9px;background:#a9433f;border-color:#dd7c70}
+@media(max-width:530px){.console-item{align-items:flex-start;flex-direction:column}.console-meta{justify-content:flex-start}}

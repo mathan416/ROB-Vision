@@ -76,8 +76,11 @@ class VirtualPad:
             os.close(self.fd)
 
 
-def fetch_state(url, token, timeout, frame_hook_game=None, test_signal_game=None, platform="retropie"):
+def fetch_state(url, token, timeout, frame_hook_game=None, test_signal_game=None,
+                platform="retropie", console_id=""):
     headers = {"Authorization": "Bearer " + token, "X-ROB-Receiver": platform}
+    if console_id:
+        headers["X-ROB-Console-ID"] = console_id
     if frame_hook_game in ("gyromite", "stack_up"):
         headers["X-ROB-Frame-Hook"] = frame_hook_game
     if test_signal_game == frame_hook_game and test_signal_game in ("gyromite", "stack_up"):
@@ -100,6 +103,14 @@ def pads_from_state(state):
     if not isinstance(pads.get("red"), bool) or not isinstance(pads.get("blue"), bool):
         raise ValueError("Gyromite pad state is missing or invalid")
     return pads["red"], pads["blue"]
+
+
+def source_selected(state, platform, console_id=""):
+    link = state.get("link") or {}
+    active = next((item.get("id") for item in link.get("consoles", []) if item.get("active")), None)
+    if active:
+        return active == (console_id or "legacy:" + platform)
+    return str(link.get("receiver") or "").casefold() in ("", platform)
 
 
 def running_game(registry, proc_root=Path("/proc"), platform="retropie"):
@@ -133,22 +144,27 @@ def running_game(registry, proc_root=Path("/proc"), platform="retropie"):
     return None
 
 
-def sync_game(url, token, system, rom, timeout, platform="retropie"):
+def sync_game(url, token, system, rom, timeout, platform="retropie", console_id=""):
     """Replay a known launch after the UNO Q restarts mid-game."""
     payload = json.dumps({"event": "start", "system": system, "rom": Path(rom).name}).encode()
-    request = Request(url.rstrip("/") + "/api/launch", data=payload,
-                      headers={"Content-Type": "application/json", "Authorization": "Bearer " + token,
-                               "X-ROB-Receiver": platform}, method="POST")
+    headers = {"Content-Type": "application/json", "Authorization": "Bearer " + token,
+               "X-ROB-Receiver": platform}
+    if console_id:
+        headers["X-ROB-Console-ID"] = console_id
+    request = Request(url.rstrip("/") + "/api/launch", data=payload, headers=headers, method="POST")
     with urlopen(request, timeout=timeout) as response:
         response.read()
 
 
-def send_frame_command(url, token, item, timeout, platform="retropie"):
+def send_frame_command(url, token, item, timeout, platform="retropie", console_id=""):
     payload = json.dumps({key: item[key] for key in
                           ("game", "pattern", "sender_pid", "frame_index")}).encode()
+    headers = {"Content-Type": "application/json", "Authorization": "Bearer " + token,
+               "X-ROB-Receiver": platform}
+    if console_id:
+        headers["X-ROB-Console-ID"] = console_id
     request = Request(url.rstrip("/") + "/api/emulator/command", data=payload,
-                      headers={"Content-Type": "application/json", "Authorization": "Bearer " + token,
-                               "X-ROB-Receiver": platform},
+                      headers=headers,
                       method="POST")
     with urlopen(request, timeout=timeout) as response:
         response.read()
@@ -170,6 +186,8 @@ def main():
     token = args.token_file.read_text().strip()
     if not token:
         parser.error("Controller token file is empty")
+    console_id_path = args.token_file.with_name("console-id")
+    console_id = console_id_path.read_text().strip() if console_id_path.exists() else ""
     running = True
 
     def stop(_signal, _frame):
@@ -199,18 +217,19 @@ def main():
                 hook_game = hook.recent_game()
                 state = fetch_state(args.url, token, args.timeout,
                                     hook_game if active_game and hook_game == active_game[0] else None,
-                                    hook.recent_test_game(), platform=args.platform)
-                selected_receiver = (state.get("link") or {}).get("receiver", "").casefold()
-                if selected_receiver not in ("", args.platform):
+                                    hook.recent_test_game(), platform=args.platform, console_id=console_id)
+                selected_here = source_selected(state, args.platform, console_id)
+                if not selected_here:
                     desired = (False, False)
                     hook_game = None
                 else:
                     desired = pads_from_state(state)
                 last_good = time.monotonic()
-                if active_game and (selected_receiver in ("", args.platform) or state.get("game") is None) and state.get("game") != active_game[0] and started >= next_sync:
+                if active_game and (selected_here or state.get("game") is None) and state.get("game") != active_game[0] and started >= next_sync:
                     next_sync = started + 2.0
                     try:
-                        sync_game(args.url, token, active_game[1], active_game[2], args.timeout, args.platform)
+                        sync_game(args.url, token, active_game[1], active_game[2], args.timeout,
+                                  args.platform, console_id)
                     except (OSError, ValueError):
                         pass
             except (OSError, ValueError, json.JSONDecodeError):
@@ -222,14 +241,14 @@ def main():
             while pending_frames:
                 item = pending_frames[0]
                 if (not active_game or active_game[0] != item["game"] or
-                        (state.get("link") or {}).get("receiver", "").casefold() not in ("", args.platform) or
+                        not source_selected(state, args.platform, console_id) or
                         time.monotonic() - item["created_at"] > 1.0):
                     pending_frames.popleft()
                     continue
                 if time.monotonic() < item.get("next_try", 0.0):
                     break
                 try:
-                    send_frame_command(args.url, token, item, args.timeout, args.platform)
+                    send_frame_command(args.url, token, item, args.timeout, args.platform, console_id)
                     pending_frames.popleft()
                 except (OSError, ValueError):
                     item["next_try"] = time.monotonic() + .2

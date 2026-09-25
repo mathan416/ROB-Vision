@@ -9,12 +9,18 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from identify_game import load_registry  # noqa: E402
-from retropie_controller2 import pads_from_state, running_game, sync_game  # noqa: E402
+from retropie_controller2 import pads_from_state, running_game, source_selected, sync_game  # noqa: E402
 from tools.retropie_frame_hook import FrameHookServer, sender_game  # noqa: E402
 from tools.install_retropie_frame_hook import install  # noqa: E402
 
 
 class ReceiverTests(unittest.TestCase):
+    def test_two_consoles_on_same_platform_follow_only_the_active_identity(self):
+        state = {"link": {"receiver": "Batocera", "consoles": [
+            {"id": "a" * 32, "active": True}, {"id": "b" * 32, "active": False}]}}
+        self.assertTrue(source_selected(state, "batocera", "a" * 32))
+        self.assertFalse(source_selected(state, "batocera", "b" * 32))
+
     def test_frame_hook_install_selects_only_two_roms_and_is_repeatable(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

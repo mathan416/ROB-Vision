@@ -32,10 +32,18 @@ def main():
             token = args.token_file.read_text().strip()
         if not token:
             raise ValueError("Controller token is not configured")
+        console_id = ""
+        if args.token_file:
+            console_id_file = args.token_file.with_name("console-id")
+            if console_id_file.exists():
+                console_id = console_id_file.read_text().strip()
         payload = event(args.action, args.system, args.rom, load_registry() if args.action == "start" else {})
+        headers = {"Content-Type": "application/json", "Authorization": "Bearer " + token,
+                   "X-ROB-Receiver": os.environ.get("ROB_VISION_RECEIVER", "retropie")}
+        if console_id:
+            headers["X-ROB-Console-ID"] = console_id
         request = Request(args.url.rstrip("/") + "/api/launch", data=json.dumps(payload).encode(),
-                          headers={"Content-Type": "application/json", "Authorization": "Bearer " + token,
-                                   "X-ROB-Receiver": os.environ.get("ROB_VISION_RECEIVER", "retropie")}, method="POST")
+                          headers=headers, method="POST")
         for attempt in range(args.attempts):
             try:
                 with urlopen(request, timeout=args.timeout) as response:
