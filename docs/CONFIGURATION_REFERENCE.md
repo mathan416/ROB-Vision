@@ -19,7 +19,7 @@
 | RetroPie stale release | 750 ms since last good response | Both virtual buttons release; game exit and missing RetroArch also release them. |
 | RetroPie process scan | 250 ms | Identifies active RetroArch launch and can resync UNO Q game context after restart, throttled to two seconds. |
 | RetroPie game-frame socket | `/run/rob-vision/frames.sock` | The FCEUmm or Nestopia proxy sends one classified bit per rendered NES frame. The receiver validates sender credentials, approved proxy path, ROM identity, and complete 13-frame commands. |
-| RetroPie per-game NES core | `lr-robvision-fceumm` or `lr-robvision-nestopia` | Both are registered; current Gyromite and Stack-Up selections remain FCEUmm. Use the installer's `--gyromite-core` and `--stack-up-core` flags to choose per game. |
+| RetroPie per-game NES launch choice | `lr-robvision-fceumm` or `lr-robvision-nestopia` | These launch the original FCEUmm or Nestopia core through the frame wrapper. Both are registered; current Gyromite and Stack-Up selections remain FCEUmm. The plain `lr-fceumm` and `lr-nestopia` entries bypass the frame link. Use the installer's `--gyromite-core` and `--stack-up-core` flags to choose per game. |
 | Game-frame indicator | Last matching receiver heartbeat within one second | `/api/state.input.frame_hook` is true; camera movement decoding pauses to avoid duplicate actions. |
 | Receiver online indicator | Authenticated poll within three seconds | Otherwise Setup/Mission show RetroPie offline. |
 | Game registry | `config/games.json` | Exact case-insensitive ROM basenames for Gyromite and Stack-Up, including configured ZIP, 7z, and NES names. |
@@ -34,7 +34,7 @@ python3 tools/identify_game.py start nes lr-fceumm "/roms/nes/Gyromite (World).z
 python3 tools/identify_game.py end
 ```
 
-The camera dependency is optional for manual controls and RetroPie game-frame play. On the UNO Q App Lab installation, OpenCV and the Kiyo Pro are present; Gyromite and Stack-Up Test modes were recognized at about 60 fps. Live camera commands were intermittent. The RetroPie frame link has independently decoded Stack-Up CLOSE and DOWN and updated the virtual model. The optional standalone `deploy/rob-vision.service` must stay disabled while App Lab owns port 8766. App Lab runs one app at a time on this device.
+The camera dependency is optional for manual controls and RetroPie game-frame play. On the UNO Q App Lab installation, OpenCV and the Kiyo Pro are present; Gyromite and Stack-Up Test modes were recognized at about 60 fps. Live camera commands were intermittent. The RetroPie frame link delivered commands from both games through FCEUmm and Nestopia to the virtual model. The optional standalone `deploy/rob-vision.service` must stay disabled while App Lab owns port 8766. App Lab runs one app at a time on this device.
 
 The repository includes UNO Q camera recovery, shutdown, early-start, and network-status host units. They are **not installed or enabled** by App Lab. Existing Avahi provides `arduiain.local`; the R.O.B. Vision status timer is diagnostic and does not create the mDNS name. See [UNO Q host helpers](../deploy/uno-q/README.md).
 

@@ -12,6 +12,16 @@ The service is enabled through systemd and should be running before the game lau
 
 The FCEUmm and Nestopia proxies observe the NES image one emulated frame at a time. Each sends a black/green/other classification and frame number to the receiver over `/run/rob-vision/frames.sock`. The receiver accepts only a RetroArch process using one of these exact proxies with a Gyromite or Stack-Up ROM found in the game registry. A complete 13-frame command travels to the UNO Q using the paired token. This path avoids the camera's one-frame sampling limit. The camera remains useful for preview, placement, and Test mode. Mission says **GAME FRAMES LINKED** when the current RetroPie game is sending frames.
 
+The `lr-robvision-*` names are **RetroPie launch choices, not new emulators**. Each choice starts RetroArch with a small R.O.B. Vision wrapper around the installed, unmodified libretro core:
+
+| Choose for Gyromite or Stack-Up | Emulator that actually runs the game | Automatic frame link |
+| --- | --- | --- |
+| `lr-robvision-fceumm` | FCEUmm | Yes |
+| `lr-robvision-nestopia` | Nestopia | Yes |
+| `lr-fceumm` or `lr-nestopia` | The named core directly | No |
+
+The plain core choices still play the game. Without a R.O.B. Vision wrapper, the camera can watch the screen for optical commands, but camera-only movement is still experimental; manual controls and demos remain available. The wrapper reads the rendered light signal and forwards the original video to RetroArch. It does not replace or modify the emulator core. The two R.O.B. Vision entries are registered for the NES system, and the per-game overrides apply only to the registered Gyromite and Stack-Up ROMs.
+
 Copy `rob_vision_fceumm_proxy.c` to `/home/pi/rob-vision/build/` and build each installed core:
 
 ```sh

@@ -16,6 +16,10 @@ Mission keeps the animated R.O.B. as the main view. Accessory Bay and Game Table
 
 When no supported game is running, select **Gyromite** or **Stack-Up** and **Run Demo Sequence**. It works even if RetroPie is paired but idle. Gyromite demonstrates a held unspun gyro, two spinning gyros on pads, spin-down, re-spin, and return to holders. The illustrative spin clock is 55 seconds. Stack-Up moves red alone and then a blue/white group. **Home** resets the pieces. Pose Lab is a character-only movement sandbox. A live game launch stops the demo and selects that game's scene.
 
+## Choose an NES emulator
+
+For automatic R.O.B. movement on RetroPie, select **lr-robvision-fceumm** if you prefer FCEUmm, or **lr-robvision-nestopia** if you prefer Nestopia. These are launch choices that use the corresponding original emulator core while sending its game flashes to the UNO Q. Both choices are installed on the test RetroPie; Gyromite and Stack-Up currently default to the FCEUmm choice. The plain **lr-fceumm** and **lr-nestopia** choices play normally but do not send game frames to R.O.B. Vision. The camera remains an experimental way to read those flashes from the screen. See the [RetroPie setup guide](../deploy/retropie/README.md) to change a game's saved choice.
+
 ## Play Gyromite
 
 Open [Setup](../dashboard/setup.html) to check the RetroPie link and, when a camera is attached, frame the game display. Start Gyromite on RetroPie and watch Mission for **GAME FRAMES LINKED**. R.O.B. then follows complete light commands from the game's rendered frames. On Mission, **Fast Gates** works while Gyromite is selected and camera capture is stopped. Tap **Lower Blue** or **Lower Red** to press immediately, tap again to release, or select **Release Both**. Keyboard shortcuts are **2**, **1**, and **0**. Presses expire after 60 seconds. Both buttons release on game exit or lost receiver data. If you moved a gyro with normal controls, select **Home** before Fast Gates to restore their holders.
