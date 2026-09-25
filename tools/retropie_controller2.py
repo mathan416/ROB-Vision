@@ -10,11 +10,15 @@ import json
 import os
 import signal
 import struct
+import sys
 import time
+from collections import deque
 from pathlib import Path
 from urllib.request import Request, urlopen
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from identify_game import identify, load_registry
+from tools.retropie_frame_hook import FrameHookServer
 
 
 def ioctl_write(number, size):
@@ -72,9 +76,12 @@ class VirtualPad:
             os.close(self.fd)
 
 
-def fetch_state(url, token, timeout):
+def fetch_state(url, token, timeout, frame_hook_game=None):
+    headers = {"Authorization": "Bearer " + token, "X-ROB-Receiver": "retropie"}
+    if frame_hook_game in ("gyromite", "stack_up"):
+        headers["X-ROB-Frame-Hook"] = frame_hook_game
     request = Request(url.rstrip("/") + "/api/state",
-                      headers={"Authorization": "Bearer " + token, "X-ROB-Receiver": "retropie"})
+                      headers=headers)
     with urlopen(request, timeout=timeout) as response:
         state = json.load(response)
     if not isinstance(state, dict):
@@ -126,6 +133,16 @@ def sync_game(url, token, system, rom, timeout):
         response.read()
 
 
+def send_frame_command(url, token, item, timeout):
+    payload = json.dumps({key: item[key] for key in
+                          ("game", "pattern", "sender_pid", "frame_index")}).encode()
+    request = Request(url.rstrip("/") + "/api/emulator/command", data=payload,
+                      headers={"Content-Type": "application/json", "Authorization": "Bearer " + token},
+                      method="POST")
+    with urlopen(request, timeout=timeout) as response:
+        response.read()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://arduiain.local")
@@ -150,11 +167,14 @@ def main():
     signal.signal(signal.SIGINT, stop)
     pad = VirtualPad()
     registry = load_registry()
+    hook = FrameHookServer(registry)
+    hook.start()
     desired = (False, False)
     last_good = 0.0
     active_game = None
     next_process_check = 0.0
     next_sync = 0.0
+    pending_frames = deque()
     try:
         while running:
             started = time.monotonic()
@@ -162,7 +182,9 @@ def main():
                 active_game = running_game(registry)
                 next_process_check = started + .25
             try:
-                state = fetch_state(args.url, token, args.timeout)
+                hook_game = hook.recent_game()
+                state = fetch_state(args.url, token, args.timeout,
+                                    hook_game if active_game and hook_game == active_game[0] else None)
                 desired = pads_from_state(state)
                 last_good = time.monotonic()
                 if active_game and state.get("game") != active_game[0] and started >= next_sync:
@@ -176,10 +198,26 @@ def main():
                     desired = (False, False)
             if not active_game or active_game[0] != "gyromite":
                 desired = (False, False)
+            pending_frames.extend(hook.take_pending())
+            while pending_frames:
+                item = pending_frames[0]
+                if (not active_game or active_game[0] != item["game"] or
+                        time.monotonic() - item["created_at"] > 1.0):
+                    pending_frames.popleft()
+                    continue
+                if time.monotonic() < item.get("next_try", 0.0):
+                    break
+                try:
+                    send_frame_command(args.url, token, item, args.timeout)
+                    pending_frames.popleft()
+                except (OSError, ValueError):
+                    item["next_try"] = time.monotonic() + .2
+                    break
             pad.update(*desired, swap=args.swap_buttons)
             if running:
                 time.sleep(max(0, args.interval - (time.monotonic() - started)))
     finally:
+        hook.stop()
         pad.close()
 
 

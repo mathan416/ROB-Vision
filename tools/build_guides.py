@@ -263,7 +263,7 @@ def body_page(canvas, doc, label: str):
     canvas.drawString(48, height-28, "R.O.B. VISION")
     canvas.setFillColor(MUTED); canvas.drawRightString(width-48, height-28, label.upper())
     canvas.line(48, 43, width-48, 43)
-    canvas.setFont("DM", 7); canvas.drawString(48, 29, "LIVE CONTROLLER · MOVEMENT OPTICS PENDING")
+    canvas.setFont("DM", 7); canvas.drawString(48, 29, "GAME FRAMES VERIFIED · CAMERA EXPERIMENTAL")
     canvas.drawRightString(width-48, 29, f"{doc.page:02d}")
     canvas.restoreState()
 

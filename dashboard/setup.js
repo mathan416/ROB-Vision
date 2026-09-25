@@ -65,7 +65,8 @@
     message('camera-device', snapshot.camera.devices?.[0]?.name || 'NO CAPTURE DEVICE');
     message('camera-fps', `${snapshot.camera.fps || 0} FPS`);
     message('camera-brightness', `${Math.round((snapshot.camera.brightness || 0) * 100)}% SIGNAL`);
-    message('camera-feedback', snapshot.camera.message);
+    message('camera-feedback', snapshot.input?.frame_hook ?
+      'Game frames are linked directly from RetroPie. Camera check is still available for alignment.' : snapshot.camera.message);
     $('camera-toggle').textContent = snapshot.camera.state === 'capturing' ? 'STOP CAMERA CHECK' :
       snapshot.camera.state === 'fault' ? 'CLEAR CAMERA FAULT' : 'START CAMERA CHECK';
     $('camera-toggle').disabled = cameraBusy;

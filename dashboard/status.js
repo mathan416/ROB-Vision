@@ -16,7 +16,7 @@
   const test = snapshot => snapshot?.test?.flash_active ? 'TEST SIGNAL SEEN' :
     snapshot?.test?.ready ? 'READY SIGNAL SEEN' : snapshot?.test?.armed ? 'WATCHING' : 'WAITING';
   const testSignal = snapshot => Boolean(snapshot?.test?.flash_active || snapshot?.test?.ready || snapshot?.test?.armed);
-  const controllerDetail = snapshot => `${gameName(snapshot?.game)} · ${camera(snapshot)}${snapshot?.camera?.state === 'capturing' ? ` · ${snapshot.camera.fps || 0} FPS` : ''} · ${receiver(snapshot)}`;
+  const controllerDetail = snapshot => `${gameName(snapshot?.game)} · ${snapshot?.input?.frame_hook ? 'GAME FRAMES LINKED' : camera(snapshot)}${!snapshot?.input?.frame_hook && snapshot?.camera?.state === 'capturing' ? ` · ${snapshot.camera.fps || 0} FPS` : ''} · ${receiver(snapshot)}`;
   window.RobStatus = Object.freeze({ gameName, connection, receiver, camera, test, testSignal, controllerDetail,
     offline: 'CONTROLLER / OFFLINE', preview: 'PREVIEW / LOCAL', connecting: 'CONTROLLER / CONNECTING' });
 })();

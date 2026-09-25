@@ -1,5 +1,5 @@
 [Unit]
-Description=R.O.B. Vision Gyromite virtual Controller 2
+Description=R.O.B. Vision RetroPie controller and frame receiver
 After=network-online.target
 Wants=network-online.target
 
@@ -12,7 +12,9 @@ User=root
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/dev/uinput
+RuntimeDirectory=rob-vision
+RuntimeDirectoryMode=0755
+ReadWritePaths=/dev/uinput /run/rob-vision
 
 [Install]
 WantedBy=multi-user.target

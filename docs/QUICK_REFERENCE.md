@@ -1,6 +1,6 @@
 # R.O.B. Vision quick reference
 
-**R.O.B. is virtual.** The UNO Q app and RetroPie link are running. Both Gyromite gate colors responded in Game A. The camera recognized both games' Test modes; movement command decoding is still unverified.
+**R.O.B. is virtual.** The UNO Q app and RetroPie link are running. Both Gyromite gate colors responded in Game A. The camera recognized both games' Test modes. RetroPie's game-frame link sent all six commands from each game to the virtual R.O.B. during live Direct play.
 
 | Where | Action | Result |
 | --- | --- | --- |
@@ -14,9 +14,10 @@
 | Setup | Reset & Reconnect | Retry OpenCV capture; USB hub is unaffected. |
 | Setup | Watch Test Signal | Blink R.O.B.'s red light for a detected Test signal; no movement. |
 | Setup | Gyromite / Stack-Up checks | Send manual pad or movement commands to the live model. |
+| Mission | GAME FRAMES LINKED | RetroPie is sending rendered game frames for the selected ROM; automatic movement does not require the camera. |
 
 In Stack-Up, press Select on the ROBOT BLOCK screen, choose Test, then press Start. The artwork remains visible while the Test signal plays.
 
-Use [Mission](http://arduiain.local/dashboard/) and [Setup](http://arduiain.local/dashboard/setup.html) on the UNO Q. A local `file://` page is only the preview. The camera requests 60 fps; delivered timing may still miss flashes. At 30 fps the current decoder rejects one-frame command traces rather than guessing.
+Use [Mission](http://arduiain.local/dashboard/) and [Setup](http://arduiain.local/dashboard/setup.html) on the UNO Q. A local `file://` page is only the preview. The camera requests 60 fps for preview and Test checks; the RetroPie frame link reads complete commands at the game's own frame rate.
 
 The game launch hook identifies an exact ROM name. The receiver applies Gyromite virtual pad states as Controller 2 input and releases both on exit or stale network data. Stack-Up moves modeled blocks and has no gate-button return path. See the [user guide](USER_GUIDE.md) and [troubleshooting](TROUBLESHOOTING.md).

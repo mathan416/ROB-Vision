@@ -1,12 +1,12 @@
 # R.O.B. Vision user guide
 
-**Current release:** The UNO Q hosts a live virtual R.O.B. dashboard and RetroPie link. Both Gyromite gate controls have been confirmed in Game A. The attached camera recognized both games' Test modes at about 60 fps; game movement flashes have not yet produced a decoded action. R.O.B., gyros, blocks, trays, and spinner are graphics and software state, not physical objects.
+**Current release:** The UNO Q hosts a live virtual R.O.B. dashboard and RetroPie link. Both Gyromite gate controls have been confirmed in Game A. The RetroPie game-frame link decoded all six commands in both supported games during live Direct play. The camera recognized both games' Test modes at about 60 fps; its movement reception was intermittent. R.O.B., gyros, blocks, trays, and spinner are graphics and software state, not physical objects.
 
 ## Open R.O.B. Vision
 
 Start **R.O.B. Vision** in UNO Q App Lab, then open `http://arduiain.local/dashboard/` on a laptop, phone, or tablet. App Lab runs one app at a time on this UNO Q; stop VirtualGlove before starting R.O.B. Vision. The direct `http://arduiain.local:8766/dashboard/` address reaches the same controller. A page opened from `file://` is an offline preview and does not show live RetroPie state.
 
-Mission keeps the animated R.O.B. as the main view. Accessory Bay and Game Table show his virtual game pieces. Pose Preview and System Vitals sit beside the Game Table; the Activity Feed reports controller actions. A label such as **GYROMITE / CONNECTED** means Gyromite is selected and this browser can reach the UNO Q. RetroPie status appears separately as **RETROPIE ONLINE** or **RETROPIE OFFLINE**; neither label proves the camera is reading valid commands.
+Mission keeps the animated R.O.B. as the main view. Accessory Bay and Game Table show his virtual game pieces. Pose Preview and System Vitals sit beside the Game Table; the Activity Feed reports controller actions. A label such as **GYROMITE / CONNECTED** means Gyromite is selected and this browser can reach the UNO Q. RetroPie status appears separately as **RETROPIE ONLINE** or **RETROPIE OFFLINE**. **GAME FRAMES LINKED** means the selected game is actively sending frames through the RetroPie link.
 
 ![Live Mission page showing R.O.B., the active Gyromite scene, and accessories](images/mission-model-screenshot.png)
 
@@ -18,16 +18,16 @@ When no supported game is running, select **Gyromite** or **Stack-Up** and **Run
 
 ## Play Gyromite
 
-Open [Setup](../dashboard/setup.html) to check the RetroPie link and, when a camera is attached, frame the game display. On Mission, **Fast Gates** works while Gyromite is selected and camera capture is stopped. Tap **Lower Blue** or **Lower Red** to press immediately, tap again to release, or select **Release Both**. Keyboard shortcuts are **2**, **1**, and **0**. Presses expire after 60 seconds. Both buttons release on game exit or lost receiver data. If you moved a gyro with normal controls, select **Home** before Fast Gates to restore their holders.
+Open [Setup](../dashboard/setup.html) to check the RetroPie link and, when a camera is attached, frame the game display. Start Gyromite on RetroPie and watch Mission for **GAME FRAMES LINKED**. R.O.B. then follows complete light commands from the game's rendered frames. On Mission, **Fast Gates** works while Gyromite is selected and camera capture is stopped. Tap **Lower Blue** or **Lower Red** to press immediately, tap again to release, or select **Release Both**. Keyboard shortcuts are **2**, **1**, and **0**. Presses expire after 60 seconds. Both buttons release on game exit or lost receiver data. If you moved a gyro with normal controls, select **Home** before Fast Gates to restore their holders.
 
 A spinning virtual gyro on a pad keeps its gate pressed while R.O.B. moves elsewhere. An unspun gyro can press one gate while R.O.B. holds it there. The UNO Q sends the resulting pad states to RetroPie's virtual Controller 2. The player confirmed red and blue gate responses with the current mapping. The game screen itself remains the authority for Hector's position and gate animation.
 
 ## Play Stack-Up
 
-Stack-Up starts with all five colored blocks on Tray 3 in the current live model. Manual **Left, Right, Up, Down, Open, Close** actions move the arm and ordered block groups. A lower grip carries the contacted block and all those above it. Impossible moves are rejected and leave the blocks in place. The model does not currently initialize the distinct historical Bingo starting layout or judge a game's score. Stack-Up has no Gyromite-style Controller 2 gate path.
+Stack-Up starts with all five colored blocks on Tray 3 in the current live model. In Direct mode, jumping Hector onto a command tile sends **Left, Right, Up, Down, Open,** or **Close** through the game-frame link. Manual controls use the same virtual model. A lower grip carries the contacted block and all those above it. Impossible moves are rejected and leave the blocks in place. The model does not currently initialize the distinct historical Bingo starting layout or judge a game's score. Stack-Up has no Gyromite-style Controller 2 gate path.
 
 ## Camera and reset
 
-On Setup, **Start Camera Check** shows the camera image, sampling rectangle, signal, and measured frame rate. **Watch Test Signal** blinks the virtual red light when a game's Test-mode signal is recognized; it does not move R.O.B. **Reset & Reconnect** closes and retries the camera in software. This does not power-cycle the USB hub. The camera capture code requests 60 fps, but real optical play still needs validation with the intended camera and game display.
+On Setup, **Start Camera Check** shows the camera image, sampling rectangle, signal, and measured frame rate. **Watch Test Signal** blinks the virtual red light when a game's Test-mode signal is recognized; it does not move R.O.B. **Reset & Reconnect** closes and retries the camera in software. This does not power-cycle the USB hub. The camera capture code requests 60 fps. RetroPie game-frame play works without it; camera-only movement remains experimental.
 
 **Home** resets the selected virtual game. Live **Emergency Stop** stops camera capture and clears the game selection; in the offline preview it cancels the scripted animation until reset. A browser reload restores the UNO Q's current snapshot. See [Setup](SETUP_GUIDE.md), [gameplay](GAMEPLAY_GUIDE.md), and [troubleshooting](TROUBLESHOOTING.md).

@@ -9,12 +9,38 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from controller.model import StackState, GyroState
-from controller.optical import OpticalDecoder, PATTERNS, TestFlashDetector
+from controller.optical import ExactFrameDecoder, OpticalDecoder, PATTERNS, TestFlashDetector
 from controller.service import Controller, preferred_kiyo_capture_mode
 from python.main import preferred_camera_roi
 
 
 class OpticalTests(unittest.TestCase):
+    def test_emulator_command_checks_game_pattern_and_retries_once(self):
+        controller = Controller()
+        controller.select('stack_up')
+        controller.emulator_command('stack_up', '0001011101010', 123, 400)
+        self.assertEqual(controller.stack.station, 4)
+        controller.emulator_command('stack_up', '0001011101010', 123, 400)
+        self.assertEqual(controller.stack.station, 4)
+        self.assertTrue(controller.snapshot()['input']['frame_hook'])
+        with self.assertRaises(ValueError):
+            controller.emulator_command('stack_up', '0001011111011', 123, 401)
+        with self.assertRaises(ValueError):
+            controller.emulator_command('gyromite', '0001011101010', 123, 402)
+
+    def test_exact_frame_decoder_matches_only_complete_game_patterns(self):
+        decoder = ExactFrameDecoder()
+        seen = [decoder.feed(i, bit, 'stack_up') for i, bit in enumerate('N' + '0001011111010')]
+        self.assertEqual(seen[-1], ('UP_STACK', '0001011111010'))
+        self.assertEqual(sum(result is not None for result in seen), 1)
+        decoder.reset()
+        wrong_game = [decoder.feed(i, bit, 'stack_up') for i, bit in enumerate('0001011111011')]
+        self.assertTrue(all(result is None for result in wrong_game))
+        decoder.reset()
+        interrupted = [decoder.feed(i, bit, 'stack_up') for i, bit in enumerate('0001011')]
+        interrupted += [decoder.feed(i + 8, bit, 'stack_up') for i, bit in enumerate('111010')]
+        self.assertTrue(all(result is None for result in interrupted))
+
     def test_kiyo_capture_mode_is_allowlisted(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

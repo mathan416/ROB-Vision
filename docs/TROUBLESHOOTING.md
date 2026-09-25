@@ -5,11 +5,11 @@ First check which page is open: `http://arduiain.local/dashboard/` is live; a `f
 | Symptom | Check |
 | --- | --- |
 | App does not start, port 8766 in use | Stop VirtualGlove or the separate `rob-vision.service`; App Lab and that service cannot both bind the port. |
-| `GYROMITE / CONNECTED` but no robot movement | The game is selected and the UNO Q controller is reachable. Check the separate RetroPie link status; camera command capture is separate; open Setup to check camera, Test signal, and delivered fps. |
+| `GYROMITE / CONNECTED` but no robot movement | Check **RETROPIE ONLINE** and **GAME FRAMES LINKED** separately. If the latter is absent, restart the game so RetroPie loads the R.O.B. Vision core. Check Mission's Activity Feed for decoded or blocked actions. |
 | RetroPie is online but no game is selected | A receiver can be online with no active game. Launch a registered ROM; then reload Mission if needed. |
 | No camera or black preview | Check physical camera connection, device selection, exposure, and Setup's green sampling rectangle. **Reset & Reconnect** retries OpenCV; it does not reset USB power. |
 | Test light never blinks | Enter the game's Test mode, select **Watch Test Signal**, align the crop, and check measured fps and brightness. A red-light preview is only an animation demonstration. |
-| Movement command is missed | Capture timing is a known limit. At 30 fps one-frame flashes cannot be reliably decoded; even 60 fps with jitter rejected some valid synthetic commands. Do not compensate by accepting ambiguous traces. |
+| Movement command is missed | On RetroPie, confirm **GAME FRAMES LINKED** and the correct game is selected. The frame link reads every rendered NES frame; check the Activity Feed for a decoded command or a model move blocked by height, grip, or station. Camera-only timing remains a separate experiment. |
 | Red/blue gate does not move | Confirm Gyromite is the active RetroArch game, Setup **Check Link** is online, camera is stopped for Fast Gates, and RetroArch port 2 is configured. Inspect the game screen during an isolated color hold. |
 | Fast Gates vanished | They show only in live Gyromite with camera capture stopped. |
 | Gate remains down | Select **Release Both**; a hold also expires at 60 seconds. The receiver releases on game exit or stale network data. |

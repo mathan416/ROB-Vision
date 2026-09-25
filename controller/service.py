@@ -19,7 +19,7 @@ from time import monotonic, time
 from urllib.parse import urlsplit
 
 from .model import GyroState, StackState
-from .optical import OpticalDecoder, TestFlashDetector
+from .optical import ALLOWED, PATTERNS, OpticalDecoder, TestFlashDetector
 from .kiyo_camera import configure_kiyo_pro
 from tools.identify_game import identify, load_registry
 
@@ -112,6 +112,9 @@ class Controller:
         self.camera_stripe_trace = deque(maxlen=900)
         self.receiver_last_seen = 0.0
         self.receiver_name = None
+        self.frame_hook_last_seen = 0.0
+        self.frame_hook_game = None
+        self.frame_hook_commands = deque(maxlen=128)
         self.test_armed_at = 0.0
         self.test_ready_at = 0.0
         self.test_flash_seen_at = 0.0
@@ -135,15 +138,44 @@ class Controller:
                     "camera": dict(self.camera), "events": list(self.events),
                     "link": {"online": monotonic() - self.receiver_last_seen < 3.0,
                              "receiver": self.receiver_name},
+                    "input": {"frame_hook": self.frame_hook_active()},
                     "test": {"armed": bool(self.test_armed_at), "ready": self.test_ready_at >= self.test_armed_at > 0,
                              "ready_at": self.test_ready_at,
                              "flash_active": self.camera["state"] == "capturing" and self.test_armed_at > 0 and
                              monotonic() - self.test_flash_seen_at < .25}}
 
-    def receiver_seen(self, name):
+    def frame_hook_active(self):
+        return self.frame_hook_game == self.game and monotonic() - self.frame_hook_last_seen < 1.0
+
+    def receiver_seen(self, name, frame_hook_game=None):
         with self.lock:
             self.receiver_name = name[:64]
             self.receiver_last_seen = monotonic()
+            if frame_hook_game == self.game and frame_hook_game in ("gyromite", "stack_up"):
+                self.frame_hook_game = frame_hook_game
+                self.frame_hook_last_seen = monotonic()
+
+    def emulator_command(self, game, pattern, sender_pid, frame_index):
+        with self.lock:
+            if game != self.game or game not in ALLOWED:
+                raise ValueError("Frame command does not match the selected game.")
+            command = PATTERNS.get(pattern)
+            if command not in ALLOWED[game]:
+                raise ValueError("Frame command does not match a complete game pattern.")
+            if type(sender_pid) is not int or not 1 <= sender_pid <= 2**31 - 1:
+                raise ValueError("Invalid frame sender.")
+            if type(frame_index) is not int or not 1 <= frame_index <= 2**32 - 1:
+                raise ValueError("Invalid frame number.")
+            key = (sender_pid, frame_index)
+            if key in self.frame_hook_commands:
+                return self.snapshot()
+            if game == "gyromite" and command != "READY" and any(self.gyro.assisted_until.values()):
+                raise ValueError("Release Gate Assist before moving R.O.B. with commands.")
+            self.frame_hook_commands.append(key)
+            self.frame_hook_game = game
+            self.frame_hook_last_seen = monotonic()
+            self.event("decoded", f"Game frame decoded: {command} ({pattern}).", command)
+            return self.command(command, "emulator", pattern)
 
     def arm_test(self):
         with self.lock:
@@ -163,6 +195,9 @@ class Controller:
         with self.lock:
             self.game = game
             self.stack, self.gyro = StackState(), GyroState()
+            self.frame_hook_game = None
+            self.frame_hook_last_seen = 0.0
+            self.frame_hook_commands.clear()
             self.decoder.reset()
             self.test_flash_detector.reset()
             self.test_armed_at = self.test_ready_at = 0.0
@@ -178,14 +213,14 @@ class Controller:
             if self.game == "gyromite" and any(self.gyro.assisted_until.values()) and command != "READY":
                 raise ValueError("Release Gate Assist before moving R.O.B. with commands.")
             if command == "READY":
-                if source == "camera" and self.test_armed_at:
+                if source in ("camera", "emulator") and self.test_armed_at:
                     self.test_ready_at = monotonic()
                 self.event("ready", "R.O.B. ready-light signal received; no movement.", command)
             else:
                 normalized = command.removesuffix("_GYRO").removesuffix("_STACK")
-                if source == "camera" and command in ("UP_GYRO", "DOWN_GYRO") and self.game != "gyromite":
+                if source in ("camera", "emulator") and command in ("UP_GYRO", "DOWN_GYRO") and self.game != "gyromite":
                     raise ValueError("Optical command does not belong to the selected game.")
-                if source == "camera" and command in ("UP_STACK", "DOWN_STACK") and self.game != "stack_up":
+                if source in ("camera", "emulator") and command in ("UP_STACK", "DOWN_STACK") and self.game != "stack_up":
                     raise ValueError("Optical command does not belong to the selected game.")
                 model = self.stack if self.game == "stack_up" else self.gyro
                 error = model.apply(normalized)
@@ -229,6 +264,9 @@ class Controller:
                     self.event("test", "Test-mode optical signal detected; R.O.B. light blinking.")
                     self.test_signal_announced = True
                 self.test_flash_seen_at = monotonic()
+            if self.frame_hook_active():
+                self.decoder.reset()
+                return None
             detection = self.decoder.feed(timestamp, brightness, self.game)
             if detection:
                 self.event("decoded", f"Flash decoded: {detection.command} ({detection.pattern}).", detection.command)
@@ -471,7 +509,7 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
             if path.startswith("/api/"):
                 if path == "/api/state":
                     if self.headers.get("X-ROB-Receiver") == "retropie" and token and self.headers.get("Authorization") == f"Bearer {token}":
-                        controller.receiver_seen("RetroPie")
+                        controller.receiver_seen("RetroPie", self.headers.get("X-ROB-Frame-Hook"))
                     return self.respond(200, controller.snapshot())
                 if path == "/api/matrix/state":
                     return self.respond(200, matrix.status() if matrix is not None else
@@ -531,7 +569,7 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
             path = urlsplit(self.path).path
             if not self.browser_request():
                 return
-            if path == "/api/launch" and not self.authorized():
+            if path in ("/api/launch", "/api/emulator/command") and not self.authorized():
                 return
             try:
                 size = int(self.headers.get("Content-Length", "0"))
@@ -545,6 +583,9 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                     result = controller.select(game)
                 elif path == "/api/command":
                     result = controller.command(data["command"])
+                elif path == "/api/emulator/command":
+                    result = controller.emulator_command(data["game"], data["pattern"],
+                                                         data["sender_pid"], data["frame_index"])
                 elif path == "/api/gate-assist":
                     result = controller.gate_assist(data["color"], data["pressed"])
                 elif path == "/api/test/arm":

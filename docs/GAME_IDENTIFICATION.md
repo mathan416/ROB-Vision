@@ -1,6 +1,6 @@
 # Game identification from RetroPie launch events
 
-**Status: installed on the dedicated `retropie.local` test machine.** Real Gyromite and Stack-Up launches selected the matching game on the UNO Q, and exits cleared it. Controlled start/end calls selected and cleared both games. The game still flashes commands for the camera to decode. Launch identification supplies context and does not replace optical input.
+**Status: installed on the dedicated `retropie.local` test machine.** Real Gyromite and Stack-Up launches selected the matching game on the UNO Q, and exits cleared it. Controlled start/end calls selected and cleared both games. Launch identification supplies context; the separate game-frame link recognizes movement signals from both ROMs.
 
 ## Decision
 
@@ -29,13 +29,13 @@ RetroPie runcommand start/end
   → exact local registry match
   → authenticated LAN game-state event
   → UNO Q selects and displays game/accessory context
-  → optical test + virtual accessory profile checks
-  → READY for validated screen-flash commands
+  → virtual accessory profile and Test checks
+  → READY for validated game-frame commands
 ```
 
-The sender transmits system, ROM path, and launch/exit event over authenticated HTTP with bounded retries. The RetroPie receiver also scans the active RetroArch process and resends identity if the UNO Q restarted during a running game. A launch event is game context only; it does not claim camera calibration or a decoded movement. Browser manual selection is also available while no supported game is active. There is no implemented comparison between camera-observed flashes and a launch identity, and no emulator-side command hook.
+The sender transmits system, ROM path, and launch/exit event over authenticated HTTP with bounded retries. The RetroPie receiver also scans the active RetroArch process and resends identity if the UNO Q restarted during a running game. A launch event is game context only; it does not claim camera calibration or a decoded movement. Browser manual selection is also available while no supported game is active. The game-frame link separately verifies exact ROM identity before accepting a complete command.
 
-Gyromite's paired tray-to-Controller-2 return path remains separate from this launch notification. Stack-Up needs no gyro-style button return in its documented modes. Both games may use the Wi-Fi/Ethernet launch event for context while receiving their movement commands through the camera.
+Gyromite's paired tray-to-Controller-2 return path remains separate from this launch notification. Stack-Up needs no gyro-style button return in its documented modes. Both games use the Wi-Fi/Ethernet launch event for context and can receive movement commands through the RetroPie frame link; camera-only decoding is experimental.
 
 ## Remaining validation
 

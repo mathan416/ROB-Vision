@@ -4,7 +4,7 @@ R.O.B. is a virtual character and accessory model. The UNO Q runs the controller
 
 ## What is running
 
-The UNO Q App Lab app serves the dashboard, owns virtual game state, receives authenticated RetroPie game-launch events, and sends snapshots to browsers. `retropie.local` has runcommand launch/exit hooks and a paired Linux virtual Controller 2 receiver. Gyromite red and blue gate controls were verified in Game A. The attached Kiyo Pro now delivers about 60 fps at 640×480, and synthetic tests cover the decoder; an optical command has not yet been confirmed from the live display. Stack-Up has been booted headlessly and its virtual model exercised; a full interactive Stack-Up session has not been observed.
+The UNO Q App Lab app serves the dashboard, owns virtual game state, receives authenticated RetroPie game-launch events, and sends snapshots to browsers. `retropie.local` has runcommand launch/exit hooks, a paired Linux virtual Controller 2 receiver, and a frame link for the two supported games. Gyromite red and blue gate controls were verified in Game A. The attached Kiyo Pro delivers about 60 fps at 640×480; live camera movement decoding was intermittent. In interactive Stack-Up Direct mode, the frame link decoded CLOSE and DOWN and updated the virtual model.
 
 ## Game rules in the model
 
@@ -16,7 +16,7 @@ Stack-Up has five colored blocks, five trays, six height levels, an arm station,
 
 Mission shows the animated robot, accessory views, Game Table, Pose Preview, System Vitals, and activity. Setup has pairing, camera framing, Test-mode light acknowledgement, and manual game checks. A `file://` page is a local preview; use `http://arduiain.local/dashboard/` for UNO Q state. The static demo may run when RetroPie is paired but no game is active. A live game stops the demo and takes authority.
 
-The camera capture code requests 60 fps and samples the central 60% by default. A complete recognized flash command changes the model; Test-mode flashing only animates R.O.B.'s red status light. A missing or uncertain command does nothing. The camera has no live-hardware acceptance result; a displayed model action is not proof of what occurred on the game screen. The service knows neither Hector's location nor Stack-Up scoring.
+The camera capture code requests 60 fps and samples the central 60% by default. A complete recognized flash command changes the model; Test-mode flashing only animates R.O.B.'s red status light. A missing or uncertain command does nothing. When the RetroPie frame link is active, commands come from the emulator's rendered NES frames and camera movement decoding pauses, while camera preview and Test detection remain available. The service knows neither Hector's location nor Stack-Up scoring.
 
 ## Failure and reset
 

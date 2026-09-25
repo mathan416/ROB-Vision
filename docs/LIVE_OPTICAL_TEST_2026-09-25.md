@@ -1,5 +1,7 @@
 # Live optical test - 25 September 2026
 
+**Later result, same day:** The camera findings below remain valid for camera-only play. A separate RetroPie frame link was subsequently installed and decoded all six command types in both games during live Direct play. See the [frame-link report](FRAME_LINK_TEST_2026-09-25.md). Statements below that the emulator hook is unimplemented describe the earlier test stage.
+
 ## Setup
 
 - R.O.B. Vision ran on the Arduino UNO Q at `arduiain.local`; RetroPie ran at `retropie.local` and sent authenticated game launch and exit events.

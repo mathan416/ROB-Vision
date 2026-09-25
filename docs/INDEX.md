@@ -1,6 +1,6 @@
 # R.O.B. Vision documentation
 
-**Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on a cabinet screen; the UNO Q camera will read its flashes; a browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. No physical robot or game pieces are planned. The UNO Q dashboard, RetroPie launch hooks, and both Gyromite gate controls have been tested. The attached camera recognized both games' Test modes at about 60 fps; movement decoding remains unverified.
+**Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on RetroPie; its rendered NES frames carry complete R.O.B. commands to the UNO Q, while the attached camera can preview and check the screen. A browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. No physical robot or game pieces are planned. Both games' six commands were decoded during live Direct play, and Gyromite's gate controls were tested in Game A. Camera-only movement reception remains experimental.
 
 Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [Technical Reference](../output/pdf/R.O.B.-Vision-Technical-Reference.pdf), [Matrix Display Guide](../output/pdf/R.O.B.-Vision-Matrix-Display-Guide.pdf), and [Quick Reference](../output/pdf/R.O.B.-Vision-Quick-Reference.pdf).
 
@@ -34,6 +34,7 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 - [UNO Q host helpers](../deploy/uno-q/README.md) and [RetroPie deployment](../deploy/retropie/README.md): installed and optional system services.
 - [Unattended engineering test report](UNATTENDED_TEST_REPORT_2026-09-24.md): synthetic optical and model evidence.
 - [Live optical test report](LIVE_OPTICAL_TEST_2026-09-25.md): attached camera and RetroPie findings.
+- [Game-frame link report](FRAME_LINK_TEST_2026-09-25.md): live per-ROM frame decoding and model actions.
 - [Safety and security](SAFETY_AND_SECURITY.md), [third-party components](THIRD_PARTY_COMPONENTS.md), and [changelog](CHANGELOG.md).
 
-The UNO Q app and Gyromite return path are running. Gyromite movement decoding and full interactive Stack-Up play remain unverified. Historical manuals explain the original physical toy; this project renders those mechanics virtually.
+The UNO Q app, RetroPie frame link, and Gyromite return path are running. All six frame command types in both games have been observed; longer unattended gameplay and Stack-Up Memory/Bingo remain to be validated. Historical manuals explain the original physical toy; this project renders those mechanics virtually.

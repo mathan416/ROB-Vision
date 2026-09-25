@@ -35,6 +35,37 @@ class Detection:
     end: float
 
 
+class ExactFrameDecoder:
+    """Decode the game's complete rendered frames without camera timing guesses."""
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.frames = deque(maxlen=13)
+        self.last_index = None
+
+    def feed(self, index, level, game):
+        if game not in ALLOWED or level not in ("0", "1", "N") or not isinstance(index, int):
+            self.reset()
+            return None
+        if self.last_index is not None and index != self.last_index + 1:
+            self.frames.clear()
+        self.last_index = index
+        if level == "N":
+            self.frames.clear()
+            return None
+        self.frames.append(level)
+        if len(self.frames) != 13:
+            return None
+        bits = "".join(self.frames)
+        command = PATTERNS.get(bits)
+        if command not in ALLOWED[game]:
+            return None
+        self.frames.clear()
+        return command, bits
+
+
 class TestFlashDetector:
     """Recognize a sustained green Test field or frame-by-frame alternation."""
 

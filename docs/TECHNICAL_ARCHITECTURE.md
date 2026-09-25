@@ -1,6 +1,6 @@
 # R.O.B. Vision technical architecture
 
-**Status, 25 September 2026:** The Arduino UNO Q runs the App Lab controller, matrix sketch, HTTP dashboard, and virtual R.O.B. model. RetroPie launch hooks and a paired virtual Controller 2 receiver run on `retropie.local`. Both Gyromite gate colors responded in Game A. The attached camera recognized both games' Test modes at about 60 fps. Live Stack-Up RIGHT and DOWN flashes decoded and moved the virtual R.O.B.; later flashes were missed, so automatic optical play is not yet reliable. R.O.B. and all accessories exist only in software.
+**Status, 25 September 2026:** The Arduino UNO Q runs the App Lab controller, matrix sketch, HTTP dashboard, and virtual R.O.B. model. RetroPie launch hooks and a paired virtual Controller 2 receiver run on `retropie.local`. Both Gyromite gate colors responded in Game A. The attached camera recognized both games' Test modes at about 60 fps. Live Stack-Up camera flashes were intermittent. The RetroArch frame link decoded all six command types during live Direct play in both games. Gyromite lift, rotation, and grip, plus Stack-Up grip, lift, and rotation, updated the UNO Q model. R.O.B. and all accessories exist only in software.
 
 ## Runtime path
 
@@ -11,13 +11,15 @@ Game display -- light flashes --> UNO Q camera --> optical decoder
                                                 +-- HTTP snapshot --> browser
                                                 +-- Gyromite pads --> RetroPie
                                                     virtual Controller 2
+FCEUmm game frames -- local RetroPie frame receiver
+                   -- authenticated command --> UNO Q virtual model
 ```
 
 The App Lab `python/main.py` publishes port 80 and forwards to `controller/service.py` on port 8766. Its Router Bridge sends controller status and action hints to `sketch/sketch.ino` for the UNO Q LED matrix. The dashboard polls `/api/state` every 500 ms. The local file preview uses its separate JavaScript demonstration model; a served page with an available controller enters live mode.
 
 ## Authority and state
 
-`controller/service.py` owns the selected game, camera/Test status, recent events, and virtual game models. `/api/state` is a snapshot with schema version 1, game, robot, camera, recent events, link, and Test data. Recent events are capped at 30; they are display history, not a durable event stream. There is no session ID, command queue, WebSocket, or emulator game-state hook. Reopening the browser reads a fresh snapshot without resetting the controller.
+`controller/service.py` owns the selected game, camera/Test status, recent events, and virtual game models. `/api/state` is a snapshot with schema version 1, game, robot, camera, input, recent events, link, and Test data. `input.frame_hook` reports a fresh RetroPie game-frame connection. Recent events are capped at 30; they are display history, not a durable event stream. There is no session ID or WebSocket. Reopening the browser reads a fresh snapshot without resetting the controller.
 
 `controller/model.py` keeps Gyromite's two gyros and Stack-Up's five blocks. A complete optical command or operator command passes through the same model. Invalid moves return an error and leave piece state intact. Stack-Up starts with all five blocks on Tray 3; a grip can carry a block with those above it, preserving order. The current live model uses this initial layout for all modes; mode-specific Bingo layouts are not implemented. Gyromite's 55-second spin lifetime and 60-second Fast Gate hold are simulation settings, not measured Nintendo hardware properties.
 
@@ -25,7 +27,9 @@ The Gyromite pad reducer derives red and blue from gyro location/spin or a held 
 
 ## Optical capture
 
-`controller/optical.py` recognizes the ROM-derived six movement/grip patterns from timestamped bright/dark samples. `controller/service.py` optionally opens an OpenCV capture device, requests 60 fps, samples the central 60% by default, and reports measured fps. A sustained green field or regular Test alternation drives the red status light without moving R.O.B. A complete valid command drives one action; ambiguous or partial traces drive none. Synthetic 60 fps jitter runs yielded 667 correct and 233 rejected commands out of 900, with zero wrong commands in that run. At 30 fps, all 900 were rejected. This is a decoder result, not a live camera acceptance result. An emulator hook is an unimplemented fallback if camera timing proves inadequate.
+`controller/optical.py` recognizes the ROM-derived six movement/grip patterns from timestamped bright/dark camera samples. `controller/service.py` optionally opens an OpenCV capture device, requests 60 fps, samples the central 60% by default, and reports measured fps. A sustained green field or regular Test alternation drives the red status light without moving R.O.B. Synthetic 60 fps jitter runs yielded 667 correct and 233 rejected commands out of 900, with zero wrong commands in that run. At 30 fps, all 900 were rejected.
+
+For RetroPie, `rob_vision_fceumm_proxy.c` delegates the libretro core API to the installed FCEUmm and observes each rendered NES frame before display. It sends only the frame number and black/green/other classification through a local Unix datagram socket. `retropie_frame_hook.py` checks the sender process credentials, proxy path, and ROM registry, then accepts only a complete, game-appropriate 13-frame pattern. The paired RetroPie receiver sends the command to the UNO Q's token-protected `/api/emulator/command` endpoint; retry idempotency is keyed by sender PID and frame number. While this link is fresh, camera movement decoding is suppressed to prevent duplicate actions; camera preview and Test detection remain available. If the link stops, camera movement decoding resumes. The installed per-ROM RetroPie choices select this proxy only for Gyromite and Stack-Up; other NES games keep the normal default core. All six command types were observed live in both games. Longer unattended gameplay and Stack-Up Memory/Bingo remain to be validated.
 
 ## HTTP and trust boundary
 
