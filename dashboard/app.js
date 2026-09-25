@@ -3,7 +3,7 @@
   const $ = (id) => document.getElementById(id);
   const StackModel = window.RobStackModel;
   let stackState = StackModel.create();
-  const state = { mode: 'gyro', live: false, head: 0, arms: 0, turn: 0, depth: 1, grip: false, manualActive: false, manualCommand: null, stopped: false, running: false, timer: null, recoveryTimer: null, recoveryQueue: [], recoveryCount: { a: 0, b: 0 }, cleanupStarted: false, sequence: null, step: -1, prop: { x: 225, y: 496, scale: 1 }, propFrame: null, secondProp: { x: 145, y: 469, scale: .85 }, secondPropFrame: null, motion: { turn: 0, arms: 0, grip: 0, head: 0, depth: 1 }, motionFrame: null };
+  const state = { mode: 'gyro', live: false, head: 0, arms: 0, turn: 0, depth: 1, grip: false, manualActive: false, manualCommand: null, stopped: false, running: false, timer: null, recoveryTimer: null, recoveryQueue: [], recoveryCount: { a: 0, b: 0 }, cleanupStarted: false, sequence: null, step: -1, prop: { x: 225, y: 496, scale: 1 }, propFrame: null, secondProp: { x: 145, y: 469, scale: .85 }, secondPropFrame: null, motion: { turn: 0, arms: 0, grip: 0, head: 0, depth: 1, handOffset: 0 }, motionFrame: null };
   // Local demo timing is illustrative; live sessions use the UNO Q controller state.
   const GYRO_SPIN_MS = 55000;
   const gyros = { a: { startedAt: null, phase: 'idle' }, b: { startedAt: null, phase: 'idle' } };
@@ -178,7 +178,11 @@
   function moveMechanism(turn, arms, grip, head, depth) {
     if (state.motionFrame) cancelAnimationFrame(state.motionFrame);
     const start = { ...state.motion };
-    const target = { turn, arms, grip: grip ? 1 : 0, head, depth };
+    const level = stackState.height - 1;
+    // Tray perspective changes the block height. Reach to its body center,
+    // while the shoulder carriage remains on the robot's central column.
+    const handOffset = state.mode === 'stack' ? stackBases[stackState.station - 1] - stackBases[2] + 7 - 2 * level : 0;
+    const target = { turn, arms, grip: grip ? 1 : 0, head, depth, handOffset };
     const started = performance.now();
     function frame(now) {
       const t = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : Math.min(1, (now - started) / 950);
@@ -195,16 +199,20 @@
       const rightX = center + gap;
       const leftElbow = 245 + state.motion.turn * .25;
       const rightElbow = 405 + state.motion.turn * .25;
-      const leftPath = `M285 318 L${leftElbow} 381 L${leftX} 449`;
-      const rightPath = `M365 318 L${rightElbow} 381 L${rightX} 449`;
+      const elbowY = 381 + state.motion.handOffset * .35;
+      const handY = 453 + state.motion.handOffset;
+      const leftPath = `M285 318 L${leftElbow} ${elbowY} L${leftX} ${handY - 4}`;
+      const rightPath = `M365 318 L${rightElbow} ${elbowY} L${rightX} ${handY - 4}`;
       $('left-arm-body').setAttribute('d', leftPath);
       $('left-arm-glint').setAttribute('d', leftPath);
       $('right-arm-body').setAttribute('d', rightPath);
       $('right-arm-glint').setAttribute('d', rightPath);
       $('left-elbow').setAttribute('cx', leftElbow);
       $('right-elbow').setAttribute('cx', rightElbow);
-      $('left-hand').setAttribute('transform', `translate(${leftX} 453) scale(${state.motion.depth})`);
-      $('right-hand').setAttribute('transform', `translate(${rightX} 453) scale(${-state.motion.depth} ${state.motion.depth})`);
+      $('left-elbow').setAttribute('cy', elbowY);
+      $('right-elbow').setAttribute('cy', elbowY);
+      $('left-hand').setAttribute('transform', `translate(${leftX} ${handY}) scale(${state.motion.depth})`);
+      $('right-hand').setAttribute('transform', `translate(${rightX} ${handY}) scale(${-state.motion.depth} ${state.motion.depth})`);
       $('head').setAttribute('transform', `rotate(${state.motion.head} 325 265)`);
       state.motionFrame = t < 1 ? requestAnimationFrame(frame) : null;
     }
