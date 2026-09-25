@@ -8,9 +8,15 @@ The large Live Model animates R.O.B.'s connected shoulders, shared opposing hand
 
 Fast Gates appears during live Gyromite when camera capture is stopped. Blue (`2`), red (`1`), and Release Both (`0`) act immediately; each hold expires after 60 seconds. A manual pose preview or scripted demo is not evidence of a decoded game command. Demo mode can run while RetroPie is paired and idle; a game launch stops it.
 
+![Live Mission page with R.O.B. and Gyromite accessories](images/mission-model-screenshot.png)
+
+![Mission control row with Pose Preview, Game Table, and System Vitals](images/mission-controls-screenshot.png)
+
 ## Setup layout
 
 Setup contains RetroPie pairing and **Check Link**, camera framing and measured fps, Test-mode flash watching and red-light preview, Gyromite pad checks, and Stack-Up movement checks. The small camera image marks the sampled region. **Reset & Reconnect** reopens OpenCV capture after a disconnect; it does not reset USB hardware. Camera diagnostics remain available even though the main visual focus is R.O.B.
+
+![Live Setup page with its four checks](images/setup-screenshot.png)
 
 ## State and limits
 

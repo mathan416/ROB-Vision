@@ -15,6 +15,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     CondPageBreak,
+    Image as GuideImage,
     LongTable,
     PageBreak,
     Paragraph,
@@ -141,7 +142,8 @@ def table_block(lines: list[str], usable_width: float, st: dict[str, ParagraphSt
 
 
 def markdown_story(path: Path, usable_width: float, st: dict[str, ParagraphStyle],
-                   chapter_number: int | None = None, new_page: bool = True):
+                   chapter_number: int | None = None, new_page: bool = True,
+                   max_image_height: float = 330):
     lines = path.read_text(encoding="utf-8").splitlines()
     title = lines[0].removeprefix("# ").strip()
     story = []
@@ -168,6 +170,20 @@ def markdown_story(path: Path, usable_width: float, st: dict[str, ParagraphStyle
         line = lines[i]
         if not line.strip():
             flush(); i += 1; continue
+        image_match = re.fullmatch(r"!\[([^]]*)\]\(([^)]+)\)", line.strip())
+        if image_match:
+            flush()
+            image_path = (path.parent / image_match.group(2)).resolve()
+            if not image_path.is_relative_to(ROOT) or not image_path.is_file():
+                raise ValueError(f"Missing or outside-repository guide image: {image_path}")
+            picture = GuideImage(str(image_path))
+            scale = min(usable_width / picture.imageWidth,
+                        max_image_height / picture.imageHeight, 1)
+            picture.drawWidth = picture.imageWidth * scale
+            picture.drawHeight = picture.imageHeight * scale
+            picture.hAlign = "CENTER"
+            story.extend([Spacer(1, 6), picture, Spacer(1, 8)])
+            i += 1; continue
         if line.startswith("## ") or line.startswith("### "):
             flush()
             level = "h3" if line.startswith("### ") else "h2"
@@ -261,8 +277,13 @@ def build_book(filename: str, title: str, subtitle: str, chapter_files: list[str
     available_width = page_size[0] - 96
     story = [Spacer(1, page_size[1] - 130)]
     for n, name in enumerate(chapter_files, 1):
+        chapter_starts_page = (n == 1 or page_size[1] > page_size[0]
+                               or name in {"TROUBLESHOOTING.md", "DASHBOARD_DESIGN.md", "UNO_Q_MATRIX_DISPLAY.md"})
+        image_height = (170 if name == "UNO_Q_MATRIX_DISPLAY.md"
+                        else 430 if page_size[1] > page_size[0] else 285)
         story.extend(markdown_story(DOCS / name, available_width, st, n,
-                                    new_page=(n == 1 or name in {"TROUBLESHOOTING.md", "DASHBOARD_DESIGN.md"})))
+                                    new_page=chapter_starts_page,
+                                    max_image_height=image_height))
     doc.build(story,
               onFirstPage=lambda c, d: cover(c, d, title, subtitle, page_size[0] > page_size[1]),
               onLaterPages=lambda c, d: body_page(c, d, title))
@@ -285,15 +306,18 @@ if __name__ == "__main__":
     generated = [
         build_book("R.O.B.-Vision-User-Guide.pdf", "User Guide",
                    "Play, preview, setup, and problem solving",
-                   ["USER_GUIDE.md", "GAMEPLAY_GUIDE.md", "INSTALLATION_GUIDE.md", "TROUBLESHOOTING.md"]),
+                   ["USER_GUIDE.md", "GAMEPLAY_GUIDE.md", "SETUP_GUIDE.md", "INSTALLATION_GUIDE.md", "TROUBLESHOOTING.md"]),
         build_book("R.O.B.-Vision-Technical-Reference.pdf", "Technical Reference",
                    "Architecture, optics, networking, hardware, and verification",
                    ["TECHNICAL_ARCHITECTURE.md", "HISTORICAL_MANUAL_NOTES.md", "GYROMITE_MANUAL_NOTES.md",
                     "STACK_UP_MANUAL_NOTES.md", "GAME_IDENTIFICATION.md",
                     "optical-input.md", "ROM_SIGNAL_ANALYSIS.md", "DASHBOARD_DESIGN.md", "network-architecture.md",
                     "HARDWARE_BUILD_GUIDE.md", "parts-plan.md", "CONFIGURATION_REFERENCE.md",
-                    "SAFETY_AND_SECURITY.md", "VERIFICATION_PLAN.md"],
+                    "SAFETY_AND_SECURITY.md", "VERIFICATION_PLAN.md", "UNO_Q_MATRIX_DISPLAY.md"],
                    page_size=landscape(A4)),
+        build_book("R.O.B.-Vision-Matrix-Display-Guide.pdf", "Matrix Display Guide",
+                   "UNO Q status animations and display states",
+                   ["UNO_Q_MATRIX_DISPLAY.md"], page_size=landscape(A4)),
         build_quick(),
     ]
     for path in generated:

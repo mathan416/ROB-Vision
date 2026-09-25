@@ -2,6 +2,28 @@
 
 **Status: implemented in the R.O.B. Vision App Lab sketch and Linux bridge; physical display behavior still needs direct visual confirmation.** RetroPie pairing code is generated on RetroPie and entered on the browser Setup page. The UNO Q matrix shows a pairing cue only. This guide defines the behavior for the built-in 13-column by 8-row blue LED matrix. The large browser dashboard remains the place for the full R.O.B. animation, accessories, and explanations.
 
+These images show the 13×8 display states defined in `sketch/sketch.ino`. Each panel is one frame of an animation.
+
+## The animations
+
+**Starting and reconnecting.** Three hourglass frames repeat until the controller is ready.
+
+![Three hourglass frames from the UNO Q matrix sketch](images/matrix-startup.png)
+
+**Ready, glance, blink.** The eyes move slowly while R.O.B. waits for a game.
+
+![Ready eyes, glance, and blink from the UNO Q matrix sketch](images/matrix-idle.png)
+
+**Game selected.** A brief title cue identifies the game; the eyes then return with a small decorative accent. The accents do not indicate a physical gyro or block movement.
+
+![Gyromite and Stack-Up title cues](images/matrix-game-titles.png)
+
+![Gyromite and Stack-Up eye loops](images/matrix-game-eyes.png)
+
+**Setup and faults.** The T is steady when Test is armed and gently pulses after sustained flashes are detected. P pulses during pairing; X blinks for a fault.
+
+![Test armed and Test flashes seen](images/matrix-test.png)
+
 ## What people should see
 
 | State | Matrix | Meaning |
@@ -18,6 +40,8 @@
 | Pairing in progress | Large `P` with a slow pulse | Open the browser Setup page and read the pairing code and fingerprint shown on RetroPie. Do not show invented or unrelated digits on the UNO Q. |
 | Camera or controller fault | Blinking `X` | Open Setup for the actual problem; the matrix alone cannot explain it. |
 | App stopped | Matrix released/blank as the platform permits | R.O.B. Vision is no longer driving the display. |
+
+![Pairing and fault indications](images/matrix-pair-fault.png)
 
 The face should be drawn for the physical 13×8 grid, with two distinct eyes and enough dark space to make a blink or sideways glance readable. The blue LEDs are monochrome: eye shapes and brightness, not color, carry the expression. Limit idle motion to an occasional glance or blink so it feels alive without competing with the game or affecting the camera. Show `GY`/`SU` long enough to identify the title, then let the eyes take over. A brief repeat of the title mark after a long idle period is acceptable.
 

@@ -1,5 +1,10 @@
 # R.O.B. Vision changelog
 
+## Illustrated guides — 24 September 2026
+
+- Added frame-by-frame 13×8 matrix display images, captured the live Mission and Setup pages, and placed the relevant screenshots in the editable guides and printable manuals.
+- Added a standalone printable Matrix Display Guide and included its illustrations in the Technical Reference.
+
 ## Unified Mission and Setup status — 24 September 2026
 
 - Both pages now use the same short game/controller top-bar label, including **GYROMITE / CONNECTED**. RetroPie, camera, and Test indicators use shared wording; controller loss clears stale Setup statuses.

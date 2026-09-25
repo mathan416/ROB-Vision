@@ -41,6 +41,6 @@ The RetroPie launch hook identifies an exact configured game filename, following
 
 Start with the [documentation index](docs/INDEX.md), [user guide](docs/USER_GUIDE.md), [gameplay guide](docs/GAMEPLAY_GUIDE.md), and [virtual system contract](docs/VIRTUAL_SYSTEM.md). The [technical architecture](docs/TECHNICAL_ARCHITECTURE.md), [ROM signal analysis](docs/ROM_SIGNAL_ANALYSIS.md), and [verification plan](docs/VERIFICATION_PLAN.md) describe the implemented system and remaining camera validation.
 
-Printable editions: [User Guide](output/pdf/R.O.B.-Vision-User-Guide.pdf), [Technical Reference](output/pdf/R.O.B.-Vision-Technical-Reference.pdf), and [Quick Reference](output/pdf/R.O.B.-Vision-Quick-Reference.pdf).
+Printable editions: [User Guide](output/pdf/R.O.B.-Vision-User-Guide.pdf), [Technical Reference](output/pdf/R.O.B.-Vision-Technical-Reference.pdf), [Matrix Display Guide](output/pdf/R.O.B.-Vision-Matrix-Display-Guide.pdf), and [Quick Reference](output/pdf/R.O.B.-Vision-Quick-Reference.pdf).
 
 Historical Nintendo manuals and the Robert project inform behavior, but their text or code is not reused in this implementation. Game artwork and Nintendo marks remain with their owners.

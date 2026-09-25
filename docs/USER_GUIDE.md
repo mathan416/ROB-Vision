@@ -8,6 +8,10 @@ Start **R.O.B. Vision** in UNO Q App Lab, then open `http://arduiain.local/dashb
 
 Mission keeps the animated R.O.B. as the main view. Accessory Bay and Game Table show his virtual game pieces. Pose Preview and System Vitals sit beside the Game Table; the Activity Feed reports controller actions. A label such as **GYROMITE / CONNECTED** means Gyromite is selected and this browser can reach the UNO Q. RetroPie status appears separately as **RETROPIE ONLINE** or **RETROPIE OFFLINE**; neither label proves the camera is reading valid commands.
 
+![Live Mission page showing R.O.B., the active Gyromite scene, and accessories](images/mission-model-screenshot.png)
+
+*Mission on the UNO Q, with Gyromite selected. The camera was not attached when this screenshot was taken.*
+
 ## Try the demonstration
 
 When no supported game is running, select **Gyromite** or **Stack-Up** and **Run Demo Sequence**. It works even if RetroPie is paired but idle. Gyromite demonstrates a held unspun gyro, two spinning gyros on pads, spin-down, re-spin, and return to holders. The illustrative spin clock is 55 seconds. Stack-Up moves red alone and then a blue/white group. **Home** resets the pieces. Pose Lab is a character-only movement sandbox. A live game launch stops the demo and selects that game's scene.

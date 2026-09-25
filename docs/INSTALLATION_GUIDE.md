@@ -8,6 +8,8 @@ Start **R.O.B. Vision** under App Lab **My Apps**. This UNO Q runs one App Lab a
 
 Open [Setup](../dashboard/setup.html) to check pairing and frame a camera. Browser controls are available on the trusted LAN without a token prompt. The token in the UNO Q's `~/.config/rob-vision/environment` is for RetroPie launch and receiver identity. Keep the LAN private. A local `file://` copy is the independent preview; use the UNO Q URL for live status.
 
+![Setup page showing the live RetroPie link and camera check](images/setup-link-camera-screenshot.png)
+
 ## RetroPie
 
 See [RetroPie deployment instructions](../deploy/retropie/README.md) for hook files, root uinput receiver service, pairing, and RetroArch port 2 configuration. The current test machine already has these installed. On another machine, merge launch/end hooks with any existing custom scripts, then pair from the Setup page. **Check Link** becomes online after authenticated receiver polls. The receiver also scans the active RetroArch process so it can resync game context after a UNO Q restart.
