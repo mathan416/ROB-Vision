@@ -33,18 +33,16 @@ RetroPie runcommand start/end
   → READY for validated screen-flash commands
 ```
 
-The current sender transmits system, ROM path, and launch/exit event over authenticated HTTP with a short timeout. Session IDs, sequence numbers, retries, and a lease timeout remain future reliability work. A successful launch event is not proof that the camera is calibrated or ready.
-
-The virtual robot should display `GYROMITE`, `STACK-UP`, or `UNKNOWN GAME` along with the source of identification. It should never animate a game command merely because a launch event arrived. An authenticated hook event selects the expected game profile, while the camera independently validates actual optical commands. If the two disagree, show a mismatch and refuse game-driven virtual actions until the operator resolves it. Manual game selection may support a non-RetroPie source, but must be explicit and pass the same optical and virtual-state checks.
+The sender transmits system, ROM path, and launch/exit event over authenticated HTTP with bounded retries. The RetroPie receiver also scans the active RetroArch process and resends identity if the UNO Q restarted during a running game. A launch event is game context only; it does not claim camera calibration or a decoded movement. Browser manual selection is also available while no supported game is active. There is no implemented comparison between camera-observed flashes and a launch identity, and no emulator-side command hook.
 
 Gyromite's paired tray-to-Controller-2 return path remains separate from this launch notification. Stack-Up needs no gyro-style button return in its documented modes. Both games may use the Wi-Fi/Ethernet launch event for context while receiving their movement commands through the camera.
 
-## Acceptance checks before installation
+## Remaining validation
 
 1. Simulate all six registered archive/member basenames, an unrelated NES ROM, and another system; verify only intended games match.
-2. Launch both archive formats through the real RetroPie UI and record the **actual** system and ROM argument; adjust the registry only from that observation.
+2. Confirm the remaining archive formats and Stack-Up through the real RetroPie UI; the Gyromite `.7z` launch/exit and controlled hook calls have already been checked.
 3. Verify start, exit, unknown game, back-to-back game launches, missed acknowledgement, and sender/robot restart. No stale game may stay armed.
 4. Confirm all existing cabinet runcommand actions still execute in their original order and that hook failure never prevents the game from starting.
-5. Compare the launch identity with camera-observed Test/Direct flashes. Only matching, calibrated signals may enable future game-specific virtual commands.
+5. Validate camera-observed Test and movement flashes for both selected games on the intended display.
 
 See [network architecture](network-architecture.md), [optical input](optical-input.md), [configuration](CONFIGURATION_REFERENCE.md), and [verification plan](VERIFICATION_PLAN.md).

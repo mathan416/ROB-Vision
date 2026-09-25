@@ -4,7 +4,7 @@
 
 ## Virtual set and starting layouts
 
-The booklet shows five colored ring-shaped pieces—red, white, blue, yellow, and green—on five numbered trays around R.O.B. Tray 3 is directly in front. Direct and Memory begin with all five on Tray 3, top to bottom red, white, blue, yellow, green. One-player Bingo also begins with five on Tray 3, in any color order. Two-player Bingo begins with three on Tray 3 and one each on Trays 2 and 4. These layouts become UNO Q virtual-state profiles, with matching browser graphics. At the start of a virtual session, the pose is centered over Tray 3, at the highest level, with hands open.
+The booklet shows five colored ring-shaped pieces—red, white, blue, yellow, and green—on five numbered trays around R.O.B. Tray 3 is directly in front. Direct and Memory begin with all five on Tray 3, top to bottom red, white, blue, yellow, green. One-player Bingo also begins with five on Tray 3, in any color order. Two-player Bingo begins with three on Tray 3 and one each on Trays 2 and 4. The current UNO Q model initializes the Direct/Memory Tray 3 stack for every Stack-Up session. Bingo-specific starting layouts are historical requirements, not implemented profiles. At the start of a virtual session, the pose is centered over Tray 3, at the highest level, with hands open.
 
 ## Command and stack behavior
 
@@ -18,12 +18,12 @@ The current scripted preview applies one virtual command per step. It first move
 | --- | --- | --- |
 | Test | Optical aiming signal | Reuse camera calibration and readiness check. |
 | Direct | Professor lands on six command keys | Decode and display left, right, up, down, open, or close. Player scores/advances with Start after arrangement. |
-| Memory | Up to 100 programmed commands at selected speed, then `END` | Measure cadence; bound queued virtual actions and report misses. `END` is a programming marker, not a robot movement flash. |
+| Memory | Up to 100 programmed commands at selected speed, then `END` | Measure cadence; the current model applies commands immediately and has no bounded queue. Report misses during camera validation. `END` is a programming marker, not a robot movement flash. |
 | Bingo, one player | Row or column completion sends a command | Apply only a complete validated optical command. |
 | Bingo, two players | Two human controllers and a different starting layout | Validate separately; keep human controller input on the cabinet. |
 
 The booklet says a simultaneous completed row and column is a no-command condition until one line changes. Do not turn that pattern into two virtual actions. The flash stream does not report a target pattern or a victory result. The UNO Q knows its own modeled block stacks but cannot infer the game's scoring outcome without another source. In Direct, Memory, and one-player Bingo, the human presses Start to request scoring after matching the displayed arrangement; a successful animation alone does not advance a round.
 
-Stack-Up's documented modes have no Gyromite-style accessory that presses Controller 2. Its tray model needs no button return path to the game. The browser preview now demonstrates both a one-block transfer and an ordered two-block carry. Future optical play must conserve all five blocks, update one modeled placement per valid open command, and handle Memory timing without silent command loss.
+Stack-Up's documented modes have no Gyromite-style accessory that presses Controller 2. Its tray model needs no button return path to the game. The browser preview now demonstrates both a one-block transfer and an ordered two-block carry. The live virtual model conserves five blocks and updates a placement on a valid open command. Optical Memory timing still needs hardware validation.
 
 See the [virtual system contract](VIRTUAL_SYSTEM.md), [ROM signal analysis](ROM_SIGNAL_ANALYSIS.md), and [verification plan](VERIFICATION_PLAN.md).

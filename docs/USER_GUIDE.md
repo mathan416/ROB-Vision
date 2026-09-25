@@ -1,40 +1,29 @@
 # R.O.B. Vision user guide
 
-**Status: the UNO Q dashboard and RetroPie Gyromite Controller 2 link are running; camera capture on the UNO Q still needs hardware testing.** R.O.B. is a virtual character and accessory model. The robot, gyros, trays, spinner, and Stack-Up blocks are drawn in the browser; they are not physical objects.
+**Current release:** The UNO Q hosts a live virtual R.O.B. dashboard and RetroPie link. Both Gyromite gate controls have been confirmed in Game A. A real camera and display have not yet passed optical-command testing. R.O.B., gyros, blocks, trays, and spinner are graphics and software state, not physical objects.
 
-## Try the available preview
+## Open R.O.B. Vision
 
-Open [the dashboard](../dashboard/index.html), or serve the project folder locally and open `/dashboard/` in a browser. The preview requires no UNO Q, ROM, camera, or network connection. It works on a laptop, iPad, or phone.
+Start **R.O.B. Vision** in UNO Q App Lab, then open `http://arduiain.local/dashboard/` on a laptop, phone, or tablet. App Lab runs one app at a time on this UNO Q; stop VirtualGlove before starting R.O.B. Vision. The direct `http://arduiain.local:8766/dashboard/` address reaches the same controller. A page opened from `file://` is an offline preview and does not show live RetroPie state.
 
-The large **Live Model** shows R.O.B. moving two opposing hands around one piece. **Accessory Bay** selects Gyromite, Stack-Up, or Pose Lab. **Game Table** gives a second view of the virtual pieces. **System Vitals** shows virtual pose, gyro spin, and virtual red/blue button state. The smaller game-camera tile is a placeholder. `SIMULATION` and `GAME LINK OFFLINE` mean no game is being controlled.
+Mission keeps the animated R.O.B. as the main view. Accessory Bay and Game Table show his virtual game pieces. Pose Preview and System Vitals sit beside the Game Table; the Activity Feed reports controller actions. A label such as **GYROMITE SELECTED / RETROPIE ONLINE** means a game is selected and the authenticated RetroPie receiver recently polled. It does not mean the camera is reading valid commands.
 
-### Run Gyromite
+## Try the demonstration
 
-1. Select **Gyromite**, then **Run Demo Sequence**.
-2. First, watch R.O.B. hold an unspun gyro on the red pad. The virtual red button stays pressed only while he holds it there.
-3. Then watch R.O.B. spin Gyro A and B and put them on the red and blue pads. Each gyro has its own illustrative spin-down clock.
-4. When each gyro tips, its virtual button releases. R.O.B. re-spins each once. After both stop again, he returns them to their holders and the demo ends.
+When no supported game is running, select **Gyromite** or **Stack-Up** and **Run Demo Sequence**. It works even if RetroPie is paired but idle. Gyromite demonstrates a held unspun gyro, two spinning gyros on pads, spin-down, re-spin, and return to holders. The illustrative spin clock is 55 seconds. Stack-Up moves red alone and then a blue/white group. **Home** resets the pieces. Pose Lab is a character-only movement sandbox. A live game launch stops the demo and selects that game's scene.
 
-The 55-second spin time is a demonstration setting, not a historical measurement. Select **Home** to reset at any point, or **Run Demo Sequence** to start again. No player needs to reposition virtual pieces.
+## Play Gyromite
 
-The demos remain available while RetroPie is paired but idle. Launching a supported game switches the dashboard to live control and stops a running demo; exiting the game restores the demo button and accessory choices.
+Open [Setup](../dashboard/setup.html) to check the RetroPie link and, when a camera is attached, frame the game display. On Mission, **Fast Gates** works while Gyromite is selected and camera capture is stopped. Tap **Lower Blue** or **Lower Red** to press immediately, tap again to release, or select **Release Both**. Keyboard shortcuts are **2**, **1**, and **0**. Presses expire after 60 seconds. Both buttons release on game exit or lost receiver data. If you moved a gyro with normal controls, select **Home** before Fast Gates to restore their holders.
 
-### Run Stack-Up or Pose Lab
+A spinning virtual gyro on a pad keeps its gate pressed while R.O.B. moves elsewhere. An unspun gyro can press one gate while R.O.B. holds it there. The UNO Q sends the resulting pad states to RetroPie's virtual Controller 2. The player confirmed red and blue gate responses with the current mapping. The game screen itself remains the authority for Hector's position and gate animation.
 
-**Stack-Up** starts with five colored blocks on Tray 3. The demo moves red alone to Tray 4, then carries blue and white together to Tray 2, and stops. Use **Stack-Up Commands** below the view to try one virtual movement at a time; the grip button switches between **Close Hands** and **Open Hands**. R.O.B. can lift a block together with every block above it. **Home** restores all five blocks to Tray 3. **Pose Lab** shows R.O.B. alone: its demo is a short greeting, and the **Pose Preview** buttons let you try turning, lifting, and gripping. It uses no game pieces or optical commands. **Emergency Stop** cancels the local sequence until **Reset Stop** is selected. It is a demo control, not a physical safety switch.
+## Play Stack-Up
 
-## Play with RetroPie
+Stack-Up starts with all five colored blocks on Tray 3 in the current live model. Manual **Left, Right, Up, Down, Open, Close** actions move the arm and ordered block groups. A lower grip carries the contacted block and all those above it. Impossible moves are rejected and leave the blocks in place. The model does not currently initialize the distinct historical Bingo starting layout or judge a game's score. Stack-Up has no Gyromite-style Controller 2 gate path.
 
-Use the [Setup page](../dashboard/setup.html) to pair RetroPie, aim the UNO Q camera, check the game's Test mode signal, and try manual controls. The [Setup guide](SETUP_GUIDE.md) gives the sequence. The camera preview appears there rather than on the Mission page. Pose Preview, Game Table, and System Vitals sit together below the live model.
+## Camera and reset
 
-Open `http://arduiain.local/dashboard/` on a laptop, phone, or tablet. Launch Gyromite on RetroPie; its launch hook selects Gyromite in R.O.B. Vision. **Fast Gates** appears above System Vitals. Select **Lower Blue** or **Lower Red** to press a gate immediately; select the same button again to raise it. **Release Both** raises both at once. Keyboard shortcuts are **2** for blue, **1** for red, and **0** to release both. Keep the dashboard open while playing. Each press releases automatically after 60 seconds, and game exit releases both. These controls let a player test gates without waiting for R.O.B.'s movement sequence. R.O.B. and the virtual gyros update in the display. The player confirmed that both red and blue controls work in Game A.
+On Setup, **Start Camera Check** shows the camera image, sampling rectangle, signal, and measured frame rate. **Watch Test Flashes** blinks the virtual red light when sustained Test-mode alternation is recognized; it does not move R.O.B. **Reset & Reconnect** closes and retries the camera in software. This does not power-cycle the USB hub. The camera capture code requests 60 fps, but real optical play still needs validation with the intended camera and game display.
 
-Fast Gates is available during Gyromite while camera capture is stopped. If you use the regular movement controls first, select **Home** to return gyros to their holders before using Fast Gates. It is a direct manual play control; optical command decoding remains separate.
-
-## Camera game connection
-
-The cabinet displays Gyromite or Stack-Up on a modern screen. The Uno Q camera will read the game's flashes and validate a complete command before the Uno Q changes the virtual R.O.B. state. A laptop, iPad, or phone will display that state over the LAN. An optional RetroPie launch hook can identify the configured ROM by exact filename; it will not replace flash decoding.
-
-For Gyromite, the UNO Q will send red/blue virtual pad states to a paired virtual Controller 2 receiver over Wi-Fi or Ethernet. A spinning gyro upright on a pad presses it, as does an unspun gyro held there by R.O.B. Moving or tipping the gyro releases it. The game itself sees only Controller 2 input; without an optional emulator hook, R.O.B. Vision cannot know the professor's exact position or prove a gate's on-screen response. Stack-Up's documented modes do not use this tray-button feedback.
-
-For a local controller trial, run `python3 -m controller.service` from the project folder and open `http://127.0.0.1:8766/dashboard/`. Choose a game; commands above System Vitals go to the controller and survive page reloads. Install `requirements-camera.txt` to enable **Start Camera**. Camera speed and screen decoding still need validation with the intended hardware. See the [virtual system contract](VIRTUAL_SYSTEM.md), [gameplay guide](GAMEPLAY_GUIDE.md), and [technical architecture](TECHNICAL_ARCHITECTURE.md).
+**Home** resets the selected virtual game. Live **Emergency Stop** stops camera capture and clears the game selection; in the offline preview it cancels the scripted animation until reset. A browser reload restores the UNO Q's current snapshot. See [Setup](SETUP_GUIDE.md), [gameplay](GAMEPLAY_GUIDE.md), and [troubleshooting](TROUBLESHOOTING.md).

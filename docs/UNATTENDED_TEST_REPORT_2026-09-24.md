@@ -25,3 +25,7 @@ In a deterministic synthetic stress run (100 traces for each command, random cam
 - Observe a real Stack-Up interactive launch and its on-screen responses to the six commands.
 - Confirm live Gyromite red/blue gate movement after optical recognition, including release on link loss. Previous user-observed gate checks used browser controls rather than camera decoding.
 - Confirm the UNO Q matrix animations by eye; software state and bridge transport have been checked, but the LEDs have not been visually observed for each mode.
+
+## Documentation audit and regression run, 24 September 2026
+
+After the host-helper and receiver-resync changes, the current repository suite passed **37 Python tests and five JavaScript Stack-Up tests**. The original 29-test count above records the earlier unattended run. The current automated checks include camera reconnect, matrix state, host camera recovery, Wi-Fi/Ethernet status, and RetroPie game resync. They add no direct camera/display evidence or interactive Stack-Up result.

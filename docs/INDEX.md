@@ -10,16 +10,16 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 | --- | --- | --- |
 | Everyone | [Project README](../README.md) | Scope, preview, and document links. |
 | Everyone | [Virtual system contract](VIRTUAL_SYSTEM.md) | UNO Q, browser, virtual pieces, and game-link responsibilities. |
-| Player | [User guide](USER_GUIDE.md) | Preview controls and planned connected experience. |
+| Player | [User guide](USER_GUIDE.md) | Live controls, preview, and current limitations. |
 | Player and installer | [Setup guide](SETUP_GUIDE.md) | Pairing, camera placement, Test mode, and manual checks. |
-| Player and installer | [UNO Q matrix display design](UNO_Q_MATRIX_DISPLAY.md) | Planned hourglass, animated eyes, game, Test, pairing, and fault indications; current implementation status. |
+| Player and installer | [UNO Q matrix display design](UNO_Q_MATRIX_DISPLAY.md) | Implemented matrix software and pending visual checks. |
 | Player | [Gameplay guide](GAMEPLAY_GUIDE.md) | Gyromite, Stack-Up, holders, spin, and virtual button rules. |
 | Player | [Quick reference](QUICK_REFERENCE.md) | Controls and indicators at a glance. |
-| Installer | [Installation guide](INSTALLATION_GUIDE.md) | Preview setup and planned UNO Q/game-host setup. |
+| Installer | [Installation guide](INSTALLATION_GUIDE.md) | Installed UNO Q/RetroPie setup and camera commissioning. |
 | Developer | [Technical architecture](TECHNICAL_ARCHITECTURE.md) | State, commands, return path, and failure behavior. |
-| Developer | [Configuration reference](CONFIGURATION_REFERENCE.md) | Proposed settings and validation. |
+| Developer | [Configuration reference](CONFIGURATION_REFERENCE.md) | Code defaults, deployed settings, and calibration. |
 | Tester | [Verification plan](VERIFICATION_PLAN.md) | Evidence before claiming a connected game works. |
-| Everyone | [Troubleshooting](TROUBLESHOOTING.md) | Preview and future connection problems. |
+| Everyone | [Troubleshooting](TROUBLESHOOTING.md) | Live and preview diagnostics. |
 
 ## Research and design references
 
@@ -29,6 +29,8 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 - [Dashboard design](DASHBOARD_DESIGN.md): robot art, accessory layout, and live state.
 - [Gyromite manual notes](GYROMITE_MANUAL_NOTES.md), [Stack-Up manual notes](STACK_UP_MANUAL_NOTES.md), and [historical manual notes](HISTORICAL_MANUAL_NOTES.md): original behavior and game modes.
 - [UNO Q setup](HARDWARE_BUILD_GUIDE.md) and [parts plan](parts-plan.md): controller, camera, power, and optional network hardware only.
+- [UNO Q host helpers](../deploy/uno-q/README.md) and [RetroPie deployment](../deploy/retropie/README.md): installed and optional system services.
+- [Unattended engineering test report](UNATTENDED_TEST_REPORT_2026-09-24.md): synthetic optical and model evidence.
 - [Safety and security](SAFETY_AND_SECURITY.md), [third-party components](THIRD_PARTY_COMPONENTS.md), and [changelog](CHANGELOG.md).
 
-All unconnected components are marked planned. Do not present a camera, ROM hook, Uno Q service, or game return path as working until it has been tested end to end. Historical manuals explain the original physical toy; this project renders those mechanics virtually.
+The UNO Q app and Gyromite return path are running. Camera/display decoding and full interactive Stack-Up play remain unverified. Historical manuals explain the original physical toy; this project renders those mechanics virtually.

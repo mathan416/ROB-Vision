@@ -1,21 +1,9 @@
 # R.O.B. Vision UNO Q hardware setup
 
-**Scope:** build the small camera and network controller, not a physical R.O.B. R.O.B., hands, gyros, spinner, pads, and Stack-Up trays are virtual graphics and controller state. No motors, mechanical fixtures, tray sensors, motor drivers, or actuator power supply are required.
+R.O.B., hands, gyros, spinner, pads, and Stack-Up blocks are virtual. The existing UNO Q App Lab app, matrix sketch, browser dashboard, and RetroPie link are running. The remaining physical work is a compatible camera, stable aim at the game display, and optional mounting/enclosure. No motors, mechanical robot, or accessory sensors are needed.
 
-## Planned controller assembly
+Use a suitable UNO Q power supply and keep its vents clear. The tested setup uses an Ethernet adapter attached through a USB hub. Wi-Fi can carry the same controller traffic. A laptop, iPad, or phone is the main R.O.B. display at `http://arduiain.local/dashboard/`. The built-in 13×8 LED matrix supplies small status animations, not the game table.
 
-- Arduino UNO Q with a supported supply and enclosure that allows ventilation and service access.
-- Compatible camera and mount aimed at the cabinet's LCD/OLED flash area. Confirm the camera interface, frame mode, focus, exposure control, and cable length on the actual UNO Q before ordering a fixed enclosure.
-- Built-in Wi-Fi as the baseline LAN path, or a compatible Ethernet adapter if wired service is preferred. The cabinet and UNO Q share a trusted local network; no USB tether to the cabinet is planned.
-- A laptop, iPad, or phone opens the dashboard from the UNO Q over LAN. It is the principal R.O.B. display. An optional observer camera could show the room or controller, but it is not required for the virtual robot.
+Before buying or fixing the camera mount, identify the actual UNO Q capture device and measure delivered 30/60 fps modes, focus, exposure, and flash sampling on the intended LCD/OLED. The current code excludes codec-only `/dev/video` nodes. A camera was not attached during the engineering tests; the setup page's reconnect action retries software capture only. The optional USB recovery host helper is supplied but not installed and avoids a whole-hub reset when Ethernet shares the hub.
 
-## Commissioning order
-
-1. Power the UNO Q and confirm the intended operating system, camera, and network interfaces independently.
-2. Aim the camera at the game display. Fix focus and exposure, then record timestamped bright/dark traces while using the game's Test mode.
-3. Validate optical framing and command decoding against both supplied ROM analyses before connecting any game return path.
-4. Serve the dashboard from the UNO Q and verify the same virtual snapshot appears on laptop, iPad, and phone.
-5. Pair the Gyromite LAN sender with the game-host receiver. Confirm red/blue virtual pad transitions, the actual A/B mapping, and release on disconnect or timeout.
-6. Run full Gyromite and Stack-Up sessions and retain logs for failures. Do not treat the current browser demo as evidence that this integration is complete.
-
-Cable routing and enclosure design should avoid blocking the camera view, heat vents, or wireless antennas. There is no moving R.O.B. mechanism to calibrate or guard.
+The RetroPie Controller 2 mapping and both Gyromite gate colors have already been verified. Commission remaining hardware in this order: attach and aim camera, observe both games' Test modes, collect repeated complete movement traces and idle false-trigger evidence, then run full interactive Gyromite and Stack-Up sessions. See [installation](INSTALLATION_GUIDE.md) and [verification](VERIFICATION_PLAN.md).

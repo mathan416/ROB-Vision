@@ -38,32 +38,32 @@ Test mode also uses sustained alternating dark/green flashes, distinct from the 
 
 These addresses refer to the CPU view of these exact 32 KiB program images (`$8000–$FFFF`). The static analysis establishes the encoded message and palette choices. It does not establish the optical fidelity of a particular emulator, TV, or camera, or every mode-specific command cadence.
 
-## Camera decoder we should build
+## Implemented decoder and camera validation
 
-1. Aim and lock an adjustable region of interest at the game display. Use the game's **full-frame dark/green changes**, not sprite or text recognition. Keep a background/control region to detect room-light changes and glare.
-2. Capture timestamped luminance faster than the roughly 60 Hz bit rate. Start bench trials at 120 or 240 captured frames per second with fixed exposure, gain, and white balance; verify the *delivered timestamps* and use a short enough exposure to separate adjacent game frames. These are test settings, not a guarantee that a chosen camera can achieve them at the required resolution.
+1. The OpenCV service samples a fixed central 60% region by default; `--camera-roi` changes it. It uses brightness changes, not sprite or text recognition. Automatic region finding and a second background region are not implemented.
+2. The current service requests 60 fps and reports delivered fps. Synthetic tests at 60 fps with jitter accepted 667/900 valid transmissions correctly and rejected 233; zero were misclassified in that run. At 30 fps, all 900 were rejected. Actual camera/display behavior is unverified.
 3. Turn samples into a frame-clocked dark/bright sequence. Search for the complete `000101` preamble, then four variable bits at the specified positions with the three required intervening green bits. Require plausible bit widths and a complete message; reject missing, merged, or ambiguous samples.
 4. Accept only the action set for the identified game. A Gyromite two-level move and a Stack-Up one-level move are distinct actions. Keep the ready-light and test flashes outside the motion path. Ignore arbitrary game brightness changes that fail the full pattern.
-5. Assign one event ID to one complete optical transmission. Repeated **separate** identical commands are legitimate, especially in Stack-Up Memory; do not suppress them by command value or by a broad time window. Suppress only extra detections of the *same captured frame interval*.
-6. Record the sampled brightness trace, bit timing, candidate pattern, accepted/rejected result, source game, and action disposition. The browser dashboard should distinguish `FLASH SEEN`, `CODE DECODED`, `ACTION ACCEPTED`, `BUSY`, and `FAULT`.
+5. A complete accepted transmission produces one controller event. Separate identical transmissions remain valid, including in Stack-Up Memory.
+6. The current activity feed shows decoded and applied or blocked actions; Setup shows brightness and measured frame rate. Raw traces, bit candidates, confidence scores, and a busy queue are not exposed in the browser.
 
 Game identification can follow the VirtualGlove-style exact launch-filename registry already described in [Game Identification](GAME_IDENTIFICATION.md). It selects the decoder's allowed action set and the matching virtual accessory profile; it is not evidence that a flash was decoded. A missing or unknown launch event keeps game-specific virtual actions disabled until the game is selected locally and verified.
 
-## What the virtual robot should do
+## Implemented virtual action mapping
 
 Every accepted optical message advances **one bounded virtual primitive**. The UNO Q owns the virtual state and the browser animates it. No physical motion controller is part of this design.
 
 | Optical event | Robot operation | Display/state requirement |
 | --- | --- | --- |
-| Left / right | Rotate one virtual station | Show station before/target, fixture occupancy, busy state. |
-| Gyromite up / down | Move two virtual vertical levels | Show both intermediate and final levels; reject an out-of-range target. |
-| Stack-Up up / down | Move one virtual vertical level | Show target level and held-block state. |
+| Left / right | Rotate one virtual station | Update station and fixture occupancy; the browser animates the resulting pose. |
+| Gyromite up / down | Move two virtual vertical levels | Move two levels and reject an out-of-range target. |
+| Stack-Up up / down | Move one virtual vertical level | Move one level and update held-block state. |
 | Open / close | Open or close the illustrated grippers once | Update a piece only when the modeled grasp or release is valid. |
 | Ready-light / test | Update optical or visual readiness only | Never move virtual pieces. |
 
 For **Gyromite**, a sequence of these primitives transfers a virtual gyro between holder, spinner, red pad, and blue pad. The UNO Q derives virtual pad state from its object model and sends that state to the paired LAN Controller 2 receiver. The flash stream alone does not identify the professor's location or prove that the game accepted the returned button. The model tracks which gyro is held and which pad is pressed.
 
-For **Stack-Up**, the same primitives manipulate five virtual colored blocks across five numbered trays. The pose also includes six height levels; closing at a lower block can carry it and every block above it as an ordered segment. The flash stream has no block ID, target-pattern, or victory message. The UNO Q can know its own modeled stack state, but not the game's desired pattern without another validated source. Memory mode can transmit successive commands faster than the animation finishes: measure cadence and use a bounded, visible queue only if tests show it is needed; otherwise report a missed-command state. In the Bingo simultaneous row-and-column case described in the manual, the game sends no command until one line changes; the camera should yield no valid movement message.
+For **Stack-Up**, the same primitives manipulate five virtual colored blocks across five numbered trays. The pose also includes six height levels; closing at a lower block can carry it and every block above it as an ordered segment. The flash stream has no block ID, target-pattern, or victory message. The UNO Q can know its own modeled stack state, but not the game's desired pattern without another validated source. Memory mode may send rapid commands; the current controller has no queue or explicit missed-command state, so this cadence needs real camera testing. In the Bingo simultaneous row-and-column case described in the manual, the game sends no command until one line changes; the camera should yield no valid movement message.
 
 ## Next validation gate
 

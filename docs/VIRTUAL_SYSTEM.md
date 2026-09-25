@@ -1,39 +1,25 @@
-# R.O.B. Vision: virtual system contract
+# R.O.B. Vision virtual system contract
 
-**Current scope:** R.O.B. is a character and accessory simulation rendered in the browser. The Arduino UNO Q is the intended controller: its camera watches Gyromite or Stack-Up on the cabinet screen, its software decodes the optical commands, updates the virtual R.O.B. and pieces, and sends virtual Controller 2 button states to the game host over Wi-Fi or Ethernet for Gyromite. A laptop, iPad, or phone shows the dashboard. There is no physical robot, moving arm, gyro, tray, spinner, or tray sensor to build.
+R.O.B. is a virtual character and accessory model. The UNO Q runs the controller and optional camera decoder; a laptop, iPad, or phone renders the robot and pieces. There are no physical arms, gyros, trays, blocks, or motors to build. RetroPie remains the game host.
 
-**Available now:** the browser contains scripted demonstrations and can also follow a local Python controller service. That service decodes the ROM-derived light patterns from timestamped samples, optionally captures frames through OpenCV, applies Stack-Up and Gyromite virtual commands, and serves the authoritative state to browser clients. Stack-Up preserves all five blocks and grouped carries. The camera path has only synthetic timing tests so far; it has not been validated with the intended UNO Q, display, or emulator. Gyromite's Controller 2 return path is still absent.
+## What is running
 
-## Runtime responsibilities
+The UNO Q App Lab app serves the dashboard, owns virtual game state, receives authenticated RetroPie game-launch events, and sends snapshots to browsers. `retropie.local` has runcommand launch/exit hooks and a paired Linux virtual Controller 2 receiver. Gyromite red and blue gate controls were verified in Game A. Synthetic tests cover the camera decoder, but actual optical play awaits an attached camera and display test. Stack-Up has been booted headlessly and its virtual model exercised; a full interactive Stack-Up session has not been observed.
 
-| Component | Responsibility |
-| --- | --- |
-| Cabinet display and emulator | Render the original game's optical flashes and accept ordinary controller input. |
-| UNO Q camera service (planned) | Capture a timestamped region of the cabinet display; decode a complete optical command or reject it. |
-| UNO Q virtual robot controller (planned) | Apply one validated command to a bounded virtual pose, two gyro states, or five Stack-Up blocks; publish ordered state events. |
-| Gyromite return path (installed on `retropie.local`) | Poll the UNO Q's virtual red/blue pad state over LAN into a virtual Controller 2; release on game exit, missing game process, or sustained stale reads. Actual gate mapping remains to be checked in the game. |
-| Browser dashboard | Render the robot, accessories, game pieces, controls, status, and event history from the UNO Q's state stream. Multiple screens observe the same session. |
-| Optional RetroPie launch hook | Supply an exact, configured game identity on launch/exit; it does not replace optical command decoding. |
+## Game rules in the model
 
-The controller service owns live game state. The browser does not independently decide what command was seen or which game button is pressed. The dashboard's separate static preview still runs its own local script. Deploying the service on the UNO Q remains a hardware validation task.
+Gyromite has two virtual gyros, holders, a spinner, and red/blue pads. A spinning gyro on a pad presses its gate; R.O.B. can also hold an unspun gyro on a pad. Moving, lifting, or spin expiry releases that pad. Each gyro has an illustrative 55-second spin clock. Fast Gates gives an immediate, 60-second maximum manual hold with camera capture stopped. The UNO Q's pad state is polled over LAN by RetroPie and applied to Controller 2. The browser does not decide button state independently.
 
-## Gyromite virtual rules
+Stack-Up has five colored blocks, five trays, six height levels, an arm station, and a shared grip. All five start on Tray 3 in the current live model. A lower grip carries the contacted block and all blocks above it as one ordered segment. Invalid moves are rejected without changing the stack. The original game's Direct, Memory, and Bingo modes send the same six movement commands; R.O.B. Vision does not yet initialize their different historical starting layouts or report scoring. Stack-Up does not use the Gyromite Controller 2 gate path.
 
-Each gyro has a location (`holder`, `held`, `spinner`, `red_pad`, or `blue_pad`) and spin phase (`idle`, `accelerating`, `spinning`, `wobbling`, or `stopped`). The controller tracks Gyro A and Gyro B separately. A virtual pad is pressed when a spinning gyro is upright on it, or when R.O.B. is explicitly holding an unspun gyro down on that pad. Lifting, moving, or tipping the gyro releases the pad. The button state is derived from this virtual model and sent over LAN; there is no physical contact sensor. The demo uses a 55-second illustrative spin lifetime. Actual play timing will be tuned for fun and compatibility rather than presented as a measured property of Nintendo hardware.
+## Browser and camera behavior
 
-The [Gyromite booklet](https://www.digitpress.com/library/manuals/nes/gyromite.txt) says one gate can be moved without spinning a gyro. For two gates, spinning one gyro lets it keep the first pad pressed while R.O.B. moves the other. When a gyro is no longer needed, R.O.B. returns it to its holder. A completed action must update both the visible object and the virtual controller state together. Loss of the LAN return path releases both game buttons even if the local animation remains visible.
+Mission shows the animated robot, accessory views, Game Table, Pose Preview, System Vitals, and activity. Setup has pairing, camera framing, Test-mode light acknowledgement, and manual game checks. A `file://` page is a local preview; use `http://arduiain.local/dashboard/` for UNO Q state. The static demo may run when RetroPie is paired but no game is active. A live game stops the demo and takes authority.
 
-The finite preview demonstrates one unspun held press, a two-gyro spin relay, one recovery per gyro after spin-down, then a return of both stopped gyros to their holders. It ends in a stable `COMPLETE` state. Future live game play should follow optical/player commands; the scripted preview is not an autonomous strategy for solving a level.
+The camera capture code requests 60 fps and samples the central 60% by default. A complete recognized flash command changes the model; Test-mode flashing only animates R.O.B.'s red status light. A missing or uncertain command does nothing. The camera has no live-hardware acceptance result; a displayed model action is not proof of what occurred on the game screen. The service knows neither Hector's location nor Stack-Up scoring.
 
-## Stack-Up virtual rules
+## Failure and reset
 
-Track five colored blocks, their order, five tray stacks, the arm station (1–5), height (six levels), and the gripper state. Closing the hands at a block level can grip that block **and every block above it** as one carried stack segment. Opening releases the whole carried segment onto the target tray in the same order. Reject a grip with no block at that level, a blocked turn, an out-of-range move, or a placement that would exceed the tray's five-block capacity. A decoded flash carries one movement command, not a block ID, destination, target pattern, or score. Stack-Up does not need Gyromite's virtual Controller 2 pad return path in the documented modes. The dashboard must show the modeled stack and distinguish a received game command from the resulting inferred piece movement.
+Game exit, unknown game, link loss, missing RetroArch, and stale receiver data release Gyromite's buttons. Browser reload recovers the controller snapshot. **Home** reinitializes the selected game. Live **Emergency Stop** stops capture and clears game selection; the preview version only cancels its local script. Setup **Reset & Reconnect** retries camera capture in software. USB hub recovery requires separately installed UNO Q host helpers and is not triggered by that button.
 
-## Failure boundaries
-
-- A partial or ambiguous optical flash never produces movement.
-- Unknown game identity or mode does not select a game-specific controller mapping.
-- One virtual action completes before another begins unless a game mode's measured timing demands a bounded queue.
-- Game exit, network timeout, restart, or a simulation stop releases both virtual Gyromite buttons.
-- Browser reconnect receives a fresh snapshot and ordered events; it never restarts a partially completed action on its own.
-- The original game sees only controller input. Unless an optional emulator hook is later implemented, the virtual controller cannot claim to know the professor's location, gate animation, or level outcome.
+See the [technical architecture](TECHNICAL_ARCHITECTURE.md) for exact runtime paths and [configuration reference](CONFIGURATION_REFERENCE.md) for defaults.

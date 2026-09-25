@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the design-preview manuals from their editable Markdown sources."""
+"""Build the current project guides from their editable Markdown sources."""
 
 from __future__ import annotations
 
@@ -151,7 +151,7 @@ def markdown_story(path: Path, usable_width: float, st: dict[str, ParagraphStyle
         story.append(CondPageBreak(160))
         story.append(Spacer(1, 23))
     if chapter_number is not None:
-        story.append(Paragraph(f"CHAPTER {chapter_number:02d} / DESIGN PREVIEW", st["eyebrow"]))
+        story.append(Paragraph(f"CHAPTER {chapter_number:02d} / CURRENT REFERENCE", st["eyebrow"]))
     story.append(Paragraph(inline(title), st["chapter"]))
     i = 1
     paragraph: list[str] = []
@@ -231,8 +231,8 @@ def cover(canvas, doc, title: str, subtitle: str, landscape_page: bool = False):
     canvas.drawString(55, 126, subtitle)
     canvas.setStrokeColor(ORANGE); canvas.setLineWidth(3); canvas.line(55, 109, 216, 109)
     canvas.setFillColor(colors.HexColor("#8BA9B8")); canvas.setFont("DM-Bold", 8)
-    canvas.drawString(55, 67, "DESIGN PREVIEW 0.1  /  24 SEPTEMBER 2026")
-    canvas.drawString(55, 52, "SIMULATION AVAILABLE · PHYSICAL BUILD NOT YET VERIFIED")
+    canvas.drawString(55, 67, "CURRENT REFERENCE  /  24 SEPTEMBER 2026")
+    canvas.drawString(55, 52, "UNO Q + RETROPIE LIVE · CAMERA VALIDATION PENDING")
     canvas.restoreState()
 
 
@@ -245,7 +245,7 @@ def body_page(canvas, doc, label: str):
     canvas.drawString(48, height-28, "R.O.B. VISION")
     canvas.setFillColor(MUTED); canvas.drawRightString(width-48, height-28, label.upper())
     canvas.line(48, 43, width-48, 43)
-    canvas.setFont("DM", 7); canvas.drawString(48, 29, "DESIGN PREVIEW · NO LIVE HARDWARE")
+    canvas.setFont("DM", 7); canvas.drawString(48, 29, "LIVE CONTROLLER · CAMERA VALIDATION PENDING")
     canvas.drawRightString(width-48, 29, f"{doc.page:02d}")
     canvas.restoreState()
 

@@ -1,31 +1,20 @@
 # R.O.B. Vision quick reference
 
-**R.O.B. is virtual.** The UNO Q dashboard and RetroPie Gyromite Controller 2 link are running. The player confirmed that both red and blue gate controls work in Game A. UNO Q camera capture remains to be verified.
+**R.O.B. is virtual.** The UNO Q app and RetroPie link are running. Both Gyromite gate colors responded in Game A. Actual camera decoding has not yet been verified on the UNO Q.
 
-## Preview controls
+| Where | Action | Result |
+| --- | --- | --- |
+| Mission | Select Gyromite, Stack-Up, or Pose Lab | Choose the virtual scene while no game is active. |
+| Mission | Run Demo Sequence | Finite animation; available while paired and idle. |
+| Mission | Home | Reset selected virtual game and pieces. |
+| Mission | Emergency Stop | Live: stop capture and clear game. Preview: cancel local script. |
+| Mission | Fast Gates during live Gyromite | Blue `2`, red `1`, Release Both `0`; press again to release a color. Auto-release after 60 seconds. |
+| Setup | Pair Console / Check Link | Pair RetroPie or refresh its authenticated online status. |
+| Setup | Start Camera Check | Show framing, measured fps, and sampling rectangle. |
+| Setup | Reset & Reconnect | Retry OpenCV capture; USB hub is unaffected. |
+| Setup | Watch Test Flashes | Blink R.O.B.'s red light for detected Test alternation; no movement. |
+| Setup | Gyromite / Stack-Up checks | Send manual pad or movement commands to the live model. |
 
-| Control | Result |
-| --- | --- |
-| Gyromite / Stack-Up / Pose Lab | Choose a game accessory scene or R.O.B.'s motion sandbox. |
-| Run Demo Sequence | Start a finite animation. Gyromite ends with both gyros stored; Stack-Up moves red alone, then blue and white together. |
-| Stack-Up Commands | Apply one local virtual turn, height change, open, or close; valid actions update the block stacks. |
-| Pose Preview | Try R.O.B.'s movement locally in Gyromite or Pose Lab. |
-| Home | Reset all virtual pieces, buttons, pose, and timers. |
-| Emergency Stop / Reset Stop | Cancel or re-enable the local simulation. |
+Use [Mission](http://arduiain.local/dashboard/) and [Setup](http://arduiain.local/dashboard/setup.html) on the UNO Q. A local `file://` page is only the preview. The camera requests 60 fps; delivered timing may still miss flashes. At 30 fps the current decoder rejects one-frame command traces rather than guessing.
 
-## Fast Gates during live Gyromite
-
-Open `http://arduiain.local/dashboard/`. **Lower Blue** or **Lower Red** presses that gate immediately; tap it again to raise it. **Release Both** raises both. Keyboard: **2** blue, **1** red, **0** release both. Each press releases after 60 seconds, and leaving the game releases both. The controls appear when Gyromite is selected and camera capture is stopped. Use **Home** first if a gyro has been moved with the regular controls.
-
-## Planned connected loop
-
-```text
-cabinet game flash → UNO Q camera → validated command → virtual R.O.B. + pieces
-                                              ↓
-                          browser on laptop / iPad / phone
-Gyromite virtual pad state → Wi-Fi/Ethernet → game-host Controller 2 receiver
-```
-
-An unspun gyro held on one pad can press one gate. A spinning gyro remains on a pad while R.O.B. operates the other. When no longer needed, gyros return to holders. The preview's 55-second spin timer is illustrative. A lost game link releases both virtual buttons.
-
-**SIMULATION / GAME LINK OFFLINE** means no game is connected. **NO SIGNAL** or **UNREADABLE SIGNAL** will mean no virtual action in the planned camera mode. See the [user guide](USER_GUIDE.md) and [virtual system contract](VIRTUAL_SYSTEM.md).
+The game launch hook identifies an exact ROM name. The receiver applies Gyromite virtual pad states as Controller 2 input and releases both on exit or stale network data. Stack-Up moves modeled blocks and has no gate-button return path. See the [user guide](USER_GUIDE.md) and [troubleshooting](TROUBLESHOOTING.md).

@@ -1,15 +1,13 @@
 # R.O.B. Vision safety and security
 
-The Mission and Setup browser controls are available to devices on the same trusted LAN without a browser token prompt. Keep the UNO Q app off guest and public networks. The RetroPie launch notifier still requires the controller token, and receiver status is marked online only for authenticated receiver polls. Console pairing uses a short-lived code and a checked TLS certificate fingerprint.
+R.O.B. and every accessory are virtual. There are no motors or physical gyros. The relevant risks are incorrect game input, stale network state, untrusted browser access, and camera privacy.
 
-R.O.B. and its accessories are virtual. This project has no robot arm, powered gripper, physical spinner, tray sensor, or actuator supply. The dashboard **Emergency Stop** cancels a local animation; it does not cut physical power. The main risks are incorrect game input, stale network state, camera privacy, and misleading UI status.
+- Mission and Setup browser controls intentionally work without a token on the trusted LAN. Keep ports 80 and 8766 away from guest and public networks. Browser writes use same-origin JSON checks; this is not a substitute for network isolation.
+- RetroPie launch notices and receiver identity require the shared controller token. Pairing uses a short-lived code and checked TLS certificate fingerprint. Do not publish the token or include it in logs.
+- The optical decoder rejects incomplete and ambiguous flashes. A camera dropout does not repeat the last action. Actual display/camera performance remains unverified.
+- Virtual movement validates bounds and block conservation. Invalid Stack-Up transfers do not move pieces.
+- The RetroPie receiver releases both Gyromite buttons on exit, unknown game, missing process, or 750 ms without a good response. Fast Gate holds expire after 60 seconds.
+- Live **Emergency Stop** stops camera capture and clears game selection. In the offline preview it only cancels the local animation. It is not a physical power switch.
+- The camera preview is a low-rate framing aid on Setup. The app does not record camera video by default. Avoid aiming it at unrelated private content. User ROMs are not bundled.
 
-- Reject incomplete or ambiguous optical commands. A flicker or camera dropout must not repeat the last action.
-- Bound every virtual pose and object transfer. A block cannot appear on two trays, and one gyro cannot occupy two stations.
-- The UNO Q, not a browser tab, owns virtual state and Gyromite pad output in the planned connected system.
-- Pair the Gyromite sender and receiver on a trusted LAN. Version and authenticate messages, reject stale sequences, and release both Controller 2 buttons on timeout, exit, reset, or unpairing.
-- Show simulation, optical validity, and game-link state separately. A drawn gyro on a pad is not proof that the emulator received its button state.
-- Restrict camera diagnostics to trusted clients. Keep the game-screen camera aligned only to the intended display; do not record video by default. Do not package user ROMs in logs or releases.
-- Browser clients reconnect from a snapshot. They do not resume a partially accepted action or silently assert old button states.
-
-The original Gyromite booklet's warnings about touching a real spinning gyro describe Nintendo's physical toy. They are historical context, not a hardware hazard in this virtual implementation.
+The original booklet's warnings about a physical spinning gyro are historical context for Nintendo's toy, not a hazard from this virtual implementation.

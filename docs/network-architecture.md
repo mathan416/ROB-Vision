@@ -1,30 +1,20 @@
 # R.O.B. Vision network architecture
 
-R.O.B. is a virtual model owned by the Arduino UNO Q. The cabinet displays the game; the UNO Q camera watches the optical flashes. A laptop, iPad, or phone receives the UNO Q's state and renders R.O.B. and every accessory. There is no physical robot or tray sensor and no USB data tether to the cabinet.
+The UNO Q owns virtual R.O.B. state. A browser on the trusted LAN renders it, and RetroPie supplies game identity and receives Gyromite pad states. The game display sends optical flashes to the UNO Q camera; no USB game-data tether is used.
 
 ```text
-cabinet game display ── optical flashes ──> UNO Q camera/decoder
-                                               ↓
-                                     virtual R.O.B. controller
-                                         ↙           ↘
-                       state/events to browsers     Gyromite pad buttons
-                              over LAN              over paired LAN link
-                                                          ↓
-                                             game-host Controller 2 receiver
+RetroPie runcommand ── authenticated launch/exit HTTP ──> UNO Q
+RetroPie receiver <── authenticated /api/state polling ── UNO Q virtual pads
+Browser <── /api/state every 500 ms ── UNO Q controller
+Game screen ── optical flashes ──> UNO Q camera (hardware validation pending)
 ```
 
-The optional RetroPie start/end hook sends exact configured game identity to the UNO Q. It selects a mode but is not a movement command. The optical decoder supplies movement commands. If camera capture proves infeasible, a future emulator adapter may supply equivalent validated commands through an authenticated channel; that fallback is not implemented.
+The App Lab gateway serves `http://arduiain.local` on port 80 and forwards to the controller on 8766. Existing Avahi supplies the `.local` name. Wi-Fi or an Ethernet adapter carries the same HTTP traffic. The Ethernet adapter shares the current USB hub; the supplied but uninstalled host recovery helper refuses a whole-hub reset while Ethernet is attached.
 
-## Gyromite return path
+## Identity and safety
 
-The UNO Q derives red/blue virtual pad states from its virtual gyro and hand model. A spinning upright gyro on a pad presses it; an unspun gyro explicitly held down by R.O.B. also presses it. Moving or tipping it releases it. These short-lived states are sent to a paired receiver that exposes a virtual second controller to the emulator. The original booklet does not establish the red/blue-to-A/B mapping clearly enough to hard-code it; measure the mapping in a running game.
+Exact configured RetroPie ROM basenames select `gyromite` or `stack_up`; unknown titles clear context. The launch notifier and receiver poll use the shared token. Pairing sends that token to RetroPie after checking a short-lived code and TLS certificate fingerprint. Browser controls intentionally require no token on the trusted LAN, so neither port should be exposed publicly.
 
-Packets need a session identifier, monotonic sequence, version, authentication, both current button states, and a bounded freshness period. The receiver releases both buttons on timeout, unpairing, game exit, or invalid input. A local socket send is not evidence that the emulator accepted a button; receiver status belongs in the dashboard. Network reconnection does not replay an old held state without a new fresh snapshot.
+The receiver is a root uinput service that polls about every 50 ms. It releases both buttons after 750 ms without a good response, on game exit, or when no matching RetroArch process is active. It scans the running process and can resynchronize game identity after a UNO Q restart. Its authenticated poll also supplies the online indicator, which expires after three seconds.
 
-Stack-Up's documented modes do not use this Gyromite tray-button return path. Its virtual piece state still streams to browser clients.
-
-## Browser stream and privacy
-
-Browsers subscribe to a versioned snapshot followed by ordered events. The UNO Q remains authoritative if a tab closes or reloads. The main view shows R.O.B., virtual pieces, commands, and controller-link freshness. The game-screen camera image is used for calibration diagnostics, while the main view remains the robot. Limit any camera stream to paired/trusted clients and avoid recording ROM images by default.
-
-Wi-Fi is the intended baseline. A compatible Ethernet adapter is optional; verify UNO Q power and interface support on the actual board. The application protocol should behave the same over either link. The local dashboard presently has no network service or game receiver.
+The UNO Q's `/api/state` response is a schema-versioned snapshot with recent events. There is no push stream, durable event log, sequence protocol, or receiver acknowledgement of an on-screen gate animation. Browser refresh gets the current state. The camera preview on Setup is a low-rate framing aid and is not recorded by default. An emulator command hook remains unimplemented.

@@ -1,5 +1,10 @@
 # R.O.B. Vision changelog
 
+## Documentation sync — 24 September 2026
+
+- Updated live architecture, setup, player, camera, network, configuration, and verification guides against current UNO Q and RetroPie code and test evidence. Regenerated the three printable editions. Historical entries below remain a record of earlier project stages.
+
+
 ## Mission game-status labels — 24 September 2026
 
 - Show the selected Gyromite or Stack-Up game beside RetroPie link status on the Mission page, matching the game context visible on Setup.
