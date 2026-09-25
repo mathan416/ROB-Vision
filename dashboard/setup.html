@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#080f1d">
   <title>R.O.B. Vision // Setup</title>
   <link rel="stylesheet" href="style.css?v=setup-3">
-  <link rel="stylesheet" href="setup.css?v=test-light-1">
+  <link rel="stylesheet" href="setup.css?v=help-1">
   <script src="setup.js?v=matrix-1" defer></script>
 </head>
 <body>
@@ -14,7 +14,7 @@
   <main class="app-shell setup-shell">
     <header class="topbar">
       <div class="brand"><span class="brand-mark">R<span>·</span>O<span>·</span>B</span><span class="brand-sub">SETUP <i>///</i> MK·01</span></div>
-      <nav class="page-nav" aria-label="Pages"><a href="/dashboard/">MISSION</a><a href="/dashboard/setup.html" aria-current="page">SETUP</a></nav>
+      <nav class="page-nav" aria-label="Pages"><a href="index.html">MISSION</a><a href="setup.html" aria-current="page">SETUP</a><a href="help.html">HELP</a></nav>
       <div class="top-status"><span class="status-dot"></span><span id="setup-connection">CONNECTING</span></div>
     </header>
     <div class="setup-hero"><p class="eyebrow">READY THE MISSION / 00</p><h1>Connect. Aim. Test.</h1><p>Prepare the RetroPie link and camera, then check each game control before playing.</p></div>
@@ -33,7 +33,7 @@
           <label>SHA-256 fingerprint<input id="pair-fingerprint" autocomplete="off" spellcheck="false" placeholder="64 hex characters from RetroPie"></label>
           <div class="setup-row"><button id="pair-button" type="button">PAIR CONSOLE</button><button id="pair-refresh-offline" type="button" class="quiet">CHECK LINK</button><button id="pair-cancel" type="button" class="quiet" hidden>BACK TO STATUS</button></div>
         </div>
-        <p class="setup-feedback" id="pair-feedback" role="status">The receiver must be installed on RetroPie before pairing.</p>
+        <p class="setup-feedback" id="pair-feedback" role="status">The receiver must be installed on RetroPie before pairing.</p><a class="setup-help-link" href="help.html#pairing">NEED HELP PAIRING? ↗</a>
       </section>
       <section class="setup-card" aria-labelledby="camera-heading">
         <div class="section-head"><span>02 / CAMERA</span><span id="camera-state">OFFLINE</span></div>
@@ -42,7 +42,7 @@
         <div class="setup-camera"><img id="setup-frame" alt="Live UNO Q camera image with a green sampling rectangle" hidden><span id="camera-placeholder">CAMERA PREVIEW OFFLINE</span></div>
         <div class="setup-stats"><span id="camera-device">NO CAMERA DETECTED</span><span id="camera-fps">0 FPS</span><span id="camera-brightness">0% SIGNAL</span></div>
         <div class="setup-row"><button id="camera-toggle" type="button">START CAMERA CHECK</button><button id="camera-reconnect" type="button" class="quiet">RESET &amp; RECONNECT</button></div>
-        <p class="setup-feedback" id="camera-feedback" role="status">Connect a camera to the UNO Q to check placement.</p>
+        <p class="setup-feedback" id="camera-feedback" role="status">Connect a camera to the UNO Q to check placement.</p><a class="setup-help-link" href="help.html#camera">CAMERA HELP ↗</a>
       </section>
       <section class="setup-card" aria-labelledby="test-heading">
         <div class="section-head"><span>03 / GAME SIGNAL</span><span id="test-state">WAITING</span></div>
@@ -50,7 +50,7 @@
         <p>Choose the game, open its Test mode, then arm this check. Repeated screen flashes make virtual R.O.B.'s red light blink; a decoded ready-light command leaves it steady. Neither signal moves his arms. The signal alone cannot identify the game's menu screen.</p>
         <div class="test-light" id="test-light"><span id="test-led" class="test-led" aria-hidden="true"></span><span id="test-led-label">R.O.B. LIGHT OFF</span></div>
         <div class="setup-row"><button id="select-gyro" type="button" class="quiet">GYROMITE</button><button id="select-stack" type="button" class="quiet">STACK-UP</button><button id="arm-test" type="button">WATCH TEST FLASHES</button><button id="test-preview" type="button" class="quiet">PREVIEW RED LIGHT</button></div>
-        <p class="setup-feedback" id="test-feedback" role="status">Select a game and start the camera check first.</p>
+        <p class="setup-feedback" id="test-feedback" role="status">Select a game and start the camera check first.</p><a class="setup-help-link" href="help.html#status">UNDERSTAND THE SIGNALS ↗</a>
       </section>
       <section class="setup-card" aria-labelledby="buttons-heading">
         <div class="section-head"><span>04 / MANUAL TEST</span><span id="buttons-mode">SELECT A GAME</span></div>
@@ -58,7 +58,7 @@
         <p>These buttons change the virtual R.O.B. state. Gyromite gates also drive RetroPie's Controller 2 when paired and the game is running.</p>
         <div id="setup-gates" hidden><p class="test-caption">GYROMITE / FAST GATES</p><div class="setup-row"><button data-setup-gate="red" type="button">LOWER RED</button><button data-setup-gate="blue" type="button">LOWER BLUE</button><button data-setup-gate="all" type="button" class="quiet">RELEASE BOTH</button></div></div>
         <div id="setup-stack" hidden><p class="test-caption">STACK-UP / R.O.B. COMMANDS</p><div class="setup-command-grid"><button data-setup-command="LEFT" type="button">LEFT</button><button data-setup-command="RIGHT" type="button">RIGHT</button><button data-setup-command="UP" type="button">UP</button><button data-setup-command="DOWN" type="button">DOWN</button><button data-setup-command="OPEN" type="button">OPEN</button><button data-setup-command="CLOSE" type="button">CLOSE</button></div></div>
-        <p class="setup-feedback" id="buttons-feedback" role="status">Manual tests are available after selecting Gyromite or Stack-Up.</p>
+        <p class="setup-feedback" id="buttons-feedback" role="status">Manual tests are available after selecting Gyromite or Stack-Up.</p><a class="setup-help-link" href="help.html#controls">CONTROL GUIDE ↗</a>
       </section>
     </div>
     <footer><span>R.O.B. VISION <b>·</b> SETUP</span><span>PAIR / CAMERA / SIGNAL / CONTROLS</span></footer>

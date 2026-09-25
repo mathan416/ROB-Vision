@@ -37,3 +37,5 @@
 @media(prefers-reduced-motion:reduce){.test-light.flashing .test-led{animation:none;background:#ff454f;box-shadow:0 0 13px #ff4657}}
 @media(max-width:800px){.setup-grid{grid-template-columns:1fr}}
 @media(max-width:530px){.setup-card{padding:16px}.setup-hero{padding-bottom:17px}.setup-card button{flex:1}.setup-command-grid button{min-width:0}}
+
+.setup-help-link{display:inline-block;margin-top:9px;color:#86ded7;text-decoration:none;border-bottom:1px solid #528d8b;padding-bottom:3px;font:800 10px "DM Sans",sans-serif;letter-spacing:.09em}.setup-help-link:hover{color:#fff;border-color:#fff}

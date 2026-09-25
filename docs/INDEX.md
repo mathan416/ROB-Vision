@@ -8,6 +8,7 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 
 | Reader | Guide | What it covers |
 | --- | --- | --- |
+| Everyone | [Built-in Help center](../dashboard/help.html) | Searchable setup, play, controls, indicators, and troubleshooting inside the dashboard. |
 | Everyone | [Project README](../README.md) | Scope, preview, and document links. |
 | Everyone | [Virtual system contract](VIRTUAL_SYSTEM.md) | UNO Q, browser, virtual pieces, and game-link responsibilities. |
 | Player | [User guide](USER_GUIDE.md) | Live controls, preview, and current limitations. |

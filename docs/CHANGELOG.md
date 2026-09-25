@@ -1,5 +1,9 @@
 # R.O.B. Vision changelog
 
+## Built-in Help — 24 September 2026
+
+- Added a searchable Help page inside the dashboard with setup, Gyromite, Stack-Up, controls, status, troubleshooting, and FAQ content. Linked it from Mission and Setup, with contextual Setup links.
+
 ## Documentation sync — 24 September 2026
 
 - Updated live architecture, setup, player, camera, network, configuration, and verification guides against current UNO Q and RetroPie code and test evidence. Regenerated the three printable editions. Historical entries below remain a record of earlier project stages.
