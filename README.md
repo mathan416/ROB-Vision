@@ -6,9 +6,30 @@ R.O.B. Vision is an independent maker project for playing Gyromite and Stack-Up 
 
 **Available now:** a separate UNO Q App Lab app, live Mission and Setup pages, exact ROM identification, paired RetroPie receiver, FCEUmm and Nestopia game-frame launch choices, Gyromite gate return, Stack-Up block model, UNO Q matrix animations, and offline demonstrations. Live Direct play delivered all six command types from both games through FCEUmm; Nestopia delivered movement commands from both games. Both Gyromite gate colors were confirmed in Game A under FCEUmm. Nestopia gate return and longer game sessions remain to be checked.
 
-Start **R.O.B. Vision** from UNO Q App Lab **My Apps**, then open `http://arduiain.local/dashboard/`. The direct `http://arduiain.local:8766/dashboard/` address uses the same controller state. This UNO Q runs one App Lab app at a time, so stop VirtualGlove before starting R.O.B. Vision. The browser controls are available on the trusted LAN without a token prompt. The token stored in the UNO Q's `~/.config/rob-vision/environment` is used for authenticated RetroPie launch and receiver traffic. Do not expose the service to the public Internet.
+Start **R.O.B. Vision** from UNO Q App Lab **My Apps**, then open `http://arduiain.local/dashboard/` on the test device or your UNO Q's own hostname. The direct port 8766 address uses the same controller state. This UNO Q runs one App Lab app at a time, so stop VirtualGlove before starting R.O.B. Vision. The browser controls are available on the trusted LAN without a token prompt. The installer creates a private token in the UNO Q app's `data/controller-token`; an existing `ROB_VISION_TOKEN` environment setting takes precedence. That token authenticates RetroPie launch and receiver traffic. Do not expose the service to the public Internet.
 
 The [Setup page](dashboard/setup.html) pairs RetroPie, shows receiver and game-frame status, acknowledges Test mode from the frame link, and offers Gyromite and Stack-Up manual checks. [Mission](dashboard/index.html) keeps R.O.B. and the Game Table as the main view. The [Help center](dashboard/help.html) covers play, controls, indicators, and troubleshooting.
+
+## Install (development preview)
+
+The installer currently supports an Arduino UNO Q running App Lab and a standard RetroPie installation with the `pi` account. It does not include ROMs or emulator cores. Install Python 3.10 or newer on both machines, and install `gcc`, `openssl`, and either `lr-fceumm` or `lr-nestopia` on RetroPie. Stop R.O.B. Vision in App Lab and exit any NES game before installing or upgrading.
+
+Clone this `dev` branch separately on each device. On the **UNO Q**, sign in as `arduino` and run:
+
+```sh
+git clone --branch dev https://github.com/mathan416/ROB-Vision.git ~/rob-vision-src
+python3 ~/rob-vision-src/scripts/install.py uno-q
+```
+
+Start **R.O.B. Vision** in App Lab and open `http://<your-uno-q-name>.local/dashboard/setup.html`. On **RetroPie**, sign in as `pi` and run (replace the controller name):
+
+```sh
+git clone --branch dev https://github.com/mathan416/ROB-Vision.git ~/rob-vision-src
+sudo python3 ~/rob-vision-src/scripts/install.py retropie --controller your-uno-q.local
+python3 /home/pi/rob-vision/tools/retropie_pair.py
+```
+
+Enter the displayed code and certificate fingerprint on the UNO Q Setup page. Then on RetroPie run `sudo systemctl enable --now rob-vision-controller2.service` and `sudo python3 ~/rob-vision-src/scripts/install.py player2` to map the detected virtual pad. Restart the game after mapping. See the [installation guide](docs/INSTALLATION_GUIDE.md) for upgrades, checks, and supported layouts. This installer has local automated coverage; a fresh two-device installation has not yet been exercised.
 
 ## Play through RetroPie
 

@@ -147,8 +147,9 @@ def send_frame_command(url, token, item, timeout):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--url", default="http://arduiain.local")
-    parser.add_argument("--token-file", type=Path, default=Path("/home/pi/.config/rob-vision/token"))
+    parser.add_argument("--url", default=os.environ.get("ROB_VISION_URL", "http://arduiain.local"))
+    parser.add_argument("--token-file", type=Path,
+                        default=Path(os.environ.get("ROB_VISION_TOKEN_FILE", "/home/pi/.config/rob-vision/token")))
     parser.add_argument("--interval", type=float, default=0.05)
     parser.add_argument("--timeout", type=float, default=0.25)
     parser.add_argument("--stale-after", type=float, default=0.75)

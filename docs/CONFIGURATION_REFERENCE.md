@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | App Lab gateway | HTTP port 80 | `http://arduiain.local/dashboard/` forwards to the controller. |
 | Controller service | Port 8766 | Direct `/dashboard/` and `/api/` access. Local CLI binds loopback by default; use `--host 0.0.0.0` for a trusted LAN. |
-| Controller token | `ROB_VISION_TOKEN` or UNO Q `~/.config/rob-vision/environment` | Authenticates RetroPie launch events, game-frame commands, and receiver polls. Browser controls on the trusted LAN do not use it. |
+| Controller token | UNO Q app `data/controller-token`, overridden by `ROB_VISION_TOKEN` when set | The installer creates and preserves the private file. It authenticates RetroPie launch events, game-frame commands, and receiver polls. Browser controls on the trusted LAN do not use it. |
 | Gyro spin lifetime | 55 seconds | Illustrative virtual lifetime. |
 | Fast Gate hold | 60 seconds maximum | Each manual Gyromite press automatically releases. |
 | Browser state polling | 500 ms | `/api/state` snapshot; recent events capped at 30. |
@@ -14,7 +14,7 @@
 | RetroPie stale release | 750 ms since last good response | Both virtual buttons release; game exit and missing RetroArch also release them. |
 | RetroPie process scan | 250 ms | Identifies an active RetroArch launch and can resync UNO Q game context, throttled to two seconds. |
 | RetroPie game-frame socket | `/run/rob-vision/frames.sock` | The FCEUmm or Nestopia proxy sends one classified cell per rendered NES frame. The receiver verifies sender credentials, approved proxy path, ROM identity, and complete 13-frame commands. |
-| RetroPie per-game NES choice | `lr-robvision-fceumm` or `lr-robvision-nestopia` | Both use the installed original core through the frame wrapper. Current Gyromite and Stack-Up selections remain FCEUmm. Plain `lr-fceumm` and `lr-nestopia` bypass the link. The installer accepts `--gyromite-core` and `--stack-up-core`. |
+| RetroPie per-game NES choice | `lr-robvision-fceumm` or `lr-robvision-nestopia` | Both use the installed original core through the frame wrapper. Current Gyromite and Stack-Up selections remain FCEUmm. Plain `lr-fceumm` and `lr-nestopia` bypass the link. For a per-game core switch after installation, the low-level `tools/install_retropie_frame_hook.py` accepts `--gyromite-core` and `--stack-up-core`. |
 | Game-frame indicator | Last matching receiver heartbeat within one second | `/api/state.input.frame_hook` is true. |
 | Test signal indicator | Sustained green or alternating rendered frames | The receiver reports a recent signal while Test check is armed; the UNO Q blinks R.O.B.'s red light. |
 | Receiver online indicator | Authenticated poll within three seconds | Otherwise Setup and Mission show RetroPie offline. |

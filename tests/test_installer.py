@@ -1,0 +1,95 @@
+"""Check installer edits without touching system services or game files."""
+
+import tempfile
+import unittest
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
+
+from scripts.install import (configure_player2, install_uno, installed_controller, managed_text,
+                             remove_legacy_hook, update_managed, valid_controller)
+
+
+class InstallerTests(unittest.TestCase):
+    def test_hook_is_idempotent_and_runs_before_other_hook_code(self):
+        old = "#!/bin/sh\necho existing\nexit 0\n"
+        installed = managed_text(old, "echo rob", "#!/bin/sh")
+        self.assertLess(installed.index("echo rob"), installed.index("echo existing"))
+        self.assertEqual(managed_text(installed, "echo rob", "#!/bin/sh"), installed)
+        self.assertIn("exit 0", installed)
+
+    def test_migrates_original_standalone_hook_once(self):
+        old = ('#!/bin/sh\n# existing comment\nROB_VISION_URL=http://arduiain.local \\\n'
+               'ROB_VISION_TOKEN_FILE=/home/pi/.config/rob-vision/token \\\n'
+               '    /usr/bin/python3 /home/pi/rob-vision/tools/notify_game.py start "$@" >/dev/null || :\n')
+        cleaned = remove_legacy_hook(old, "start")
+        self.assertNotIn("notify_game.py", cleaned)
+        self.assertIn("# existing comment", cleaned)
+        with self.assertRaises(ValueError):
+            remove_legacy_hook(old + "echo notify_game.py\n", "start")
+
+    def test_config_keeps_existing_values_and_creates_one_backup(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "retroarch.cfg"
+            path.write_text('input_player1_a_btn = "0"\n#include "../all/retroarch.cfg"\n')
+            update_managed(path, 'input_player2_a_btn = "1"')
+            first = path.read_text()
+            update_managed(path, 'input_player2_a_btn = "1"')
+            self.assertEqual(path.read_text(), first)
+            self.assertTrue((path.parent / "retroarch.cfg.before-rob-vision").exists())
+            self.assertLess(first.index("#include"), first.index("input_player2_a_btn"))
+
+    def test_damaged_section_and_bad_hostname_are_rejected(self):
+        with self.assertRaises(ValueError):
+            managed_text("# BEGIN R.O.B. Vision (managed by installer)\n", "echo rob")
+        for value in ("http://controller.local", "bad host", "-host", "a..b", "host:8766"):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                valid_controller(value)
+        self.assertEqual(valid_controller("robvision.local"), "robvision.local")
+        with tempfile.TemporaryDirectory() as directory:
+            env = Path(directory) / "receiver.env"
+            self.assertIsNone(installed_controller(env))
+            env.write_text("ROB_VISION_URL=http://robvision.local\n")
+            self.assertEqual(installed_controller(env), "robvision.local")
+
+    def test_detects_virtual_pad_and_only_changes_nes_player2(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for index, name in ((0, "Player One"), (2, "R.O.B. Vision Controller 2")):
+                device = root / "sys" / f"js{index}" / "device"
+                device.mkdir(parents=True)
+                (device / "name").write_text(name)
+            config = root / "retroarch.cfg"
+            config.write_text('input_player1_a_btn = "7"\n')
+            self.assertEqual(configure_player2(sys_root=root / "sys", config=config), 2)
+            self.assertIn('input_player1_a_btn = "7"', config.read_text())
+            self.assertIn('input_player2_joypad_index = "2"', config.read_text())
+
+    def test_uno_stages_app_and_preserves_private_token_on_upgrade(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            destination = root / "ArduinoApps" / "rob-vision"
+            for name in ("python", "sketch", "dashboard"):
+                (source / name).mkdir(parents=True)
+            (source / "app.yaml").write_text("name: R.O.B. Vision\n")
+            (source / "python/main.py").write_text("pass\n")
+            (source / "sketch/sketch.ino").write_text("// sketch\n")
+            (source / "dashboard/index.html").write_text("<main>one</main>\n")
+            destination.parent.mkdir()
+            with patch("scripts.install.sys.platform", "linux"), \
+                 patch("scripts.install.os.geteuid", return_value=1000), \
+                 patch("scripts.install.pwd.getpwuid", return_value=SimpleNamespace(pw_name="arduino")):
+                install_uno(source, destination)
+                token = (destination / "data/controller-token").read_text()
+                (source / "dashboard/index.html").write_text("<main>two</main>\n")
+                install_uno(source, destination)
+            self.assertEqual((destination / "data/controller-token").read_text(), token)
+            self.assertEqual((destination / "dashboard/index.html").read_text(), "<main>two</main>\n")
+            self.assertEqual((root / "ArduinoApps/rob-vision.previous/dashboard/index.html").read_text(),
+                             "<main>one</main>\n")
+            self.assertEqual((destination / "data/controller-token").stat().st_mode & 0o777, 0o600)
+
+
+if __name__ == "__main__":
+    unittest.main()

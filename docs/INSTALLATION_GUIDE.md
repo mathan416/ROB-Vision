@@ -1,12 +1,59 @@
 # R.O.B. Vision installation guide
 
-**Installed test setup, 25 September 2026:** R.O.B. Vision is a separate UNO Q App Lab app. `retropie.local` has exact-name launch/exit hooks, pairing, a virtual Controller 2 receiver, and FCEUmm and Nestopia frame-link choices. Gyromite launch/exit and both gate colors were verified under FCEUmm. Both games delivered commands through FCEUmm and Nestopia. Nestopia's Gyromite Player 2 gate return still needs a Game A check. There is no physical robot or camera.
+**Installed test setup, 25 September 2026:** R.O.B. Vision is a separate UNO Q App Lab app. `retropie.local` has exact-name launch/exit hooks, pairing, a virtual Controller 2 receiver, and FCEUmm and Nestopia frame-link choices. Gyromite launch/exit and both gate colors were verified under FCEUmm. Both games delivered commands through FCEUmm and Nestopia. Nestopia's Gyromite Player 2 gate return still needs a Game A check. There is no physical robot or camera. The installer below is a development preview: its file and configuration behavior is tested locally, but a fresh installation on two new devices has not yet been run.
+
+## Before you begin
+
+- Use an Arduino UNO Q with App Lab and a standard RetroPie machine with the `pi` account and `/opt/retropie/configs`. Both need Python 3.10 or newer and `git`. RetroPie also needs `gcc`, `openssl`, `modprobe`, systemd, and at least one installed NES libretro core: `lr-fceumm` or `lr-nestopia`.
+- Supply your own legally obtained Gyromite or Stack-Up ROM with an exact filename listed in `config/games.json`. The repository and installer contain no ROMs.
+- Keep both devices on a trusted local network. Stop the R.O.B. Vision App Lab app and exit any NES game before installation or upgrade. The UNO Q can run only one App Lab app at a time on the tested device.
+
+## Install on the UNO Q
+
+As the `arduino` user, clone the development branch outside the App Lab app folder and run:
+
+```sh
+git clone --branch dev https://github.com/mathan416/ROB-Vision.git ~/rob-vision-src
+python3 ~/rob-vision-src/scripts/install.py uno-q
+```
+
+The installer stages the app in `~/ArduinoApps/rob-vision`, creates a private controller token on first installation, and preserves the token and other app data on upgrade. It retains the prior app in a `rob-vision.previous*` sibling for rollback. Start the new app from **App Lab → My Apps**. The normal panel address is `http://<your-uno-q-hostname>.local/dashboard/`; open `/dashboard/setup.html` to pair the console. App Lab owns ports 80 and 8766 while the app runs. Do not enable the separate `deploy/rob-vision.service` at the same time.
+
+## Install on RetroPie
+
+As `pi`, clone the same branch and run the installer with the UNO Q's LAN hostname or IP:
+
+```sh
+git clone --branch dev https://github.com/mathan416/ROB-Vision.git ~/rob-vision-src
+sudo python3 ~/rob-vision-src/scripts/install.py retropie --controller your-uno-q.local
+```
+
+It installs the root virtual Controller 2 receiver, builds frame wrappers for installed FCEUmm and/or Nestopia cores, and adds two NES launch choices. It selects those choices only for the registered Gyromite and Stack-Up filenames, preserving any unrelated custom emulator choice. Existing runcommand scripts stay in place; the installer adds a marked R.O.B. Vision section near the top and writes a one-time `.before-rob-vision` backup. Its NES config edit is also marked and backed up. It stores the controller address in `/home/pi/.config/rob-vision/receiver.env` and loads `uinput` on future boots. Your ROMs are not copied or changed.
+
+Pair the receiver before starting its service:
+
+```sh
+python3 /home/pi/rob-vision/tools/retropie_pair.py
+```
+
+Enter the six-digit code and SHA-256 certificate fingerprint in the UNO Q Setup page, then run:
+
+```sh
+sudo systemctl enable --now rob-vision-controller2.service
+sudo python3 ~/rob-vision-src/scripts/install.py player2
+```
+
+The last command discovers **R.O.B. Vision Controller 2** among RetroPie's joysticks and writes its actual index plus the tested red/blue mapping to NES RetroArch configuration. It leaves Player 1 alone. Exit and relaunch Gyromite so RetroArch reads the new mapping. If a joystick order changes later, rerun `player2` while the receiver is running. If you know the index in advance, `retropie --player2-index N` sets it during the initial installation.
+
+In RetroPie's per-game emulator selection, choose `lr-robvision-fceumm` or `lr-robvision-nestopia`. On Setup, **Check Link** should show the receiver online, and launching a registered ROM through a R.O.B. Vision choice should show **GAME FRAMES LINKED**. Start with Gyromite Test, then test blue and red gates individually in Game A. Stack-Up Direct mode can verify each of its six movements. The installer does not reprogram an existing Player 1 controller or its EmulationStation mapping.
+
+To upgrade, exit the games, stop the UNO Q app, update each `~/rob-vision-src` checkout, rerun the corresponding installer, and restart the App Lab app. Existing pairing is preserved. The RetroPie installer restarts the receiver when a token already exists; no fresh pairing is needed unless the UNO Q token changed.
 
 ## UNO Q and browser
 
-Start **R.O.B. Vision** under App Lab **My Apps**. Stop VirtualGlove first because this UNO Q runs one App Lab app at a time. App Lab exposes port 80 at `http://arduiain.local/dashboard/`; the controller is also reachable at `http://arduiain.local:8766/dashboard/`. Both URLs share one virtual game state. The App Lab `python/main.py` gateway talks to `controller/service.py`, and Router Bridge drives the matrix sketch. Existing Avahi supplies the `.local` hostname. Keep the separate `deploy/rob-vision.service` disabled while App Lab owns port 8766.
+Start **R.O.B. Vision** under App Lab **My Apps**. Stop VirtualGlove first because the tested UNO Q runs one App Lab app at a time. App Lab exposes port 80 at `http://<your-uno-q-hostname>.local/dashboard/`; the controller is also reachable on port 8766. Both addresses share one virtual game state. The App Lab `python/main.py` gateway talks to `controller/service.py`, and Router Bridge drives the matrix sketch. Avahi supplies the `.local` hostname when configured on the UNO Q. Keep the separate `deploy/rob-vision.service` disabled while App Lab owns port 8766.
 
-Open [Setup](../dashboard/setup.html) to check pairing and the game-frame link. Browser controls are available on the trusted LAN without a token prompt. The token in the UNO Q's `~/.config/rob-vision/environment` authenticates RetroPie launches and receiver traffic. Keep the LAN private. A local `file://` page is an offline preview.
+Open [Setup](../dashboard/setup.html) to check pairing and the game-frame link. Browser controls are available on the trusted LAN without a token prompt. The installer's private `data/controller-token` authenticates RetroPie launches and receiver traffic; an existing `ROB_VISION_TOKEN` environment setting overrides that file. Keep the LAN private. A local `file://` page is an offline preview.
 
 ## RetroPie
 

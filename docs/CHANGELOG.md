@@ -1,5 +1,10 @@
 # R.O.B. Vision changelog
 
+## Development installers — 25 September 2026
+
+- Added repeatable UNO Q App Lab and standard RetroPie installers, with app staging, private token preservation, frame wrapper builds, selective NES launch choices, runcommand hook merging, and service setup.
+- Added a post-pairing step that detects the virtual Controller 2 joystick and writes its NES mapping without changing Player 1. The installed test machines have not been reinstalled from scratch with these scripts yet.
+
 ## Buddy in the guides — 25 September 2026
 
 - Added Buddy's original character portrait and a Meet Buddy introduction to the editable User Guide.

@@ -5,7 +5,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/pi/rob-vision/tools/retropie_controller2.py --url http://arduiain.local --token-file /home/pi/.config/rob-vision/token
+EnvironmentFile=/home/pi/.config/rob-vision/receiver.env
+ExecStart=/usr/bin/python3 /home/pi/rob-vision/tools/retropie_controller2.py
 Restart=always
 RestartSec=2
 User=root
