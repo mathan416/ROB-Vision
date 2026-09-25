@@ -98,6 +98,8 @@ class Controller:
         self.camera_roi = camera_roi
         self.preview_frame = None
         self.camera_trace = deque(maxlen=1800)
+        self.wide_camera_trace = deque(maxlen=1800)
+        self.camera_stripe_trace = deque(maxlen=900)
         self.receiver_last_seen = 0.0
         self.receiver_name = None
         self.test_armed_at = 0.0
@@ -202,9 +204,14 @@ class Controller:
                 self.event("assist", f"{color.title()} Gate Assist {'pressed' if pressed else 'released'}.")
             return self.snapshot()
 
-    def sample(self, timestamp, brightness):
+    def sample(self, timestamp, brightness, wide_brightness=None, stripe_brightness=None):
         with self.lock:
             self.camera_trace.append((round(timestamp, 6), round(brightness, 4)))
+            if wide_brightness is not None:
+                self.wide_camera_trace.append((round(timestamp, 6), round(wide_brightness, 4)))
+            if stripe_brightness is not None:
+                self.camera_stripe_trace.append((round(timestamp, 6),
+                                                 [round(value, 4) for value in stripe_brightness]))
             self.camera["brightness"] = round(brightness, 3)
             self.camera["last_frame"] = time()
             if self.test_armed_at and self.test_flash_detector.feed(timestamp, brightness):
@@ -289,6 +296,9 @@ class Controller:
             self.test_flash_detector.reset()
             self.test_flash_seen_at = 0.0
             self.preview_frame = None
+            self.camera_trace.clear()
+            self.wide_camera_trace.clear()
+            self.camera_stripe_trace.clear()
             self.camera.update(state="capturing", message="Measuring frame timing; aim at the flash area.",
                                fps=0, brightness=0, last_frame=None)
             self.event("camera", f"Camera {index} opened.")
@@ -311,6 +321,17 @@ class Controller:
                     # this display. Measure green above both other channels.
                     b, g, r, _ = cv2.mean(crop)
                     brightness = max(0.0, min(1.0, (g - max(r, b)) / 255))
+                    # The wide view covers the game display when the camera is
+                    # aimed at it, while the small crop stays on a dark patch.
+                    wb, wg, wr, _ = cv2.mean(frame[:height // 2, :])
+                    wide_brightness = max(0.0, min(1.0, (wg - max(wr, wb)) / 255))
+                    screen = frame[:int(height * .47), int(width * .20):int(width * .75)]
+                    stripe_brightness = []
+                    for stripe in range(12):
+                        band = screen[stripe * screen.shape[0] // 12:
+                                      (stripe + 1) * screen.shape[0] // 12, :]
+                        sb, sg, sr, _ = cv2.mean(band)
+                        stripe_brightness.append(max(0.0, min(1.0, (sg - max(sr, sb)) / 255)))
                     frame_times.append(timestamp)
                     while frame_times and timestamp - frame_times[0] > 4:
                         frame_times.popleft()
@@ -324,7 +345,7 @@ class Controller:
                             "Near 60 fps: timing drift can still miss a one-frame flash; verify commands in Test mode."
                             if fps else "Measuring camera frame rate."
                         )
-                    self.sample(timestamp, brightness)
+                    self.sample(timestamp, brightness, wide_brightness, stripe_brightness)
                     if timestamp - last_preview >= .5:
                         x0, y0 = int(x * width), int(y * height)
                         x1, y1 = int((x + w) * width), int((y + h) * height)
@@ -468,7 +489,11 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                 if path == "/api/camera/trace":
                     with controller.lock:
                         trace = list(controller.camera_trace)
-                    return self.respond(200, {"samples": trace, "roi": controller.camera_roi})
+                        wide_trace = list(controller.wide_camera_trace)
+                        stripe_trace = list(controller.camera_stripe_trace)
+                    return self.respond(200, {"samples": trace, "wide_samples": wide_trace,
+                                              "stripe_samples": stripe_trace,
+                                              "roi": controller.camera_roi})
                 return self.respond(404, {"error": "Unknown endpoint."})
             if path == "/":
                 self.send_response(302)
