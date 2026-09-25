@@ -1,6 +1,6 @@
 # R.O.B. Vision technical architecture
 
-**Status, 25 September 2026:** The Arduino UNO Q runs the App Lab controller, matrix sketch, HTTP dashboard, and virtual R.O.B. model. RetroPie launch hooks and a paired virtual Controller 2 receiver run on `retropie.local`. Both Gyromite gate colors responded in Game A. The attached camera recognized both games' Test modes at about 60 fps. One live Stack-Up RIGHT flash decoded and moved the virtual R.O.B. one station; later flashes were missed, so automatic optical play is not yet reliable. R.O.B. and all accessories exist only in software.
+**Status, 25 September 2026:** The Arduino UNO Q runs the App Lab controller, matrix sketch, HTTP dashboard, and virtual R.O.B. model. RetroPie launch hooks and a paired virtual Controller 2 receiver run on `retropie.local`. Both Gyromite gate colors responded in Game A. The attached camera recognized both games' Test modes at about 60 fps. Live Stack-Up RIGHT and DOWN flashes decoded and moved the virtual R.O.B.; later flashes were missed, so automatic optical play is not yet reliable. R.O.B. and all accessories exist only in software.
 
 ## Runtime path
 
@@ -31,7 +31,7 @@ The Gyromite pad reducer derives red and blue from gyro location/spin or a held 
 
 Browser controls on the trusted LAN can call `/api/game`, `/api/command`, `/api/gate-assist`, `/api/test/arm`, and camera actions without a token. The browser also reads `/api/state`, `/api/camera/frame`, and matrix status. The service uses JSON and same-origin checks for browser writes. `/api/launch` and receiver identity require the shared token; pairing uses a time-limited code and verified TLS certificate fingerprint to deliver it. Do not expose port 80 or 8766 to an untrusted network.
 
-Setup's **Reset & Reconnect** closes and reopens OpenCV capture; it does not reset the USB hub. UNO Q host recovery units are supplied under `deploy/uno-q` but are not installed by App Lab and currently need separate privileged setup. The attached Razer Kiyo Pro runs at 640×480 MJPEG near 60 delivered fps after a temporary, identity-checked HDR-off and 1 ms manual exposure request. Stack-Up has one confirmed live optical movement; repeated capture reliability and Gyromite movement still need confirmation.
+Setup's **Reset & Reconnect** closes and reopens OpenCV capture; it does not reset the USB hub. UNO Q host recovery units are supplied under `deploy/uno-q` but are not installed by App Lab and currently need separate privileged setup. The attached Razer Kiyo Pro runs at 640×480 MJPEG near 60 delivered fps after a temporary, identity-checked HDR-off and 1 ms manual exposure request. Stack-Up has confirmed live RIGHT and DOWN optical movements; repeated capture reliability and Gyromite movement still need confirmation.
 
 ## Resets and limits
 

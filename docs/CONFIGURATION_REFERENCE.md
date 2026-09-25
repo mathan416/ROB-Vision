@@ -30,7 +30,7 @@ python3 tools/identify_game.py start nes lr-fceumm "/roms/nes/Gyromite (World).z
 python3 tools/identify_game.py end
 ```
 
-The camera dependency is optional for manual controls and preview. On the UNO Q App Lab installation, OpenCV and the Kiyo Pro are present; Gyromite and Stack-Up Test modes were recognized at about 60 fps. A live Stack-Up RIGHT command moved the virtual R.O.B. one station, but subsequent 60 fps captures missed complete patterns, so automatic play remains unreliable. The optional standalone `deploy/rob-vision.service` must stay disabled while App Lab owns port 8766. App Lab runs one app at a time on this device.
+The camera dependency is optional for manual controls and preview. On the UNO Q App Lab installation, OpenCV and the Kiyo Pro are present; Gyromite and Stack-Up Test modes were recognized at about 60 fps. Live Stack-Up RIGHT and DOWN commands moved the virtual R.O.B., but subsequent 60 fps captures missed complete patterns, so automatic play remains unreliable. The optional standalone `deploy/rob-vision.service` must stay disabled while App Lab owns port 8766. App Lab runs one app at a time on this device.
 
 The repository includes UNO Q camera recovery, shutdown, early-start, and network-status host units. They are **not installed or enabled** by App Lab. Existing Avahi provides `arduiain.local`; the R.O.B. Vision status timer is diagnostic and does not create the mDNS name. See [UNO Q host helpers](../deploy/uno-q/README.md).
 

@@ -58,3 +58,17 @@ The Test signal is a visual status check. Its red light must never move a virtua
 - The controller now records three diagnostic traces per frame: the dark box, a wide upper-frame average, and 12 horizontal bands across the game display. Only the dark-box trace drives the existing strict decoder.
 - An independent Stack-Up Direct-mode UP/RIGHT sequence produced visible pulses in both small and wide averages, but neither decoded a complete command. The wide average tracked the same missing cells as the small box. A horizontal band recovered UP once in offline replay, showing that row timing contains extra information. Three more independent UP/RIGHT cycles yielded no complete command from any band, and R.O.B. stayed at station 3.
 - UP_STACK and RIGHT differ at only one of their 13 bits. Losing the green UP cell at that position can make a trace resemble RIGHT. A permissive decoder could therefore move R.O.B. the wrong way. The band trace remains diagnostic until command identity and false-trigger rates are validated over repeated trials.
+
+## Direct-mode comparison across movement directions
+
+The same RetroPie session was driven independently across the Stack-Up Direct grid while RetroArch recorded its rendered frames and the UNO Q logged camera samples. The emulator rendered full, exact 13-frame messages for UP_STACK (`0001011111010`), LEFT (`0001010111010`), DOWN_STACK (`0001010101110`), and RIGHT (`0001011101010`). It also rendered OPEN during a move onto that square. These are game output, not inferred camera commands.
+
+| Source command | Camera observation | Live controller result |
+| --- | --- | --- |
+| UP_STACK, first transmission | The dark-box and wide traces preserved the active sequence and the green ninth bit, but frame timing did not satisfy the strict decoder. | Rejected. |
+| LEFT | The dark-box and wide traces preserved a different active sequence and the green ninth bit; timing still prevented a complete decode. | Rejected. |
+| UP_STACK, later transmission | Several camera cells blended together, including a long green run. | Rejected. |
+| DOWN_STACK | The active sequence, including its dark ninth bit, was distinguishable. | **Decoded live; virtual arm height moved from 6 to 5.** |
+| RIGHT | The camera sequence had extra or blended cells and could not be aligned uniquely with the rendered pattern. | Rejected. |
+
+The ninth bit is not consistently absent. Different transmissions lose or blend different cells, and some preserve the distinguishing bit while still failing timing validation. The wide upper-frame average followed the dark-box trace closely; it did not fill the missing samples. Keep movement decoding strict until a method can identify every command without mistaking one direction for another.
