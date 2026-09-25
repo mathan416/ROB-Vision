@@ -47,6 +47,11 @@
 @media(max-width:760px){.piece-focus{left:12px;top:44%;width:150px;padding:9px}.piece-focus-body{gap:8px}.piece-focus-body strong{font-size:16px}.piece-focus-body small{font-size:7px}}
 @media(max-width:530px){.piece-focus{left:10px;top:50%;width:116px;padding:7px}.piece-focus-title{font-size:7px}.piece-focus-body{min-height:43px}.piece-focus-body strong{font-size:14px}.piece-focus-body small{font-size:6px}.focus-art.gyro{transform:scale(.72);margin-left:0;margin-right:-5px}.focus-art.stack{transform:scale(.72);margin-right:-7px}}
 @media(prefers-reduced-motion:reduce){.gyro-piece.is-spinning .gyro-spin-ring,.gyro-piece.is-spinning use,.station-art.spinner>.piece.spinning,.focus-art.gyro.spinning,.piece.wobbling{animation:none}}
+#head-led{fill:#553c47;stroke:#8a6870;stroke-width:1.5;transition:fill .15s,filter .15s}
+#stage.test-ready #head-led{fill:#ff454f;filter:drop-shadow(0 0 7px #ff4657)}
+#stage.test-flashing #head-led{animation:rob-test-light .42s steps(1,end) infinite}
+@keyframes rob-test-light{0%,49%{fill:#ff454f;filter:drop-shadow(0 0 9px #ff4657)}50%,100%{fill:#553c47;filter:none}}
+@media(prefers-reduced-motion:reduce){#stage.test-flashing #head-led{animation:none;fill:#ff454f;filter:drop-shadow(0 0 7px #ff4657)}}
 
 /* Gyromite's two matching tops: shallow red platters, pale segmented rims, tall spindles. */
 .accessory-art.mode-gyro .gyro{width:39px;height:13px;margin-top:19px;border-radius:50%;background:radial-gradient(ellipse 6px 3px at 50% 45%,#dbe5df 0 72%,transparent 76%),radial-gradient(ellipse at 50% 28%,#ad5960,#853b48 75%);border:3px solid #e3e9e4;box-shadow:0 5px 0 -1px #65726f,0 8px 0 -3px #dbe5dd;flex:none}

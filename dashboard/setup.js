@@ -9,6 +9,8 @@
   let lastReceiverOnline = null;
   let linkChecking = false;
   let cameraBusy = false;
+  let previewActive = false;
+  let previewTimer = null;
   const headers = () => ({ 'Content-Type': 'application/json' });
 
   async function api(path, data) {
@@ -77,9 +79,16 @@
       button.setAttribute('aria-pressed', String(active));
       button.disabled = snapshot.camera.state === 'capturing';
     }
-    message('test-state', snapshot.test?.ready ? 'READY SIGNAL SEEN' : snapshot.test?.armed ? 'WATCHING' : 'WAITING');
-    message('test-feedback', snapshot.test?.ready ? 'The camera decoded a complete R.O.B. ready-light signal from this game.' :
-      snapshot.test?.armed ? 'Waiting for a complete ready-light signal. Keep the flash area inside the green frame.' :
+    const flashing = Boolean(snapshot.test?.flash_active);
+    const ready = Boolean(snapshot.test?.ready) && !flashing;
+    $('test-light').classList.toggle('flashing', flashing || previewActive && !ready);
+    $('test-light').classList.toggle('ready', ready);
+    message('test-led-label', flashing ? 'R.O.B. LIGHT FLASHING' : ready ? 'R.O.B. LIGHT ON' : previewActive ? 'PREVIEW ONLY · FLASHING' : 'R.O.B. LIGHT OFF');
+    message('test-state', flashing ? 'TEST FLASHES SEEN' : ready ? 'READY SIGNAL SEEN' : snapshot.test?.armed ? 'WATCHING' : 'WAITING');
+    message('test-feedback', flashing ? 'Alternating Test-mode flashes detected. R.O.B.’s red light blinks; his arms do not move.' :
+      ready ? 'A separate ready-light command was decoded. R.O.B.’s red light stays on; his arms do not move.' :
+      previewActive ? 'This is a visual preview only. No camera signal was detected.' :
+      snapshot.test?.armed ? 'Waiting for Test-mode flashes. Keep the flashing area inside the green frame.' :
       'Select a game, start the camera, and arm the check while the game shows Test mode.');
     if (snapshot.camera.state === 'capturing') frame();
   }
@@ -150,6 +159,12 @@
   $('select-gyro').addEventListener('click', () => act('/api/game', { game: 'gyromite' }, 'test-feedback'));
   $('select-stack').addEventListener('click', () => act('/api/game', { game: 'stack_up' }, 'test-feedback'));
   $('arm-test').addEventListener('click', () => act('/api/test/arm', {}, 'test-feedback'));
+  $('test-preview').addEventListener('click', () => {
+    previewActive = true;
+    if (previewTimer) clearTimeout(previewTimer);
+    if (state) render(state);
+    previewTimer = setTimeout(() => { previewActive = false; if (state) render(state); }, 4500);
+  });
   document.querySelectorAll('[data-setup-gate]').forEach(button => button.addEventListener('click', () => {
     const color = button.dataset.setupGate;
     act('/api/gate-assist', { color, pressed: color === 'all' ? false : !state?.robot?.assist?.[color] }, 'buttons-feedback', 'Gate state updated. Check the game screen.');
@@ -157,7 +172,7 @@
   document.querySelectorAll('[data-setup-command]').forEach(button => button.addEventListener('click', () => {
     act('/api/command', { command: button.dataset.setupCommand }, 'buttons-feedback', 'Command sent to virtual R.O.B.');
   }));
-  window.addEventListener('pagehide', clearFrame);
+  window.addEventListener('pagehide', () => { clearFrame(); if (previewTimer) clearTimeout(previewTimer); });
   poll();
   setInterval(poll, 1000);
 })();

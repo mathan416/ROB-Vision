@@ -7,11 +7,25 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from controller.model import StackState, GyroState
-from controller.optical import OpticalDecoder, PATTERNS
+from controller.optical import OpticalDecoder, PATTERNS, TestFlashDetector
 from controller.service import Controller
 
 
 class OpticalTests(unittest.TestCase):
+    def test_sustained_test_flashes_are_distinct_from_commands(self):
+        for fps in (60, 120):
+            detector = TestFlashDetector()
+            observed = False
+            for sample in range(fps):
+                frame = int(((sample + .5) / fps) * 60)
+                observed |= detector.feed((sample + .5) / fps, .8 if frame % 2 else .04)
+            self.assertTrue(observed, fps)
+        detector.reset()
+        self.assertFalse(any(detector.feed(i / 60, .8) for i in range(60)))
+        detector.reset()
+        bits = '1' + next(iter(PATTERNS)) + '0000'
+        self.assertFalse(any(detector.feed(i / 60, .8 if bit == '1' else .04) for i, bit in enumerate(bits)))
+
     def trace(self, pattern, game, fps=240):
         decoder = OpticalDecoder()
         found = []
@@ -52,6 +66,21 @@ class OpticalTests(unittest.TestCase):
 
 
 class ModelTests(unittest.TestCase):
+    def test_test_flashes_light_robot_without_moving_it(self):
+        controller = Controller()
+        controller.select('gyromite')
+        controller.camera['state'] = 'capturing'
+        controller.arm_test()
+        initial = controller.snapshot()['robot']
+        for sample in range(30):
+            controller.sample((sample + .5) / 60, .8 if sample % 2 else .04)
+        snapshot = controller.snapshot()
+        self.assertTrue(snapshot['test']['flash_active'])
+        self.assertFalse(snapshot['test']['ready'])
+        self.assertEqual(snapshot['robot'], initial)
+        controller.command('READY', 'camera')
+        self.assertTrue(controller.snapshot()['test']['ready'])
+
     def test_camera_reconnect_reopens_after_capture_failure(self):
         captures = []
 

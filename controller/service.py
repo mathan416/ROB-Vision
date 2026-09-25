@@ -18,7 +18,7 @@ from time import monotonic, time
 from urllib.parse import urlsplit
 
 from .model import GyroState, StackState
-from .optical import OpticalDecoder
+from .optical import OpticalDecoder, TestFlashDetector
 from tools.identify_game import identify, load_registry
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -83,6 +83,7 @@ class Controller:
         self.stack = StackState()
         self.gyro = GyroState()
         self.decoder = OpticalDecoder()
+        self.test_flash_detector = TestFlashDetector()
         self.sequence = 0
         self.events = []
         self.camera = {"state": "offline", "fps": 0, "brightness": 0, "last_frame": None,
@@ -98,6 +99,7 @@ class Controller:
         self.receiver_name = None
         self.test_armed_at = 0.0
         self.test_ready_at = 0.0
+        self.test_flash_seen_at = 0.0
 
     def event(self, kind, message, command=None):
         self.sequence += 1
@@ -118,7 +120,9 @@ class Controller:
                     "link": {"online": monotonic() - self.receiver_last_seen < 3.0,
                              "receiver": self.receiver_name},
                     "test": {"armed": bool(self.test_armed_at), "ready": self.test_ready_at >= self.test_armed_at > 0,
-                             "ready_at": self.test_ready_at}}
+                             "ready_at": self.test_ready_at,
+                             "flash_active": self.camera["state"] == "capturing" and self.test_armed_at > 0 and
+                             monotonic() - self.test_flash_seen_at < .25}}
 
     def receiver_seen(self, name):
         with self.lock:
@@ -131,7 +135,9 @@ class Controller:
                 raise ValueError("Select Gyromite or Stack-Up before arming the test.")
             self.test_armed_at = monotonic()
             self.test_ready_at = 0.0
-            self.event("test", "Watching for the game's R.O.B. ready-light signal.")
+            self.test_flash_seen_at = 0.0
+            self.test_flash_detector.reset()
+            self.event("test", "Watching for the game's alternating Test-mode flashes or ready-light command.")
             return self.snapshot()
 
     def select(self, game):
@@ -141,7 +147,9 @@ class Controller:
             self.game = game
             self.stack, self.gyro = StackState(), GyroState()
             self.decoder.reset()
+            self.test_flash_detector.reset()
             self.test_armed_at = self.test_ready_at = 0.0
+            self.test_flash_seen_at = 0.0
             self.event("session", f"{game or 'No game'} selected; virtual pieces reset.")
             return self.snapshot()
 
@@ -188,6 +196,10 @@ class Controller:
         with self.lock:
             self.camera["brightness"] = round(brightness, 3)
             self.camera["last_frame"] = time()
+            if self.test_armed_at and self.test_flash_detector.feed(timestamp, brightness):
+                if monotonic() - self.test_flash_seen_at >= .25:
+                    self.event("test", "Alternating Test-mode flashes detected; R.O.B. light blinking.")
+                self.test_flash_seen_at = monotonic()
             detection = self.decoder.feed(timestamp, brightness, self.game)
             if detection:
                 self.event("decoded", f"Flash decoded: {detection.command} ({detection.pattern}).", detection.command)
@@ -249,6 +261,8 @@ class Controller:
         self.capture_stop.clear()
         with self.lock:
             self.decoder.reset()
+            self.test_flash_detector.reset()
+            self.test_flash_seen_at = 0.0
             self.preview_frame = None
             self.camera.update(state="capturing", message="Measuring frame timing; aim at the flash area.",
                                fps=0, brightness=0, last_frame=None)
@@ -330,6 +344,8 @@ class Controller:
         with self.lock:
             self.preview_frame = None
             self.decoder.reset()
+            self.test_flash_detector.reset()
+            self.test_flash_seen_at = 0.0
             self.camera.update(state="offline", fps=0, brightness=0, last_frame=None,
                                devices=capture_devices(), message="Camera stopped. Reconnect to scan for a camera again.")
             self.devices_checked_at = monotonic()

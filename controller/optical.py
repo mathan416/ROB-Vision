@@ -34,6 +34,35 @@ class Detection:
     end: float
 
 
+class TestFlashDetector:
+    """Recognize sustained frame-by-frame light alternation in a game's Test mode."""
+
+    def __init__(self, threshold=0.38):
+        self.threshold = threshold
+        self.reset()
+
+    def reset(self):
+        self.level = None
+        self.last_time = None
+        self.edges = deque(maxlen=13)
+
+    def feed(self, timestamp, brightness):
+        if not 0 <= brightness <= 1:
+            return False
+        if self.last_time is not None and (timestamp <= self.last_time or timestamp - self.last_time > .1):
+            self.reset()
+        self.last_time = timestamp
+        level = brightness >= self.threshold
+        if self.level is None:
+            self.level = level
+            return False
+        if level == self.level:
+            return False
+        self.level = level
+        self.edges.append(timestamp)
+        return len(self.edges) == 13 and all(.009 <= b - a <= .027 for a, b in zip(self.edges, list(self.edges)[1:]))
+
+
 class OpticalDecoder:
     def __init__(self, threshold=0.38, frame_seconds=FRAME_SECONDS):
         self.threshold = threshold

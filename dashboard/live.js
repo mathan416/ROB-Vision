@@ -10,6 +10,7 @@
   let suspended = false;
   let lastCameraState = null;
   let lastLinkOnline = null;
+  let lastTestLightMode = null;
   let liveGame = null;
   const headers = () => ({ 'Content-Type': 'application/json' });
   async function request(path, data) {
@@ -31,6 +32,7 @@
       lastSequence = snapshot.sequence;
       lastCameraState = snapshot.camera.state;
       lastLinkOnline = Boolean(snapshot.link?.online);
+      lastTestLightMode = null;
       return;
     }
     liveGame = snapshot.game;
@@ -44,9 +46,11 @@
     }
     const noCamera = snapshot.camera.platform === 'linux' && !snapshot.camera.devices.length;
     $('controller-status').textContent = snapshot.camera.state === 'fault' ? snapshot.camera.message : noCamera ? 'CONTROLLER READY · NO CAMERA ATTACHED' : snapshot.game ? `${snapshot.game === 'stack_up' ? 'STACK-UP' : 'GYROMITE'} · ${snapshot.camera.state.toUpperCase()} · ${snapshot.camera.fps} FPS` : 'CONTROLLER READY · SELECT A GAME';
-    if (snapshot.sequence !== lastSequence || snapshot.camera.state !== lastCameraState || Boolean(snapshot.link?.online) !== lastLinkOnline) {
+    const testLightMode = snapshot.test?.flash_active ? 'flashing' : snapshot.test?.ready ? 'ready' : 'off';
+    if (snapshot.sequence !== lastSequence || snapshot.camera.state !== lastCameraState || Boolean(snapshot.link?.online) !== lastLinkOnline || testLightMode !== lastTestLightMode) {
       lastCameraState = snapshot.camera.state;
       lastLinkOnline = Boolean(snapshot.link?.online);
+      lastTestLightMode = testLightMode;
       lastSequence = snapshot.sequence;
       window.RobDashboard.applyLive(snapshot);
       const recent = snapshot.events.at(-1);

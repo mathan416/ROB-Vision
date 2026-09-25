@@ -28,6 +28,8 @@ The screen flashes represent **one robot primitive per command**, not a complete
 
 The eight-bit command byte is the message after the five leading bits: for example, open is `$EE`, close `$BE`, left `$BA`, right `$EA`, Gyromite up/down `$BB/$FB`, Stack-Up up/down `$FA/$AE`, and ready light `$EB`. The ready-light message is a status operation. It must never move an axis.
 
+Test mode also uses sustained alternating dark/green flashes, distinct from the 13-frame ready-light command. The virtual head light blinks only after detecting a sustained alternation from the camera; the ready-light command produces a steady light. These are status indications, not motion commands. The Test-mode flash detector must be checked against real camera traces to confirm timing on the intended LCD/OLED and emulator.
+
 ### ROM evidence
 
 - **Gyromite:** The program at `$A679–$A697` indexes a palette-choice table at `$A6FC`, with 13 entries per command slot and the entries read in reverse order. Valid populated slots 1, 2, 3, 5, 6, 7, and 8 decode to the rows above. Slot 4 is deliberately skipped in the controller selection logic at `$A591–$A5A2`; its table area is not a valid optical command. Palette-selection values 3 and 4 resolve through the table at `$B35E` to the all-black palette at `$B404` and all-green palette at `$B428` respectively. This ties the table bits to actual on-screen light, rather than just matching known codes by coincidence.

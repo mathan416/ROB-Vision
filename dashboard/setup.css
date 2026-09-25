@@ -29,5 +29,11 @@
 .test-caption{font-weight:800!important;color:#78d5d2!important;letter-spacing:.14em;margin:15px 0 0}
 .setup-command-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .setup-command-grid button{background:#17374a;border-color:#588397}
+.test-light{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;border:1px solid #4d6874;background:#0a1d2b;color:#d7e8e8;font:800 10px 'DM Sans',sans-serif;letter-spacing:.1em}
+.test-led{width:15px;height:15px;border-radius:50%;background:#553c47;border:1px solid #8a6870;flex:none}
+.test-light.ready .test-led{background:#ff454f;box-shadow:0 0 13px #ff4657}
+.test-light.flashing .test-led{animation:setup-test-light .42s steps(1,end) infinite}
+@keyframes setup-test-light{0%,49%{background:#ff454f;box-shadow:0 0 13px #ff4657}50%,100%{background:#553c47;box-shadow:none}}
+@media(prefers-reduced-motion:reduce){.test-light.flashing .test-led{animation:none;background:#ff454f;box-shadow:0 0 13px #ff4657}}
 @media(max-width:800px){.setup-grid{grid-template-columns:1fr}}
 @media(max-width:530px){.setup-card{padding:16px}.setup-hero{padding-bottom:17px}.setup-card button{flex:1}.setup-command-grid button{min-width:0}}
