@@ -70,6 +70,10 @@ class FrameTests(unittest.TestCase):
                              for event in state['events']), 1)
         controller.emulator_command('gyromite', '0001011101011', 123, 420)
         self.assertTrue(controller.snapshot()['test']['ready'])
+        controller.test_ready_at -= 1.1
+        self.assertFalse(controller.snapshot()['test']['ready'])
+        controller.emulator_command('gyromite', '0001011101011', 123, 421)
+        self.assertTrue(controller.snapshot()['test']['ready'])
         controller.emulator_command('gyromite', '0001011111011', 123, 440)
         self.assertFalse(controller.snapshot()['test']['ready'])
         self.assertFalse(controller.snapshot()['test']['flash_active'])

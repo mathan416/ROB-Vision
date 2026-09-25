@@ -22,6 +22,7 @@ from .pairings import PairingStore, PLATFORMS
 from tools.identify_game import identify, load_registry
 
 ROOT = Path(__file__).resolve().parents[1]
+READY_LIGHT_SECONDS = 1.0
 MIME = {".html": "text/html", ".js": "text/javascript", ".css": "text/css",
         ".svg": "image/svg+xml", ".pdf": "application/pdf", ".png": "image/png",
         ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".ttf": "font/ttf"}
@@ -100,7 +101,8 @@ class Controller:
                              "receiver": self.receiver_name,
                              "consoles": self.pairings.list_public(self.active_console_id) if self.pairings else []},
                     "input": {"frame_hook": self.frame_hook_active()},
-                    "test": {"ready": self.test_ready_at > 0 and self.frame_hook_active(),
+                    "test": {"ready": self.test_ready_at > 0 and
+                             monotonic() - self.test_ready_at < READY_LIGHT_SECONDS and self.frame_hook_active(),
                              "ready_at": self.test_ready_at,
                              "flash_active": self.frame_hook_active() and
                              monotonic() - self.test_flash_seen_at < .25}}

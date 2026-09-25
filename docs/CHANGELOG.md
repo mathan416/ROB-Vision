@@ -4,6 +4,7 @@
 
 - Gyromite and Stack-Up Test signals now blink R.O.B.'s red light automatically when linked game frames arrive. The UNO Q matrix also switches to its pulsing T and returns to the game face when the signal ends.
 - Removed the Setup arming button and updated the panel, Help, and printable guides. A separate ready-light command still shows a steady light; neither signal moves the virtual robot.
+- Limited the steady READY indication to one second after a live Stack-Up Test exit left the UNO Q matrix showing T after the flashes stopped.
 
 ## Stack-Up block alignment — 25 September 2026
 

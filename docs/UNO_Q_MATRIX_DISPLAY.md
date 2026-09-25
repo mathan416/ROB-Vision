@@ -20,7 +20,7 @@ In Buddy's story, this tiny display is his first sign of life outside the emulat
 
 ![Gyromite and Stack-Up eye loops](images/matrix-game-eyes.png)
 
-**Game Test and faults.** The T gently pulses while a game Test signal is detected and stays steady after a separate ready-light command. P pulses during pairing; X blinks for a fault.
+**Game Test and faults.** The T gently pulses while a game Test signal is detected and stays steady for up to one second after a separate ready-light command. It then returns to the game eyes. P pulses during pairing; X blinks for a fault.
 
 ![Test light states](images/matrix-test.png)
 
@@ -36,7 +36,7 @@ In Buddy's story, this tiny display is his first sign of life outside the emulat
 | Stack-Up selected | Brief `SU`, then eyes with a small rising-block accent | The selected game is Stack-Up. The accent is decorative; it must not claim a block was moved. |
 | Valid movement command accepted | Eyes glance in the movement direction, rise/fall for vertical motion, or narrow briefly for grip | Mirror the authoritative virtual action, then return to the selected game's eye loop. Never animate from an undecoded flash alone. |
 | Test flashes detected | `T` gently pulses | The frame link has reported the game's Test signal automatically. |
-| Ready-light command detected | Steady `T` | The game sent a separate ready-light command. |
+| Ready-light command detected | Brief steady `T` | The game sent a separate ready-light command; the game eyes return within one second. |
 | Pairing in progress | Large `P` with a slow pulse | Open the browser Setup page and read the pairing code and fingerprint shown on RetroPie. Do not show invented or unrelated digits on the UNO Q. |
 | Controller fault | Blinking `X` | Open Setup for the actual problem; the matrix alone cannot explain it. |
 | App stopped | Matrix released/blank as the platform permits | R.O.B. Vision is no longer driving the display. |
