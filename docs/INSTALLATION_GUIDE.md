@@ -9,14 +9,25 @@
 - Keep both devices on a trusted local network. Exit any NES game before installation or upgrade. The UNO Q installer stops and restarts R.O.B. Vision automatically; stop any other App Lab app first. The UNO Q can run only one App Lab app at a time on the tested device.
 - The GitHub repository is currently private. A direct clone on a device requires a GitHub account with access and authenticated Git on that device. You can instead send the source from an authorized computer over SSH without copying GitHub credentials to either device.
 
-For the SSH transfer option, run these commands **on a computer with a local checkout of `dev`**, replacing the device names. They create only the source folders used by the installer:
+### Transfer the source over SSH
+
+Run the archive commands **on your computer, inside the R.O.B. Vision Git checkout**. First change to that folder and confirm Git prints its path. Replace `/path/to/rob-vision` with the actual local checkout path; a command run from your home folder (`~`) will fail with `not a git repository` and send an invalid stream to `tar` on the device.
+
+```sh
+cd "/path/to/rob-vision"
+git rev-parse --show-toplevel
+set -o pipefail
+```
+
+Check that SSH login works for the device hostname and account you intend to use. Use the **same hostname** for its transfer and installer commands. Replace the example hostnames below; the Batocera source folder is separate from its installed app folder.
 
 ```sh
 git archive --format=tar dev | ssh arduino@your-uno-q.local 'mkdir -p /home/arduino/rob-vision-src && tar -xf - -C /home/arduino/rob-vision-src'
 git archive --format=tar dev | ssh pi@your-retropie.local 'mkdir -p /home/pi/rob-vision-src && tar -xf - -C /home/pi/rob-vision-src'
+git archive --format=tar dev | ssh root@your-batocera.local 'mkdir -p /userdata/system/rob-vision-install && tar -xf - -C /userdata/system/rob-vision-install'
 ```
 
-Then skip each `git clone` command below and run its installer command. For an upgrade using this option, transfer the new archive again before rerunning the installer.
+Transfer only to the devices you are installing. Then skip their `git clone` commands below and run their installer commands using the same hostnames. For Batocera, run `cd /userdata/system/rob-vision-install && python3 scripts/install_batocera.py --controller your-uno-q.local` as root. For an upgrade using this option, transfer the new archive again before rerunning the installer. If SSH asks for a password unexpectedly, verify that your key is authorized on that particular hostname before continuing.
 
 ## Install on the UNO Q
 
