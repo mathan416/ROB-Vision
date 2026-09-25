@@ -8,7 +8,7 @@
 | --- | --- |
 | Gyromite / Stack-Up / Pose Lab | Choose a game accessory scene or R.O.B.'s motion sandbox. |
 | Run Demo Sequence | Start a finite animation. Gyromite ends with both gyros stored; Stack-Up moves red alone, then blue and white together. |
-| Stack-Up Commands | Apply one local virtual turn, height change, open, or close; valid actions update the disc stacks. |
+| Stack-Up Commands | Apply one local virtual turn, height change, open, or close; valid actions update the block stacks. |
 | Pose Preview | Try R.O.B.'s movement locally in Gyromite or Pose Lab. |
 | Home | Reset all virtual pieces, buttons, pose, and timers. |
 | Emergency Stop / Reset Stop | Cancel or re-enable the local simulation. |

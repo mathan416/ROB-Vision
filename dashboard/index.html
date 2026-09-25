@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#080f1d">
   <title>R.O.B. Vision // Mission Control</title>
   <link rel="stylesheet" href="style.css?v=setup-3">
-  <script src="stack-model.js" defer></script>
-  <script src="app.js?v=demo-idle-1" defer></script>
+  <script src="stack-model.js?v=blocks-1" defer></script>
+  <script src="app.js?v=blocks-1" defer></script>
   <script src="live.js?v=demo-idle-1" defer></script>
 </head>
 <body>
@@ -24,7 +24,7 @@
           <div class="stage-grid"></div><div class="stage-halo"></div>
           <div class="stage-label top-left">3/4 ACCESSORY STAGE<br><strong id="stage-action-label">HOME / 00</strong></div>
           <div class="stage-label top-right">CAMERA / SCREEN<br><strong id="tracking-label">NOT CONNECTED</strong></div>
-          <svg id="robot-svg" class="robot-svg" viewBox="0 0 650 590" role="img" aria-label="R.O.B.-inspired robot with two opposing hands moving matching Gyromite gyros or Stack-Up discs between accessory stations">
+          <svg id="robot-svg" class="robot-svg" viewBox="0 0 650 590" role="img" aria-label="R.O.B.-inspired robot with two opposing hands moving matching Gyromite gyros or Stack-Up blocks between accessory stations">
             <defs>
               <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f3f6f9"/><stop offset=".43" stop-color="#acb8c8"/><stop offset="1" stop-color="#60738b"/></linearGradient>
               <linearGradient id="body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e5e9ee"/><stop offset=".55" stop-color="#8997a9"/><stop offset="1" stop-color="#536478"/></linearGradient>
@@ -205,7 +205,7 @@
             <div class="fixture-station"><div class="station-art stack-tray"></div><b>TRAY 3 / START</b></div>
             <div class="fixture-station"><div class="station-art stack-tray"></div><b>TRAY 4</b></div>
             <div class="fixture-station"><div class="station-art stack-tray"></div><b>TRAY 5</b></div>
-            <div id="table-held-stack" aria-label="Discs held by R.O.B."></div>
+            <div id="table-held-stack" aria-label="Blocks held by R.O.B."></div>
           </div>
           <div class="fixture-empty" id="free-fixture" hidden><strong>POSE LAB</strong><span>Just R.O.B. and his motion controls. No game pieces or commands are connected.</span></div>
           <div class="fixture-note" id="fixture-note">Two gyros, one spinner, and two button trays. Positions are illustrative.</div>

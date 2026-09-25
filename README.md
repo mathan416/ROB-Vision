@@ -26,14 +26,14 @@ Arduino documents [USB camera support on UNO Q](https://docs.arduino.cc/hardware
 
 Open [the dashboard](dashboard/index.html), or serve this folder locally with `python3 -m http.server 8000` and visit `http://localhost:8000/dashboard/`.
 
-Choose **Gyromite** and select **Run Demo Sequence**. The finite sequence demonstrates a single gate pressed with an unspun gyro, two spinning gyros on separate pads, one spin-down and re-spin recovery for each, and a final return to both holders. **Home** resets immediately. Stack-Up demonstrates red moving alone to Tray 4, followed by blue and white moving together to Tray 2. Its local command controls can move any valid disc group; **Home** restores all five to Tray 3. Pose Lab is a character-only movement sandbox. All graphics are original SVG/CSS drawn for this project; the current preview uses no game or hardware connection.
+Choose **Gyromite** and select **Run Demo Sequence**. The finite sequence demonstrates a single gate pressed with an unspun gyro, two spinning gyros on separate pads, one spin-down and re-spin recovery for each, and a final return to both holders. **Home** resets immediately. Stack-Up demonstrates red moving alone to Tray 4, followed by blue and white moving together to Tray 2. Its local command controls can move any valid block group; **Home** restores all five to Tray 3. Pose Lab is a character-only movement sandbox. All graphics are original SVG/CSS drawn for this project; the current preview uses no game or hardware connection.
 
 ## How the finished system will work
 
 1. The cabinet runs the game on an LCD or OLED screen. The UNO Q camera watches its optical command area.
 2. A validated command changes the UNO Q's virtual R.O.B. pose and accessory model. The browser subscribes to that state and shows the action in real time.
 3. In Gyromite, a virtual gyro or a held unspun gyro presses a virtual red or blue pad. The UNO Q sends the corresponding Controller 2 button state to the paired game host over LAN. When the virtual pad releases, the button releases.
-4. In Stack-Up, commands move virtual discs among five trays. The game modes documented in the manual have no Gyromite-style tray-button return path.
+4. In Stack-Up, commands move virtual blocks among five trays. The game modes documented in the manual have no Gyromite-style tray-button return path.
 
 The RetroPie launch hook identifies an exact configured game filename, following the VirtualGlove approach. The [resolver](tools/identify_game.py) and [registry](config/games.json) match names; the installed test-machine hooks notify the UNO Q. A launch name supplies context; optical flashes remain the command source. User-supplied ROMs stay outside this repository.
 

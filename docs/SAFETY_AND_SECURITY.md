@@ -5,7 +5,7 @@ The Mission and Setup browser controls are available to devices on the same trus
 R.O.B. and its accessories are virtual. This project has no robot arm, powered gripper, physical spinner, tray sensor, or actuator supply. The dashboard **Emergency Stop** cancels a local animation; it does not cut physical power. The main risks are incorrect game input, stale network state, camera privacy, and misleading UI status.
 
 - Reject incomplete or ambiguous optical commands. A flicker or camera dropout must not repeat the last action.
-- Bound every virtual pose and object transfer. A disc cannot appear on two trays, and one gyro cannot occupy two stations.
+- Bound every virtual pose and object transfer. A block cannot appear on two trays, and one gyro cannot occupy two stations.
 - The UNO Q, not a browser tab, owns virtual state and Gyromite pad output in the planned connected system.
 - Pair the Gyromite sender and receiver on a trusted LAN. Version and authenticate messages, reject stale sequences, and release both Controller 2 buttons on timeout, exit, reset, or unpairing.
 - Show simulation, optical validity, and game-link state separately. A drawn gyro on a pad is not proof that the emulator received its button state.

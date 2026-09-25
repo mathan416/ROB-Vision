@@ -109,7 +109,7 @@
 #stack-fixture .fixture-station:nth-child(4) .disc.red{top:43px}
 @media(max-width:600px){#gyro-fixture,#stack-fixture{height:284px}#gyro-fixture .fixture-station,#stack-fixture .fixture-station{width:70px}#gyro-fixture .fixture-station:nth-child(4){left:14%;top:45px}#gyro-fixture .fixture-station:nth-child(1){left:38%;top:91px}#gyro-fixture .fixture-station:nth-child(2){left:82%;top:91px}#gyro-fixture .fixture-station:nth-child(3){left:44%;top:173px}#gyro-fixture .fixture-station:nth-child(5){left:70%;top:173px}#stack-fixture .fixture-station:nth-child(1){left:14%;top:18px}#stack-fixture .fixture-station:nth-child(2){left:31%;top:86px}#stack-fixture .fixture-station:nth-child(3){left:50%;top:166px}#stack-fixture .fixture-station:nth-child(4){left:69%;top:86px}#stack-fixture .fixture-station:nth-child(5){left:86%;top:18px}}
 
-/* Stack-Up's accessory preview shows the full five-tray, five-disc set. */
+/* Stack-Up's accessory preview shows the full five-tray, five-block set. */
 .stack-kit{display:none}
 .accessory-art.mode-stack{height:96px}
 .accessory-art.mode-stack>.gyro,.accessory-art.mode-stack>.platform{display:none}

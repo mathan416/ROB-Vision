@@ -8,7 +8,7 @@
 | Game identity | Exact configured ROM basenames and game IDs | No substring guessing; unknown title and exit clear context. |
 | Virtual robot | Pose bounds, action duration, hand/grip rules, object locations | No impossible transfer or overlapping actions. |
 | Gyromite | Gyro spin lifetime, wobble threshold, initial holders, pad rules, red/blue Controller 2 mapping | One held unspun press, two-gyro relay, independent release, measured A/B game response. |
-| Stack-Up | Tray indices, starting disc order, six height levels, mode timing | Ordered disc groups move together when gripped below the top; no command loss in Memory mode. |
+| Stack-Up | Tray indices, starting block order, six height levels, mode timing | Ordered block groups move together when gripped below the top; no command loss in Memory mode. |
 | LAN | UNO Q and game-host identities, receiver address, pairing key, packet interval, timeout | Fresh authenticated state only; both buttons released on timeout/exit. |
 | Dashboard | Text scale, reduced motion, camera diagnostic visibility | Touch and keyboard use on laptop, iPad, and phone. |
 

@@ -69,7 +69,7 @@
     $('setup-gates').hidden = game !== 'gyromite';
     $('setup-stack').hidden = game !== 'stack_up';
     if (game === 'gyromite') message('buttons-feedback', 'Use the red and blue buttons to test the matching gates. Stop the camera first.');
-    else if (game === 'stack_up') message('buttons-feedback', 'Send one movement at a time, then watch the virtual discs on Mission.');
+    else if (game === 'stack_up') message('buttons-feedback', 'Send one movement at a time, then watch the virtual blocks on Mission.');
     for (const color of ['red', 'blue']) {
       const button = document.querySelector(`[data-setup-gate="${color}"]`);
       const active = Boolean(snapshot.robot?.assist?.[color]);

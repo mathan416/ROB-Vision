@@ -1,6 +1,6 @@
 # R.O.B. Vision parts plan
 
-The build is an electronic controller with a virtual R.O.B. display. The historical gyros, spinner, pads, trays, arms, and discs are **software models**, not parts to purchase or fabricate.
+The build is an electronic controller with a virtual R.O.B. display. The historical gyros, spinner, pads, trays, arms, and blocks are **software models**, not parts to purchase or fabricate.
 
 | Item | Purpose | Status |
 | --- | --- | --- |

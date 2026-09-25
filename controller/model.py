@@ -34,14 +34,14 @@ class StackState:
             if height == 1:
                 return "Arms are already at the lowest level."
             if held and height - 1 <= len(tray):
-                return "The carried discs would collide with this tray stack."
+                return "The carried blocks would collide with this tray stack."
             height -= 1
         elif command in ("LEFT", "RIGHT"):
             target = station + (-1 if command == "LEFT" else 1)
             if not 1 <= target <= 5:
                 return "There is no tray in that direction."
             if held and height <= len(trays[target - 1]):
-                return "Raise the carried discs to clear the next tray."
+                return "Raise the carried blocks to clear the next tray."
             station = target
         elif command == "CLOSE":
             if grip == "closed":
@@ -55,15 +55,15 @@ class StackState:
                 return "Hands are already open."
             if held:
                 if height != len(tray) + 1:
-                    return "Lower the carried discs to the next free level before releasing."
+                    return "Lower the carried blocks to the next free level before releasing."
                 if len(tray) + len(held) > 5:
-                    return "That tray cannot hold more than five discs."
+                    return "That tray cannot hold more than five blocks."
                 tray.extend(held)
                 held = []
             grip = "open"
         pieces = [*held, *(c for t in trays for c in t)]
         if sorted(pieces) != sorted(COLORS):
-            return "Command would lose or duplicate a disc."
+            return "Command would lose or duplicate a block."
         self.trays, self.held, self.station, self.height, self.grip = trays, held, station, height, grip
         return None
 

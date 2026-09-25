@@ -15,8 +15,8 @@
 
 ## Stack-Up grouped carries — 24 September 2026
 
-- Added a browser virtual Stack-Up controller with five ordered tray stacks, six height levels, five stations, open/closed hands, and an ordered carried disc segment. Invalid moves leave the model unchanged.
-- Updated the demo to transfer red alone, then blue and white together. Live Model, Accessory Bay, and Game Table now render the same changing disc state.
+- Added a browser virtual Stack-Up controller with five ordered tray stacks, six height levels, five stations, open/closed hands, and an ordered carried block segment. Invalid moves leave the model unchanged.
+- Updated the demo to transfer red alone, then blue and white together. Live Model, Accessory Bay, and Game Table now render the same changing block state.
 - Made the Stack-Up command buttons interactive in local simulation and added five model tests for grouped carries, conservation, bounds, and blocked moves.
 - Renamed Free Play to Pose Lab and removed its stray gyro artwork; it remains a character-only motion sandbox.
 

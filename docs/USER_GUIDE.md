@@ -1,6 +1,6 @@
 # R.O.B. Vision user guide
 
-**Status: the UNO Q dashboard and RetroPie Gyromite Controller 2 link are running; camera capture on the UNO Q still needs hardware testing.** R.O.B. is a virtual character and accessory model. The robot, gyros, trays, spinner, and Stack-Up discs are drawn in the browser; they are not physical objects.
+**Status: the UNO Q dashboard and RetroPie Gyromite Controller 2 link are running; camera capture on the UNO Q still needs hardware testing.** R.O.B. is a virtual character and accessory model. The robot, gyros, trays, spinner, and Stack-Up blocks are drawn in the browser; they are not physical objects.
 
 ## Try the available preview
 
@@ -21,7 +21,7 @@ The demos remain available while RetroPie is paired but idle. Launching a suppor
 
 ### Run Stack-Up or Pose Lab
 
-**Stack-Up** starts with five colored discs on Tray 3. The demo moves red alone to Tray 4, then carries blue and white together to Tray 2, and stops. Use **Stack-Up Commands** below the view to try one virtual movement at a time; the grip button switches between **Close Hands** and **Open Hands**. R.O.B. can lift a disc together with every disc above it. **Home** restores all five discs to Tray 3. **Pose Lab** shows R.O.B. alone: its demo is a short greeting, and the **Pose Preview** buttons let you try turning, lifting, and gripping. It uses no game pieces or optical commands. **Emergency Stop** cancels the local sequence until **Reset Stop** is selected. It is a demo control, not a physical safety switch.
+**Stack-Up** starts with five colored blocks on Tray 3. The demo moves red alone to Tray 4, then carries blue and white together to Tray 2, and stops. Use **Stack-Up Commands** below the view to try one virtual movement at a time; the grip button switches between **Close Hands** and **Open Hands**. R.O.B. can lift a block together with every block above it. **Home** restores all five blocks to Tray 3. **Pose Lab** shows R.O.B. alone: its demo is a short greeting, and the **Pose Preview** buttons let you try turning, lifting, and gripping. It uses no game pieces or optical commands. **Emergency Stop** cancels the local sequence until **Reset Stop** is selected. It is a demo control, not a physical safety switch.
 
 ## Play with RetroPie
 

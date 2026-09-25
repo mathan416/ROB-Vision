@@ -9,7 +9,7 @@ function commands(state, ...items) {
   }
 }
 
-test('gripping below the top carries an ordered disc segment', () => {
+test('gripping below the top carries an ordered block segment', () => {
   const state = stack.create();
   commands(state, 'DOWN', 'DOWN', 'DOWN', 'CLOSE');
   assert.deepEqual(state.held, ['blue', 'white', 'red']);
@@ -20,7 +20,7 @@ test('gripping below the top carries an ordered disc segment', () => {
   assert.equal(stack.valid(state), true);
 });
 
-test('invalid placement preserves all discs and the closed grip', () => {
+test('invalid placement preserves all blocks and the closed grip', () => {
   const state = stack.create();
   commands(state, 'DOWN', 'CLOSE', 'UP', 'RIGHT');
   const before = stack.snapshot(state);
@@ -30,7 +30,7 @@ test('invalid placement preserves all discs and the closed grip', () => {
   assert.equal(state.grip, 'closed');
 });
 
-test('carried discs cannot descend into an occupied tray', () => {
+test('carried blocks cannot descend into an occupied tray', () => {
   const state = stack.create();
   commands(state, 'DOWN', 'CLOSE', 'UP', 'RIGHT', ...Array(5).fill('DOWN'), 'OPEN', ...Array(5).fill('UP'), 'LEFT', 'DOWN', 'DOWN', 'DOWN', 'CLOSE', 'UP', 'UP', 'UP', 'RIGHT', 'DOWN', 'DOWN', 'DOWN', 'DOWN');
   assert.equal(state.height, 2);
@@ -50,7 +50,7 @@ test('station and height boundaries reject moves without changing state', () => 
   assert.deepEqual(stack.snapshot(state), before);
 });
 
-test('five discs remain accounted for throughout the scripted transfer', () => {
+test('five blocks remain accounted for throughout the scripted transfer', () => {
   const state = stack.create();
   const sequence = ['DOWN', 'CLOSE', 'UP', 'RIGHT', ...Array(5).fill('DOWN'), 'OPEN', ...Array(5).fill('UP'), 'LEFT', ...Array(3).fill('DOWN'), 'CLOSE', ...Array(3).fill('UP'), 'LEFT', ...Array(5).fill('DOWN'), 'OPEN'];
   for (const command of sequence) {

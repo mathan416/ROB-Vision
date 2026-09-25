@@ -9,7 +9,7 @@
 | Game display/emulator | Game rendering and optical flashes | R.O.B. Vision's virtual pose |
 | Optional RetroPie launch hook | Exact configured game ID and launch/exit state | Motion commands or ROM-content proof |
 | UNO Q camera decoder | Timestamped frames, flash region, complete-command validation | Virtual pad assertions from partial flashes |
-| UNO Q mode adapter and virtual robot controller | One accepted action, bounded pose, gyro/disc state, virtual pad state, ordered events | Professor location or unobserved game outcome |
+| UNO Q mode adapter and virtual robot controller | One accepted action, bounded pose, gyro/block state, virtual pad state, ordered events | Professor location or unobserved game outcome |
 | UNO Q LAN sender | Fresh red/blue virtual Controller 2 states | Arbitrary emulator commands |
 | Paired game-host receiver | Virtual Controller 2 button state and timeout release | Trusting stale or unpaired packets |
 | Browser dashboard | Live R.O.B., pieces, controls, explanations, and history on laptop/iPad/phone | Independent game state or button authority |
@@ -37,7 +37,7 @@ The [Gyromite booklet](https://www.digitpress.com/library/manuals/nes/gyromite.t
 
 ## Virtual Stack-Up state
 
-The [browser stack model](../dashboard/stack-model.js) tracks five disc IDs, ordered contents of each of five trays, carried stack segment, station (1–5), height (six levels), and open/closed grippers. At the selected height, closing the grippers takes the contacted disc and all discs above it as one ordered segment; opening releases the full segment onto the target stack. A top-disc transfer is one special case. It validates height and station bounds, carried clearance, destination capacity, and conservation of all five discs before committing each command. Rejected actions leave state unchanged. This model currently drives the local scripted demo and manual buttons. The planned UNO Q service must own equivalent authoritative state. Memory mode requires a bounded plan for rapid commands; Bingo's simultaneous row-and-column no-command case must remain a no-op. Stack-Up's documented modes have no gyro-pad return path.
+The [browser stack model](../dashboard/stack-model.js) tracks five block IDs, ordered contents of each of five trays, carried stack segment, station (1–5), height (six levels), and open/closed grippers. At the selected height, closing the grippers takes the contacted block and all blocks above it as one ordered segment; opening releases the full segment onto the target stack. A top-block transfer is one special case. It validates height and station bounds, carried clearance, destination capacity, and conservation of all five blocks before committing each command. Rejected actions leave state unchanged. This model currently drives the local scripted demo and manual buttons. The planned UNO Q service must own equivalent authoritative state. Memory mode requires a bounded plan for rapid commands; Bingo's simultaneous row-and-column no-command case must remain a no-op. Stack-Up's documented modes have no gyro-pad return path.
 
 ## State and event contract
 

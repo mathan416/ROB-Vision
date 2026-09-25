@@ -55,13 +55,13 @@ Every accepted optical message advances **one bounded virtual primitive**. The U
 | --- | --- | --- |
 | Left / right | Rotate one virtual station | Show station before/target, fixture occupancy, busy state. |
 | Gyromite up / down | Move two virtual vertical levels | Show both intermediate and final levels; reject an out-of-range target. |
-| Stack-Up up / down | Move one virtual vertical level | Show target level and held-disc state. |
+| Stack-Up up / down | Move one virtual vertical level | Show target level and held-block state. |
 | Open / close | Open or close the illustrated grippers once | Update a piece only when the modeled grasp or release is valid. |
 | Ready-light / test | Update optical or visual readiness only | Never move virtual pieces. |
 
 For **Gyromite**, a sequence of these primitives transfers a virtual gyro between holder, spinner, red pad, and blue pad. The UNO Q derives virtual pad state from its object model and sends that state to the paired LAN Controller 2 receiver. The flash stream alone does not identify the professor's location or prove that the game accepted the returned button. The model tracks which gyro is held and which pad is pressed.
 
-For **Stack-Up**, the same primitives manipulate five virtual colored discs across five numbered trays. The pose also includes six height levels; closing at a lower disc can carry it and every disc above it as an ordered segment. The flash stream has no disc ID, target-pattern, or victory message. The UNO Q can know its own modeled stack state, but not the game's desired pattern without another validated source. Memory mode can transmit successive commands faster than the animation finishes: measure cadence and use a bounded, visible queue only if tests show it is needed; otherwise report a missed-command state. In the Bingo simultaneous row-and-column case described in the manual, the game sends no command until one line changes; the camera should yield no valid movement message.
+For **Stack-Up**, the same primitives manipulate five virtual colored blocks across five numbered trays. The pose also includes six height levels; closing at a lower block can carry it and every block above it as an ordered segment. The flash stream has no block ID, target-pattern, or victory message. The UNO Q can know its own modeled stack state, but not the game's desired pattern without another validated source. Memory mode can transmit successive commands faster than the animation finishes: measure cadence and use a bounded, visible queue only if tests show it is needed; otherwise report a missed-command state. In the Bingo simultaneous row-and-column case described in the manual, the game sends no command until one line changes; the camera should yield no valid movement message.
 
 ## Next validation gate
 

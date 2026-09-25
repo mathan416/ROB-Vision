@@ -1,5 +1,5 @@
 /* Stack-Up's virtual accessory state. A gripper closes around one level and
-   carries that disc together with every disc resting above it. */
+   carries that block together with every block resting above it. */
 (() => {
   'use strict';
   const COLORS = Object.freeze(['green', 'yellow', 'blue', 'white', 'red']);
@@ -33,12 +33,12 @@
       next.height += 1;
     } else if (command === 'DOWN') {
       if (next.height === 1) return { ok: false, reason: 'Arms are already at the lowest level.' };
-      if (next.held.length && next.height - 1 <= tray.length) return { ok: false, reason: 'The carried discs would collide with this tray stack.' };
+      if (next.held.length && next.height - 1 <= tray.length) return { ok: false, reason: 'The carried blocks would collide with this tray stack.' };
       next.height -= 1;
     } else if (command === 'LEFT' || command === 'RIGHT') {
       const target = next.station + (command === 'LEFT' ? -1 : 1);
       if (target < 1 || target > 5) return { ok: false, reason: 'There is no tray in that direction.' };
-      if (next.held.length && next.height <= next.trays[target - 1].length) return { ok: false, reason: 'Raise the carried discs to clear the next tray.' };
+      if (next.held.length && next.height <= next.trays[target - 1].length) return { ok: false, reason: 'Raise the carried blocks to clear the next tray.' };
       next.station = target;
     } else if (command === 'CLOSE') {
       if (next.grip === 'closed') return { ok: false, reason: 'Hands are already closed.' };
@@ -47,14 +47,14 @@
     } else if (command === 'OPEN') {
       if (next.grip === 'open') return { ok: false, reason: 'Hands are already open.' };
       if (next.held.length) {
-        if (next.height !== tray.length + 1) return { ok: false, reason: 'Lower the carried discs to the next free level before releasing.' };
-        if (tray.length + next.held.length > 5) return { ok: false, reason: 'That tray cannot hold more than five discs.' };
+        if (next.height !== tray.length + 1) return { ok: false, reason: 'Lower the carried blocks to the next free level before releasing.' };
+        if (tray.length + next.held.length > 5) return { ok: false, reason: 'That tray cannot hold more than five blocks.' };
         tray.push(...next.held);
         next.held = [];
       }
       next.grip = 'open';
     }
-    if (!valid(next)) return { ok: false, reason: 'Command would lose or duplicate a disc.' };
+    if (!valid(next)) return { ok: false, reason: 'Command would lose or duplicate a block.' };
     Object.assign(state, next);
     return { ok: true, command, state: snapshot(state) };
   }

@@ -23,7 +23,7 @@
   }
   const descriptions = {
     gyro: 'Watch R.O.B. spin two gyros, recover each once, then return both to their holders.',
-    stack: 'Watch R.O.B. move one disc, then carry two discs together. Every move follows a Stack-Up command.',
+    stack: 'Watch R.O.B. move one block, then carry two blocks together. Every move follows a Stack-Up command.',
     free: 'Try R.O.B.’s poses with the controls below, or run his short greeting. No game pieces.'
   };
   const missions = {
@@ -78,23 +78,23 @@
   };
   function buildStackDemo() {
     const preview = StackModel.create();
-    const steps = [{ title: 'Stack-Up / five discs', action: 'READY', caption: 'All five discs begin on Tray 3. R.O.B. starts centered, high, and open.', event: 'Stack-Up virtual setup ready.' }];
+    const steps = [{ title: 'Stack-Up / five blocks', action: 'READY', caption: 'All five blocks begin on Tray 3. R.O.B. starts centered, high, and open.', event: 'Stack-Up virtual setup ready.' }];
     const add = (command, title) => {
       const before = StackModel.snapshot(preview);
       const result = StackModel.apply(preview, command);
       if (!result.ok) throw new Error(`Invalid Stack-Up demo: ${command}: ${result.reason}`);
       const colors = preview.held.join(' + ');
       let caption;
-      if (command === 'CLOSE') caption = `CLOSE: R.O.B. grips ${colors} ${preview.held.length === 1 ? 'disc' : 'discs'} together on Tray ${preview.station}.`;
-      else if (command === 'OPEN') caption = `OPEN: ${before.held.join(' + ')} ${before.held.length === 1 ? 'disc lands' : 'discs land'} on Tray ${preview.station}.`;
+      if (command === 'CLOSE') caption = `CLOSE: R.O.B. grips ${colors} ${preview.held.length === 1 ? 'block' : 'blocks'} together on Tray ${preview.station}.`;
+      else if (command === 'OPEN') caption = `OPEN: ${before.held.join(' + ')} ${before.held.length === 1 ? 'block lands' : 'blocks land'} on Tray ${preview.station}.`;
       else if (command === 'LEFT' || command === 'RIGHT') caption = `${command}: R.O.B. turns one station to Tray ${preview.station}${colors ? `, carrying ${colors}` : ''}.`;
       else caption = `${command}: arms move one level to ${preview.height}${colors ? ` with ${colors}` : ''}.`;
       steps.push({ title, action: command, command, caption, event: caption });
     };
     const repeat = (command, count, title) => { for (let i = 0; i < count; i += 1) add(command, title); };
-    add('DOWN', 'Top red disc'); add('CLOSE', 'Top red disc'); add('UP', 'Top red disc'); add('RIGHT', 'Top red disc'); repeat('DOWN', 5, 'Top red disc'); add('OPEN', 'Top red disc');
-    repeat('UP', 5, 'Two-disc carry'); add('LEFT', 'Two-disc carry'); repeat('DOWN', 3, 'Two-disc carry'); add('CLOSE', 'Two-disc carry'); repeat('UP', 3, 'Two-disc carry'); add('LEFT', 'Two-disc carry'); repeat('DOWN', 5, 'Two-disc carry'); add('OPEN', 'Two-disc carry');
-    steps.push({ title: 'Stack-Up complete!', action: 'COMPLETE', caption: 'Red rests on Tray 4; blue and white stay stacked together on Tray 2. Green and yellow remain on Tray 3.', event: 'All five discs accounted for; grouped carry demo complete.' });
+    add('DOWN', 'Top red block'); add('CLOSE', 'Top red block'); add('UP', 'Top red block'); add('RIGHT', 'Top red block'); repeat('DOWN', 5, 'Top red block'); add('OPEN', 'Top red block');
+    repeat('UP', 5, 'Two-block carry'); add('LEFT', 'Two-block carry'); repeat('DOWN', 3, 'Two-block carry'); add('CLOSE', 'Two-block carry'); repeat('UP', 3, 'Two-block carry'); add('LEFT', 'Two-block carry'); repeat('DOWN', 5, 'Two-block carry'); add('OPEN', 'Two-block carry');
+    steps.push({ title: 'Stack-Up complete!', action: 'COMPLETE', caption: 'Red rests on Tray 4; blue and white stay stacked together on Tray 2. Green and yellow remain on Tray 3.', event: 'All five blocks accounted for; grouped carry demo complete.' });
     return steps;
   }
   missions.stack = buildStackDemo();
@@ -415,7 +415,7 @@
     $('focus-type').textContent = state.mode === 'free' ? 'MOTION STUDY' : 'GAME PIECE';
     $('floor-action').textContent = state.mode === 'free' ? 'TURN → LIFT → GRIP' : 'PICK → PLACE';
     const stackTop = stackState.trays[stackState.station - 1].at(-1);
-    $('focus-name').textContent = state.mode === 'gyro' ? item?.piece === 'b' ? 'GYRO B' : 'GYRO A' : state.mode === 'stack' ? stackState.held.length ? stackState.held.length === 1 ? `${stackState.held[0].toUpperCase()} DISC` : `${stackState.held.length} DISCS TOGETHER` : stackTop ? `${stackTop.toUpperCase()} DISC` : 'EMPTY TRAY' : 'R.O.B. POSE';
+    $('focus-name').textContent = state.mode === 'gyro' ? item?.piece === 'b' ? 'GYRO B' : 'GYRO A' : state.mode === 'stack' ? stackState.held.length ? stackState.held.length === 1 ? `${stackState.held[0].toUpperCase()} BLOCK` : `${stackState.held.length} BLOCKS TOGETHER` : stackTop ? `${stackTop.toUpperCase()} BLOCK` : 'EMPTY TRAY' : 'R.O.B. POSE';
     $('focus-art').style.background = state.mode === 'stack' ? discPaint[stackState.held.at(-1) || stackTop]?.[1] || '#536f7b' : '';
     $('focus-action').textContent = state.stopped ? 'STOPPED' : item?.action || (state.manualActive ? state.manualCommand || 'POSE' : 'READY');
     $('focus-location').textContent = state.mode === 'gyro' ? ({ holder: state.cleanupStarted ? item?.piece === 'b' ? 'FAR HOLDER / STORED' : 'FRONT HOLDER / STORED' : item?.piece === 'b' ? 'FAR HOLDER → BLUE PAD' : 'FRONT HOLDER → RED PAD', held: 'BETWEEN BOTH HANDS', spinner: 'RIGHT SPINNER / ROTATING', redTray: 'RED BUTTON PAD', blueTray: 'BLUE BUTTON PAD' })[item?.location || 'holder'] : state.mode === 'stack' ? `TRAY ${stackState.station} / LEVEL ${stackState.height}${stackState.held.length ? ' / IN HAND' : ''}` : 'NO GAME PIECES';
