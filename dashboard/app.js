@@ -155,15 +155,20 @@
   function animateProp(slot, frameSlot, elementId, x, y, scale, immediate) {
     if (state[frameSlot]) cancelAnimationFrame(state[frameSlot]);
     const start = { ...state[slot] };
+    const place = (position) => {
+      const transform = `translate(${position.x} ${position.y}) scale(${position.scale})`;
+      $(elementId).setAttribute('transform', transform);
+      if (elementId === 'move-prop') $('disc-prop').setAttribute('transform', transform);
+    };
     if (immediate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      state[slot] = { x, y, scale }; $(elementId).setAttribute('transform', `translate(${x} ${y}) scale(${scale})`); state[frameSlot] = null; return;
+      state[slot] = { x, y, scale }; place(state[slot]); state[frameSlot] = null; return;
     }
     const started = performance.now();
     function frame(now) {
       const t = Math.min(1, (now - started) / 1000);
       const eased = t * t * (3 - 2 * t);
       state[slot] = { x: start.x + (x - start.x) * eased, y: start.y + (y - start.y) * eased, scale: start.scale + (scale - start.scale) * eased };
-      $(elementId).setAttribute('transform', `translate(${state[slot].x} ${state[slot].y}) scale(${state[slot].scale})`);
+      place(state[slot]);
       state[frameSlot] = t < 1 ? requestAnimationFrame(frame) : null;
     }
     state[frameSlot] = requestAnimationFrame(frame);
@@ -182,7 +187,8 @@
       // The carriage moves vertically on the column. Its shoulder pivots stay attached;
       // the projected hands sweep across the front as the upper body turns.
       $('arm-carriage').setAttribute('transform', `translate(0 ${state.motion.arms})`);
-      const closedGap = state.mode === 'stack' ? 27 : 23;
+      $('hands-carriage').setAttribute('transform', `translate(0 ${state.motion.arms})`);
+      const closedGap = state.mode === 'stack' ? 29 : 23;
       const gap = (closedGap + (1 - state.motion.grip) * 23) * state.motion.depth;
       const center = 325 + state.motion.turn;
       const leftX = center - gap;
@@ -400,6 +406,7 @@
     if (!state.stopped && animateMotion) moveMechanism(state.turn, state.arms, state.grip, state.head, state.depth);
     $('scene-gyro').style.display = state.mode === 'gyro' ? '' : 'none';
     $('scene-stack').style.display = state.mode === 'stack' ? '' : 'none';
+    $('stack-colors').style.display = state.mode === 'stack' ? '' : 'none';
     $('move-prop').style.display = state.mode === 'free' ? 'none' : '';
     $('second-gyro-prop').style.display = state.mode === 'gyro' ? '' : 'none';
     $('gyro-prop').style.display = state.mode === 'gyro' ? '' : 'none';

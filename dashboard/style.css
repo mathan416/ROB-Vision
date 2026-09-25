@@ -237,3 +237,4 @@
 .focus-block{display:block;position:relative;flex:none;width:40px;height:14px;margin-bottom:-1px;border:2px solid #e5f1e9a8;border-radius:50% / 35%;box-shadow:inset 0 -5px 0 #17374955,0 2px 2px #03101b99}
 .focus-block:after{content:'';position:absolute;left:50%;top:2px;width:9px;height:3px;transform:translateX(-50%);border-radius:50%;background:#1d39468c}
 .focus-block.red{background:#f08069}.focus-block.white{background:#e7efeb}.focus-block.blue{background:#5dd1ef}.focus-block.yellow{background:#f1c76e}.focus-block.green{background:#80d8a4}
+#disc-prop{filter:drop-shadow(0 5px 6px #020c16a8)}

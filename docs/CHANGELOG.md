@@ -3,6 +3,7 @@
 ## Stack-Up block alignment — 25 September 2026
 
 - Made each virtual block one visible hand level tall in the Live Model, with a glow on the block R.O.B. can grip.
+- Drew the blocks in front of the arm linkage and put the two hands at the sides of a carried or placed stack.
 - Updated the Game Table and Accessory Bay block stacks to match, and made the Game Piece card show the selected or carried colors as they change.
 - Clarified that the UNO Q installer includes the matrix display sketch and App Lab compiles and uploads it on start.
 

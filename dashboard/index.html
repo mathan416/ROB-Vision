@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080f1d">
   <title>R.O.B. Vision // Mission Control</title>
-  <link rel="stylesheet" href="style.css?v=stack-blocks-2">
+  <link rel="stylesheet" href="style.css?v=stack-side-grip-1">
   <script src="status.js?v=status-2" defer></script>
   <script src="stack-model.js?v=blocks-1" defer></script>
-  <script src="app.js?v=stack-blocks-2" defer></script>
+  <script src="app.js?v=stack-side-grip-1" defer></script>
   <script src="live.js?v=status-1" defer></script>
 </head>
 <body>
@@ -122,13 +122,11 @@
                   <g id="stack-tray-4" transform="translate(410 512)"><path d="M-10 3 L-10 42 Q0 50 10 42 L10 3Z" fill="url(#body)" stroke="#dcebea" stroke-width="2"/><ellipse cy="1" rx="34" ry="11" fill="#e4eeed" stroke="#f5faf7" stroke-width="2"/><ellipse class="tray-ring" cy="-1" rx="25" ry="7" fill="#314b59" stroke="#708c97" stroke-width="2"/><ellipse cy="-2" rx="17" ry="4" fill="#10283b"/></g>
                   <g id="stack-tray-5" transform="translate(500 493)"><path d="M-10 3 L-10 52 Q0 60 10 52 L10 3Z" fill="url(#body)" stroke="#dcebea" stroke-width="2"/><ellipse cy="1" rx="35" ry="11" fill="#e4eeed" stroke="#f5faf7" stroke-width="2"/><ellipse class="tray-ring" cy="-1" rx="26" ry="7" fill="#314b59" stroke="#708c97" stroke-width="2"/><ellipse cy="-2" rx="18" ry="4" fill="#10283b"/></g>
                 </g>
-                <g id="stack-colors"></g>
                 <text x="145" y="560" text-anchor="middle">TRAY 1</text><text x="230" y="571" text-anchor="middle">TRAY 2</text><text x="325" y="576" text-anchor="middle">TRAY 3</text><text x="410" y="570" text-anchor="middle">TRAY 4</text><text x="500" y="560" text-anchor="middle">TRAY 5</text>
               </g>
               <g id="second-gyro-prop" class="gyro-piece" transform="translate(145 469) scale(.85)"><use href="#gyro-body"/><ellipse class="gyro-spin-ring" cy="4" rx="25" ry="9" fill="none" stroke="#a4f7ff" stroke-width="3" stroke-dasharray="11 9"/></g>
               <g id="move-prop" transform="translate(225 496)">
                 <g id="gyro-prop" class="gyro-piece"><use href="#gyro-body"/><ellipse class="gyro-spin-ring" cy="4" rx="25" ry="9" fill="none" stroke="#a4f7ff" stroke-width="3" stroke-dasharray="11 9"/></g>
-                <g id="disc-prop"></g>
               </g>
             </g>
             <g id="arm-carriage" transform="translate(0 0)">
@@ -141,6 +139,10 @@
               <circle id="left-elbow" cx="245" cy="381" r="10" fill="#536a7e" stroke="#e8f2f3" stroke-width="3"/><circle id="right-elbow" cx="405" cy="381" r="10" fill="#536a7e" stroke="#e8f2f3" stroke-width="3"/>
               <circle cx="285" cy="317" r="24" fill="#34495d" stroke="#e2edf2" stroke-width="7"/><circle cx="365" cy="317" r="24" fill="#34495d" stroke="#e2edf2" stroke-width="7"/>
               <circle cx="285" cy="317" r="8" fill="#c9dfe8"/><circle cx="365" cy="317" r="8" fill="#c9dfe8"/>
+            </g>
+            <g id="stack-colors"></g>
+            <g id="disc-prop" transform="translate(325 486)"></g>
+            <g id="hands-carriage" transform="translate(0 0)">
               <g id="left-hand" transform="translate(282 453)"><path d="M5 -14 L-9 -14 Q-19 -13 -19 -3 L-19 8 Q-18 17 -9 17 L5 17 L5 8 L-8 8 L-8 -4 L5 -4Z" fill="url(#body)" stroke="#ecf7f8" stroke-width="3"/><path d="M5 -6 L5 10" stroke="#7595a4" stroke-width="3"/></g>
               <g id="right-hand" transform="translate(368 453) scale(-1 1)"><path d="M5 -14 L-9 -14 Q-19 -13 -19 -3 L-19 8 Q-18 17 -9 17 L5 17 L5 8 L-8 8 L-8 -4 L5 -4Z" fill="url(#body)" stroke="#ecf7f8" stroke-width="3"/><path d="M5 -6 L5 10" stroke="#7595a4" stroke-width="3"/></g>
             </g>
