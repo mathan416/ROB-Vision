@@ -80,3 +80,9 @@ The ninth bit is not consistently absent. Different transmissions lose or blend 
 - The minimum exposed shutter setting, 0.3 ms, produced an overexposed image and about 30 delivered fps during this trial. The 1 ms setting was restored.
 - Standalone raw NV12 1920×1080 capture with OpenCV color conversion disabled delivered 660 frames in 11.9 seconds, around 60 fps. Full BGR conversion delivered only about 36 fps in the same benchmark. A first raw-row trace sampled outside the active flash area and is inconclusive; no row-timing decoder has been deployed.
 - The app was restored to 640×480 MJPEG, the saved `0.205,0.15,0.04,0.05` region, and 1 ms exposure. Its camera state was verified as capturing at 60.1 fps, with Stack-Up and RetroPie still linked.
+
+## Raw 1080p and Kiyo zoom follow-up
+
+The UNO Q captured two further 1,800-frame raw NV12 sessions at about 60 fps, each aligned with independently triggered Stack-Up Direct moves and RetroArch source recordings. Three narrow vertical strips, with 24 row bands each, measured luma and V chroma. Normal framing recovered two of four source-recorded commands exactly in the frame average; none of the 72 bands recovered the two rejected commands. The Kiyo Pro's zoom and tilt controls then enlarged the game display from roughly half the frame height to most of it. In that framing, only one of four source-recorded commands matched exactly, and no band recovered the other three. [The row-test report](KIYO_PRO_ROW_TEST_2026-09-25.md) records each command and the safety implication. No row-based action path was deployed.
+
+The separate UVC metadata node yielded 30 nonempty timing records while the normal preview ran, confirming that camera and USB timing can be measured more precisely in a future capture path. Camera zoom, tilt, exposure, capture mode, and crop were restored after testing; the live preview returned to about 60 fps with RetroPie online.

@@ -25,6 +25,7 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 ## Research and design references
 
 - [Optical input](optical-input.md) and [ROM signal analysis](ROM_SIGNAL_ANALYSIS.md): flashes, timing, and command decoding.
+- [Kiyo Pro row test](KIYO_PRO_ROW_TEST_2026-09-25.md): source-aligned 1080p capture, zoom, row, and timing-metadata results.
 - [Game identification](GAME_IDENTIFICATION.md): exact RetroPie launch-name matching.
 - [Network architecture](network-architecture.md): virtual Controller 2 return path over Wi-Fi or Ethernet.
 - [Dashboard design](DASHBOARD_DESIGN.md): robot art, accessory layout, and live state.
