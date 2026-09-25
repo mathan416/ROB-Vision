@@ -1,5 +1,11 @@
 # R.O.B. Vision changelog
 
+## UNO Q matrix display — 24 September 2026
+
+- Added an App Lab microcontroller sketch for the built-in 13×8 blue matrix: startup hourglass, idle eyes, Gyromite and Stack-Up title marks with animated eyes, Test `T`, pairing `P`, and fault `X`.
+- Added a Linux Router Bridge sender driven by the controller's game, camera, Test, and accepted-action state. A heartbeat returns the sketch to the hourglass if the Linux side disappears.
+- The physical sketch compiled and uploaded on the UNO Q and the bridge endpoint responded. Direct visual confirmation of each matrix animation remains pending.
+
 ## Setup and live controls — 24 September 2026
 
 - Added a Setup page with certificate-pinned one-time RetroPie pairing, receiver status, camera alignment preview, game Test mode ready-light acknowledgement, Gyromite Fast Gates, and six Stack-Up command checks.

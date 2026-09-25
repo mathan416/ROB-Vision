@@ -80,6 +80,8 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(snapshot['robot'], initial)
         controller.command('READY', 'camera')
         self.assertTrue(controller.snapshot()['test']['ready'])
+        controller.command('DOWN_GYRO', 'camera')
+        self.assertFalse(controller.snapshot()['test']['armed'])
 
     def test_camera_reconnect_reopens_after_capture_failure(self):
         captures = []

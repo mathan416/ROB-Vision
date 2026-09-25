@@ -74,7 +74,10 @@ class DeviceNameHandler(BaseHTTPRequestHandler):
 
 def main() -> None:
     from controller.service import serve
+    from controller.matrix import MatrixDisplay, MatrixMode
 
+    matrix = MatrixDisplay()
+    matrix.send(MatrixMode.LOADING, force=True)
     token = controller_token()
     if not token:
         raise RuntimeError("Controller token is empty")
@@ -82,7 +85,7 @@ def main() -> None:
     thread = threading.Thread(target=gateway.serve_forever, daemon=True)
     thread.start()
     try:
-        serve("0.0.0.0", 8766, token, None, None)
+        serve("0.0.0.0", 8766, token, None, None, matrix=matrix)
     finally:
         gateway.shutdown()
         gateway.server_close()

@@ -128,8 +128,8 @@
   }
   $('pair-refresh').addEventListener('click', checkLink);
   $('pair-refresh-offline').addEventListener('click', checkLink);
-  $('pair-change').addEventListener('click', () => { pairExpanded = true; if (state) render(state); });
-  $('pair-cancel').addEventListener('click', () => { pairExpanded = false; if (state) render(state); });
+  $('pair-change').addEventListener('click', () => { pairExpanded = true; if (state) render(state); act('/api/matrix/pairing', { active: true }); });
+  $('pair-cancel').addEventListener('click', () => { pairExpanded = false; if (state) render(state); act('/api/matrix/pairing', { active: false }); });
   $('pair-button').addEventListener('click', async () => {
     const button = $('pair-button');
     button.disabled = true;

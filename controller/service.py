@@ -174,6 +174,9 @@ class Controller:
                 if error:
                     self.event("blocked", f"{normalized} blocked: {error}", normalized)
                 else:
+                    if self.test_armed_at:
+                        self.test_armed_at = self.test_ready_at = self.test_flash_seen_at = 0.0
+                        self.test_flash_detector.reset()
                     self.event("action", f"{source.title()} command: {normalized}.", normalized)
             return self.snapshot()
 
@@ -358,10 +361,15 @@ class Controller:
             return self._start_camera(index, roi)
 
 
-def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi=None):
+def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi=None, matrix=None):
     if host not in ("127.0.0.1", "localhost", "::1") and not token:
         raise ValueError("A bearer token is required when serving over the network.")
     controller = Controller()
+    matrix_stop = threading.Event()
+    matrix_thread = None
+    if matrix is not None:
+        matrix_thread = threading.Thread(target=matrix.run, args=(controller.snapshot, matrix_stop), daemon=True)
+        matrix_thread.start()
     if camera_index is not None:
         try:
             controller.start_camera(camera_index, camera_roi)
@@ -413,6 +421,9 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                     if self.headers.get("X-ROB-Receiver") == "retropie" and token and self.headers.get("Authorization") == f"Bearer {token}":
                         controller.receiver_seen("RetroPie")
                     return self.respond(200, controller.snapshot())
+                if path == "/api/matrix/state":
+                    return self.respond(200, matrix.status() if matrix is not None else
+                                        {"available": False, "bridge_ok": False, "mode": None})
                 if path == "/api/camera/frame":
                     with controller.lock:
                         frame = controller.preview_frame
@@ -469,7 +480,19 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                 elif path == "/api/test/arm":
                     result = controller.arm_test()
                 elif path == "/api/pair":
-                    result = pair_retropie(data["host"], data["code"], data["fingerprint"], token)
+                    if matrix is not None:
+                        matrix.show_pairing()
+                    try:
+                        result = pair_retropie(data["host"], data["code"], data["fingerprint"], token)
+                    finally:
+                        if matrix is not None:
+                            matrix.clear_pairing()
+                elif path == "/api/matrix/pairing":
+                    if not isinstance(data.get("active"), bool):
+                        raise ValueError("Choose whether pairing is active.")
+                    if matrix is not None:
+                        matrix.show_pairing() if data["active"] else matrix.clear_pairing()
+                    result = controller.snapshot()
                 elif path == "/api/camera/start":
                     result = controller.start_camera(int(data.get("index", 0)), data.get("roi"))
                 elif path == "/api/camera/stop":
@@ -487,6 +510,9 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
     try:
         server.serve_forever()
     finally:
+        matrix_stop.set()
+        if matrix_thread is not None:
+            matrix_thread.join(timeout=2)
         controller.stop_camera()
         server.server_close()
 

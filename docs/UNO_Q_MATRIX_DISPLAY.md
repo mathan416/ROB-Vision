@@ -1,6 +1,6 @@
 # UNO Q matrix display design
 
-**Status: design only.** R.O.B. Vision currently has no Arduino matrix sketch or Linux-to-microcontroller display bridge. Its RetroPie pairing code is generated on RetroPie and entered on the browser Setup page; nothing is displayed on the UNO Q matrix yet. This guide defines the intended behavior for the built-in 13-column by 8-row blue LED matrix. The large browser dashboard remains the place for the full R.O.B. animation, accessories, and explanations.
+**Status: implemented in the R.O.B. Vision App Lab sketch and Linux bridge; physical display behavior still needs direct visual confirmation.** RetroPie pairing code is generated on RetroPie and entered on the browser Setup page. The UNO Q matrix shows a pairing cue only. This guide defines the behavior for the built-in 13-column by 8-row blue LED matrix. The large browser dashboard remains the place for the full R.O.B. animation, accessories, and explanations.
 
 ## What people should see
 
@@ -23,13 +23,13 @@ The face should be drawn for the physical 13×8 grid, with two distinct eyes and
 
 ## State ownership and priority
 
-The sketch should own all framebuffer writes and animate the startup hourglass without waiting for Linux. Linux should send compact *requested states* and accepted action hints through Router Bridge, using the UNO Q controller's authoritative game, camera, test, and fault state. A bridge reconnect should re-send the current state. If Linux disappears, the display should return to the hourglass after a short timeout rather than freezing a misleading game face.
+The sketch owns all framebuffer writes and animates the startup hourglass without waiting for Linux. Linux sends compact *requested states* and accepted action hints through Router Bridge, using the UNO Q controller's authoritative game, camera, test, and fault state. It sends a heartbeat at least once per second. If Linux disappears for about 3.5 seconds, the display returns to the hourglass rather than freezing a misleading game face. The sketch cannot replace Arduino's protected boot logo before App Lab releases the microcontroller.
 
 Display priority: **fault → pairing → Test check → startup/reconnect → selected game → idle eyes**. A movement hint is temporary within the selected game and never overrides fault, pairing, or Test. A camera being absent should be visible on Setup; the idle eyes alone must not claim optical readiness. Pairing has a bounded lifetime and returns to the prior state when complete or expired.
 
 ## Pairing distinction
 
-VirtualGlove has a separate physical pairing display for its own device approval PIN. R.O.B. Vision currently pairs **RetroPie to the UNO Q**: RetroPie produces a six-digit code and certificate fingerprint, while the UNO Q browser Setup page accepts them. The proposed matrix `P` is a status cue only. Showing the code on the UNO Q would require a deliberate change to the pairing protocol and must not be assumed to be working.
+VirtualGlove has a separate physical pairing display for its own device approval PIN. R.O.B. Vision pairs **RetroPie to the UNO Q**: RetroPie produces a six-digit code and certificate fingerprint, while the UNO Q browser Setup page accepts them. The matrix `P` is a status cue when **Pair another console** is opened or pairing is submitted; it expires or clears afterward. Showing the code on the UNO Q would require a deliberate change to the pairing protocol.
 
 ## Acceptance checks before calling it implemented
 
