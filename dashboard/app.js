@@ -453,7 +453,7 @@
   function home() {
     cancelDemo(); resetGyros(); stackState = StackModel.create(); state.sequence = null; state.recoveryCount = { a: 0, b: 0 }; state.cleanupStarted = false; state.head = 0; state.arms = 0; state.turn = 0; state.depth = 1; state.grip = false; state.manualActive = false; state.manualCommand = null; state.step = -1; moveProp(state.mode === 'gyro' ? 225 : 325, state.mode === 'gyro' ? 496 : 486, 1, true); moveSecondProp(145, 469, .85, true); if (state.mode === 'stack') stackPose(true);
     $('mission-title').textContent = state.mode === 'free' ? 'Try a pose.' : 'Ready when you are.';
-    $('mission-description').textContent = state.mode === 'free' ? 'Use Pose Preview below to turn, lift, and grip, or play R.O.B.’s greeting.' : 'Choose an accessory and give R.O.B. a mission. Every movement will play out here in real time.';
+    $('mission-description').textContent = state.mode === 'free' ? 'Use Pose Preview below to turn, lift, and grip, or play Buddy’s greeting.' : 'Give Buddy a mission. Every movement is another step beyond the game screen.';
     $('stage-caption').textContent = 'Waiting for a mission.';
     $('mission-step').textContent = 'STANDBY'; $('progress-text').textContent = '0 / 0'; $('progress-fill').style.width = '0%';
     log('Returned to home pose.'); render();
@@ -583,7 +583,7 @@
       state.manualActive = true;
       state.manualCommand = snapshot.events.at(-1)?.command?.replace(/_(GYRO|STACK)$/, '') || 'READY';
       $('mission-title').textContent = robot ? `Live ${state.mode === 'stack' ? 'Stack-Up' : 'Gyromite'}` : 'Select a game';
-      $('mission-description').textContent = robot ? snapshot.events.at(-1)?.message || 'Watching for game commands.' : 'Choose Gyromite or Stack-Up in the Accessory Bay.';
+      $('mission-description').textContent = robot ? snapshot.events.at(-1)?.message || 'Watching for game commands.' : 'Buddy is waiting for a game link. Choose Gyromite or Stack-Up in the Accessory Bay.';
       $('stage-caption').textContent = $('mission-description').textContent;
       const status = window.RobStatus;
       $('mission-step').textContent = status.testSignal(snapshot) ? status.test(snapshot) : status.frames(snapshot);

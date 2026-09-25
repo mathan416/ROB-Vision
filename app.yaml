@@ -1,5 +1,5 @@
 name: R.O.B. Vision
-description: Virtual Nintendo R.O.B. with RetroPie game-frame commands and a live browser dashboard
+description: Independent virtual robot companion with RetroPie game-frame commands and a live browser dashboard
 icon: "🤖"
 ports:
   - 80

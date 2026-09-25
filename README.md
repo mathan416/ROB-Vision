@@ -1,6 +1,8 @@
 # R.O.B. Vision
 
-R.O.B. Vision brings Nintendo's Robotic Operating Buddy to life as a **virtual robot**. The Arduino UNO Q owns R.O.B.'s pose and game pieces. RetroPie sends Gyromite and Stack-Up light commands from each rendered NES frame to the UNO Q over Wi-Fi or Ethernet. A browser on a laptop, iPad, or phone animates the robot, gyros, spinner, pads, trays, and blocks. Gyromite's virtual Controller 2 buttons return to RetroPie over the network. There is no physical robot or camera.
+R.O.B. Vision is an independent maker project for playing Gyromite and Stack-Up with a **virtual robot companion**. The Arduino UNO Q owns the companion's pose and game pieces. RetroPie sends game light commands from each rendered NES frame to the UNO Q over Wi-Fi or Ethernet. A browser on a laptop, iPad, or phone animates the robot, gyros, spinner, pads, trays, and blocks. Gyromite's virtual Controller 2 buttons return to RetroPie over the network. There is no physical robot or camera.
+
+**Meet Buddy:** our working character concept is a little robot finding his way out of an emulator through the game-frame link. His first blink appears on the UNO Q; his movements appear in the browser. The [story brief](docs/BUDDY_STORY.md) develops that premise and sets boundaries for an original character. Buddy is a working nickname, not a cleared public brand.
 
 **Available now:** a separate UNO Q App Lab app, live Mission and Setup pages, exact ROM identification, paired RetroPie receiver, FCEUmm and Nestopia game-frame launch choices, Gyromite gate return, Stack-Up block model, UNO Q matrix animations, and offline demonstrations. Live Direct play delivered all six command types from both games through FCEUmm; Nestopia delivered movement commands from both games. Both Gyromite gate colors were confirmed in Game A under FCEUmm. Nestopia gate return and longer game sessions remain to be checked.
 
@@ -22,4 +24,4 @@ For local development, run `python3 -m controller.service` and open `http://127.
 
 Start with the [documentation index](docs/INDEX.md), [user guide](docs/USER_GUIDE.md), [setup guide](docs/SETUP_GUIDE.md), [technical architecture](docs/TECHNICAL_ARCHITECTURE.md), and [release review](docs/RELEASE_REVIEW_2026-09-25.md). Printable editions are under [output/pdf](output/pdf). The remaining live checks include longer sessions, Stack-Up Memory/Bingo, Nestopia Game A gate return, and simultaneous browser clients.
 
-Historical Nintendo manuals and the Robert project informed behavior, but their text or code is not reused here. Game artwork and Nintendo marks remain with their owners.
+Historical Nintendo manuals and the Robert project informed behavior, but their text or code is not reused here. Nintendo's characters, game artwork, and marks remain with their owners. R.O.B. Vision is not affiliated with or endorsed by Nintendo.
