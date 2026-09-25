@@ -12,7 +12,7 @@ The booklet says that **one gate can be operated without spinning a gyro**. R.O.
 
 | Mode | Manual behavior | Virtual design implication |
 | --- | --- | --- |
-| Test | Optical aiming signal | Provide camera framing and decoder diagnostics before play. |
+| Test | Optical aiming signal | Report Test signal from the rendered frame link before play. |
 | Direct | Up/down/left/right/open/close go straight to R.O.B. | Validate six optical commands and show each virtual movement. |
 | Game A | Player controls the professor on a dark screen; Start enters a blue robot-transmission screen | Decode complete robot commands in the correct mode; avoid claiming to know professor position from flashes. |
 | Game B | Professor walks while Controller 1 commands R.O.B. directly | Show ready/busy state and virtual-pad-to-game latency. |

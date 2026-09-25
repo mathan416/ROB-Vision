@@ -61,9 +61,7 @@ class MatrixDisplay:
         return True
 
     def update(self, snapshot):
-        if snapshot["camera"]["state"] == "fault":
-            mode = MatrixMode.FAULT
-        elif monotonic() < self.pairing_until:
+        if monotonic() < self.pairing_until:
             mode = MatrixMode.PAIRING
         elif snapshot["test"]["armed"]:
             mode = MatrixMode.TEST_FLASH if snapshot["test"]["flash_active"] else MatrixMode.TEST

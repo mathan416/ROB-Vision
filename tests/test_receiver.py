@@ -110,6 +110,15 @@ class ReceiverTests(unittest.TestCase):
                     hook.feed(123, index, level)
                 self.assertEqual(hook.take_pending(), [])
 
+    def test_frame_hook_reports_test_signal_without_queuing_a_move(self):
+        with tempfile.TemporaryDirectory() as directory:
+            hook = FrameHookServer(load_registry(), Path(directory) / 'unused.sock')
+            with patch('tools.retropie_frame_hook.sender_game', return_value='stack_up'):
+                for index in range(20):
+                    hook.feed(123, index, str(index % 2))
+            self.assertEqual(hook.recent_test_game(), 'stack_up')
+            self.assertEqual(hook.take_pending(), [])
+
     def test_detects_each_live_retroarch_game_but_not_background_emulator(self):
         registry = load_registry()
         for filename, expected in [('Gyromite (World).7z', 'gyromite'),

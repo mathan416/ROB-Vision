@@ -1,4 +1,4 @@
-"""Independent optical-to-virtual-object flows for each supported game."""
+"""Independent game-frame-to-virtual-object flows for each supported game."""
 
 import unittest
 
@@ -9,19 +9,16 @@ from controller.service import Controller
 BY_COMMAND = {command: pattern for pattern, command in PATTERNS.items()}
 
 
-class OpticalFlow:
+class FrameFlow:
     def __init__(self, game):
         self.controller = Controller()
         self.controller.select(game)
-        self.frame = 0
+        self.frame = 100
 
     def send(self, command):
         before = self.controller.snapshot()['sequence']
-        for bit in '1' + BY_COMMAND[command] + '000':
-            for sample in range(4):
-                self.controller.sample((self.frame * 4 + sample + .5) / 240,
-                                       .82 if bit == '1' else .03)
-            self.frame += 1
+        self.frame += 16
+        self.controller.emulator_command(self.controller.game, BY_COMMAND[command], 123, self.frame)
         events = [event for event in self.controller.snapshot()['events'] if event['seq'] > before]
         assert [event['command'] for event in events if event['kind'] == 'decoded'] == [command], events
         return events
@@ -32,7 +29,7 @@ class OpticalFlow:
 
 class GameFlowTests(unittest.TestCase):
     def test_gyromite_spinner_to_red_pad_and_release(self):
-        game = OpticalFlow('gyromite')
+        game = FrameFlow('gyromite')
         for command in ['DOWN_GYRO', 'DOWN_GYRO', 'CLOSE', 'UP_GYRO', 'UP_GYRO',
                         'RIGHT', 'RIGHT', 'RIGHT', 'DOWN_GYRO', 'DOWN_GYRO', 'OPEN']:
             game.send(command)
@@ -49,7 +46,7 @@ class GameFlowTests(unittest.TestCase):
         self.assertEqual(game.state()['pieces']['b'], 'holder_b')
 
     def test_stack_up_red_then_grouped_blue_white_transfer(self):
-        game = OpticalFlow('stack_up')
+        game = FrameFlow('stack_up')
         for command in ['DOWN_STACK', 'CLOSE', 'UP_STACK', 'RIGHT'] + ['DOWN_STACK'] * 5 + ['OPEN']:
             game.send(command)
         self.assertEqual(game.state()['trays'][3], ['red'])
@@ -65,15 +62,12 @@ class GameFlowTests(unittest.TestCase):
         self.assertEqual(sum(map(len, game.state()['trays'])) + len(game.state()['held']), 5)
 
     def test_game_specific_vertical_commands_never_cross_modes(self):
-        gyro = OpticalFlow('gyromite')
-        stack = OpticalFlow('stack_up')
+        gyro = FrameFlow('gyromite')
+        stack = FrameFlow('stack_up')
         gyro_before, stack_before = gyro.state(), stack.state()
         for command, game in [('DOWN_STACK', gyro), ('DOWN_GYRO', stack)]:
-            for bit in '1' + BY_COMMAND[command] + '000':
-                for sample in range(4):
-                    game.controller.sample((game.frame * 4 + sample + .5) / 240,
-                                           .82 if bit == '1' else .03)
-                game.frame += 1
+            with self.assertRaises(ValueError):
+                game.controller.emulator_command(game.controller.game, BY_COMMAND[command], 123, 200)
         self.assertEqual(gyro.state(), gyro_before)
         self.assertEqual(stack.state(), stack_before)
 

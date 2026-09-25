@@ -3,13 +3,10 @@
   const $ = (id) => document.getElementById(id);
   const status = window.RobStatus;
   let state = null;
-  let previewUrl = null;
-  let previewBusy = false;
   let polling = false;
   let pairExpanded = false;
   let lastReceiverOnline = null;
   let linkChecking = false;
-  let cameraBusy = false;
   let previewActive = false;
   let previewTimer = null;
   const headers = () => ({ 'Content-Type': 'application/json' });
@@ -23,28 +20,6 @@
     return result;
   }
   function message(id, value) { $(id).textContent = value; }
-  function clearFrame() {
-    $('setup-frame').hidden = true;
-    $('camera-placeholder').hidden = false;
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    previewUrl = null;
-  }
-  async function frame() {
-    if (previewBusy || state?.camera.state !== 'capturing') return;
-    previewBusy = true;
-    try {
-      const response = await fetch('/api/camera/frame', { cache: 'no-store' });
-      if (response.status !== 200) return;
-      const next = URL.createObjectURL(await response.blob());
-      const previous = previewUrl;
-      previewUrl = next;
-      $('setup-frame').src = next;
-      $('setup-frame').hidden = false;
-      $('camera-placeholder').hidden = true;
-      if (previous) URL.revokeObjectURL(previous);
-    } catch (_error) { /* A preview failure must not interrupt capture. */ }
-    finally { previewBusy = false; }
-  }
   function render(snapshot) {
     state = snapshot;
     message('setup-connection', status.connection(snapshot));
@@ -56,34 +31,25 @@
     $('pair-details').hidden = receiverOnline && !pairExpanded;
     $('pair-cancel').hidden = !receiverOnline;
     if (receiverOnline !== lastReceiverOnline) {
-      message('pair-feedback', receiverOnline ? 'RetroPie receiver is online. Continue to the camera check.' :
+      message('pair-feedback', receiverOnline ? 'RetroPie receiver is online. Continue to the game-frame check.' :
         'No recent RetroPie receiver heartbeat. Check its power and network connection.');
       lastReceiverOnline = receiverOnline;
     }
-    message('camera-state', status.camera(snapshot));
-    $('camera-state').dataset.state = status.camera(snapshot) === 'NO CAMERA DETECTED' ? 'missing' : snapshot.camera.state;
-    message('camera-device', snapshot.camera.devices?.[0]?.name || 'NO CAPTURE DEVICE');
-    message('camera-fps', `${snapshot.camera.fps || 0} FPS`);
-    message('camera-brightness', `${Math.round((snapshot.camera.brightness || 0) * 100)}% SIGNAL`);
-    message('camera-feedback', snapshot.input?.frame_hook ?
-      'Game frames are linked directly from RetroPie. Camera check is still available for alignment.' : snapshot.camera.message);
-    $('camera-toggle').textContent = snapshot.camera.state === 'capturing' ? 'STOP CAMERA CHECK' :
-      snapshot.camera.state === 'fault' ? 'CLEAR CAMERA FAULT' : 'START CAMERA CHECK';
-    $('camera-toggle').disabled = cameraBusy;
-    $('camera-reconnect').disabled = cameraBusy;
-    if (snapshot.camera.state !== 'capturing') clearFrame();
+    message('frame-state', status.frames(snapshot));
+    message('frame-feedback', snapshot.input?.frame_hook ?
+      'The selected game is sending rendered frames to R.O.B. Vision. Automatic movement is ready.' :
+      'Launch Gyromite or Stack-Up with its R.O.B. Vision emulator choice to link game frames.');
     const game = snapshot.game;
     message('buttons-mode', game ? game.replace('_', '-').toUpperCase() : 'SELECT A GAME');
     $('setup-gates').hidden = game !== 'gyromite';
     $('setup-stack').hidden = game !== 'stack_up';
-    if (game === 'gyromite') message('buttons-feedback', 'Use the red and blue buttons to test the matching gates. Stop the camera first.');
+    if (game === 'gyromite') message('buttons-feedback', 'Use the red and blue buttons to test the matching gates.');
     else if (game === 'stack_up') message('buttons-feedback', 'Send one movement at a time, then watch the virtual blocks on Mission.');
     for (const color of ['red', 'blue']) {
       const button = document.querySelector(`[data-setup-gate="${color}"]`);
       const active = Boolean(snapshot.robot?.assist?.[color]);
       button.textContent = `${active ? 'RAISE' : 'LOWER'} ${color.toUpperCase()}`;
       button.setAttribute('aria-pressed', String(active));
-      button.disabled = snapshot.camera.state === 'capturing';
     }
     const flashing = Boolean(snapshot.test?.flash_active);
     const ready = Boolean(snapshot.test?.ready) && !flashing;
@@ -93,10 +59,9 @@
     message('test-state', status.test(snapshot));
     message('test-feedback', flashing ? 'Test-mode optical signal detected. R.O.B.’s red light blinks; his arms do not move.' :
       ready ? 'A separate ready-light command was decoded. R.O.B.’s red light stays on; his arms do not move.' :
-      previewActive ? 'This is a visual preview only. No camera signal was detected.' :
-      snapshot.test?.armed ? 'Waiting for the Test-mode signal. Keep the green game area inside the camera frame.' :
-      'Select a game, start the camera, and arm the check while the game shows Test mode.');
-    if (snapshot.camera.state === 'capturing') frame();
+      previewActive ? 'This is a visual preview only. No game signal was detected.' :
+      snapshot.test?.armed ? 'Waiting for the Test-mode signal from linked game frames.' :
+      'Select a game, link its frames, and arm the check while the game shows Test mode.');
   }
   async function act(path, data, feedback, success) {
     try { render(await api(path, data)); if (feedback && success) message(feedback, success); }
@@ -116,18 +81,13 @@
       $('setup-connection').closest('.top-status').dataset.connection = preview ? 'preview' : 'offline';
       message('pair-link', 'RETROPIE UNKNOWN');
       $('pair-link').dataset.state = 'unknown';
-      message('camera-state', 'CAMERA UNKNOWN');
-      $('camera-state').dataset.state = 'unknown';
-      message('camera-device', 'NO CAPTURE DEVICE');
-      message('camera-fps', '0 FPS');
-      message('camera-brightness', '0% SIGNAL');
+      message('frame-state', 'GAME FRAMES UNKNOWN');
       message('test-state', 'SIGNAL UNKNOWN');
       message('buttons-mode', 'SELECT A GAME');
       $('setup-gates').hidden = true; $('setup-stack').hidden = true;
       message('pair-feedback', preview ? 'Local preview only. Open Setup on the UNO Q for live checks.' : 'The UNO Q controller is unavailable. Start R.O.B. Vision in App Lab.');
-      message('camera-feedback', 'Camera status is unavailable until the controller reconnects.');
+      message('frame-feedback', 'Game-frame status is unavailable until the controller reconnects.');
       message('test-feedback', 'Game signal status is unavailable until the controller reconnects.');
-      clearFrame();
     } finally { polling = false; }
   }
   async function checkLink() {
@@ -164,18 +124,6 @@
     } catch (error) { message('pair-feedback', error.message); }
     finally { button.disabled = false; }
   });
-  async function cameraAction(path) {
-    if (cameraBusy) return;
-    cameraBusy = true;
-    $('camera-toggle').disabled = true;
-    $('camera-reconnect').disabled = true;
-    message('camera-feedback', path === '/api/camera/reconnect' ? 'Resetting camera and scanning for a connection…' : 'Updating camera…');
-    try { render(await api(path, {})); }
-    catch (error) { message('camera-feedback', error.message); poll(); }
-    finally { cameraBusy = false; $('camera-toggle').disabled = false; $('camera-reconnect').disabled = false; }
-  }
-  $('camera-toggle').addEventListener('click', () => cameraAction(state?.camera.state === 'offline' ? '/api/camera/start' : '/api/camera/stop'));
-  $('camera-reconnect').addEventListener('click', () => cameraAction('/api/camera/reconnect'));
   $('select-gyro').addEventListener('click', () => act('/api/game', { game: 'gyromite' }, 'test-feedback'));
   $('select-stack').addEventListener('click', () => act('/api/game', { game: 'stack_up' }, 'test-feedback'));
   $('arm-test').addEventListener('click', () => act('/api/test/arm', {}, 'test-feedback'));
@@ -192,7 +140,7 @@
   document.querySelectorAll('[data-setup-command]').forEach(button => button.addEventListener('click', () => {
     act('/api/command', { command: button.dataset.setupCommand }, 'buttons-feedback', 'Command sent to virtual R.O.B.');
   }));
-  window.addEventListener('pagehide', () => { clearFrame(); if (previewTimer) clearTimeout(previewTimer); });
+  window.addEventListener('pagehide', () => { if (previewTimer) clearTimeout(previewTimer); });
   poll();
   setInterval(poll, 1000);
 })();

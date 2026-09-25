@@ -242,7 +242,7 @@ def cover(canvas, doc, title: str, subtitle: str, landscape_page: bool = False):
     canvas.setFillColor(colors.white); canvas.setFont("Barlow", 22)
     canvas.drawString(53, height-75, "R.O.B. VISION")
     canvas.setFont("DM-Bold", 8.4); canvas.setFillColor(colors.HexColor("#83B4C2"))
-    canvas.drawString(54, height-92, "OPTICAL ROBOT COMPANION / MK.01")
+    canvas.drawString(54, height-92, "VIRTUAL ROBOT COMPANION / MK.01")
     canvas.setFillColor(colors.white); canvas.setFont("Barlow", 42 if not landscape_page else 38)
     canvas.drawString(53, 150, title.upper())
     canvas.setFillColor(colors.HexColor("#ADD0D9")); canvas.setFont("DM", 12)
@@ -250,7 +250,7 @@ def cover(canvas, doc, title: str, subtitle: str, landscape_page: bool = False):
     canvas.setStrokeColor(ORANGE); canvas.setLineWidth(3); canvas.line(55, 109, 216, 109)
     canvas.setFillColor(colors.HexColor("#8BA9B8")); canvas.setFont("DM-Bold", 8)
     canvas.drawString(55, 67, "CURRENT REFERENCE  /  25 SEPTEMBER 2026")
-    canvas.drawString(55, 52, "UNO Q + RETROPIE LIVE · TEST SIGNAL VERIFIED")
+    canvas.drawString(55, 52, "UNO Q + RETROPIE LIVE · FRAME LINK VERIFIED")
     canvas.restoreState()
 
 
@@ -263,7 +263,7 @@ def body_page(canvas, doc, label: str):
     canvas.drawString(48, height-28, "R.O.B. VISION")
     canvas.setFillColor(MUTED); canvas.drawRightString(width-48, height-28, label.upper())
     canvas.line(48, 43, width-48, 43)
-    canvas.setFont("DM", 7); canvas.drawString(48, 29, "GAME FRAMES VERIFIED · CAMERA EXPERIMENTAL")
+    canvas.setFont("DM", 7); canvas.drawString(48, 29, "GAME FRAMES LINKED · VIRTUAL ROBOT")
     canvas.drawRightString(width-48, 29, f"{doc.page:02d}")
     canvas.restoreState()
 
@@ -310,7 +310,7 @@ if __name__ == "__main__":
                    "Play, preview, setup, and problem solving",
                    ["USER_GUIDE.md", "GAMEPLAY_GUIDE.md", "SETUP_GUIDE.md", "INSTALLATION_GUIDE.md", "TROUBLESHOOTING.md"]),
         build_book("R.O.B.-Vision-Technical-Reference.pdf", "Technical Reference",
-                   "Architecture, optics, networking, hardware, and verification",
+                   "Architecture, frame protocol, networking, hardware, and verification",
                    ["TECHNICAL_ARCHITECTURE.md", "HISTORICAL_MANUAL_NOTES.md", "GYROMITE_MANUAL_NOTES.md",
                     "STACK_UP_MANUAL_NOTES.md", "GAME_IDENTIFICATION.md",
                     "optical-input.md", "ROM_SIGNAL_ANALYSIS.md", "DASHBOARD_DESIGN.md", "network-architecture.md",

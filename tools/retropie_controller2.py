@@ -76,10 +76,12 @@ class VirtualPad:
             os.close(self.fd)
 
 
-def fetch_state(url, token, timeout, frame_hook_game=None):
+def fetch_state(url, token, timeout, frame_hook_game=None, test_signal_game=None):
     headers = {"Authorization": "Bearer " + token, "X-ROB-Receiver": "retropie"}
     if frame_hook_game in ("gyromite", "stack_up"):
         headers["X-ROB-Frame-Hook"] = frame_hook_game
+    if test_signal_game == frame_hook_game and test_signal_game in ("gyromite", "stack_up"):
+        headers["X-ROB-Test-Signal"] = test_signal_game
     request = Request(url.rstrip("/") + "/api/state",
                       headers=headers)
     with urlopen(request, timeout=timeout) as response:
@@ -184,7 +186,8 @@ def main():
             try:
                 hook_game = hook.recent_game()
                 state = fetch_state(args.url, token, args.timeout,
-                                    hook_game if active_game and hook_game == active_game[0] else None)
+                                    hook_game if active_game and hook_game == active_game[0] else None,
+                                    hook.recent_test_game())
                 desired = pads_from_state(state)
                 last_good = time.monotonic()
                 if active_game and state.get("game") != active_game[0] and started >= next_sync:

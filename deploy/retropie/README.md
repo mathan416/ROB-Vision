@@ -6,11 +6,11 @@ After installing the receiver, run `python3 /home/pi/rob-vision/tools/retropie_p
 
 The current NES-specific RetroArch configuration forces Player 2 to Gamepad (`input_libretro_device_p2 = "1"`) and assigns joystick index 1 to Controller 2. The receiver emits red as Linux button 0 and blue as button 1. In a real Game A test, button 0 initially moved the visible blue gate, so the RetroArch profile and NES config now map button 1 to A and button 0 to B. After a restart, an isolated blue hold moved the blue gate and release returned it. The player subsequently confirmed that both red and blue controls work in Game A. `--swap-buttons` on the receiver is an alternative way to reverse the two colors, but is not enabled on this machine. RetroArch reads the NES configuration when a game starts, so restart Gyromite after installing or changing its mapping.
 
-The service is enabled through systemd and should be running before the game launches. Its status is available with `systemctl status rob-vision-controller2.service`; the virtual pad should appear as `/dev/input/js1` while the existing player's controller is `/dev/input/js0`. The UNO Q app must be running in App Lab. Its attached camera has recognized Test signals in both games; camera movement reception was intermittent.
+The service is enabled through systemd and should be running before the game launches. Its status is available with `systemctl status rob-vision-controller2.service`; the virtual pad should appear as `/dev/input/js1` while the existing player's controller is `/dev/input/js0`. The UNO Q app must be running in App Lab.
 
 ## Game-frame link
 
-The FCEUmm and Nestopia proxies observe the NES image one emulated frame at a time. Each sends a black/green/other classification and frame number to the receiver over `/run/rob-vision/frames.sock`. The receiver accepts only a RetroArch process using one of these exact proxies with a Gyromite or Stack-Up ROM found in the game registry. A complete 13-frame command travels to the UNO Q using the paired token. This path avoids the camera's one-frame sampling limit. The camera remains useful for preview, placement, and Test mode. Mission says **GAME FRAMES LINKED** when the current RetroPie game is sending frames.
+The FCEUmm and Nestopia proxies observe the NES image one emulated frame at a time. Each sends a black/green/other classification and frame number to the receiver over `/run/rob-vision/frames.sock`. The receiver accepts only a RetroArch process using one of these exact proxies with a Gyromite or Stack-Up ROM found in the game registry. A complete 13-frame command travels to the UNO Q using the paired token. The same frame stream also reports Test-mode light signals. Mission says **GAME FRAMES LINKED** when the current RetroPie game is sending frames.
 
 The `lr-robvision-*` names are **RetroPie launch choices, not new emulators**. Each choice starts RetroArch with a small R.O.B. Vision wrapper around the installed, unmodified libretro core:
 
@@ -20,7 +20,7 @@ The `lr-robvision-*` names are **RetroPie launch choices, not new emulators**. E
 | `lr-robvision-nestopia` | Nestopia | Yes |
 | `lr-fceumm` or `lr-nestopia` | The named core directly | No |
 
-The plain core choices still play the game. Without a R.O.B. Vision wrapper, the camera can watch the screen for optical commands, but camera-only movement is still experimental; manual controls and demos remain available. The wrapper reads the rendered light signal and forwards the original video to RetroArch. It does not replace or modify the emulator core. The two R.O.B. Vision entries are registered for the NES system, and the per-game overrides apply only to the registered Gyromite and Stack-Up ROMs.
+The plain core choices still play the game. Without a R.O.B. Vision wrapper, automatic R.O.B. movement is unavailable; manual controls and demos remain available. The wrapper reads the rendered light signal and forwards the original video to RetroArch. It does not replace or modify the emulator core. The two R.O.B. Vision entries are registered for the NES system, and the per-game overrides apply only to the registered Gyromite and Stack-Up ROMs.
 
 Copy `rob_vision_fceumm_proxy.c` to `/home/pi/rob-vision/build/` and build each installed core:
 

@@ -172,8 +172,6 @@
 .controller-link button{border:1px solid #5f9a9f;background:#183b49;color:#c3f3ed;padding:6px 8px;font:800 8px 'DM Sans',sans-serif;letter-spacing:.06em;cursor:pointer}
 .controller-link input{width:100%;padding:7px;background:#0a1e2b;border:1px solid #5f9a9f;color:#fff}
 .controller-link [hidden]{display:none}
-.observer-placeholder #camera-frame{display:block;width:100%;height:155px;object-fit:contain;background:#06121d}
-.observer-placeholder #camera-frame[hidden]{display:none}
 .observer-placeholder.has-frame .observer-icon{display:none}
 
 /* The game table sits with pose controls and vitals beside the model. */

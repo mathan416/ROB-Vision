@@ -9,7 +9,7 @@ from collections import deque
 from pathlib import Path
 from time import monotonic
 
-from controller.optical import ExactFrameDecoder
+from controller.optical import ExactFrameDecoder, FrameTestDetector
 from tools.identify_game import identify
 
 PROXY_CORES = frozenset((
@@ -54,6 +54,8 @@ class FrameHookServer:
         self.last_frame_at = 0.0
         self.last_process_check = 0.0
         self.decoder = ExactFrameDecoder()
+        self.test_detector = FrameTestDetector()
+        self.last_test_at = 0.0
         self.pending = deque(maxlen=32)
         self.trace = os.getenv("ROB_FRAME_TRACE") == "1"
         self.trace_last_level = None
@@ -116,11 +118,15 @@ class FrameHookServer:
                 self.last_process_check = now
                 if pid != self.sender_pid or game != self.game:
                     self.decoder.reset()
+                    self.test_detector.reset()
+                    self.last_test_at = 0.0
                     print('R.O.B. frame hook: sender {} game {}.'.format(pid, game or 'ignored'), flush=True)
                 self.sender_pid, self.game = pid, game
             if not self.game:
                 return
             self.last_frame_at = now
+            if self.test_detector.feed(index, level):
+                self.last_test_at = now
             if self.trace and (level != self.trace_last_level or level != "N"):
                 print('R.O.B. frame trace: {} {}'.format(index, level), flush=True)
             self.trace_last_level = level
@@ -135,6 +141,12 @@ class FrameHookServer:
     def recent_game(self):
         with self.lock:
             if self.game and monotonic() - self.last_frame_at < .5:
+                return self.game
+            return None
+
+    def recent_test_game(self):
+        with self.lock:
+            if self.game and monotonic() - self.last_test_at < .5:
                 return self.game
             return None
 

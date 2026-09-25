@@ -18,13 +18,13 @@
       <nav class="page-nav" aria-label="Pages"><a href="index.html">MISSION</a><a href="setup.html" aria-current="page">SETUP</a><a href="help.html">HELP</a></nav>
       <div class="top-status" data-connection="connecting"><span class="status-dot"></span><span id="setup-connection">CONTROLLER / CONNECTING</span></div>
     </header>
-    <div class="setup-hero"><p class="eyebrow">READY THE MISSION / 00</p><h1>Connect. Aim. Test.</h1><p>Prepare the RetroPie link and camera, then check each game control before playing.</p></div>
+    <div class="setup-hero"><p class="eyebrow">READY THE MISSION / 00</p><h1>Connect. Link. Test.</h1><p>Pair RetroPie, check the game-frame link, and try each game control before playing.</p></div>
     <div class="setup-grid">
       <section class="setup-card" aria-labelledby="pair-heading">
         <div class="section-head"><span>01 / CONSOLE LINK</span><span id="pair-link">RETROPIE UNKNOWN</span></div>
         <h2 id="pair-heading">Connect RetroPie</h2>
         <div id="pair-connected" hidden>
-          <p class="pair-success">RetroPie is already paired and its receiver is online. You can continue to the camera check.</p>
+          <p class="pair-success">RetroPie is already paired and its receiver is online. You can continue to the game-frame check.</p>
           <div class="setup-row"><button id="pair-change" type="button" class="quiet">PAIR ANOTHER CONSOLE</button><button id="pair-refresh" type="button" class="quiet">CHECK LINK</button></div>
         </div>
         <div id="pair-details" hidden>
@@ -36,14 +36,11 @@
         </div>
         <p class="setup-feedback" id="pair-feedback" role="status">The receiver must be installed on RetroPie before pairing.</p><a class="setup-help-link" href="help.html#pairing">NEED HELP PAIRING? ↗</a>
       </section>
-      <section class="setup-card" aria-labelledby="camera-heading">
-        <div class="section-head"><span>02 / CAMERA</span><span id="camera-state">CAMERA UNKNOWN</span></div>
-        <h2 id="camera-heading">Aim at the game screen</h2>
-        <p>Place the UNO Q camera so the game's optical flash area fills the green rectangle. Use the camera's 60 fps mode with short exposure, then check the delivered rate and Test mode. A 30 fps camera can miss one-frame flashes; even 60 fps needs a real-game command check.</p>
-        <div class="setup-camera"><img id="setup-frame" alt="Live UNO Q camera image with a green sampling rectangle" hidden><span id="camera-placeholder">CAMERA PREVIEW OFFLINE</span></div>
-        <div class="setup-stats"><span id="camera-device">NO CAMERA DETECTED</span><span id="camera-fps">0 FPS</span><span id="camera-brightness">0% SIGNAL</span></div>
-        <div class="setup-row"><button id="camera-toggle" type="button">START CAMERA CHECK</button><button id="camera-reconnect" type="button" class="quiet">RESET &amp; RECONNECT</button></div>
-        <p class="setup-feedback" id="camera-feedback" role="status">Connect a camera to the UNO Q to check placement.</p><a class="setup-help-link" href="help.html#camera">CAMERA HELP ↗</a>
+      <section class="setup-card" aria-labelledby="frames-heading">
+        <div class="section-head"><span>02 / GAME FRAMES</span><span id="frame-state">GAME FRAMES WAITING</span></div>
+        <h2 id="frames-heading">Check automatic movement</h2>
+        <p>Launch Gyromite or Stack-Up using its R.O.B. Vision emulator choice in RetroPie. The game-frame link reads the rendered light commands directly and sends R.O.B.'s movements to the UNO Q.</p>
+        <p class="setup-feedback" id="frame-feedback" role="status">Launch a supported game to check the frame link.</p><a class="setup-help-link" href="help.html#frames">GAME-FRAME HELP ↗</a>
       </section>
       <section class="setup-card" aria-labelledby="test-heading">
         <div class="section-head"><span>03 / GAME SIGNAL</span><span id="test-state">WAITING</span></div>
@@ -52,7 +49,7 @@
         <p>In Stack-Up, press Select at the ROBOT BLOCK screen to open the mode list, choose Test, then press Start. The Test signal appears over the ROBOT BLOCK artwork.</p>
         <div class="test-light" id="test-light"><span id="test-led" class="test-led" aria-hidden="true"></span><span id="test-led-label">R.O.B. LIGHT OFF</span></div>
         <div class="setup-row"><button id="select-gyro" type="button" class="quiet">GYROMITE</button><button id="select-stack" type="button" class="quiet">STACK-UP</button><button id="arm-test" type="button">WATCH TEST SIGNAL</button><button id="test-preview" type="button" class="quiet">PREVIEW RED LIGHT</button></div>
-        <p class="setup-feedback" id="test-feedback" role="status">Select a game and start the camera check first.</p><a class="setup-help-link" href="help.html#status">UNDERSTAND THE SIGNALS ↗</a>
+        <p class="setup-feedback" id="test-feedback" role="status">Select a game and launch it through a R.O.B. Vision emulator choice.</p><a class="setup-help-link" href="help.html#status">UNDERSTAND THE SIGNALS ↗</a>
       </section>
       <section class="setup-card" aria-labelledby="buttons-heading">
         <div class="section-head"><span>04 / MANUAL TEST</span><span id="buttons-mode">SELECT A GAME</span></div>
@@ -63,7 +60,7 @@
         <p class="setup-feedback" id="buttons-feedback" role="status">Manual tests are available after selecting Gyromite or Stack-Up.</p><a class="setup-help-link" href="help.html#controls">CONTROL GUIDE ↗</a>
       </section>
     </div>
-    <footer><span>R.O.B. VISION <b>·</b> SETUP</span><span>PAIR / CAMERA / SIGNAL / CONTROLS</span></footer>
+    <footer><span>R.O.B. VISION <b>·</b> SETUP</span><span>PAIR / GAME FRAMES / SIGNAL / CONTROLS</span></footer>
   </main>
 </body>
 </html>

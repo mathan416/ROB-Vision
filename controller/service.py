@@ -1,17 +1,14 @@
-"""Local HTTP controller and optional OpenCV camera capture for R.O.B. Vision."""
+"""Local HTTP controller for R.O.B. Vision's RetroPie game-frame link."""
 
 import argparse
 import json
 import os
-import glob
 import hashlib
 import http.client
 import ipaddress
-import math
 import re
 import socket
 import ssl
-import sys
 import threading
 from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -20,41 +17,13 @@ from time import monotonic, time
 from urllib.parse import urlsplit
 
 from .model import GyroState, StackState
-from .optical import ALLOWED, PATTERNS, OpticalDecoder, TestFlashDetector
-from .kiyo_camera import configure_kiyo_pro
+from .optical import ALLOWED, PATTERNS
 from tools.identify_game import identify, load_registry
 
 ROOT = Path(__file__).resolve().parents[1]
 MIME = {".html": "text/html", ".js": "text/javascript", ".css": "text/css",
         ".svg": "image/svg+xml", ".pdf": "application/pdf", ".png": "image/png",
         ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".ttf": "font/ttf"}
-KIYO_CAPTURE_MODES = {"mjpg480": ("MJPG", 640, 480), "yuyv720": ("YUYV", 1280, 720)}
-
-
-def preferred_kiyo_capture_mode():
-    """Read an optional device-local mode; fall back to the known 480p mode."""
-    try:
-        mode = (ROOT / "data" / "camera-mode").read_text().strip().lower()
-    except OSError:
-        mode = "mjpg480"
-    return mode if mode in KIYO_CAPTURE_MODES else "mjpg480"
-
-
-def capture_devices():
-    """List likely V4L2 cameras, omitting the UNO Q's video codec nodes."""
-    devices = []
-    for path in sorted(glob.glob("/dev/video*")):
-        name_file = Path("/sys/class/video4linux") / Path(path).name / "name"
-        try:
-            name = name_file.read_text().strip()
-        except OSError:
-            name = Path(path).name
-        if any(word in name.casefold() for word in ("encoder", "decoder", "codec")):
-            continue
-        devices.append({"path": path, "name": name})
-    return devices
-
-
 def pair_retropie(host, code, fingerprint, token, port=8768):
     """Send the controller token only after checking the console's TLS fingerprint."""
     if not isinstance(host, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]{0,252}", host):
@@ -92,25 +61,13 @@ def pair_retropie(host, code, fingerprint, token, port=8768):
 
 
 class Controller:
-    def __init__(self, camera_roi=None):
+    def __init__(self):
         self.lock = threading.RLock()
         self.game = None
         self.stack = StackState()
         self.gyro = GyroState()
-        self.decoder = OpticalDecoder()
-        self.test_flash_detector = TestFlashDetector()
         self.sequence = 0
         self.events = []
-        self.camera = {"state": "offline", "fps": 0, "brightness": 0, "last_frame": None,
-                       "devices": capture_devices(), "platform": sys.platform, "message": "Camera not started."}
-        self.devices_checked_at = monotonic()
-        self.capture_stop = threading.Event()
-        self.capture_thread = None
-        self.camera_control_lock = threading.Lock()
-        self.camera_index = 0
-        self.camera_roi = camera_roi
-        self.preview_frame = None
-        self.camera_trace = deque(maxlen=1800)
         self.receiver_last_seen = 0.0
         self.receiver_name = None
         self.frame_hook_last_seen = 0.0
@@ -131,30 +88,32 @@ class Controller:
             if self.game == "gyromite":
                 for color in self.gyro.expire_assist():
                     self.event("assist", f"{color.title()} Gate Assist timed out; button released.")
-            if monotonic() - self.devices_checked_at > 5:
-                self.camera["devices"] = capture_devices()
-                self.devices_checked_at = monotonic()
             return {"schema": 1, "sequence": self.sequence, "game": self.game,
                     "robot": self.stack.snapshot() if self.game == "stack_up" else self.gyro.snapshot() if self.game == "gyromite" else None,
-                    "camera": dict(self.camera), "events": list(self.events),
+                    "events": list(self.events),
                     "link": {"online": monotonic() - self.receiver_last_seen < 3.0,
                              "receiver": self.receiver_name},
                     "input": {"frame_hook": self.frame_hook_active()},
                     "test": {"armed": bool(self.test_armed_at), "ready": self.test_ready_at >= self.test_armed_at > 0,
                              "ready_at": self.test_ready_at,
-                             "flash_active": self.camera["state"] == "capturing" and self.test_armed_at > 0 and
+                             "flash_active": self.test_armed_at > 0 and
                              monotonic() - self.test_flash_seen_at < .25}}
 
     def frame_hook_active(self):
         return self.frame_hook_game == self.game and monotonic() - self.frame_hook_last_seen < 1.0
 
-    def receiver_seen(self, name, frame_hook_game=None):
+    def receiver_seen(self, name, frame_hook_game=None, test_signal_game=None):
         with self.lock:
             self.receiver_name = name[:64]
             self.receiver_last_seen = monotonic()
             if frame_hook_game == self.game and frame_hook_game in ("gyromite", "stack_up"):
                 self.frame_hook_game = frame_hook_game
                 self.frame_hook_last_seen = monotonic()
+                if self.test_armed_at and test_signal_game == self.game:
+                    self.test_flash_seen_at = monotonic()
+                    if not self.test_signal_announced:
+                        self.event("test", "Game-frame Test signal detected; R.O.B. light blinking.")
+                        self.test_signal_announced = True
 
     def emulator_command(self, game, pattern, sender_pid, frame_index):
         with self.lock:
@@ -186,8 +145,7 @@ class Controller:
             self.test_ready_at = 0.0
             self.test_flash_seen_at = 0.0
             self.test_signal_announced = False
-            self.test_flash_detector.reset()
-            self.event("test", "Watching for the game's Test-mode optical signal or ready-light command.")
+            self.event("test", "Watching for the game's Test-mode frame signal or ready-light command.")
             return self.snapshot()
 
     def select(self, game):
@@ -199,8 +157,6 @@ class Controller:
             self.frame_hook_game = None
             self.frame_hook_last_seen = 0.0
             self.frame_hook_commands.clear()
-            self.decoder.reset()
-            self.test_flash_detector.reset()
             self.test_armed_at = self.test_ready_at = 0.0
             self.test_flash_seen_at = 0.0
             self.test_signal_announced = False
@@ -214,14 +170,14 @@ class Controller:
             if self.game == "gyromite" and any(self.gyro.assisted_until.values()) and command != "READY":
                 raise ValueError("Release Gate Assist before moving R.O.B. with commands.")
             if command == "READY":
-                if source in ("camera", "emulator") and self.test_armed_at:
+                if source == "emulator" and self.test_armed_at:
                     self.test_ready_at = monotonic()
                 self.event("ready", "R.O.B. ready-light signal received; no movement.", command)
             else:
                 normalized = command.removesuffix("_GYRO").removesuffix("_STACK")
-                if source in ("camera", "emulator") and command in ("UP_GYRO", "DOWN_GYRO") and self.game != "gyromite":
+                if source == "emulator" and command in ("UP_GYRO", "DOWN_GYRO") and self.game != "gyromite":
                     raise ValueError("Optical command does not belong to the selected game.")
-                if source in ("camera", "emulator") and command in ("UP_STACK", "DOWN_STACK") and self.game != "stack_up":
+                if source == "emulator" and command in ("UP_STACK", "DOWN_STACK") and self.game != "stack_up":
                     raise ValueError("Optical command does not belong to the selected game.")
                 model = self.stack if self.game == "stack_up" else self.gyro
                 error = model.apply(normalized)
@@ -231,7 +187,6 @@ class Controller:
                     if self.test_armed_at:
                         self.test_armed_at = self.test_ready_at = self.test_flash_seen_at = 0.0
                         self.test_signal_announced = False
-                        self.test_flash_detector.reset()
                     self.event("action", f"{source.title()} command: {normalized}.", normalized)
             return self.snapshot()
 
@@ -239,8 +194,6 @@ class Controller:
         with self.lock:
             if self.game != "gyromite":
                 raise ValueError("Gate Assist is only available in Gyromite.")
-            if self.camera["state"] == "capturing":
-                raise ValueError("Stop the camera before using manual Gate Assist.")
             if color == "all" and pressed is False:
                 for gate in ("red", "blue"):
                     self.gyro.assist_gate(gate, False)
@@ -250,205 +203,16 @@ class Controller:
                 self.event("assist", f"{color.title()} Gate Assist {'pressed' if pressed else 'released'}.")
             return self.snapshot()
 
-    def sample(self, timestamp, brightness):
-        with self.lock:
-            self.camera_trace.append((round(timestamp, 6), round(brightness, 4)))
-            self.camera["brightness"] = round(brightness, 3)
-            self.camera["last_frame"] = time()
-            if self.test_armed_at and self.test_flash_detector.feed(timestamp, brightness):
-                if not self.test_signal_announced:
-                    self.event("test", "Test-mode optical signal detected; R.O.B. light blinking.")
-                    self.test_signal_announced = True
-                self.test_flash_seen_at = monotonic()
-            if self.frame_hook_active():
-                self.decoder.reset()
-                return None
-            detection = self.decoder.feed(timestamp, brightness, self.game)
-            if detection:
-                self.event("decoded", f"Flash decoded: {detection.command} ({detection.pattern}).", detection.command)
-                self.command(detection.command, "camera")
-            return detection
 
-    def start_camera(self, index=0, roi=None):
-        with self.camera_control_lock:
-            return self._start_camera(index, roi)
-
-    def _start_camera(self, index=0, roi=None):
-        if roi is None:
-            roi = self.camera_roi
-        if self.capture_thread and self.capture_thread.is_alive():
-            if self.camera["state"] == "capturing":
-                return self.snapshot()
-            raise RuntimeError("The previous camera session is still closing. Try reconnecting again.")
-        with self.lock:
-            if self.game == "gyromite" and any(self.gyro.assisted_until.values()):
-                for color in ("red", "blue"):
-                    self.gyro.assist_gate(color, False)
-                self.event("assist", "Gate Assist released before camera capture.")
-        if roi is not None and (not isinstance(roi, list) or len(roi) != 4 or
-                                any(type(value) not in (int, float) or not math.isfinite(value)
-                                    for value in roi)):
-            raise ValueError("ROI must contain four normalized numbers.")
-        if roi is not None and (min(roi) < 0 or max(roi) > 1 or roi[2] <= 0 or roi[3] <= 0 or
-                                roi[0] + roi[2] > 1 or roi[1] + roi[3] > 1):
-            raise ValueError("ROI must fit inside the camera frame.")
-        self.camera_index = index
-        self.camera_roi = roi
-        devices = capture_devices()
-        with self.lock:
-            self.camera["devices"] = devices
-            self.devices_checked_at = monotonic()
-        if os.name == "posix" and Path("/sys/class/video4linux").exists():
-            if not devices:
-                with self.lock:
-                    self.camera.update(state="fault", fps=0, brightness=0, last_frame=None,
-                                       message="No camera capture device is attached. Video codec nodes are not cameras.")
-                    self.event("fault", self.camera["message"])
-                raise RuntimeError(self.camera["message"])
-            if index == 0:
-                index = devices[0]["path"]
-        try:
-            import cv2
-        except ImportError as exc:
-            with self.lock:
-                self.camera.update(state="fault", fps=0, brightness=0, last_frame=None,
-                                   message="OpenCV is not installed on this controller.")
-                self.event("fault", self.camera["message"])
-            raise RuntimeError("OpenCV is needed for camera capture. Install opencv-python on the controller.") from exc
-        kiyo_configured = False
-        try:
-            kiyo_configured = configure_kiyo_pro(index)
-        except (OSError, ValueError, RuntimeError) as exc:
-            with self.lock:
-                self.event("camera", f"Kiyo Pro 60 fps setting unavailable: {exc}")
-        capture = cv2.VideoCapture(index)
-        if not capture.isOpened():
-            capture.release()
-            with self.lock:
-                self.camera.update(state="fault", fps=0, brightness=0, last_frame=None,
-                                   message=f"Camera {index} could not be opened.")
-                self.event("fault", self.camera["message"])
-            raise RuntimeError(f"Camera {index} could not be opened.")
-        if kiyo_configured:
-            capture_mode = preferred_kiyo_capture_mode()
-            fourcc, capture_width, capture_height = KIYO_CAPTURE_MODES[capture_mode]
-            capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*fourcc))
-            capture.set(cv2.CAP_PROP_FRAME_WIDTH, capture_width)
-            capture.set(cv2.CAP_PROP_FRAME_HEIGHT, capture_height)
-            with self.lock:
-                self.camera["mode"] = capture_mode
-        # This is a best-effort request; report measured timing below.
-        capture.set(cv2.CAP_PROP_FPS, 60)
-        self.capture_stop.clear()
-        with self.lock:
-            self.decoder.reset()
-            self.test_flash_detector.reset()
-            self.test_flash_seen_at = 0.0
-            self.preview_frame = None
-            self.camera_trace.clear()
-            self.camera.update(state="capturing", message="Measuring frame timing; aim at the flash area.",
-                               fps=0, brightness=0, last_frame=None)
-            self.event("camera", f"Camera {index} opened.")
-
-        def capture_loop():
-            frame_times = deque()
-            last_preview = 0.0
-            try:
-                while not self.capture_stop.is_set():
-                    ok, frame = capture.read()
-                    timestamp = monotonic()
-                    if not ok:
-                        raise RuntimeError("Camera stopped delivering frames.")
-                    height, width = frame.shape[:2]
-                    x, y, w, h = roi or (0.2, 0.2, 0.6, 0.6)
-                    crop = frame[int(y * height):int((y + h) * height), int(x * width):int((x + w) * width)]
-                    if crop.size == 0:
-                        raise RuntimeError("Camera region is empty.")
-                    # White and green command frames have similar luminance on
-                    # this display. Measure green above both other channels.
-                    b, g, r, _ = cv2.mean(crop)
-                    brightness = max(0.0, min(1.0, (g - max(r, b)) / 255))
-                    frame_times.append(timestamp)
-                    while frame_times and timestamp - frame_times[0] > 4:
-                        frame_times.popleft()
-                    fps = ((len(frame_times) - 1) / (frame_times[-1] - frame_times[0])
-                           if len(frame_times) > 1 and frame_times[-1] > frame_times[0] else 0.0)
-                    with self.lock:
-                        self.camera["fps"] = round(fps, 1)
-                        self.camera["message"] = (
-                            "Below 60 delivered fps: one-frame game flashes cannot be captured reliably."
-                            if fps and fps < 55 else
-                            "Near 60 fps: timing drift can still miss a one-frame flash; verify commands in Test mode."
-                            if fps else "Measuring camera frame rate."
-                        )
-                    self.sample(timestamp, brightness)
-                    if timestamp - last_preview >= .5:
-                        x0, y0 = int(x * width), int(y * height)
-                        x1, y1 = int((x + w) * width), int((y + h) * height)
-                        with self.lock:
-                            self.preview_frame = (frame.copy(), (x0, y0, x1, y1))
-                        last_preview = timestamp
-            except Exception as exc:
-                with self.lock:
-                    self.preview_frame = None
-                    self.camera.update(state="fault", fps=0, brightness=0, last_frame=None, message=str(exc))
-                    self.event("fault", f"Camera fault: {exc}")
-            finally:
-                capture.release()
-                with self.lock:
-                    self.preview_frame = None
-                    if self.camera["state"] != "fault":
-                        self.camera.update(state="offline", fps=0, brightness=0, last_frame=None, message="Camera stopped.")
-                        self.event("camera", "Camera stopped.")
-
-        self.capture_thread = threading.Thread(target=capture_loop, daemon=True)
-        self.capture_thread.start()
-        return self.snapshot()
-
-    def stop_camera(self):
-        with self.camera_control_lock:
-            return self._stop_camera()
-
-    def _stop_camera(self):
-        self.capture_stop.set()
-        if self.capture_thread and self.capture_thread.is_alive():
-            self.capture_thread.join(timeout=2)
-            if self.capture_thread.is_alive():
-                with self.lock:
-                    self.camera.update(state="fault", message="Camera did not stop. Check the connection and try again.")
-                    self.event("fault", self.camera["message"])
-                raise RuntimeError(self.camera["message"])
-        with self.lock:
-            self.preview_frame = None
-            self.decoder.reset()
-            self.test_flash_detector.reset()
-            self.test_flash_seen_at = 0.0
-            self.camera.update(state="offline", fps=0, brightness=0, last_frame=None,
-                               devices=capture_devices(), message="Camera stopped. Reconnect to scan for a camera again.")
-            self.devices_checked_at = monotonic()
-        return self.snapshot()
-
-    def reconnect_camera(self):
-        with self.camera_control_lock:
-            index, roi = self.camera_index, self.camera_roi
-            self._stop_camera()
-            return self._start_camera(index, roi)
-
-
-def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi=None, matrix=None):
+def serve(host="127.0.0.1", port=8766, token=None, matrix=None):
     if host not in ("127.0.0.1", "localhost", "::1") and not token:
         raise ValueError("A bearer token is required when serving over the network.")
-    controller = Controller(camera_roi)
+    controller = Controller()
     matrix_stop = threading.Event()
     matrix_thread = None
     if matrix is not None:
         matrix_thread = threading.Thread(target=matrix.run, args=(controller.snapshot, matrix_stop), daemon=True)
         matrix_thread.start()
-    if camera_index is not None:
-        try:
-            controller.start_camera(camera_index, camera_roi)
-        except RuntimeError as exc:
-            print(f"Camera startup failed: {exc}", flush=True)
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, format, *args):
@@ -493,39 +257,12 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
             if path.startswith("/api/"):
                 if path == "/api/state":
                     if self.headers.get("X-ROB-Receiver") == "retropie" and token and self.headers.get("Authorization") == f"Bearer {token}":
-                        controller.receiver_seen("RetroPie", self.headers.get("X-ROB-Frame-Hook"))
+                        controller.receiver_seen("RetroPie", self.headers.get("X-ROB-Frame-Hook"),
+                                                 self.headers.get("X-ROB-Test-Signal"))
                     return self.respond(200, controller.snapshot())
                 if path == "/api/matrix/state":
                     return self.respond(200, matrix.status() if matrix is not None else
                                         {"available": False, "bridge_ok": False, "mode": None})
-                if path == "/api/camera/frame":
-                    with controller.lock:
-                        preview = controller.preview_frame
-                    if preview is None:
-                        self.send_response(204)
-                        self.end_headers()
-                        return
-                    import cv2
-                    frame, (x0, y0, x1, y1) = preview
-                    frame = frame.copy()
-                    cv2.rectangle(frame, (x0, y0), (x1, y1), (84, 225, 117), 2)
-                    ok_jpeg, encoded = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 68])
-                    if not ok_jpeg:
-                        self.send_response(204)
-                        self.end_headers()
-                        return
-                    frame = encoded.tobytes()
-                    self.send_response(200)
-                    self.send_header("Content-Type", "image/jpeg")
-                    self.send_header("Cache-Control", "no-store")
-                    self.send_header("Content-Length", str(len(frame)))
-                    self.end_headers()
-                    self.wfile.write(frame)
-                    return
-                if path == "/api/camera/trace":
-                    with controller.lock:
-                        trace = list(controller.camera_trace)
-                    return self.respond(200, {"samples": trace, "roi": controller.camera_roi})
                 return self.respond(404, {"error": "Unknown endpoint."})
             if path == "/":
                 self.send_response(302)
@@ -585,12 +322,6 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                     if matrix is not None:
                         matrix.show_pairing() if data["active"] else matrix.clear_pairing()
                     result = controller.snapshot()
-                elif path == "/api/camera/start":
-                    result = controller.start_camera(int(data.get("index", 0)), data.get("roi"))
-                elif path == "/api/camera/stop":
-                    result = controller.stop_camera()
-                elif path == "/api/camera/reconnect":
-                    result = controller.reconnect_camera()
                 else:
                     return self.respond(404, {"error": "Unknown endpoint."})
                 self.respond(200, result)
@@ -605,7 +336,6 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
         matrix_stop.set()
         if matrix_thread is not None:
             matrix_thread.join(timeout=2)
-        controller.stop_camera()
         server.server_close()
 
 
@@ -614,9 +344,5 @@ if __name__ == "__main__":
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8766)
     parser.add_argument("--token", default=os.environ.get("ROB_VISION_TOKEN"))
-    parser.add_argument("--camera-index", type=int, help="Open this camera on the main thread at startup (useful on macOS).")
-    parser.add_argument("--camera-roi", help="Normalized x,y,width,height crop, e.g. 0.2,0.2,0.6,0.6")
     args = parser.parse_args()
-    configured_roi = args.camera_roi or os.environ.get("ROB_VISION_CAMERA_ROI")
-    roi = [float(value) for value in configured_roi.split(",")] if configured_roi else None
-    serve(args.host, args.port, args.token, args.camera_index, roi)
+    serve(args.host, args.port, args.token)

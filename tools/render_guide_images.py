@@ -128,12 +128,6 @@ def strip(name, frames):
     result.save(OUT / f"matrix-{name}.png", optimize=True)
 
 
-def crop_capture(name, box):
-    source = Image.open(CAPTURES / f"{name}-full.png").convert("RGB")
-    crop = source.crop(box)
-    crop.save(OUT / f"{name}-screenshot.png", optimize=True)
-
-
 def main():
     strip("startup", [(hourglass(0), "Starting", "Hourglass / frame 1"),
                       (hourglass(1), "Bridge loading", "Hourglass / frame 2"),
@@ -152,9 +146,6 @@ def main():
     source = Image.open(CAPTURES / "mission-full.png").convert("RGB")
     source.crop((0, 0, 640, 500)).save(OUT / "mission-model-screenshot.png", optimize=True)
     source.crop((0, 500, 625, 715)).save(OUT / "mission-controls-screenshot.png", optimize=True)
-    crop_capture("setup", (0, 0, 640, 622))
-    source = Image.open(CAPTURES / "setup-full.png").convert("RGB")
-    source.crop((0, 126, 640, 416)).save(OUT / "setup-link-camera-screenshot.png", optimize=True)
 
 
 

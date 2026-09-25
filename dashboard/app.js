@@ -586,7 +586,7 @@
       $('mission-description').textContent = robot ? snapshot.events.at(-1)?.message || 'Watching for game commands.' : 'Choose Gyromite or Stack-Up in the Accessory Bay.';
       $('stage-caption').textContent = $('mission-description').textContent;
       const status = window.RobStatus;
-      $('mission-step').textContent = status.testSignal(snapshot) ? status.test(snapshot) : status.camera(snapshot);
+      $('mission-step').textContent = status.testSignal(snapshot) ? status.test(snapshot) : status.frames(snapshot);
       $('progress-text').textContent = `#${snapshot.sequence}`;
       render();
       const flashing = Boolean(snapshot.test?.flash_active);
@@ -596,11 +596,11 @@
       if (flashing || ready) $('mission-step').textContent = status.test(snapshot);
       $('demo-button').disabled = true;
       document.querySelectorAll('[data-mode]').forEach((tab) => { tab.disabled = true; });
-      $('tracking-label').textContent = status.testSignal(snapshot) ? status.test(snapshot) : status.camera(snapshot);
-      $('optical-value').textContent = snapshot.camera.state === 'capturing' ? `${snapshot.camera.fps} FPS` : status.camera(snapshot);
+      $('tracking-label').textContent = status.testSignal(snapshot) ? status.test(snapshot) : status.frames(snapshot);
+      $('optical-value').textContent = status.frames(snapshot);
       $('connection').textContent = status.connection(snapshot);
       document.querySelector('.gyro-vitals-note').textContent = snapshot.link?.online ? 'Virtual pad states sent to RetroPie Controller 2' : 'Virtual spin and button states; game link offline';
-      $('controls-context').textContent = 'LIVE CONTROLLER / CAMERA OR MANUAL';
+      $('controls-context').textContent = 'LIVE CONTROLLER / GAME FRAMES OR MANUAL';
       document.querySelector('.vitals-card .live-text').textContent = '● CONTROLLER';
       document.querySelector('.stage-panel .chip').textContent = 'LIVE VIRTUAL MOTION';
       $('fixture-note').textContent = $('fixture-note').textContent.replaceAll('Game link offline.', 'Game-host buttons pending.');

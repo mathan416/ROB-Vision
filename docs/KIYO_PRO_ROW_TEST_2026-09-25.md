@@ -1,5 +1,7 @@
 # Kiyo Pro raw-row optical test — 25 September 2026
 
+> Archived camera research. R.O.B. Vision now receives game commands and Test signals only through RetroPie rendered frames.
+
 ## Question
 
 Could uncompressed 1080p camera frames reveal enough subframe scan timing to recover Stack-Up commands that the 60 fps whole-frame decoder misses?

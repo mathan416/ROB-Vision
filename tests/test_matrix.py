@@ -4,8 +4,8 @@ from unittest.mock import patch
 from controller.matrix import MatrixDisplay, MatrixMode
 
 
-def snapshot(game=None, sequence=0, command=None, kind='action', camera='offline', test=None):
-    return {'game': game, 'sequence': sequence, 'camera': {'state': camera},
+def snapshot(game=None, sequence=0, command=None, kind='action', test=None):
+    return {'game': game, 'sequence': sequence,
             'test': test or {'armed': False, 'flash_active': False},
             'events': [{'kind': kind, 'command': command}] if command else []}
 
@@ -23,22 +23,18 @@ class MatrixTests(unittest.TestCase):
         self.assertEqual(sent, [('set_rob_display', 1, 0), ('set_rob_display', 2, 1),
                                 ('set_rob_display', 3, 5)])
 
-    def test_test_pairing_and_fault_priority(self):
+    def test_test_and_pairing_priority(self):
         sent = []
         display = MatrixDisplay(call=lambda *args: sent.append(args))
         display.update(snapshot('gyromite', test={'armed': True, 'flash_active': False}))
         display.update(snapshot('gyromite', test={'armed': True, 'flash_active': True}))
-        display.update(snapshot('gyromite', camera='fault'))
         display.show_pairing()
-        display.update(snapshot('gyromite', camera='fault'))
+        display.update(snapshot('gyromite', test={'armed': True, 'flash_active': True}))
+        self.assertEqual([call[1] for call in sent],
+                         [MatrixMode.TEST, MatrixMode.TEST_FLASH, MatrixMode.PAIRING])
         display.clear_pairing()
-        display.update(snapshot('gyromite', camera='fault'))
-        self.assertEqual([call[1] for call in sent], [MatrixMode.TEST, MatrixMode.TEST_FLASH,
-                         MatrixMode.FAULT])
         display.update(snapshot('gyromite'))
-        display.show_pairing()
-        display.update(snapshot('gyromite'))
-        self.assertEqual(sent[-1][1], MatrixMode.PAIRING)
+        self.assertEqual(sent[-1][1], MatrixMode.GYROMITE)
 
     def test_heartbeat_and_unavailable_bridge(self):
         sent = []

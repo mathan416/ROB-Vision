@@ -9,7 +9,7 @@
   let busy = false;
   let available = true;
   let suspended = false;
-  let lastCameraState = null;
+  let lastFrameLink = null;
   let lastLinkOnline = null;
   let lastTestLightMode = null;
   let liveGame = null;
@@ -32,16 +32,16 @@
       if (liveGame) window.RobDashboard.leaveLive();
       $('connection').textContent = status.connection(snapshot);
       $('connection').closest('.top-status').dataset.connection = 'connected';
-      $('controller-status').textContent = `NO GAME SELECTED · ${status.camera(snapshot)} · ${status.receiver(snapshot)}`;
+      $('controller-status').textContent = `NO GAME SELECTED · ${status.frames(snapshot)} · ${status.receiver(snapshot)}`;
       liveGame = null;
       lastSequence = snapshot.sequence;
-      lastCameraState = snapshot.camera.state;
+      lastFrameLink = Boolean(snapshot.input?.frame_hook);
       lastLinkOnline = Boolean(snapshot.link?.online);
       lastTestLightMode = null;
       return;
     }
     liveGame = snapshot.game;
-    const assist = snapshot.game === 'gyromite' && snapshot.camera.state !== 'capturing';
+    const assist = snapshot.game === 'gyromite';
     $('gate-assist').hidden = !assist;
     for (const color of ['red', 'blue']) {
       const button = document.querySelector(`[data-gate="${color}"]`);
@@ -51,8 +51,8 @@
     }
     $('controller-status').textContent = status.controllerDetail(snapshot);
     const testLightMode = snapshot.test?.flash_active ? 'flashing' : snapshot.test?.ready ? 'ready' : 'off';
-    if (snapshot.sequence !== lastSequence || snapshot.camera.state !== lastCameraState || Boolean(snapshot.link?.online) !== lastLinkOnline || testLightMode !== lastTestLightMode) {
-      lastCameraState = snapshot.camera.state;
+    if (snapshot.sequence !== lastSequence || Boolean(snapshot.input?.frame_hook) !== lastFrameLink || Boolean(snapshot.link?.online) !== lastLinkOnline || testLightMode !== lastTestLightMode) {
+      lastFrameLink = Boolean(snapshot.input?.frame_hook);
       lastLinkOnline = Boolean(snapshot.link?.online);
       lastTestLightMode = testLightMode;
       lastSequence = snapshot.sequence;
@@ -81,7 +81,7 @@
       const preview = location.protocol === 'file:' || !available;
       $('connection').textContent = preview ? status.preview : status.offline;
       $('connection').closest('.top-status').dataset.connection = preview ? 'preview' : 'offline';
-      $('controller-status').textContent = preview ? 'LOCAL PREVIEW · NO CONTROLLER' : 'CONTROLLER OFFLINE · CAMERA UNKNOWN · RETROPIE UNKNOWN';
+      $('controller-status').textContent = preview ? 'LOCAL PREVIEW · NO CONTROLLER' : 'CONTROLLER OFFLINE · GAME FRAMES UNKNOWN · RETROPIE UNKNOWN';
     } finally { busy = false; }
   }
   async function act(path, data) {
@@ -94,7 +94,7 @@
     act('/api/gate-assist', { color, pressed: color === 'all' ? false : !latest.robot?.assist?.[color] });
   }));
   document.addEventListener('keydown', (event) => {
-    if (!connected || latest?.game !== 'gyromite' || latest?.camera.state === 'capturing' || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (!connected || latest?.game !== 'gyromite' || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
     if (event.target instanceof Element && event.target.closest('input, textarea, [contenteditable="true"]')) return;
     const color = { '1': 'red', '2': 'blue', '0': 'all' }[event.key];
     if (color) { event.preventDefault(); act('/api/gate-assist', { color, pressed: color === 'all' ? false : !latest.robot?.assist?.[color] }); }
@@ -109,7 +109,7 @@
       act('/api/command', { command });
     },
     reset() { if (latest?.game) act('/api/game', { game: latest.game }); },
-    stop() { act('/api/camera/stop', {}).then(() => act('/api/game', { game: null })); },
+    stop() { act('/api/game', { game: null }); },
     disconnect() { suspended = true; $('gate-assist').hidden = true; if (latest) act('/api/game', { game: null }); window.RobDashboard.leaveLive(); }
   };
   poll();

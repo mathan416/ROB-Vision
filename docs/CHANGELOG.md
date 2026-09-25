@@ -1,5 +1,11 @@
 # R.O.B. Vision changelog
 
+## Frame-only runtime — 25 September 2026
+
+- Removed camera capture, sampled-light decoding, OpenCV dependency, camera recovery helpers, camera controls, and stale setup screenshots. RetroPie FCEUmm and Nestopia wrappers are now the only automatic command sources.
+- Added Test-mode signal detection from rendered game frames, forwarded through the authenticated RetroPie receiver to the UNO Q. This path passed local tests and awaits a live Test-mode check.
+- Updated current guides and printable editions for the frame-only architecture. Earlier camera entries below remain historical research.
+
 ## Kiyo Pro camera commissioning — 25 September 2026
 
 - Confirmed VirtualGlove's 640×480, roughly 60 fps isolated Kiyo Pro capture result applies to this UNO Q only after a temporary HDR-off camera setting. R.O.B. Vision initially received about 30 fps with the default YUYV path; after the setting it received about 60 fps.

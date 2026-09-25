@@ -33,9 +33,9 @@ RetroPie runcommand start/end
   → READY for validated game-frame commands
 ```
 
-The sender transmits system, ROM path, and launch/exit event over authenticated HTTP with bounded retries. The RetroPie receiver also scans the active RetroArch process and resends identity if the UNO Q restarted during a running game. A launch event is game context only; it does not claim camera calibration or a decoded movement. Browser manual selection is also available while no supported game is active. The game-frame link separately verifies exact ROM identity before accepting a complete command.
+The sender transmits system, ROM path, and launch/exit event over authenticated HTTP with bounded retries. The RetroPie receiver also scans the active RetroArch process and resends identity if the UNO Q restarted during a running game. A launch event is game context only; it does not claim a decoded movement. Browser manual selection is also available while no supported game is active. The game-frame link separately verifies exact ROM identity before accepting a complete command.
 
-Gyromite's paired tray-to-Controller-2 return path remains separate from this launch notification. Stack-Up needs no gyro-style button return in its documented modes. Both games use the Wi-Fi/Ethernet launch event for context and can receive movement commands through the RetroPie frame link; camera-only decoding is experimental.
+Gyromite's paired tray-to-Controller-2 return path remains separate from this launch notification. Stack-Up needs no gyro-style button return in its documented modes. Both games use the Wi-Fi/Ethernet launch event for context and can receive movement commands through the RetroPie frame link.
 
 ## Remaining validation
 
@@ -43,6 +43,6 @@ Gyromite's paired tray-to-Controller-2 return path remains separate from this la
 2. Confirm extracted `.nes` files through the real RetroPie UI; Gyromite and Stack-Up archives have already been launched and identified.
 3. Verify start, exit, unknown game, back-to-back game launches, missed acknowledgement, and sender/robot restart. No stale game may stay armed.
 4. Confirm all existing cabinet runcommand actions still execute in their original order and that hook failure never prevents the game from starting.
-5. Validate camera-observed Test and movement flashes for both selected games on the intended display.
+5. Validate frame-link Test and movement signals for both selected games.
 
 See [network architecture](network-architecture.md), [optical input](optical-input.md), [configuration](CONFIGURATION_REFERENCE.md), and [verification plan](VERIFICATION_PLAN.md).
