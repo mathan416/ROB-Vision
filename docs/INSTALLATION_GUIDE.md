@@ -87,7 +87,7 @@ Open [Setup](../dashboard/setup.html) to check pairing and the game-frame link. 
 
 Follow the [RetroPie deployment instructions](../deploy/retropie/README.md) for the launch/end hooks, root uinput receiver service, pairing, FCEUmm and Nestopia launch choices, and RetroArch port 2 configuration. Merge hooks with any existing scripts rather than replacing unrelated commands. After pairing, **Check Link** turns online when authenticated receiver polls arrive. The receiver can resync game identity from the active RetroArch process after a UNO Q restart.
 
-For Gyromite or Stack-Up, choose `lr-robvision-fceumm` or `lr-robvision-nestopia` in RetroPie's emulator selection. These entries run the installed original core through R.O.B. Vision's frame wrapper. Plain `lr-fceumm` and `lr-nestopia` play without automatic R.O.B. movement. The UNO Q receives only complete game-specific light commands. Setup's Test check uses the same frame link.
+For Gyromite or Stack-Up, choose `lr-robvision-fceumm` or `lr-robvision-nestopia` in RetroPie's emulator selection. These entries run the installed original core through R.O.B. Vision's frame wrapper. Plain `lr-fceumm` and `lr-nestopia` play without automatic R.O.B. movement. The UNO Q receives only complete game-specific light commands. The Test light responds automatically through the same frame link.
 
 ## Local development
 

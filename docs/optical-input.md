@@ -6,7 +6,7 @@ R.O.B. Vision reads the games' light messages from the emulator's rendered frame
 
 The RetroPie wrapper observes each libretro video callback, classifies a grid of NES pixels as dark, green, or other, and forwards one classification and frame number to a local Unix socket. The receiver validates the sending process, wrapper path, and registered ROM. `ExactFrameDecoder` rejects missing frames, non-light frames inside a command, incomplete patterns, and commands belonging to another game. A complete game-specific command travels to the UNO Q's token-protected endpoint. Retries with the same sender PID and frame number apply once.
 
-Test mode is separate from movement. `FrameTestDetector` recognizes a sustained green field in Gyromite or alternating dark/green frames in Stack-Up. When the user arms Setup's Test check, a recent authenticated receiver heartbeat makes R.O.B.'s red light blink. The ready-light command makes it steady. Neither Test indication moves R.O.B.
+Test mode is separate from movement. `FrameTestDetector` recognizes a sustained green field in Gyromite or alternating dark/green frames in Stack-Up. A recent authenticated receiver heartbeat makes R.O.B.'s red light blink automatically. The ready-light command makes it steady. Neither Test indication moves R.O.B.
 
 ## Current evidence and limits
 

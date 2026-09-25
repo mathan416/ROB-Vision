@@ -7,8 +7,8 @@
   <title>R.O.B. Vision // Setup</title>
   <link rel="stylesheet" href="style.css?v=setup-3">
   <link rel="stylesheet" href="setup.css?v=consoles-1">
-  <script src="status.js?v=status-2" defer></script>
-  <script src="setup.js?v=consoles-1" defer></script>
+  <script src="status.js?v=test-auto-1" defer></script>
+  <script src="setup.js?v=test-auto-1" defer></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -46,11 +46,11 @@
       </section>
       <section class="setup-card" aria-labelledby="test-heading">
         <div class="section-head"><span>03 / GAME SIGNAL</span><span id="test-state">WAITING</span></div>
-        <h2 id="test-heading">Check the game's Test mode</h2>
-        <p>Choose the game, open its Test mode, then arm this check. Gyromite shows sustained green; Stack-Up alternates green and white. Either recognized signal makes virtual R.O.B.'s red light blink. A decoded ready-light command leaves it steady. Neither signal moves his arms.</p>
+        <h2 id="test-heading">Game Test light</h2>
+        <p>Open the game's Test mode while its game frames are linked. Gyromite shows sustained green; Stack-Up alternates green and white. R.O.B.'s red light blinks automatically when either signal is recognized. A decoded ready-light command leaves it steady. Neither signal moves his arms.</p>
         <p>In Stack-Up, press Select at the ROBOT BLOCK screen to open the mode list, choose Test, then press Start. The Test signal appears over the ROBOT BLOCK artwork.</p>
         <div class="test-light" id="test-light"><span id="test-led" class="test-led" aria-hidden="true"></span><span id="test-led-label">R.O.B. LIGHT OFF</span></div>
-        <div class="setup-row"><button id="select-gyro" type="button" class="quiet">GYROMITE</button><button id="select-stack" type="button" class="quiet">STACK-UP</button><button id="arm-test" type="button">WATCH TEST SIGNAL</button><button id="test-preview" type="button" class="quiet">PREVIEW RED LIGHT</button></div>
+        <div class="setup-row"><button id="select-gyro" type="button" class="quiet">GYROMITE</button><button id="select-stack" type="button" class="quiet">STACK-UP</button><button id="test-preview" type="button" class="quiet">PREVIEW RED LIGHT</button></div>
         <p class="setup-feedback" id="test-feedback" role="status">Select a game and launch it through a R.O.B. Vision emulator choice.</p><a class="setup-help-link" href="help.html#status">UNDERSTAND THE SIGNALS ↗</a>
       </section>
       <section class="setup-card" aria-labelledby="buttons-heading">

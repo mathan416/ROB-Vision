@@ -139,7 +139,7 @@ def main():
                           (title_mark("S", "U"), "Stack-Up", "Title cue / 1.3 seconds")])
     strip("game-eyes", [(eyes(1, "gyromite"), "Gyromite", "Eyes + spinning dot"),
                         (eyes(3, "stack-up"), "Stack-Up", "Eyes + rising blocks")])
-    strip("test", [(letter("T", 4), "Test armed", "Steady T"),
+    strip("test", [(letter("T", 4), "Ready signal", "Steady T"),
                    (letter("T", 7), "Flashes seen", "Pulsing T")])
     strip("pair-fault", [(letter("P", 7), "Pairing", "Pulsing P"),
                          (letter("X", 7), "Fault", "Blinking X")])

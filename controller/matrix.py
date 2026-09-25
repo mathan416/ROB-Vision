@@ -63,7 +63,7 @@ class MatrixDisplay:
     def update(self, snapshot):
         if monotonic() < self.pairing_until:
             mode = MatrixMode.PAIRING
-        elif snapshot["test"]["armed"]:
+        elif snapshot["test"]["flash_active"] or snapshot["test"].get("ready"):
             mode = MatrixMode.TEST_FLASH if snapshot["test"]["flash_active"] else MatrixMode.TEST
         elif snapshot["game"] == "gyromite":
             mode = MatrixMode.GYROMITE

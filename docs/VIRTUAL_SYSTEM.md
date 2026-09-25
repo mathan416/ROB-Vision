@@ -16,7 +16,7 @@ Stack-Up has five colored blocks, five trays, six height levels, an arm station,
 
 Mission shows the animated robot, accessory views, Game Table, Pose Preview, System Vitals, and activity. Setup has pairing, frame-link status, Test-mode light acknowledgement, and manual game checks. A `file://` page is a local preview; use `http://arduiain.local/dashboard/` for UNO Q state. The static demo may run when RetroPie is paired but no game is active. A live game stops the demo and takes authority.
 
-The RetroPie frame link reads rendered NES frames. A complete 13-frame command changes the model; Test-mode frames only animate R.O.B.'s red status light when the check is armed. Incomplete commands do nothing. The service knows neither Hector's location nor Stack-Up scoring.
+The RetroPie frame link reads rendered NES frames. A complete 13-frame command changes the model; Test-mode frames automatically animate R.O.B.'s red status light. Incomplete commands do nothing. The service knows neither Hector's location nor Stack-Up scoring.
 
 ## Failure and reset
 

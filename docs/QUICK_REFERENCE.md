@@ -10,7 +10,7 @@
 | Mission | Emergency Stop | Live: clear game and release pads. Preview: cancel local script. |
 | Mission | Fast Gates during live Gyromite | Blue `2`, red `1`, Release Both `0`; press again to release a color. Auto-release after 60 seconds. |
 | Setup | Pair Console / Check Link | Pair RetroPie or refresh its authenticated online status. |
-| Setup | Watch Test Signal | Blink R.O.B.'s red light when the frame link detects a Test signal; no movement. |
+| Game Test mode | Automatic red light | Blink R.O.B.'s red light when linked game frames carry the Test signal; no movement. |
 | Setup | Gyromite / Stack-Up checks | Send manual pad or movement commands to the live model. |
 | Mission | GAME FRAMES LINKED | RetroPie is sending rendered game frames for the selected ROM; automatic movement uses those frames. |
 

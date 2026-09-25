@@ -20,9 +20,9 @@ In Buddy's story, this tiny display is his first sign of life outside the emulat
 
 ![Gyromite and Stack-Up eye loops](images/matrix-game-eyes.png)
 
-**Setup and faults.** The T is steady when Test is armed and gently pulses after sustained flashes are detected. P pulses during pairing; X blinks for a fault.
+**Game Test and faults.** The T gently pulses while a game Test signal is detected and stays steady after a separate ready-light command. P pulses during pairing; X blinks for a fault.
 
-![Test armed and Test flashes seen](images/matrix-test.png)
+![Test light states](images/matrix-test.png)
 
 ## What people should see
 
@@ -35,8 +35,8 @@ In Buddy's story, this tiny display is his first sign of life outside the emulat
 | Gyromite selected | Brief `GY`, then eyes with a small spinning-dot accent | The selected game is Gyromite. The accent is decorative; it must not claim a gyro is actually spinning. |
 | Stack-Up selected | Brief `SU`, then eyes with a small rising-block accent | The selected game is Stack-Up. The accent is decorative; it must not claim a block was moved. |
 | Valid movement command accepted | Eyes glance in the movement direction, rise/fall for vertical motion, or narrow briefly for grip | Mirror the authoritative virtual action, then return to the selected game's eye loop. Never animate from an undecoded flash alone. |
-| Game Test check armed | Large `T` | The user is checking the game Test signal. The browser separately indicates whether Test flashes were actually detected. |
-| Test flashes detected | `T` gently pulses | The frame link has reported the game's Test signal. |
+| Test flashes detected | `T` gently pulses | The frame link has reported the game's Test signal automatically. |
+| Ready-light command detected | Steady `T` | The game sent a separate ready-light command. |
 | Pairing in progress | Large `P` with a slow pulse | Open the browser Setup page and read the pairing code and fingerprint shown on RetroPie. Do not show invented or unrelated digits on the UNO Q. |
 | Controller fault | Blinking `X` | Open Setup for the actual problem; the matrix alone cannot explain it. |
 | App stopped | Matrix released/blank as the platform permits | R.O.B. Vision is no longer driving the display. |
@@ -49,7 +49,7 @@ The face should be drawn for the physical 13×8 grid, with two distinct eyes and
 
 The sketch owns all framebuffer writes and animates the startup hourglass without waiting for Linux. Linux sends compact *requested states* and accepted action hints through Router Bridge, using the UNO Q controller's authoritative game, frame-link, test, and fault state. It sends a heartbeat at least once per second. If Linux disappears for about 3.5 seconds, the display returns to the hourglass rather than freezing a misleading game face. The sketch cannot replace Arduino's protected boot logo before App Lab releases the microcontroller.
 
-Display priority: **fault → pairing → Test check → startup/reconnect → selected game → idle eyes**. A movement hint is temporary within the selected game and never overrides fault, pairing, or Test. Frame-link status is visible on Setup; the idle eyes alone do not claim a linked game. Pairing has a bounded lifetime and returns to the prior state when complete or expired.
+Display priority: **fault → pairing → active Test or ready signal → startup/reconnect → selected game → idle eyes**. A movement hint is temporary within the selected game and never overrides fault, pairing, or Test. Frame-link status is visible on Setup; the idle eyes alone do not claim a linked game. Pairing has a bounded lifetime and returns to the prior state when complete or expired.
 
 ## Pairing distinction
 

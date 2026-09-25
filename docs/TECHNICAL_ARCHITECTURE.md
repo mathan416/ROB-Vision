@@ -26,7 +26,7 @@ The Gyromite pad reducer derives red and blue from gyro location/spin or a held 
 
 `rob_vision_fceumm_proxy.c` builds one wrapper for FCEUmm and one for Nestopia. Each delegates libretro API calls to the installed original core. Its video callback classifies each rendered NES frame as dark, green, or other and sends the frame number and class through a local Unix datagram socket. `retropie_frame_hook.py` verifies the sender's process credentials, approved wrapper path, and exact ROM identity. `controller/optical.py` accepts only complete game-appropriate 13-frame patterns. The receiver forwards commands to token-protected `/api/emulator/command`; retries are idempotent by sender PID and frame number.
 
-The same classified frames recognize Gyromite's sustained green Test field or Stack-Up's alternating Test frames. While Setup's Test check is armed, the receiver reports a recent Test signal in its authenticated heartbeat and the UNO Q blinks R.O.B.'s red light. A separate READY command lights it steadily. Neither Test indication moves the model. FCEUmm remains selected for both registered games on the test RetroPie. Nestopia's Gyromite Player 2 return still needs a Game A check; see the [Nestopia report](NESTOPIA_FRAME_LINK_TEST_2026-09-25.md).
+The same classified frames recognize Gyromite's sustained green Test field or Stack-Up's alternating Test frames. The receiver reports a recent Test signal in its authenticated heartbeat, and the UNO Q blinks R.O.B.'s red light automatically. It returns to the game display after the signal stops. A separate READY command lights it steadily. Neither Test indication moves the model. FCEUmm remains selected for both registered games on the test RetroPie. Nestopia's Gyromite Player 2 return still needs a Game A check; see the [Nestopia report](NESTOPIA_FRAME_LINK_TEST_2026-09-25.md).
 
 ## Batocera host
 
@@ -36,7 +36,7 @@ Both console receivers identify themselves in authenticated heartbeats, launch e
 
 ## HTTP and trust boundary
 
-Trusted-LAN browser controls use `/api/game`, `/api/command`, `/api/gate-assist`, and `/api/test/arm` without a token. The browser reads `/api/state` and matrix status. JSON and same-origin checks protect browser writes. `/api/launch` and `/api/emulator/command` require the shared token. Pairing uses a time-limited code and verified TLS certificate fingerprint to deliver it. Keep ports 80 and 8766 off untrusted networks.
+Trusted-LAN browser controls use `/api/game`, `/api/command`, and `/api/gate-assist` without a token. The browser reads `/api/state` and matrix status. JSON and same-origin checks protect browser writes. `/api/launch` and `/api/emulator/command` require the originating console's credential. Pairing uses a time-limited code and verified TLS certificate fingerprint to deliver it. Keep ports 80 and 8766 off untrusted networks.
 
 ## Resets and limits
 

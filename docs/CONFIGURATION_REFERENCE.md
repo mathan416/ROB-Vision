@@ -16,7 +16,7 @@
 | RetroPie game-frame socket | `/run/rob-vision/frames.sock` | The FCEUmm or Nestopia proxy sends one classified cell per rendered NES frame. The receiver verifies sender credentials, approved proxy path, ROM identity, and complete 13-frame commands. |
 | RetroPie per-game NES choice | `lr-robvision-fceumm` or `lr-robvision-nestopia` | Both use the installed original core through the frame wrapper. Current Gyromite and Stack-Up selections remain FCEUmm. Plain `lr-fceumm` and `lr-nestopia` bypass the link. For a per-game core switch after installation, the low-level `tools/install_retropie_frame_hook.py` accepts `--gyromite-core` and `--stack-up-core`. |
 | Game-frame indicator | Last matching receiver heartbeat within one second | `/api/state.input.frame_hook` is true. |
-| Test signal indicator | Sustained green or alternating rendered frames | The receiver reports a recent signal while Test check is armed; the UNO Q blinks R.O.B.'s red light. |
+| Test signal indicator | Sustained green or alternating rendered frames | The receiver reports a recent signal automatically; the UNO Q blinks R.O.B.'s red light. |
 | Receiver online indicator | Authenticated poll within three seconds | Otherwise Setup and Mission show RetroPie offline. |
 | Game registry | `config/games.json` | Exact case-insensitive ROM basenames for Gyromite and Stack-Up, including configured ZIP, 7z, and NES names. |
 

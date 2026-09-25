@@ -28,7 +28,7 @@ The screen flashes represent **one robot primitive per command**, not a complete
 
 The eight-bit command byte is the message after the five leading bits: for example, open is `$EE`, close `$BE`, left `$BA`, right `$EA`, Gyromite up/down `$BB/$FB`, Stack-Up up/down `$FA/$AE`, and ready light `$EB`. The ready-light message is a status operation. It must never move an axis.
 
-Gyromite Test produces a sustained green signal. Stack-Up Test alternates green and dark frames on the ROBOT BLOCK artwork. The frame-link Test detector can blink the virtual head light when the check is armed; a separately decoded ready-light command produces a steady light. These are status indications, not motion commands.
+Gyromite Test produces a sustained green signal. Stack-Up Test alternates green and dark frames on the ROBOT BLOCK artwork. The frame-link Test detector automatically blinks the virtual head light; a separately decoded ready-light command produces a steady light. These are status indications, not motion commands.
 
 ### ROM evidence
 

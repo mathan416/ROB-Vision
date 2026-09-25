@@ -6,7 +6,7 @@ from controller.matrix import MatrixDisplay, MatrixMode
 
 def snapshot(game=None, sequence=0, command=None, kind='action', test=None):
     return {'game': game, 'sequence': sequence,
-            'test': test or {'armed': False, 'flash_active': False},
+            'test': test or {'ready': False, 'flash_active': False},
             'events': [{'kind': kind, 'command': command}] if command else []}
 
 
@@ -26,10 +26,10 @@ class MatrixTests(unittest.TestCase):
     def test_test_and_pairing_priority(self):
         sent = []
         display = MatrixDisplay(call=lambda *args: sent.append(args))
-        display.update(snapshot('gyromite', test={'armed': True, 'flash_active': False}))
-        display.update(snapshot('gyromite', test={'armed': True, 'flash_active': True}))
+        display.update(snapshot('gyromite', test={'ready': True, 'flash_active': False}))
+        display.update(snapshot('gyromite', test={'ready': True, 'flash_active': True}))
         display.show_pairing()
-        display.update(snapshot('gyromite', test={'armed': True, 'flash_active': True}))
+        display.update(snapshot('gyromite', test={'ready': True, 'flash_active': True}))
         self.assertEqual([call[1] for call in sent],
                          [MatrixMode.TEST, MatrixMode.TEST_FLASH, MatrixMode.PAIRING])
         display.clear_pairing()
