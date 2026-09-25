@@ -72,3 +72,11 @@ The same RetroPie session was driven independently across the Stack-Up Direct gr
 | RIGHT | The camera sequence had extra or blended cells and could not be aligned uniquely with the rendered pattern. | Rejected. |
 
 The ninth bit is not consistently absent. Different transmissions lose or blend different cells, and some preserve the distinguishing bit while still failing timing validation. The wide upper-frame average followed the dark-box trace closely; it did not fill the missing samples. Keep movement decoding strict until a method can identify every command without mistaking one direction for another.
+
+## Kiyo Pro capture-mode investigation
+
+- The attached Kiyo Pro is on a 5 Gbit/s USB 3 link. It enumerates MJPEG, YUYV, NV12, and H264 capture formats through 1920×1080 at 60 fps; `/dev/video3` is a separate UVC metadata node with `UVCH` format.
+- A device-local capture-mode switch allowed comparison of the normal 640×480 MJPEG pipeline with 1280×720 uncompressed YUYV. After moving the normalized sampling box to the actual dark display patch, YUYV delivered about 60 fps. In a source-recorded UP, LEFT, UP run, the camera decoded LEFT but missed both UP commands. The capture mode alone did not solve reliability.
+- The minimum exposed shutter setting, 0.3 ms, produced an overexposed image and about 30 delivered fps during this trial. The 1 ms setting was restored.
+- Standalone raw NV12 1920×1080 capture with OpenCV color conversion disabled delivered 660 frames in 11.9 seconds, around 60 fps. Full BGR conversion delivered only about 36 fps in the same benchmark. A first raw-row trace sampled outside the active flash area and is inconclusive; no row-timing decoder has been deployed.
+- The app was restored to 640×480 MJPEG, the saved `0.205,0.15,0.04,0.05` region, and 1 ms exposure. Its camera state was verified as capturing at 60.1 fps, with Stack-Up and RetroPie still linked.

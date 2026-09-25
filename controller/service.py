@@ -25,6 +25,16 @@ from tools.identify_game import identify, load_registry
 
 ROOT = Path(__file__).resolve().parents[1]
 MIME = {".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml"}
+KIYO_CAPTURE_MODES = {"mjpg480": ("MJPG", 640, 480), "yuyv720": ("YUYV", 1280, 720)}
+
+
+def preferred_kiyo_capture_mode():
+    """Read an optional device-local mode; fall back to the known 480p mode."""
+    try:
+        mode = (ROOT / "data" / "camera-mode").read_text().strip().lower()
+    except OSError:
+        mode = "mjpg480"
+    return mode if mode in KIYO_CAPTURE_MODES else "mjpg480"
 
 
 def capture_devices():
@@ -285,9 +295,13 @@ class Controller:
                 self.event("fault", self.camera["message"])
             raise RuntimeError(f"Camera {index} could not be opened.")
         if kiyo_configured:
-            capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
-            capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            capture_mode = preferred_kiyo_capture_mode()
+            fourcc, capture_width, capture_height = KIYO_CAPTURE_MODES[capture_mode]
+            capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*fourcc))
+            capture.set(cv2.CAP_PROP_FRAME_WIDTH, capture_width)
+            capture.set(cv2.CAP_PROP_FRAME_HEIGHT, capture_height)
+            with self.lock:
+                self.camera["mode"] = capture_mode
         # This is a best-effort request; report measured timing below.
         capture.set(cv2.CAP_PROP_FPS, 60)
         self.capture_stop.clear()

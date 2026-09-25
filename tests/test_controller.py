@@ -3,17 +3,29 @@ import time
 import types
 import unittest
 import random
+import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from controller.model import StackState, GyroState
 from controller.optical import OpticalDecoder, PATTERNS, TestFlashDetector
-from controller.service import Controller
+from controller.service import Controller, preferred_kiyo_capture_mode
 from python.main import preferred_camera_roi
 
 
 class OpticalTests(unittest.TestCase):
+    def test_kiyo_capture_mode_is_allowlisted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'data').mkdir()
+            with patch('controller.service.ROOT', root):
+                self.assertEqual(preferred_kiyo_capture_mode(), 'mjpg480')
+                (root / 'data' / 'camera-mode').write_text('yuyv720\n')
+                self.assertEqual(preferred_kiyo_capture_mode(), 'yuyv720')
+                (root / 'data' / 'camera-mode').write_text('unsupported\n')
+                self.assertEqual(preferred_kiyo_capture_mode(), 'mjpg480')
+
     def test_saved_camera_sampling_box(self):
         with patch.dict('os.environ', {'ROB_VISION_CAMERA_ROI': '0.4,0.30,0.055,0.06'}):
             self.assertEqual(preferred_camera_roi(), [0.4, 0.30, 0.055, 0.06])

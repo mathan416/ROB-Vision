@@ -1,6 +1,6 @@
 # R.O.B. Vision configuration reference
 
-**Status:** Current code defaults and installed test-machine behavior as of 24 September 2026. Camera and display calibration remains open.
+**Status:** Current code defaults and installed test-machine behavior as of 25 September 2026. Camera and display calibration remains open.
 
 | Setting | Current value or location | Meaning |
 | --- | --- | --- |
@@ -9,6 +9,7 @@
 | Controller token | `ROB_VISION_TOKEN` or UNO Q `~/.config/rob-vision/environment` | Required for RetroPie launch events and authenticated receiver polls, not LAN browser controls. Keep private. |
 | Camera index | `0` for manual start | OpenCV probes physical capture devices and excludes codec-only UNO Q video nodes. The tested Kiyo Pro opens as `/dev/video2` on the UNO Q; device numbering may change. |
 | Camera frame request | 60 fps | Delivered fps is measured and shown; a request does not guarantee that rate. |
+| Kiyo Pro capture mode | `data/camera-mode`: absent or `mjpg480` | Default 640×480 MJPEG. `yuyv720` selects the 1280×720 uncompressed experiment. Recalibrate `data/camera-roi` when switching. The UNO Q is currently restored to `mjpg480`. |
 | Camera region | `0.2,0.2,0.6,0.6` | Normalized x, y, width, height; central 60% of image. CLI `--camera-roi` can change it. |
 | Optical threshold/cells | Luminance 0.38; fixed 60 Hz source cells | Initial decoder values derived from ROM analysis, not calibrated to the actual display. |
 | Gyro spin lifetime | 55 seconds | Illustrative virtual lifetime. |
