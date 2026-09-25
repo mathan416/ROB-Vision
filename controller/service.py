@@ -79,7 +79,7 @@ def pair_retropie(host, code, fingerprint, token, port=8768):
 
 
 class Controller:
-    def __init__(self):
+    def __init__(self, camera_roi=None):
         self.lock = threading.RLock()
         self.game = None
         self.stack = StackState()
@@ -95,7 +95,7 @@ class Controller:
         self.capture_thread = None
         self.camera_control_lock = threading.Lock()
         self.camera_index = 0
-        self.camera_roi = None
+        self.camera_roi = camera_roi
         self.preview_frame = None
         self.receiver_last_seen = 0.0
         self.receiver_name = None
@@ -221,6 +221,8 @@ class Controller:
             return self._start_camera(index, roi)
 
     def _start_camera(self, index=0, roi=None):
+        if roi is None:
+            roi = self.camera_roi
         if self.capture_thread and self.capture_thread.is_alive():
             if self.camera["state"] == "capturing":
                 return self.snapshot()
@@ -381,7 +383,7 @@ class Controller:
 def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi=None, matrix=None):
     if host not in ("127.0.0.1", "localhost", "::1") and not token:
         raise ValueError("A bearer token is required when serving over the network.")
-    controller = Controller()
+    controller = Controller(camera_roi)
     matrix_stop = threading.Event()
     matrix_thread = None
     if matrix is not None:
@@ -542,5 +544,6 @@ if __name__ == "__main__":
     parser.add_argument("--camera-index", type=int, help="Open this camera on the main thread at startup (useful on macOS).")
     parser.add_argument("--camera-roi", help="Normalized x,y,width,height crop, e.g. 0.2,0.2,0.6,0.6")
     args = parser.parse_args()
-    roi = [float(value) for value in args.camera_roi.split(",")] if args.camera_roi else None
+    configured_roi = args.camera_roi or os.environ.get("ROB_VISION_CAMERA_ROI")
+    roi = [float(value) for value in configured_roi.split(",")] if configured_roi else None
     serve(args.host, args.port, args.token, args.camera_index, roi)

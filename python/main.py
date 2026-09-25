@@ -27,6 +27,26 @@ def controller_token() -> str:
         raise RuntimeError(f"Controller token missing from {token_file}") from None
 
 
+def preferred_camera_roi() -> list[float] | None:
+    """Load the saved sampling box without requiring camera capture at boot."""
+    value = os.environ.get("ROB_VISION_CAMERA_ROI")
+    if not value:
+        try:
+            value = (ROOT / "data" / "camera-roi").read_text().strip()
+        except FileNotFoundError:
+            return None
+    try:
+        roi = [float(part) for part in value.split(",")]
+        if (len(roi) != 4 or any(not 0 <= part <= 1 for part in roi)
+                or roi[2] <= 0 or roi[3] <= 0
+                or roi[0] + roi[2] > 1 or roi[1] + roi[3] > 1):
+            raise ValueError
+        return roi
+    except ValueError:
+        print("Ignoring invalid saved camera sampling box.", flush=True)
+        return None
+
+
 class DeviceNameHandler(BaseHTTPRequestHandler):
     """Forward the ordinary device URL to the same controller on port 8766."""
 
@@ -85,7 +105,7 @@ def main() -> None:
     thread = threading.Thread(target=gateway.serve_forever, daemon=True)
     thread.start()
     try:
-        serve("0.0.0.0", 8766, token, None, None, matrix=matrix)
+        serve("0.0.0.0", 8766, token, None, preferred_camera_roi(), matrix=matrix)
     finally:
         gateway.shutdown()
         gateway.server_close()

@@ -4,7 +4,7 @@
 
 - R.O.B. Vision ran on the Arduino UNO Q at `arduiain.local`; RetroPie ran at `retropie.local` and sent authenticated game launch and exit events.
 - A Razer Kiyo Pro connected to the UNO Q watched the modern display. It delivered approximately 59.8-60 frames per second at 640 x 480 MJPEG with HDR temporarily disabled.
-- Both games were checked with a tight normalized camera region of `0.4,0.54,0.055,0.06`. The region and camera placement are specific to this test.
+- The first camera position used a tight normalized sampling region of `0.4,0.54,0.055,0.06`. After the display was centered in the camera image, the region moved to `0.4,0.30,0.055,0.06`. These coordinates are specific to this camera placement.
 - The games were the user's supplied world ROM archives. No ROM is included in this repository.
 
 ## What happened
@@ -16,6 +16,7 @@
 | Gyromite frame trace | A command produced a brief green/white sequence several seconds after the input. The former mixed-brightness score treated white as green. Green dominance separates the two in the captured frames. | Correcting the color metric is necessary, but the current camera timing still misses or blends cells. |
 | Stack-Up launch and modes | Both supplied archive formats were identified correctly by RetroPie and the UNO Q. On FCEUmm, Select opened the mode list and Start entered Test, Direct, and Memory. The ROBOT BLOCK artwork also appears during Test. | The apparent title-screen block was a menu-control misunderstanding, not a failed ROM launch. |
 | Stack-Up Test signal | A direct 756-frame trace at 60.2 fps showed alternating white and green frames in the screen crop. The live UNO Q detector recognized the signal and blinked the red light; no movement event occurred. | Test acknowledgement works for Stack-Up with this crop. Movement command decoding remains unverified. |
+| Recentered camera | The new sampling box landed on the full display. Stack-Up Test was detected again at 60 fps with the new region. Gyromite launched and was identified correctly; its Test mode was not repeated after repositioning. | The new framing is confirmed for Stack-Up Test. Gyromite Test had passed at the earlier camera position. |
 | Stack-Up Direct controls | FCEUmm entered Direct mode with Player 1 Select and Start. Directional input was sent, but no complete optical movement command was established from that check. | The menu and player input path work; this does not certify automatic block movement. |
 | Cleanup | The game was exited and the temporary RetroPie emulator override was removed. | RetroPie is back at its normal menu and default emulator configuration. |
 
@@ -32,6 +33,7 @@ The Test signal is a visual status check. Its red light must never move a virtua
 - Camera sampling now measures green dominance over both red and blue. This separates the captured green frames from white frames.
 - Test acknowledgement accepts a green field held for at least 0.6 seconds, as well as regular alternating Test flashes. The browser calls this **Watch Test Signal**.
 - The activity feed records one Test acknowledgement per arm instead of repeating it every camera frame.
+- The App Lab entry point now loads a preferred sampling region from `data/camera-roi` (or `ROB_VISION_CAMERA_ROI`). Starting or reconnecting the camera reuses that region. The installed device stores the recentered region in its app data directory.
 
 ## Remaining validation
 
