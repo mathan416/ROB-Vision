@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import html
 import re
+import shutil
 from pathlib import Path
 
 from reportlab.lib import colors
@@ -29,6 +30,7 @@ from reportlab.platypus import (
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 OUTPUT = ROOT / "output" / "pdf"
+WEB_GUIDES = ROOT / "dashboard" / "guides"
 FONTS = ROOT / "dashboard" / "fonts"
 
 NAVY = colors.HexColor("#0C2030")
@@ -320,5 +322,7 @@ if __name__ == "__main__":
                    ["UNO_Q_MATRIX_DISPLAY.md"], page_size=landscape(A4)),
         build_quick(),
     ]
+    WEB_GUIDES.mkdir(parents=True, exist_ok=True)
     for path in generated:
+        shutil.copy2(path, WEB_GUIDES / path.name)
         print(path)

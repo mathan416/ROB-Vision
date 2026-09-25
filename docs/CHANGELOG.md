@@ -4,6 +4,7 @@
 
 - Added frame-by-frame 13×8 matrix display images, captured the live Mission and Setup pages, and placed the relevant screenshots in the editable guides and printable manuals.
 - Added a standalone printable Matrix Display Guide and included its illustrations in the Technical Reference.
+- Published all four printable guides through the UNO Q Help page for local download, without requiring GitHub access.
 
 ## Unified Mission and Setup status — 24 September 2026
 
