@@ -280,7 +280,9 @@
     startNextRecovery();
   }
   const stackXs = [145, 230, 325, 410, 500];
-  const stackBases = [486, 509, 518, 505, 486];
+  // Each block occupies one visible level, aligned with the hand carriage.
+  const stackBases = [477, 500, 509, 496, 477];
+  const stackPitch = 16;
   const stackPercents = [12, 31, 50, 69, 88];
   const stackTops = [30, 83, 174, 83, 30];
   const discPaint = {
@@ -297,18 +299,21 @@
     state.arms = 57 - (stackState.height - 1) * 14;
     state.grip = stackState.grip === 'closed';
     state.depth = 1;
-    moveProp(stackXs[index], stackBases[index] - (stackState.height - 1) * 8, 1, immediate);
+    moveProp(stackXs[index], stackBases[index] - (stackState.height - 1) * stackPitch, 1, immediate);
   }
-  function svgDisc(color, x, y) {
+  function svgDisc(color, x, y, selected = false) {
     const ns = 'http://www.w3.org/2000/svg';
     const group = document.createElementNS(ns, 'g');
+    group.setAttribute('class', `stack-block${selected ? ' selected' : ''}`);
     group.setAttribute('transform', `translate(${x} ${y})`);
     const [side, top, rim, hub] = discPaint[color];
-    for (const attributes of [
-      { cy: 7, rx: 24, ry: 8, fill: side },
-      { cy: 0, rx: 24, ry: 8, fill: top, stroke: rim, 'stroke-width': 3 },
-      { cy: 0, rx: 8, ry: 3, fill: hub }
-    ]) {
+    const body = document.createElementNS(ns, 'path');
+    body.setAttribute('d', 'M-24 0 V9 C-24 19 24 19 24 9 V0Z');
+    body.setAttribute('fill', side);
+    body.setAttribute('stroke', rim);
+    body.setAttribute('stroke-width', '1.5');
+    group.append(body);
+    for (const attributes of [{ cy: 0, rx: 24, ry: 8, fill: top, stroke: rim, 'stroke-width': 2 }, { cy: 0, rx: 8, ry: 3, fill: hub }]) {
       const ellipse = document.createElementNS(ns, 'ellipse');
       for (const [key, value] of Object.entries(attributes)) ellipse.setAttribute(key, value);
       group.append(ellipse);
@@ -319,27 +324,28 @@
     const placed = $('stack-colors');
     const carried = $('disc-prop');
     placed.replaceChildren(); carried.replaceChildren();
-    stackState.trays.forEach((tray, index) => tray.forEach((color, level) => placed.append(svgDisc(color, stackXs[index], stackBases[index] - level * 8))));
-    stackState.held.forEach((color, level) => carried.append(svgDisc(color, 0, -level * 8)));
+    stackState.trays.forEach((tray, index) => tray.forEach((color, level) => placed.append(svgDisc(color, stackXs[index], stackBases[index] - level * stackPitch, index === stackState.station - 1 && !stackState.held.length && stackState.grip === 'open' && level === stackState.height - 1))));
+    stackState.held.forEach((color, level) => carried.append(svgDisc(color, 0, -level * stackPitch, level === 0)));
     const stations = $('stack-fixture').querySelectorAll('.station-art.stack-tray');
     stations.forEach((station, index) => {
       station.replaceChildren();
       stackState.trays[index].forEach((color, level) => {
         const disc = document.createElement('span');
         disc.className = `disc ${color}`;
-        disc.style.top = `${43 - level * 7}px`;
+        disc.style.top = `${40 - level * 10}px`;
         disc.style.zIndex = String(2 + level);
+        disc.classList.toggle('selected', index === stackState.station - 1 && !stackState.held.length && stackState.grip === 'open' && level === stackState.height - 1);
         station.append(disc);
       });
     });
     const tableHeld = $('table-held-stack');
     tableHeld.replaceChildren();
     tableHeld.style.left = `${stackPercents[stackState.station - 1]}%`;
-    tableHeld.style.top = `${Math.max(2, stackTops[stackState.station - 1] - 35 - (stackState.height - 1) * 3)}px`;
+    tableHeld.style.top = `${Math.max(0, stackTops[stackState.station - 1] - 28 - (stackState.height - 1) * 5)}px`;
     stackState.held.forEach((color, level) => {
       const disc = document.createElement('span');
       disc.className = `disc ${color}`;
-      disc.style.top = `${32 - level * 7}px`;
+      disc.style.top = `${32 - level * 10}px`;
       disc.style.zIndex = String(2 + level);
       tableHeld.append(disc);
     });
@@ -349,7 +355,7 @@
       const disc = document.createElement('i');
       disc.className = `mini-disc ${color}`;
       disc.style.left = `${[17, 33, 50, 67, 83][station]}%`;
-      disc.style.top = `${top - 8 - level * 5}px`;
+      disc.style.top = `${top - 8 - level * 8}px`;
       disc.style.zIndex = String(2 + level);
       mini.append(disc);
     };
@@ -414,11 +420,19 @@
     $('focus-art').className = `focus-art ${state.mode}${state.mode === 'gyro' && gyroLevel(gyros[focusedGyro]) > 0 && !state.stopped ? ' spinning' : ''}`;
     $('focus-type').textContent = state.mode === 'free' ? 'MOTION STUDY' : 'GAME PIECE';
     $('floor-action').textContent = state.mode === 'free' ? 'TURN → LIFT → GRIP' : 'PICK → PLACE';
-    const stackTop = stackState.trays[stackState.station - 1].at(-1);
-    $('focus-name').textContent = state.mode === 'gyro' ? item?.piece === 'b' ? 'GYRO B' : 'GYRO A' : state.mode === 'stack' ? stackState.held.length ? stackState.held.length === 1 ? `${stackState.held[0].toUpperCase()} BLOCK` : `${stackState.held.length} BLOCKS TOGETHER` : stackTop ? `${stackTop.toUpperCase()} BLOCK` : 'EMPTY TRAY' : 'R.O.B. POSE';
-    $('focus-art').style.background = state.mode === 'stack' ? discPaint[stackState.held.at(-1) || stackTop]?.[1] || '#536f7b' : '';
+    const stackTarget = stackState.trays[stackState.station - 1].slice(stackState.height - 1);
+    const focusedBlocks = stackState.held.length ? stackState.held : stackState.grip === 'open' ? stackTarget : [];
+    const focusArt = $('focus-art');
+    focusArt.replaceChildren();
+    if (state.mode === 'stack') focusedBlocks.forEach((color) => {
+      const block = document.createElement('i');
+      block.className = `focus-block ${color}`;
+      focusArt.prepend(block);
+    });
+    $('focus-name').textContent = state.mode === 'gyro' ? item?.piece === 'b' ? 'GYRO B' : 'GYRO A' : state.mode === 'stack' ? focusedBlocks.length > 1 ? `${focusedBlocks.length} BLOCKS` : focusedBlocks.length ? `${focusedBlocks[0].toUpperCase()} BLOCK` : 'NO BLOCK' : 'R.O.B. POSE';
+    focusArt.setAttribute('aria-label', state.mode === 'stack' ? focusedBlocks.length ? `${focusedBlocks.join(', ')} blocks ${stackState.held.length ? 'in hand' : 'at hand level'}` : 'No block at hand level' : '');
     $('focus-action').textContent = state.stopped ? 'STOPPED' : item?.action || (state.manualActive ? state.manualCommand || 'POSE' : 'READY');
-    $('focus-location').textContent = state.mode === 'gyro' ? ({ holder: state.cleanupStarted ? item?.piece === 'b' ? 'FAR HOLDER / STORED' : 'FRONT HOLDER / STORED' : item?.piece === 'b' ? 'FAR HOLDER → BLUE PAD' : 'FRONT HOLDER → RED PAD', held: 'BETWEEN BOTH HANDS', spinner: 'RIGHT SPINNER / ROTATING', redTray: 'RED BUTTON PAD', blueTray: 'BLUE BUTTON PAD' })[item?.location || 'holder'] : state.mode === 'stack' ? `TRAY ${stackState.station} / LEVEL ${stackState.height}${stackState.held.length ? ' / IN HAND' : ''}` : 'NO GAME PIECES';
+    $('focus-location').textContent = state.mode === 'gyro' ? ({ holder: state.cleanupStarted ? item?.piece === 'b' ? 'FAR HOLDER / STORED' : 'FRONT HOLDER / STORED' : item?.piece === 'b' ? 'FAR HOLDER → BLUE PAD' : 'FRONT HOLDER → RED PAD', held: 'BETWEEN BOTH HANDS', spinner: 'RIGHT SPINNER / ROTATING', redTray: 'RED BUTTON PAD', blueTray: 'BLUE BUTTON PAD' })[item?.location || 'holder'] : state.mode === 'stack' ? `TRAY ${stackState.station} / LEVEL ${stackState.height} · ${stackState.held.length ? 'IN HAND' : focusedBlocks.length ? `SELECTED: ${focusedBlocks.join(' + ').toUpperCase()}` : 'EMPTY AT HAND LEVEL'}` : 'NO GAME PIECES';
     $('stage-action-label').textContent = item ? `${item.action || 'PLAY'} / ${String(state.step + 1).padStart(2, '0')}` : state.manualActive ? `${state.manualCommand || 'POSE'} / MANUAL` : 'HOME / 00';
     $('head-value').textContent = `${state.head}°`;
     $('head-bar').style.width = `${50 + state.head * .6}%`;

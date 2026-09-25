@@ -218,3 +218,22 @@
 }
 
 .top-status[data-connection="offline"] .status-dot{background:#f07873;box-shadow:0 0 11px #f07873}.top-status[data-connection="preview"] .status-dot,.top-status[data-connection="connecting"] .status-dot{background:#eab26c;box-shadow:0 0 11px #eab26c}
+
+/* Stack-Up blocks now occupy the same vertical levels as R.O.B.'s hands. */
+.stack-block.selected{filter:drop-shadow(0 0 8px #8ff3ee)}
+.stack-block.selected ellipse:first-of-type{stroke:#e6ffef;stroke-width:3}
+#stack-fixture .station-art.stack-tray{height:75px}
+#stack-fixture .disc{height:14px}
+#stack-fixture .disc.red{box-shadow:inset 0 -5px 0 #a03c47,0 5px 7px #03101b88}
+#stack-fixture .disc.white{box-shadow:inset 0 -5px 0 #9aafb0,0 5px 7px #03101b88}
+#stack-fixture .disc.blue{box-shadow:inset 0 -5px 0 #317d9b,0 5px 7px #03101b88}
+#stack-fixture .disc.yellow{box-shadow:inset 0 -5px 0 #a98145,0 5px 7px #03101b88}
+#stack-fixture .disc.green{box-shadow:inset 0 -5px 0 #4b9870,0 5px 7px #03101b88}
+#stack-fixture .disc.selected{outline:2px solid #a5fff3;outline-offset:2px;filter:drop-shadow(0 0 7px #88f4ea)}
+.mini-disc{height:9px;border-radius:50% / 38%;box-shadow:inset 0 -3px 0 #17374966,0 1px 2px #04131caa}
+#table-held-stack .disc{height:14px}
+.focus-art.stack{height:76px;width:44px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:0;border:0;background:none;box-shadow:none}
+.focus-art.stack:after{content:'';position:absolute;left:0;top:auto;bottom:-3px;width:43px;height:8px;border:2px solid #cee7e5;border-radius:50%;background:#1a3446;z-index:-1}
+.focus-block{display:block;position:relative;flex:none;width:40px;height:14px;margin-bottom:-1px;border:2px solid #e5f1e9a8;border-radius:50% / 35%;box-shadow:inset 0 -5px 0 #17374955,0 2px 2px #03101b99}
+.focus-block:after{content:'';position:absolute;left:50%;top:2px;width:9px;height:3px;transform:translateX(-50%);border-radius:50%;background:#1d39468c}
+.focus-block.red{background:#f08069}.focus-block.white{background:#e7efeb}.focus-block.blue{background:#5dd1ef}.focus-block.yellow{background:#f1c76e}.focus-block.green{background:#80d8a4}

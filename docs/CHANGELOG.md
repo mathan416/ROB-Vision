@@ -1,5 +1,11 @@
 # R.O.B. Vision changelog
 
+## Stack-Up block alignment — 25 September 2026
+
+- Made each virtual block one visible hand level tall in the Live Model, with a glow on the block R.O.B. can grip.
+- Updated the Game Table and Accessory Bay block stacks to match, and made the Game Piece card show the selected or carried colors as they change.
+- Clarified that the UNO Q installer includes the matrix display sketch and App Lab compiles and uploads it on start.
+
 ## Development installers — 25 September 2026
 
 - Added repeatable UNO Q App Lab and standard RetroPie installers, with app staging, private token preservation, frame wrapper builds, selective NES launch choices, runcommand hook merging, and service setup.
