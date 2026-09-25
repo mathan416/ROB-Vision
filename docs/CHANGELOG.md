@@ -1,5 +1,10 @@
 # R.O.B. Vision changelog
 
+## Camera-rate correction — 24 September 2026
+
+- Changed the OpenCV camera request from 120 to 60 fps and updated Setup feedback for actual 30–60 fps cameras. The delivered frame rate remains measured, not assumed.
+- Added deterministic 30/60 fps jitter checks and a sampled-frame ambiguity guard. The original 60 fps decoder sometimes turned a missed one-frame pulse into the wrong command. The guard rejects uncertain traces; it accepted 667 of 900 simulated 60 fps transmissions correctly and rejected the remainder, with no wrong actions in this run or ten additional seeds. This remains below reliable-play quality until the chosen camera and display are tested; an emulator-side command hook is the likely fallback if misses persist.
+
 ## UNO Q network status counterpart — 24 September 2026
 
 - Added R.O.B. Vision versions of the VirtualGlove host Wi-Fi status sampler, service, and timer. They publish physical Wi-Fi/Ethernet link health and broadcast addresses without network names or credentials.

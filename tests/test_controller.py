@@ -2,6 +2,7 @@ import sys
 import time
 import types
 import unittest
+import random
 from pathlib import Path
 from unittest.mock import patch
 
@@ -49,6 +50,43 @@ class OpticalTests(unittest.TestCase):
             game = "stack_up" if command.endswith("STACK") else "gyromite"
             self.assertEqual(self.trace(pattern, game, fps=60), [command], command)
 
+    def test_realistic_camera_rates_fail_closed_when_bits_are_missed(self):
+        # Unsynchronized 30/60 fps capture of 60 Hz one-frame bits cannot be
+        # assumed complete. Preserve correct-command rate and no wrong actions.
+        for fps in (30, 60):
+            rng = random.Random(416)
+            correct = wrong = 0
+            for pattern, command in PATTERNS.items():
+                game = "stack_up" if command.endswith("STACK") else "gyromite"
+                for _ in range(100):
+                    phase = rng.random()
+                    bits = "1" + pattern + "00000"
+                    decoder = OpticalDecoder()
+                    found = []
+                    for sample in range(int(len(bits) * fps / 60) + 5):
+                        timestamp = (sample + phase) / fps + rng.uniform(-.0007, .0007)
+                        bit = bits[min(int(timestamp * 60), len(bits) - 1)]
+                        brightness = (.85 if bit == "1" else .05) + rng.uniform(-.025, .025)
+                        detection = decoder.feed(timestamp, brightness, game)
+                        if detection:
+                            found.append(detection.command)
+                    correct += found == [command]
+                    wrong += bool(found and found != [command])
+            self.assertEqual(wrong, 0, fps)
+            if fps == 30:
+                self.assertEqual(correct, 0)
+            else:
+                self.assertGreaterEqual(correct, 640)
+
+    def test_idle_and_test_flashes_do_not_move_robot_at_60_fps(self):
+        rng = random.Random(416)
+        for game in ("gyromite", "stack_up"):
+            for alternating in (False, True):
+                decoder = OpticalDecoder()
+                for sample in range(1800):
+                    brightness = (.85 if sample % 2 else .05) if alternating else .05 + rng.uniform(-.025, .025)
+                    self.assertIsNone(decoder.feed((sample + .5) / 60, brightness, game))
+
     def test_wrong_game_and_partial_rejected(self):
         self.assertEqual(self.trace("0001011111010", "gyromite"), [])
         self.assertEqual(self.trace("0001011101", "stack_up"), [])
@@ -85,6 +123,7 @@ class ModelTests(unittest.TestCase):
 
     def test_camera_reconnect_reopens_after_capture_failure(self):
         captures = []
+        requested_rates = []
 
         class FailedCapture:
             def __init__(self, _index):
@@ -95,7 +134,7 @@ class ModelTests(unittest.TestCase):
                 return True
 
             def set(self, _property, _value):
-                pass
+                requested_rates.append(_value)
 
             def read(self):
                 return False, None
@@ -112,6 +151,7 @@ class ModelTests(unittest.TestCase):
             controller.reconnect_camera()
             controller.capture_thread.join(timeout=1)
             self.assertEqual(len(captures), 2)
+            self.assertEqual(requested_rates, [60, 60])
             self.assertTrue(all(capture.released for capture in captures))
             self.assertEqual(controller.snapshot()["camera"]["state"], "fault")
 

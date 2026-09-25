@@ -7,6 +7,7 @@ decoder uses run durations rather than assuming one camera frame per game frame.
 
 from collections import deque
 from dataclasses import dataclass
+from math import floor
 
 FRAME_SECONDS = 1 / 60.0
 PATTERNS = {
@@ -68,6 +69,7 @@ class OpticalDecoder:
         self.threshold = threshold
         self.frame_seconds = frame_seconds
         self.runs = deque(maxlen=32)
+        self.samples = deque(maxlen=96)
         self.level = None
         self.run_start = None
         self.last_time = None
@@ -75,6 +77,7 @@ class OpticalDecoder:
 
     def reset(self):
         self.runs.clear()
+        self.samples.clear()
         self.level = self.run_start = self.last_time = None
         self.last_emitted_end = -1.0
 
@@ -86,6 +89,7 @@ class OpticalDecoder:
             self.reset()
         self.last_time = timestamp
         level = int(brightness >= self.threshold)
+        self.samples.append((timestamp, level))
         if self.level is None:
             self.level, self.run_start = level, timestamp
             return None
@@ -125,6 +129,44 @@ class OpticalDecoder:
             end = runs[-1][2]
             if end <= self.last_emitted_end or start < self.last_emitted_end:
                 continue
+            if self._possible_commands(game, start) != {command}:
+                continue
             self.last_emitted_end = end
             return Detection(command, bits, start, end)
         return None
+
+    def _possible_commands(self, game, observed_start):
+        """Reject a run fit if sampled frames also admit another command."""
+        samples = list(self.samples)
+        previous_bright = next((stamp for stamp, level in reversed(samples)
+                                if stamp < observed_start and level == 1), None)
+        if previous_bright is None:
+            return set()
+        possible = set()
+        # Only sample-to-bit assignments matter. Check every interval between
+        # the exact phase boundaries, including narrow ones near a frame edge.
+        boundaries = {previous_bright, observed_start}
+        for stamp, _level in samples:
+            for cell in range(14):
+                boundary = stamp - cell * self.frame_seconds
+                if previous_bright < boundary < observed_start:
+                    boundaries.add(boundary)
+        ordered = sorted(boundaries)
+        for lower, upper in zip(ordered, ordered[1:]):
+            start = (lower + upper) / 2
+            levels = {}
+            conflict = False
+            for stamp, level in samples:
+                cell = floor((stamp - start) / self.frame_seconds)
+                if 0 <= cell < 13:
+                    if cell in levels and levels[cell] != level:
+                        conflict = True
+                        break
+                    levels[cell] = level
+            if conflict or len(levels) < 10:
+                continue
+            for pattern, command in PATTERNS.items():
+                if command in ALLOWED[game] and all(int(pattern[cell]) == level
+                                                    for cell, level in levels.items()):
+                    possible.add(command)
+        return possible

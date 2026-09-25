@@ -260,7 +260,9 @@ class Controller:
                                    message=f"Camera {index} could not be opened.")
                 self.event("fault", self.camera["message"])
             raise RuntimeError(f"Camera {index} could not be opened.")
-        capture.set(cv2.CAP_PROP_FPS, 120)
+        # This is a best-effort request, not a measurement; the camera may
+        # deliver 30 or 60 fps. Report measured timing below.
+        capture.set(cv2.CAP_PROP_FPS, 60)
         self.capture_stop.clear()
         with self.lock:
             self.decoder.reset()
@@ -297,11 +299,10 @@ class Controller:
                     with self.lock:
                         self.camera["fps"] = round(fps, 1)
                         self.camera["message"] = (
-                            "Below 60 delivered fps: one-frame flashes may be missed."
-                            if fps and fps < 60 else
-                            "At this frame rate, check Test mode; exposure and display timing may still hide flashes."
-                            if fps and fps < 120 else
-                            "Watching for complete optical commands."
+                            "Below 60 delivered fps: one-frame game flashes cannot be captured reliably."
+                            if fps and fps < 55 else
+                            "Near 60 fps: timing drift can still miss a one-frame flash; verify commands in Test mode."
+                            if fps else "Measuring camera frame rate."
                         )
                     self.sample(timestamp, brightness)
                     if timestamp - last_preview >= .5:
