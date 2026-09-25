@@ -35,6 +35,49 @@ class ReceiverTests(unittest.TestCase):
             self.assertIn('nes_Stack-UpWorld = "lr-robvision-fceumm"', before[1])
             self.assertEqual(len(before[1].splitlines()), 2)
 
+    def test_frame_hook_offers_both_cores_and_preserves_per_rom_selection(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            root = base / 'configs'
+            (root / 'nes').mkdir(parents=True)
+            (root / 'all').mkdir()
+            (root / 'nes' / 'emulators.cfg').write_text('default = "lr-fceumm"\n')
+            (root / 'all' / 'emulators.cfg').write_text(
+                'nes_GyromiteWorld = "lr-nestopia"\n'
+                'nes_Stack-UpWorld = "lr-robvision-fceumm"\n')
+            cores = {}
+            for name in ('fceumm', 'nestopia'):
+                proxy, real = base / (name + '-proxy.so'), base / (name + '-real.so')
+                proxy.touch()
+                real.touch()
+                cores[name] = proxy, real
+            install(root, cores=cores)
+            self.assertEqual((root / 'all' / 'emulators.cfg').read_text(),
+                             'nes_GyromiteWorld = "lr-robvision-nestopia"\n'
+                             'nes_Stack-UpWorld = "lr-robvision-fceumm"\n')
+            self.assertIn('lr-robvision-nestopia =', (root / 'nes' / 'emulators.cfg').read_text())
+            install(root, cores=cores)
+            self.assertEqual(len((root / 'nes' / 'emulators.cfg').read_text().splitlines()), 3)
+            install(root, cores=cores, choices={'nes_Stack-UpWorld': 'nestopia'})
+            self.assertIn('nes_Stack-UpWorld = "lr-robvision-nestopia"',
+                          (root / 'all' / 'emulators.cfg').read_text())
+
+    def test_frame_hook_leaves_other_rom_emulator_override_intact(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            root = base / 'configs'
+            (root / 'nes').mkdir(parents=True)
+            (root / 'all').mkdir()
+            (root / 'nes' / 'emulators.cfg').write_text('default = "lr-fceumm"\n')
+            (root / 'all' / 'emulators.cfg').write_text(
+                'nes_GyromiteWorld = "custom-emulator"\n')
+            proxy, real = base / 'proxy.so', base / 'real.so'
+            proxy.touch()
+            real.touch()
+            install(root, cores={'fceumm': (proxy, real)})
+            self.assertIn('nes_GyromiteWorld = "custom-emulator"',
+                          (root / 'all' / 'emulators.cfg').read_text())
+
     def test_frame_hook_accepts_only_known_rom_under_proxy_core(self):
         registry = load_registry()
         with tempfile.TemporaryDirectory() as directory:
@@ -50,6 +93,9 @@ class ReceiverTests(unittest.TestCase):
             args[2] = '/opt/retropie/libretrocores/lr-fceumm/fceumm_libretro.so'
             (process / 'cmdline').write_bytes(b'\0'.join(a.encode() for a in args) + b'\0')
             self.assertIsNone(sender_game(123, registry, proc))
+            args[2] = '/home/pi/rob-vision/build/rob_vision_nestopia_libretro.so'
+            (process / 'cmdline').write_bytes(b'\0'.join(a.encode() for a in args) + b'\0')
+            self.assertEqual(sender_game(123, registry, proc), 'stack_up')
 
     def test_frame_hook_queues_only_complete_exact_command(self):
         with tempfile.TemporaryDirectory() as directory:

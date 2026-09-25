@@ -1,6 +1,6 @@
 # R.O.B. Vision installation guide
 
-**Installed test setup, 24 September 2026:** R.O.B. Vision is a separate UNO Q App Lab app. `retropie.local` has exact-name runcommand hooks, pairing, and a virtual Controller 2 receiver. Gyromite launch/exit and both gate colors have been verified. A real UNO Q camera/display has not been tested; Stack-Up interactive play is also pending. There is no physical robot to assemble.
+**Installed test setup, 25 September 2026:** R.O.B. Vision is a separate UNO Q App Lab app. `retropie.local` has exact-name runcommand hooks, pairing, and a virtual Controller 2 receiver. Gyromite launch/exit and both gate colors have been verified under FCEUmm. The UNO Q camera recognized both games' Test signals; camera-only movement remains intermittent. FCEUmm drove all six commands in both games through the frame link. Nestopia's frame link is installed and delivered live movement commands from both games to the UNO Q; its Gyromite Player 2 gate return remains to be checked. There is no physical robot to assemble.
 
 ## UNO Q and browser
 
@@ -12,11 +12,11 @@ Open [Setup](../dashboard/setup.html) to check pairing and frame a camera. Brows
 
 ## RetroPie
 
-See [RetroPie deployment instructions](../deploy/retropie/README.md) for hook files, root uinput receiver service, pairing, and RetroArch port 2 configuration. The current test machine already has these installed. On another machine, merge launch/end hooks with any existing custom scripts, then pair from the Setup page. **Check Link** becomes online after authenticated receiver polls. The receiver also scans the active RetroArch process so it can resync game context after a UNO Q restart.
+See [RetroPie deployment instructions](../deploy/retropie/README.md) for hook files, root uinput receiver service, pairing, both FCEUmm and Nestopia frame-link choices, and RetroArch port 2 configuration. The current test machine already has these installed. On another machine, merge launch/end hooks with any existing custom scripts, then pair from the Setup page. **Check Link** becomes online after authenticated receiver polls. The receiver also scans the active RetroArch process so it can resync game context after a UNO Q restart.
 
 ## Camera commissioning
 
-Attach a compatible camera to the UNO Q, aim it at the game's optical flash region, and use Setup's **Start Camera Check**. Confirm that OpenCV found a real capture device, the green crop covers the flashing region, and measured fps is near 60. Test both games' Test mode, then record complete valid commands and false-trigger behavior on the intended screen. The current service asks for 60 fps and uses the center 60% crop by default. Even delivered 60 fps does not guarantee every one-frame flash; at 30 fps the synthetic decoder rejected them. The installed RetroPie FCEUmm frame link reads each rendered NES frame and handles automatic game commands without depending on the camera. Camera-only play remains experimental.
+Attach a compatible camera to the UNO Q, aim it at the game's optical flash region, and use Setup's **Start Camera Check**. Confirm that OpenCV found a real capture device, the green crop covers the flashing region, and measured fps is near 60. Test both games' Test mode, then record complete valid commands and false-trigger behavior on the intended screen. The current service asks for 60 fps and uses the center 60% crop by default. Even delivered 60 fps does not guarantee every one-frame flash; at 30 fps the synthetic decoder rejected them. The installed RetroPie FCEUmm frame link reads each rendered NES frame and handles automatic game commands without depending on the camera. Nestopia's frame-link choice uses the same libretro callback approach and is installed for validation. Camera-only play remains experimental.
 
 **Reset & Reconnect** retries capture in software. UNO Q camera-recovery, shutdown, early-start, and network-status host helpers are included in [deploy/uno-q](../deploy/uno-q/README.md), but are not installed by App Lab and need privileged host setup. The existing Ethernet adapter shares the USB hub, so the recovery helper guards against resetting a hub carrying network traffic.
 

@@ -1,7 +1,9 @@
-/* Pass FCEUmm through unchanged while observing each libretro video frame.
- * This file contains no Nintendo or FCEUmm code. Build on RetroPie with:
+/* Pass an NES libretro core through while observing each video frame.
+ * This file contains no Nintendo or emulator code. Build one proxy per core:
  * gcc -std=gnu11 -O2 -fPIC -shared -Wall -Wextra -o rob_vision_fceumm_libretro.so \
  *     rob_vision_fceumm_proxy.c -ldl
+ * gcc -std=gnu11 -O2 -fPIC -shared -Wall -Wextra -DROB_USE_NESTOPIA \
+ *     -o rob_vision_nestopia_libretro.so rob_vision_fceumm_proxy.c -ldl
  */
 #define _GNU_SOURCE
 #include <dlfcn.h>
@@ -29,13 +31,27 @@ static video_cb frontend_video;
 static unsigned pixel_format;
 static uint32_t frame_index;
 static int frame_socket = -1;
-static const char *const real_path = "/opt/retropie/libretrocores/lr-fceumm/fceumm_libretro.so";
-static const char *const socket_path = "/run/rob-vision/frames.sock";
+#ifndef ROB_REAL_CORE_PATH
+#ifdef ROB_USE_NESTOPIA
+#define ROB_REAL_CORE_PATH "/opt/retropie/libretrocores/lr-nestopia/nestopia_libretro.so"
+#else
+#define ROB_REAL_CORE_PATH "/opt/retropie/libretrocores/lr-fceumm/fceumm_libretro.so"
+#endif
+#endif
+static const char *const real_path = ROB_REAL_CORE_PATH;
+#ifndef ROB_FRAME_SOCKET_PATH
+#ifdef ROB_TEST_SOCKET
+#define ROB_FRAME_SOCKET_PATH "/tmp/rob-vision-nestopia-probe.sock"
+#else
+#define ROB_FRAME_SOCKET_PATH "/run/rob-vision/frames.sock"
+#endif
+#endif
+static const char *const socket_path = ROB_FRAME_SOCKET_PATH;
 
 static void load_core(void) {
     if (!real_core) {
         real_core = dlopen(real_path, RTLD_NOW | RTLD_LOCAL);
-        if (!real_core) fprintf(stderr, "R.O.B. Vision: cannot load FCEUmm: %s\n", dlerror());
+        if (!real_core) fprintf(stderr, "R.O.B. Vision: cannot load %s: %s\n", real_path, dlerror());
     }
 }
 

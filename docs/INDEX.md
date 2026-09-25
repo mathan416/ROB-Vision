@@ -35,6 +35,7 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 - [Unattended engineering test report](UNATTENDED_TEST_REPORT_2026-09-24.md): synthetic optical and model evidence.
 - [Live optical test report](LIVE_OPTICAL_TEST_2026-09-25.md): attached camera and RetroPie findings.
 - [Game-frame link report](FRAME_LINK_TEST_2026-09-25.md): live per-ROM frame decoding and model actions.
+- [Nestopia frame-link report](NESTOPIA_FRAME_LINK_TEST_2026-09-25.md): second NES core, isolated game-frame checks, and remaining live validation.
 - [Safety and security](SAFETY_AND_SECURITY.md), [third-party components](THIRD_PARTY_COMPONENTS.md), and [changelog](CHANGELOG.md).
 
 The UNO Q app, RetroPie frame link, and Gyromite return path are running. All six frame command types in both games have been observed; longer unattended gameplay and Stack-Up Memory/Bingo remain to be validated. Historical manuals explain the original physical toy; this project renders those mechanics virtually.

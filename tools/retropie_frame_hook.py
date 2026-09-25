@@ -1,4 +1,4 @@
-"""Receive exact FCEUmm video-frame colors from the local RetroArch proxy core."""
+"""Receive exact NES video-frame colors from approved RetroArch proxy cores."""
 
 import os
 import pwd
@@ -12,7 +12,10 @@ from time import monotonic
 from controller.optical import ExactFrameDecoder
 from tools.identify_game import identify
 
-PROXY_CORE = b"/home/pi/rob-vision/build/rob_vision_fceumm_libretro.so"
+PROXY_CORES = frozenset((
+    b"/home/pi/rob-vision/build/rob_vision_fceumm_libretro.so",
+    b"/home/pi/rob-vision/build/rob_vision_nestopia_libretro.so",
+))
 SOCKET_PATH = Path("/run/rob-vision/frames.sock")
 
 
@@ -28,7 +31,7 @@ def sender_game(pid, registry, proc_root=Path("/proc")):
         return None
     if b"/dev/shm/retroarch.cfg" not in args:
         return None
-    if not any(args[i] == b"-L" and args[i + 1] == PROXY_CORE
+    if not any(args[i] == b"-L" and args[i + 1] in PROXY_CORES
                for i in range(len(args) - 1)):
         return None
     for arg in args[1:]:

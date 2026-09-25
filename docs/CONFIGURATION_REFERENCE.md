@@ -18,7 +18,8 @@
 | RetroPie receiver polling | 50 ms; request timeout 250 ms | Root uinput service reads the UNO Q state. |
 | RetroPie stale release | 750 ms since last good response | Both virtual buttons release; game exit and missing RetroArch also release them. |
 | RetroPie process scan | 250 ms | Identifies active RetroArch launch and can resync UNO Q game context after restart, throttled to two seconds. |
-| RetroPie game-frame socket | `/run/rob-vision/frames.sock` | The FCEUmm proxy sends one classified bit per rendered NES frame. The receiver validates sender credentials, ROM identity, and complete 13-frame commands. |
+| RetroPie game-frame socket | `/run/rob-vision/frames.sock` | The FCEUmm or Nestopia proxy sends one classified bit per rendered NES frame. The receiver validates sender credentials, approved proxy path, ROM identity, and complete 13-frame commands. |
+| RetroPie per-game NES core | `lr-robvision-fceumm` or `lr-robvision-nestopia` | Both are registered; current Gyromite and Stack-Up selections remain FCEUmm. Use the installer's `--gyromite-core` and `--stack-up-core` flags to choose per game. |
 | Game-frame indicator | Last matching receiver heartbeat within one second | `/api/state.input.frame_hook` is true; camera movement decoding pauses to avoid duplicate actions. |
 | Receiver online indicator | Authenticated poll within three seconds | Otherwise Setup/Mission show RetroPie offline. |
 | Game registry | `config/games.json` | Exact case-insensitive ROM basenames for Gyromite and Stack-Up, including configured ZIP, 7z, and NES names. |
