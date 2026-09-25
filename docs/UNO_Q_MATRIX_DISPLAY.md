@@ -2,7 +2,7 @@
 
 **Status: implemented in the R.O.B. Vision App Lab sketch and Linux bridge; physical display behavior still needs direct visual confirmation.** RetroPie pairing code is generated on RetroPie and entered on the browser Setup page. The UNO Q matrix shows a pairing cue only. This guide defines the behavior for the built-in 13-column by 8-row blue LED matrix. The large browser dashboard remains the place for the full R.O.B. animation, accessories, and explanations.
 
-These images show the 13×8 display states defined in `sketch/sketch.ino`. Each panel is one frame of an animation.
+In Buddy's story, this tiny display is his first sign of life outside the emulator. These images show the actual 13×8 display states defined in `sketch/sketch.ino`. Each panel is one frame of an animation; Buddy's full-color guide portrait is an illustration, not a matrix state.
 
 ## The animations
 

@@ -1,6 +1,6 @@
 # R.O.B. Vision quick reference
 
-**R.O.B. is virtual.** The UNO Q app and RetroPie link are running. Both Gyromite gate colors responded in Game A. RetroPie's game-frame link sent all six commands from each game to the virtual R.O.B. during live Direct play.
+**Buddy is virtual.** The UNO Q app and RetroPie link are running. Both Gyromite gate colors responded in Game A. RetroPie's game-frame link sent all six commands from each game to the virtual robot during live Direct play.
 
 | Where | Action | Result |
 | --- | --- | --- |

@@ -1,5 +1,11 @@
 # R.O.B. Vision changelog
 
+## Buddy in the guides — 25 September 2026
+
+- Added Buddy's original character portrait and a Meet Buddy introduction to the editable User Guide.
+- Rebuilt all four printable manuals with Buddy on their covers; the Quick Reference includes a small portrait without changing its single-page layout.
+- Kept gameplay screenshots and matrix diagrams tied to the actual interface and sketch. The web interface is unchanged by this documentation update.
+
 ## Frame-only runtime — 25 September 2026
 
 - Removed camera capture, sampled-light decoding, OpenCV dependency, camera recovery helpers, camera controls, and stale setup screenshots. RetroPie FCEUmm and Nestopia wrappers are now the only automatic command sources.

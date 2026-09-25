@@ -1,6 +1,6 @@
 # R.O.B. Vision user guide
 
-The UNO Q hosts a live virtual R.O.B. and receives Gyromite and Stack-Up commands through RetroPie's game-frame link. R.O.B., gyros, blocks, trays, and spinner are graphics and software state. There is no physical robot or camera.
+The UNO Q hosts Buddy, our virtual robot companion, and receives Gyromite and Stack-Up commands through RetroPie's game-frame link. The robot, gyros, blocks, trays, and spinner are graphics and software state. There is no physical robot or camera. [Meet Buddy](MEET_BUDDY.md) introduces his story; the instructions below describe the working controls.
 
 ## Open R.O.B. Vision
 

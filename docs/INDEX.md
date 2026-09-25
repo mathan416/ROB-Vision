@@ -12,6 +12,8 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 | --- | --- | --- |
 | Everyone | [Built-in Help center](../dashboard/help.html) | Searchable setup, play, controls, indicators, and troubleshooting inside the dashboard. |
 | Everyone | [Project README](../README.md) | Scope, preview, and document links. |
+| Everyone | [Buddy story brief](BUDDY_STORY.md) | Original character premise, interface moments, and public-brand boundaries. |
+| Everyone | [Meet Buddy](MEET_BUDDY.md) | Illustrated introduction used in the printable User Guide. |
 | Everyone | [Virtual system contract](VIRTUAL_SYSTEM.md) | UNO Q, browser, virtual pieces, and game-link responsibilities. |
 | Player | [User guide](USER_GUIDE.md) | Live controls, preview, and current limitations. |
 | Player and installer | [Setup guide](SETUP_GUIDE.md) | Pairing, frame-link status, Test mode, and manual checks. |

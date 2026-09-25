@@ -32,6 +32,7 @@ DOCS = ROOT / "docs"
 OUTPUT = ROOT / "output" / "pdf"
 WEB_GUIDES = ROOT / "dashboard" / "guides"
 FONTS = ROOT / "dashboard" / "fonts"
+BUDDY_ART = DOCS / "images" / "buddy-concept-v1.png"
 
 NAVY = colors.HexColor("#0C2030")
 MIDNIGHT = colors.HexColor("#07131F")
@@ -230,14 +231,12 @@ def cover(canvas, doc, title: str, subtitle: str, landscape_page: bool = False):
     canvas.setStrokeColor(colors.HexColor("#2C6173")); canvas.setLineWidth(1.4)
     for offset in (0, 27, 55):
         canvas.circle(width * .77, height * .58, height * .24 + offset, fill=0, stroke=1)
-    # Original geometric robot portrait.
-    cx = width * .77; cy = height * .58
-    canvas.setFillColor(colors.HexColor("#CFDBE2")); canvas.roundRect(cx-103, cy-44, 206, 124, 35, fill=1, stroke=0)
-    canvas.setFillColor(colors.HexColor("#163346")); canvas.roundRect(cx-92, cy-25, 184, 72, 19, fill=1, stroke=0)
-    for ex in (-48, 48):
-        canvas.setFillColor(colors.HexColor("#62D5DF")); canvas.circle(cx+ex, cy+11, 24, fill=1, stroke=0)
-        canvas.setFillColor(colors.HexColor("#CCF8F7")); canvas.circle(cx+ex-6, cy+17, 7, fill=1, stroke=0)
-    canvas.setFillColor(ORANGE); canvas.circle(cx, cy+62, 6, fill=1, stroke=0)
+    # Buddy is a separate story portrait; body diagrams remain screenshots of the app.
+    art_height = 450 if landscape_page else 550
+    art_width = art_height * 1145 / 1374
+    canvas.drawImage(str(BUDDY_ART), width - art_width - 9,
+                     80 if landscape_page else 165,
+                     width=art_width, height=art_height, mask="auto")
     canvas.setFillColor(ORANGE); canvas.rect(0, 0, 11, height, fill=1, stroke=0)
     canvas.setFillColor(colors.white); canvas.setFont("Barlow", 22)
     canvas.drawString(53, height-75, "R.O.B. VISION")
@@ -257,6 +256,11 @@ def cover(canvas, doc, title: str, subtitle: str, landscape_page: bool = False):
 def body_page(canvas, doc, label: str):
     width, height = doc.pagesize
     canvas.saveState()
+    if label == "Quick Reference":
+        art_height = 190
+        canvas.drawImage(str(BUDDY_ART), width - 48 - art_height * 1145 / 1374,
+                         70, width=art_height * 1145 / 1374,
+                         height=art_height, mask="auto")
     canvas.setStrokeColor(RULE); canvas.setLineWidth(.6)
     canvas.line(48, height-39, width-48, height-39)
     canvas.setFont("DM-Bold", 7.6); canvas.setFillColor(TEAL)
@@ -281,7 +285,8 @@ def build_book(filename: str, title: str, subtitle: str, chapter_files: list[str
     for n, name in enumerate(chapter_files, 1):
         chapter_starts_page = (n == 1 or page_size[1] > page_size[0]
                                or name in {"TROUBLESHOOTING.md", "DASHBOARD_DESIGN.md", "UNO_Q_MATRIX_DISPLAY.md"})
-        image_height = (170 if name == "UNO_Q_MATRIX_DISPLAY.md"
+        image_height = (300 if name == "MEET_BUDDY.md"
+                        else 170 if name == "UNO_Q_MATRIX_DISPLAY.md"
                         else 430 if page_size[1] > page_size[0] else 285)
         story.extend(markdown_story(DOCS / name, available_width, st, n,
                                     new_page=chapter_starts_page,
@@ -308,7 +313,7 @@ if __name__ == "__main__":
     generated = [
         build_book("R.O.B.-Vision-User-Guide.pdf", "User Guide",
                    "Play, preview, setup, and problem solving",
-                   ["USER_GUIDE.md", "GAMEPLAY_GUIDE.md", "SETUP_GUIDE.md", "INSTALLATION_GUIDE.md", "TROUBLESHOOTING.md"]),
+                   ["MEET_BUDDY.md", "USER_GUIDE.md", "GAMEPLAY_GUIDE.md", "SETUP_GUIDE.md", "INSTALLATION_GUIDE.md", "TROUBLESHOOTING.md"]),
         build_book("R.O.B.-Vision-Technical-Reference.pdf", "Technical Reference",
                    "Architecture, frame protocol, networking, hardware, and verification",
                    ["TECHNICAL_ARCHITECTURE.md", "HISTORICAL_MANUAL_NOTES.md", "GYROMITE_MANUAL_NOTES.md",
