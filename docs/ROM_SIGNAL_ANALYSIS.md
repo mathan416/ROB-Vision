@@ -1,6 +1,6 @@
 # Gyromite and Stack-Up ROM signal analysis
 
-**Status:** Static analysis of the user-supplied `Gyromite (World)` and `Stack-Up (World)` ROMs, 24 September 2026. The ZIP and 7z copies of each game contain identical NES data. No ROM or extracted graphics is stored in this project. The derived patterns have **not yet been captured from the user's LCD/OLED and camera**.
+**Status:** Static analysis of the user-supplied `Gyromite (World)` and `Stack-Up (World)` ROMs, 24 September 2026. The ZIP and 7z copies of each game contain identical NES data. No ROM or extracted graphics is stored in this project. The derived patterns have been sought in a live camera trace, but no full movement command has decoded from it.
 
 Run `python3 tools/analyze_rob_roms.py --gyromite '/path/to/Gyromite (World).zip' --stack-up '/path/to/Stack-Up (World).zip'` to reproduce the command report from the archives in place. The program rejects unexpected ROM layout or changed evidence bytes. The inspected full-file SHA-256 hashes are `bf1b323ba39c84b964f93127598b267ff3f16cbf99c533ae1e9b8332232b3e5b` (Gyromite) and `3ab6bc99246783a6bf7083481027fe358ccdb147dcf1165eaf08aaf4e1b06548` (Stack-Up). Each is an iNES mapper-0 image with 32 KiB program ROM and 8 KiB character ROM.
 
@@ -28,7 +28,7 @@ The screen flashes represent **one robot primitive per command**, not a complete
 
 The eight-bit command byte is the message after the five leading bits: for example, open is `$EE`, close `$BE`, left `$BA`, right `$EA`, Gyromite up/down `$BB/$FB`, Stack-Up up/down `$FA/$AE`, and ready light `$EB`. The ready-light message is a status operation. It must never move an axis.
 
-Test mode also uses sustained alternating dark/green flashes, distinct from the 13-frame ready-light command. The virtual head light blinks only after detecting a sustained alternation from the camera; the ready-light command produces a steady light. These are status indications, not motion commands. The Test-mode flash detector must be checked against real camera traces to confirm timing on the intended LCD/OLED and emulator.
+The live Gyromite Test screen presented a sustained green field in the camera crop. The virtual head light now blinks after detecting a sustained green field or regular Test alternation; a separately decoded ready-light command produces a steady light. These are status indications, not motion commands. Stack-Up Test mode has not been reached on the test console.
 
 ### ROM evidence
 
@@ -40,8 +40,8 @@ These addresses refer to the CPU view of these exact 32 KiB program images (`$80
 
 ## Implemented decoder and camera validation
 
-1. The OpenCV service samples a fixed central 60% region by default; `--camera-roi` changes it. It uses brightness changes, not sprite or text recognition. Automatic region finding and a second background region are not implemented.
-2. The current service requests 60 fps and reports delivered fps. Synthetic tests at 60 fps with jitter accepted 667/900 valid transmissions correctly and rejected 233; zero were misclassified in that run. At 30 fps, all 900 were rejected. Actual camera/display behavior is unverified.
+1. The OpenCV service samples a fixed central 60% region by default; `--camera-roi` changes it. It uses green dominance over the red and blue channels, not sprite or text recognition. Automatic region finding and a second background region are not implemented.
+2. The current service requests 60 fps and reports delivered fps. Synthetic tests at 60 fps with jitter accepted 667/900 valid transmissions correctly and rejected 233; zero were misclassified in that run. At 30 fps, all 900 were rejected. The attached camera delivered about 60 fps. Gyromite Test mode was recognized, but six spaced Direct-mode commands produced no decoded actions.
 3. Turn samples into a frame-clocked dark/bright sequence. Search for the complete `000101` preamble, then four variable bits at the specified positions with the three required intervening green bits. Require plausible bit widths and a complete message; reject missing, merged, or ambiguous samples.
 4. Accept only the action set for the identified game. A Gyromite two-level move and a Stack-Up one-level move are distinct actions. Keep the ready-light and test flashes outside the motion path. Ignore arbitrary game brightness changes that fail the full pattern.
 5. A complete accepted transmission produces one controller event. Separate identical transmissions remain valid, including in Stack-Up Memory.

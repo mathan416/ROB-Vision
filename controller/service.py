@@ -102,6 +102,7 @@ class Controller:
         self.test_armed_at = 0.0
         self.test_ready_at = 0.0
         self.test_flash_seen_at = 0.0
+        self.test_signal_announced = False
 
     def event(self, kind, message, command=None):
         self.sequence += 1
@@ -138,8 +139,9 @@ class Controller:
             self.test_armed_at = monotonic()
             self.test_ready_at = 0.0
             self.test_flash_seen_at = 0.0
+            self.test_signal_announced = False
             self.test_flash_detector.reset()
-            self.event("test", "Watching for the game's alternating Test-mode flashes or ready-light command.")
+            self.event("test", "Watching for the game's Test-mode optical signal or ready-light command.")
             return self.snapshot()
 
     def select(self, game):
@@ -152,6 +154,7 @@ class Controller:
             self.test_flash_detector.reset()
             self.test_armed_at = self.test_ready_at = 0.0
             self.test_flash_seen_at = 0.0
+            self.test_signal_announced = False
             self.event("session", f"{game or 'No game'} selected; virtual pieces reset.")
             return self.snapshot()
 
@@ -178,6 +181,7 @@ class Controller:
                 else:
                     if self.test_armed_at:
                         self.test_armed_at = self.test_ready_at = self.test_flash_seen_at = 0.0
+                        self.test_signal_announced = False
                         self.test_flash_detector.reset()
                     self.event("action", f"{source.title()} command: {normalized}.", normalized)
             return self.snapshot()
@@ -202,8 +206,9 @@ class Controller:
             self.camera["brightness"] = round(brightness, 3)
             self.camera["last_frame"] = time()
             if self.test_armed_at and self.test_flash_detector.feed(timestamp, brightness):
-                if monotonic() - self.test_flash_seen_at >= .25:
-                    self.event("test", "Alternating Test-mode flashes detected; R.O.B. light blinking.")
+                if not self.test_signal_announced:
+                    self.event("test", "Test-mode optical signal detected; R.O.B. light blinking.")
+                    self.test_signal_announced = True
                 self.test_flash_seen_at = monotonic()
             detection = self.decoder.feed(timestamp, brightness, self.game)
             if detection:
@@ -298,10 +303,10 @@ class Controller:
                     crop = frame[int(y * height):int((y + h) * height), int(x * width):int((x + w) * width)]
                     if crop.size == 0:
                         raise RuntimeError("Camera region is empty.")
-                    # Green exceeds red on the NES command frame. Measure both
-                    # brightness and green dominance to reject neutral room light.
+                    # White and green command frames have similar luminance on
+                    # this display. Measure green above both other channels.
                     b, g, r, _ = cv2.mean(crop)
-                    brightness = max(0.0, min(1.0, ((g - max(r, b) * .45) / 255)))
+                    brightness = max(0.0, min(1.0, (g - max(r, b)) / 255))
                     frame_times.append(timestamp)
                     while frame_times and timestamp - frame_times[0] > 4:
                         frame_times.popleft()

@@ -22,7 +22,7 @@ class OpticalTests(unittest.TestCase):
                 observed |= detector.feed((sample + .5) / fps, .8 if frame % 2 else .04)
             self.assertTrue(observed, fps)
         detector.reset()
-        self.assertFalse(any(detector.feed(i / 60, .8) for i in range(60)))
+        self.assertTrue(any(detector.feed(i / 60, .8) for i in range(60)))
         detector.reset()
         bits = '1' + next(iter(PATTERNS)) + '0000'
         self.assertFalse(any(detector.feed(i / 60, .8 if bit == '1' else .04) for i, bit in enumerate(bits)))
@@ -120,6 +120,20 @@ class ModelTests(unittest.TestCase):
         self.assertTrue(controller.snapshot()['test']['ready'])
         controller.command('DOWN_GYRO', 'camera')
         self.assertFalse(controller.snapshot()['test']['armed'])
+
+    def test_steady_green_test_signal_announced_once(self):
+        controller = Controller()
+        controller.select('gyromite')
+        controller.camera['state'] = 'capturing'
+        controller.arm_test()
+        initial = controller.snapshot()['robot']
+        for sample in range(180):
+            controller.sample(sample / 60, .25)
+        snapshot = controller.snapshot()
+        self.assertTrue(snapshot['test']['flash_active'])
+        self.assertEqual(snapshot['robot'], initial)
+        self.assertEqual(sum(event['message'].startswith('Test-mode optical signal detected')
+                             for event in snapshot['events']), 1)
 
     def test_camera_reconnect_reopens_after_capture_failure(self):
         captures = []

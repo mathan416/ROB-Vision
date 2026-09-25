@@ -7,7 +7,7 @@
 | App Lab gateway | HTTP port 80 | `http://arduiain.local/dashboard/` forwards to the controller. |
 | Controller service | Port 8766 | Direct `/dashboard/` and `/api/` access. Local CLI binds loopback by default; use `--host 0.0.0.0` for a trusted LAN. |
 | Controller token | `ROB_VISION_TOKEN` or UNO Q `~/.config/rob-vision/environment` | Required for RetroPie launch events and authenticated receiver polls, not LAN browser controls. Keep private. |
-| Camera index | `0` for manual start | OpenCV probes physical capture devices and excludes codec-only UNO Q video nodes. Actual camera node is unverified. |
+| Camera index | `0` for manual start | OpenCV probes physical capture devices and excludes codec-only UNO Q video nodes. The tested Kiyo Pro opens as `/dev/video2` on the UNO Q; device numbering may change. |
 | Camera frame request | 60 fps | Delivered fps is measured and shown; a request does not guarantee that rate. |
 | Camera region | `0.2,0.2,0.6,0.6` | Normalized x, y, width, height; central 60% of image. CLI `--camera-roi` can change it. |
 | Optical threshold/cells | Luminance 0.38; fixed 60 Hz source cells | Initial decoder values derived from ROM analysis, not calibrated to the actual display. |
@@ -30,7 +30,7 @@ python3 tools/identify_game.py start nes lr-fceumm "/roms/nes/Gyromite (World).z
 python3 tools/identify_game.py end
 ```
 
-The camera dependency is optional for manual controls and preview. On the UNO Q App Lab installation, OpenCV is present but no physical capture camera was attached for verification. The optional standalone `deploy/rob-vision.service` must stay disabled while App Lab owns port 8766. App Lab runs one app at a time on this device.
+The camera dependency is optional for manual controls and preview. On the UNO Q App Lab installation, OpenCV and the Kiyo Pro are present; Gyromite Test mode was recognized at about 60 fps, while movement decoding remains unverified. The optional standalone `deploy/rob-vision.service` must stay disabled while App Lab owns port 8766. App Lab runs one app at a time on this device.
 
 The repository includes UNO Q camera recovery, shutdown, early-start, and network-status host units. They are **not installed or enabled** by App Lab. Existing Avahi provides `arduiain.local`; the R.O.B. Vision status timer is diagnostic and does not create the mDNS name. See [UNO Q host helpers](../deploy/uno-q/README.md).
 

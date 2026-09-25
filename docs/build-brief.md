@@ -4,7 +4,7 @@
 
 R.O.B. Vision renders Nintendo's robotic companion and accessories as a virtual system controlled by an Arduino UNO Q. The game runs on RetroPie and a modern display; the UNO Q camera is intended to read its optical flashes. A laptop, iPad, or phone displays R.O.B. and the game table. Gyromite virtual pad states return over LAN as Controller 2 input. No physical robot or game accessories are built.
 
-The UNO Q App Lab app, dashboard, matrix sketch, virtual models, ROM-derived decoder, launch/exit hooks, pairing, and RetroPie receiver are implemented. Gyromite red and blue gate responses were user-confirmed in Game A. The decoder has synthetic 30/60 fps stress results but no actual camera/display test. Stack-Up's virtual block flows were tested and RetroArch booted it headlessly; interactive Stack-Up play remains to be tested.
+The UNO Q App Lab app, dashboard, matrix sketch, virtual models, ROM-derived decoder, launch/exit hooks, pairing, and RetroPie receiver are implemented. Gyromite red and blue gate responses were user-confirmed in Game A. The decoder has synthetic 30/60 fps stress results. The attached camera recognized Gyromite Test mode at about 60 fps, but movement commands did not decode. Stack-Up's virtual block flows were tested and RetroArch booted it headlessly; interactive Stack-Up play remains to be tested.
 
 ## Player experience
 

@@ -1,6 +1,6 @@
 # R.O.B. Vision technical architecture
 
-**Status, 24 September 2026:** The Arduino UNO Q runs the App Lab controller, matrix sketch, HTTP dashboard, and virtual R.O.B. model. RetroPie launch hooks and a paired virtual Controller 2 receiver run on `retropie.local`. Both Gyromite gate colors responded in Game A. Optical decoding has synthetic timing evidence, but no attached UNO Q camera/display has been validated. R.O.B. and all accessories exist only in software.
+**Status, 25 September 2026:** The Arduino UNO Q runs the App Lab controller, matrix sketch, HTTP dashboard, and virtual R.O.B. model. RetroPie launch hooks and a paired virtual Controller 2 receiver run on `retropie.local`. Both Gyromite gate colors responded in Game A. The attached camera recognized Gyromite Test mode at about 60 fps; live movement decoding remains unverified. R.O.B. and all accessories exist only in software.
 
 ## Runtime path
 
@@ -25,13 +25,13 @@ The Gyromite pad reducer derives red and blue from gyro location/spin or a held 
 
 ## Optical capture
 
-`controller/optical.py` recognizes the ROM-derived six movement/grip patterns from timestamped bright/dark samples. `controller/service.py` optionally opens an OpenCV capture device, requests 60 fps, samples the central 60% by default, and reports measured fps. Test-mode alternation drives the red status light without moving R.O.B. A complete valid command drives one action; ambiguous or partial traces drive none. Synthetic 60 fps jitter runs yielded 667 correct and 233 rejected commands out of 900, with zero wrong commands in that run. At 30 fps, all 900 were rejected. This is a decoder result, not a live camera acceptance result. An emulator hook is an unimplemented fallback if camera timing proves inadequate.
+`controller/optical.py` recognizes the ROM-derived six movement/grip patterns from timestamped bright/dark samples. `controller/service.py` optionally opens an OpenCV capture device, requests 60 fps, samples the central 60% by default, and reports measured fps. A sustained green Test-mode signal drives the red status light without moving R.O.B. A complete valid command drives one action; ambiguous or partial traces drive none. Synthetic 60 fps jitter runs yielded 667 correct and 233 rejected commands out of 900, with zero wrong commands in that run. At 30 fps, all 900 were rejected. This is a decoder result, not a live camera acceptance result. An emulator hook is an unimplemented fallback if camera timing proves inadequate.
 
 ## HTTP and trust boundary
 
 Browser controls on the trusted LAN can call `/api/game`, `/api/command`, `/api/gate-assist`, `/api/test/arm`, and camera actions without a token. The browser also reads `/api/state`, `/api/camera/frame`, and matrix status. The service uses JSON and same-origin checks for browser writes. `/api/launch` and receiver identity require the shared token; pairing uses a time-limited code and verified TLS certificate fingerprint to deliver it. Do not expose port 80 or 8766 to an untrusted network.
 
-Setup's **Reset & Reconnect** closes and reopens OpenCV capture; it does not reset the USB hub. UNO Q host recovery units are supplied under `deploy/uno-q` but are not installed by App Lab and currently need separate privileged setup. The attached Razer Kiyo Pro now runs at 640×480 MJPEG near 60 delivered fps after a temporary, identity-checked HDR-off and fixed-rate exposure request. Live optical commands still need confirmation.
+Setup's **Reset & Reconnect** closes and reopens OpenCV capture; it does not reset the USB hub. UNO Q host recovery units are supplied under `deploy/uno-q` but are not installed by App Lab and currently need separate privileged setup. The attached Razer Kiyo Pro now runs at 640×480 MJPEG near 60 delivered fps after a temporary, identity-checked HDR-off and fixed-rate exposure request. Live movement commands still need confirmation.
 
 ## Resets and limits
 

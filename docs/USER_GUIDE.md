@@ -1,6 +1,6 @@
 # R.O.B. Vision user guide
 
-**Current release:** The UNO Q hosts a live virtual R.O.B. dashboard and RetroPie link. Both Gyromite gate controls have been confirmed in Game A. A real camera and display have not yet passed optical-command testing. R.O.B., gyros, blocks, trays, and spinner are graphics and software state, not physical objects.
+**Current release:** The UNO Q hosts a live virtual R.O.B. dashboard and RetroPie link. Both Gyromite gate controls have been confirmed in Game A. The attached camera recognized Gyromite Test mode at 60 fps; game movement flashes have not yet produced a decoded action. R.O.B., gyros, blocks, trays, and spinner are graphics and software state, not physical objects.
 
 ## Open R.O.B. Vision
 
@@ -28,6 +28,6 @@ Stack-Up starts with all five colored blocks on Tray 3 in the current live model
 
 ## Camera and reset
 
-On Setup, **Start Camera Check** shows the camera image, sampling rectangle, signal, and measured frame rate. **Watch Test Flashes** blinks the virtual red light when sustained Test-mode alternation is recognized; it does not move R.O.B. **Reset & Reconnect** closes and retries the camera in software. This does not power-cycle the USB hub. The camera capture code requests 60 fps, but real optical play still needs validation with the intended camera and game display.
+On Setup, **Start Camera Check** shows the camera image, sampling rectangle, signal, and measured frame rate. **Watch Test Signal** blinks the virtual red light when a sustained green Test-mode signal is recognized; it does not move R.O.B. **Reset & Reconnect** closes and retries the camera in software. This does not power-cycle the USB hub. The camera capture code requests 60 fps, but real optical play still needs validation with the intended camera and game display.
 
 **Home** resets the selected virtual game. Live **Emergency Stop** stops camera capture and clears the game selection; in the offline preview it cancels the scripted animation until reset. A browser reload restores the UNO Q's current snapshot. See [Setup](SETUP_GUIDE.md), [gameplay](GAMEPLAY_GUIDE.md), and [troubleshooting](TROUBLESHOOTING.md).

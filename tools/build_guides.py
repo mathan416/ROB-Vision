@@ -249,8 +249,8 @@ def cover(canvas, doc, title: str, subtitle: str, landscape_page: bool = False):
     canvas.drawString(55, 126, subtitle)
     canvas.setStrokeColor(ORANGE); canvas.setLineWidth(3); canvas.line(55, 109, 216, 109)
     canvas.setFillColor(colors.HexColor("#8BA9B8")); canvas.setFont("DM-Bold", 8)
-    canvas.drawString(55, 67, "CURRENT REFERENCE  /  24 SEPTEMBER 2026")
-    canvas.drawString(55, 52, "UNO Q + RETROPIE LIVE · CAMERA VALIDATION PENDING")
+    canvas.drawString(55, 67, "CURRENT REFERENCE  /  25 SEPTEMBER 2026")
+    canvas.drawString(55, 52, "UNO Q + RETROPIE LIVE · TEST SIGNAL VERIFIED")
     canvas.restoreState()
 
 
@@ -263,7 +263,7 @@ def body_page(canvas, doc, label: str):
     canvas.drawString(48, height-28, "R.O.B. VISION")
     canvas.setFillColor(MUTED); canvas.drawRightString(width-48, height-28, label.upper())
     canvas.line(48, 43, width-48, 43)
-    canvas.setFont("DM", 7); canvas.drawString(48, 29, "LIVE CONTROLLER · CAMERA VALIDATION PENDING")
+    canvas.setFont("DM", 7); canvas.drawString(48, 29, "LIVE CONTROLLER · MOVEMENT OPTICS PENDING")
     canvas.drawRightString(width-48, 29, f"{doc.page:02d}")
     canvas.restoreState()
 

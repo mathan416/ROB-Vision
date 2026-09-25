@@ -36,9 +36,9 @@ class Detection:
 
 
 class TestFlashDetector:
-    """Recognize sustained frame-by-frame light alternation in a game's Test mode."""
+    """Recognize a sustained green Test field or frame-by-frame alternation."""
 
-    def __init__(self, threshold=0.38):
+    def __init__(self, threshold=0.10):
         self.threshold = threshold
         self.reset()
 
@@ -46,6 +46,7 @@ class TestFlashDetector:
         self.level = None
         self.last_time = None
         self.edges = deque(maxlen=13)
+        self.green_since = None
 
     def feed(self, timestamp, brightness):
         if not 0 <= brightness <= 1:
@@ -54,18 +55,26 @@ class TestFlashDetector:
             self.reset()
         self.last_time = timestamp
         level = brightness >= self.threshold
+        if level:
+            if self.green_since is None:
+                self.green_since = timestamp
+        else:
+            self.green_since = None
+        sustained = self.green_since is not None and timestamp - self.green_since >= .6
         if self.level is None:
             self.level = level
             return False
         if level == self.level:
-            return False
+            return sustained
         self.level = level
         self.edges.append(timestamp)
-        return len(self.edges) == 13 and all(.009 <= b - a <= .027 for a, b in zip(self.edges, list(self.edges)[1:]))
+        alternating = len(self.edges) == 13 and all(
+            .009 <= b - a <= .027 for a, b in zip(self.edges, list(self.edges)[1:]))
+        return sustained or alternating
 
 
 class OpticalDecoder:
-    def __init__(self, threshold=0.38, frame_seconds=FRAME_SECONDS):
+    def __init__(self, threshold=0.10, frame_seconds=FRAME_SECONDS):
         self.threshold = threshold
         self.frame_seconds = frame_seconds
         self.runs = deque(maxlen=32)

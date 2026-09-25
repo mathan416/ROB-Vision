@@ -13,7 +13,7 @@
     if (capture.platform === 'linux' && Array.isArray(capture.devices) && !capture.devices.length) return 'NO CAMERA DETECTED';
     return 'CAMERA OFFLINE';
   };
-  const test = snapshot => snapshot?.test?.flash_active ? 'TEST FLASHES SEEN' :
+  const test = snapshot => snapshot?.test?.flash_active ? 'TEST SIGNAL SEEN' :
     snapshot?.test?.ready ? 'READY SIGNAL SEEN' : snapshot?.test?.armed ? 'WATCHING' : 'WAITING';
   const testSignal = snapshot => Boolean(snapshot?.test?.flash_active || snapshot?.test?.ready || snapshot?.test?.armed);
   const controllerDetail = snapshot => `${gameName(snapshot?.game)} · ${camera(snapshot)}${snapshot?.camera?.state === 'capturing' ? ` · ${snapshot.camera.fps || 0} FPS` : ''} · ${receiver(snapshot)}`;

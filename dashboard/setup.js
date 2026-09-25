@@ -90,10 +90,10 @@
     $('test-light').classList.toggle('ready', ready);
     message('test-led-label', flashing ? 'R.O.B. LIGHT FLASHING' : ready ? 'R.O.B. LIGHT ON' : previewActive ? 'PREVIEW ONLY · FLASHING' : 'R.O.B. LIGHT OFF');
     message('test-state', status.test(snapshot));
-    message('test-feedback', flashing ? 'Alternating Test-mode flashes detected. R.O.B.’s red light blinks; his arms do not move.' :
+    message('test-feedback', flashing ? 'Test-mode optical signal detected. R.O.B.’s red light blinks; his arms do not move.' :
       ready ? 'A separate ready-light command was decoded. R.O.B.’s red light stays on; his arms do not move.' :
       previewActive ? 'This is a visual preview only. No camera signal was detected.' :
-      snapshot.test?.armed ? 'Waiting for Test-mode flashes. Keep the flashing area inside the green frame.' :
+      snapshot.test?.armed ? 'Waiting for the Test-mode signal. Keep the green game area inside the camera frame.' :
       'Select a game, start the camera, and arm the check while the game shows Test mode.');
     if (snapshot.camera.state === 'capturing') frame();
   }
