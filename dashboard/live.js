@@ -26,8 +26,9 @@
     connected = true;
     if (!snapshot.game) {
       $('gate-assist').hidden = true;
-      $('controller-status').textContent = 'CONTROLLER READY · NO GAME RUNNING';
       if (liveGame) window.RobDashboard.leaveLive();
+      $('connection').textContent = `NO GAME SELECTED / ${snapshot.link?.online ? 'RETROPIE ONLINE' : 'RETROPIE OFFLINE'}`;
+      $('controller-status').textContent = 'CONTROLLER READY · NO GAME SELECTED';
       liveGame = null;
       lastSequence = snapshot.sequence;
       lastCameraState = snapshot.camera.state;
@@ -45,7 +46,10 @@
       button.textContent = `${active ? 'RAISE' : 'LOWER'} ${color.toUpperCase()}`;
     }
     const noCamera = snapshot.camera.platform === 'linux' && !snapshot.camera.devices.length;
-    $('controller-status').textContent = snapshot.camera.state === 'fault' ? snapshot.camera.message : noCamera ? 'CONTROLLER READY · NO CAMERA ATTACHED' : snapshot.game ? `${snapshot.game === 'stack_up' ? 'STACK-UP' : 'GYROMITE'} · ${snapshot.camera.state.toUpperCase()} · ${snapshot.camera.fps} FPS` : 'CONTROLLER READY · SELECT A GAME';
+    const gameName = snapshot.game === 'stack_up' ? 'STACK-UP' : 'GYROMITE';
+    $('controller-status').textContent = snapshot.camera.state === 'fault' ? `${gameName} · ${snapshot.camera.message}` :
+      noCamera ? `${gameName} SELECTED · NO CAMERA ATTACHED` :
+      `${gameName} · ${snapshot.camera.state.toUpperCase()} · ${snapshot.camera.fps} FPS`;
     const testLightMode = snapshot.test?.flash_active ? 'flashing' : snapshot.test?.ready ? 'ready' : 'off';
     if (snapshot.sequence !== lastSequence || snapshot.camera.state !== lastCameraState || Boolean(snapshot.link?.online) !== lastLinkOnline || testLightMode !== lastTestLightMode) {
       lastCameraState = snapshot.camera.state;
@@ -72,7 +76,7 @@
     busy = true;
     try { accept(await request('/api/state')); }
     catch (error) {
-      if (connected) { connected = false; if (liveGame) window.RobDashboard.leaveLive(); liveGame = null; $('gate-assist').hidden = true; showError(error); }
+      if (connected) { connected = false; if (liveGame) window.RobDashboard.leaveLive(); liveGame = null; $('gate-assist').hidden = true; $('connection').textContent = 'CONTROLLER OFFLINE / RETROPIE UNKNOWN'; showError(error); }
     } finally { busy = false; }
   }
   async function act(path, data) {

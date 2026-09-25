@@ -598,7 +598,8 @@
       document.querySelectorAll('[data-mode]').forEach((tab) => { tab.disabled = true; });
       $('tracking-label').textContent = flashing ? 'TEST FLASHES DETECTED' : ready ? 'READY LIGHT SEEN' : snapshot.camera.state === 'capturing' ? 'CAMERA ACTIVE' : 'CAMERA OFFLINE';
       $('optical-value').textContent = snapshot.camera.state === 'capturing' ? `${snapshot.camera.fps} FPS` : 'CAMERA OFFLINE';
-      $('connection').textContent = snapshot.link?.online ? 'CONTROLLER CONNECTED / RETROPIE ONLINE' : 'CONTROLLER CONNECTED / GAME LINK PENDING';
+      const gameName = snapshot.game === 'stack_up' ? 'STACK-UP' : 'GYROMITE';
+      $('connection').textContent = `${gameName} SELECTED / ${snapshot.link?.online ? 'RETROPIE ONLINE' : 'RETROPIE OFFLINE'}`;
       document.querySelector('.gyro-vitals-note').textContent = snapshot.link?.online ? 'Virtual pad states sent to RetroPie Controller 2' : 'Virtual spin and button states; game link offline';
       $('controls-context').textContent = 'LIVE CONTROLLER / CAMERA OR MANUAL';
       document.querySelector('.vitals-card .live-text').textContent = '● CONTROLLER';

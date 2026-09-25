@@ -1,5 +1,10 @@
 # R.O.B. Vision changelog
 
+## Mission game-status labels — 24 September 2026
+
+- Show the selected Gyromite or Stack-Up game beside RetroPie link status on the Mission page, matching the game context visible on Setup.
+- Keep the game name in Pose Preview when no camera is attached, and replace the static footer's stale offline claim. The live device was checked with Gyromite selected and RetroPie online.
+
 ## Camera-rate correction — 24 September 2026
 
 - Changed the OpenCV camera request from 120 to 60 fps and updated Setup feedback for actual 30–60 fps cameras. The delivered frame rate remains measured, not assumed.
