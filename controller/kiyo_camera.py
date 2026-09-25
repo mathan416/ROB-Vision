@@ -54,9 +54,11 @@ def configure_kiyo_pro(device, sysfs=Path("/sys/class/video4linux")):
         payload = ctypes.create_string_buffer(size.value)
         payload[0:8] = _HDR_OFF
         fcntl.ioctl(fd, request, _ExtensionQuery(unit, 1, 0x01, size.value, ctypes.addressof(payload)))
-        for control, value in ((0x009A0901, 3), (0x009A0903, 0)):
+        # A one millisecond exposure kept the 60 Hz green/dark command cells
+        # separate on the tested LCD; automatic exposure blended them.
+        for control, value in ((0x009A0901, 1), (0x009A0902, 10)):
             fcntl.ioctl(fd, 0xC008561C, bytearray(struct.pack("Ii", control, value)))
-        for control, expected in ((0x009A0901, 3), (0x009A0903, 0)):
+        for control, expected in ((0x009A0901, 1), (0x009A0902, 10)):
             result = bytearray(struct.pack("Ii", control, 0))
             fcntl.ioctl(fd, 0xC008561B, result)
             if struct.unpack("Ii", result)[1] != expected:

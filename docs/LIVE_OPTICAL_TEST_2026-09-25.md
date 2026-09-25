@@ -27,7 +27,7 @@ The Test signal is a visual status check. Its red light must never move a virtua
 
 - The live NES core is FCEUmm. Player 1 uses its regular joypad controls; the R.O.B. Vision virtual Controller 2 remains on Player 2. Nestopia was tried during diagnosis, then its temporary per-ROM override was removed.
 - The registry on RetroPie, the UNO Q, and in this repository had the same SHA-256 hash. Live Gyromite and Stack-Up `.7z` launches selected the matching virtual game; exiting cleared the selection. Both archive formats were also launched during the optical investigation.
-- The Sony pad had Select assigned both to the game and RetroArch's hotkey modifier. The hotkey is now L3 (button 11), game Select is button 9, and game Start is button 8. L3+R3 exits RetroArch and was tested with Stack-Up. The previous profile is backed up on RetroPie.
+- The user remapped the Sony pad in EmulationStation. The resulting profile has Select on button 8, Start on button 9, and the hotkey on button 10. Independent test inputs also worked through RetroArch's configured keyboard directions. The user's generated pad profile was left intact.
 
 ## Changes from this test
 
@@ -41,3 +41,13 @@ The Test signal is a visual status check. Its red light must never move a virtua
 1. Capture confirmed Stack-Up Direct commands and compare each complete optical pattern with the ROM table. The Test signal is now confirmed and does not move virtual blocks.
 2. Improve the command capture path and replay recorded live traces before permitting an action. Verify all commands in both games, with repeated trials and no false movement during idle or Test mode.
 3. Check different screen positions, exposure settings, camera phase, and real gameplay timing. Keep the current fail-closed behavior until measured reliability is acceptable.
+
+## Independent Stack-Up Direct-mode follow-up
+
+- RetroPie was navigated into Stack-Up Direct mode and Hector was moved onto the actual RIGHT arrow using configured inputs. A short RetroArch recording showed the exact 13 rendered frames `0001011101010`, the ROM-derived RIGHT pattern. The temporary recording configuration was removed afterward; the original NES configuration was restored exactly.
+- A camera trace with a long dark idle before the flash contained all 13 cells. The decoder had rejected it because it counted the entire idle stretch as the three-frame preamble. It now trims that stretch and tests the phase of the first bright sample. A second live trace had a 9 ms dark cell; accepting a half-frame timing error while still requiring a unique sampled pattern recovered RIGHT in replay. All 42 local tests pass, including these two trace shapes and idle false-trigger checks.
+- The Kiyo Pro was tested with HDR off, 640×480 MJPEG near 60 delivered fps, and manual exposure 10 (1 ms). Automatic exposure blended the dark cells. The controller now applies that measured setting when it starts or reconnects this camera. The saved crop on this UNO Q is `0.32,0.15,0.045,0.05`; this is specific to the current physical aim.
+- In one live, independently triggered UP then RIGHT sequence, both commands decoded. UP was blocked because the arms were already at the top; RIGHT moved the virtual R.O.B. from station 3 to 4. After a later controller restart, another RIGHT trace was uniquely recoverable in offline replay but was just outside the earlier timing threshold. A final live sequence after deploying that adjustment was fully green in the camera samples, so no command decoded and R.O.B. correctly remained still.
+- Four additional hands-free UP/RIGHT cycles on the final deployment generated 80 bright camera samples but zero decoded commands. The virtual station stayed at 3. This confirms that the single successful live sequence does not represent dependable capture with the present 60 fps camera and LCD timing.
+- **Result:** automatic Stack-Up movement has been demonstrated end to end, but the 60 fps camera and display are not reliable enough for unattended play. The emulator's rendered 13-frame pattern is correct; the remaining loss is in optical capture. Gyromite automatic movement has not yet been demonstrated live. Keep the strict decoder; do not infer a command from an all-green or incomplete burst.
+- The measured next route for dependable RetroPie play is a frame-level emulator output hook that forwards only a fully matched 13-frame optical command to the UNO Q. This has not been implemented or validated. The camera path can remain available for original hardware and Test-mode checks.

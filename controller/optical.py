@@ -118,12 +118,19 @@ class OpticalDecoder:
         for first in range(max(0, len(runs) - 20), len(runs)):
             if runs[first][0] != 0:
                 continue
+            candidate_runs = runs[first:]
+            if runs[first][3] > self.frame_seconds * 8 and first + 1 < len(runs):
+                # The first command after a long idle has no preceding flash.
+                # Only its final three dark frames are the message preamble.
+                bright_start = runs[first][2]
+                candidate_runs = [(0, bright_start - 3 * self.frame_seconds,
+                                   bright_start, 3 * self.frame_seconds)] + runs[first + 1:]
             bits = ""
             plausible = True
-            for level, _start, _end, duration in runs[first:]:
+            for level, _start, _end, duration in candidate_runs:
                 cells = round(duration / self.frame_seconds)
                 error = abs(duration / self.frame_seconds - cells)
-                if cells < 1 or cells > 8 or error > .42:
+                if cells < 1 or cells > 8 or error > .50:
                     plausible = False
                     break
                 bits += str(level) * cells
@@ -134,7 +141,7 @@ class OpticalDecoder:
             command = PATTERNS.get(bits)
             if command not in ALLOWED[game]:
                 continue
-            start = runs[first][1]
+            start = candidate_runs[0][1]
             end = runs[-1][2]
             if end <= self.last_emitted_end or start < self.last_emitted_end:
                 continue
@@ -147,18 +154,20 @@ class OpticalDecoder:
     def _possible_commands(self, game, observed_start):
         """Reject a run fit if sampled frames also admit another command."""
         samples = list(self.samples)
-        previous_bright = next((stamp for stamp, level in reversed(samples)
-                                if stamp < observed_start and level == 1), None)
-        if previous_bright is None:
+        first_bright = next((stamp for stamp, level in samples
+                             if stamp >= observed_start and level == 1), None)
+        if first_bright is None:
             return set()
         possible = set()
-        # Only sample-to-bit assignments matter. Check every interval between
-        # the exact phase boundaries, including narrow ones near a frame edge.
-        boundaries = {previous_bright, observed_start}
+        # The first bright sample belongs to cell 3. Its exact position within
+        # that cell is unknown, so test every phase allowed by the timestamps.
+        lower = first_bright - 4 * self.frame_seconds
+        upper = first_bright - 3 * self.frame_seconds
+        boundaries = {lower, upper}
         for stamp, _level in samples:
             for cell in range(14):
                 boundary = stamp - cell * self.frame_seconds
-                if previous_bright < boundary < observed_start:
+                if lower < boundary < upper:
                     boundaries.add(boundary)
         ordered = sorted(boundaries)
         for lower, upper in zip(ordered, ordered[1:]):

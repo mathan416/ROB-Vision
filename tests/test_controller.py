@@ -57,6 +57,42 @@ class OpticalTests(unittest.TestCase):
             game = "stack_up" if command.endswith("STACK") else "gyromite"
             self.assertEqual(self.trace(pattern, game, fps=60), [command], command)
 
+    def test_first_command_after_long_idle_uses_three_dark_preamble_frames(self):
+        # The live Stack-Up RIGHT trace began after 19 seconds of darkness.
+        # Camera samples preserved the 13 bit cells, but the first dark run
+        # must be trimmed to the message's three-frame preamble.
+        decoder = OpticalDecoder()
+        samples = [(-.0661, 0), (-.0569, 0), (-.0487, 0),
+                   (-.0293, 0), (-.0167, 0), (0, 1), (.0215, 0),
+                   (.0379, 1), (.0542, 1), (.0702, 1), (.0892, 0),
+                   (.1035, 1), (.1200, 0), (.1392, 1), (.1533, 0),
+                   (.1702, 0), (.1845, 0)]
+        observed = []
+        for frame in range(60 * 19):
+            self.assertIsNone(decoder.feed(frame / 60, .02, "stack_up"))
+        start = 19.5
+        for offset, level in samples:
+            detection = decoder.feed(start + offset, .4 if level else .02, "stack_up")
+            if detection:
+                observed.append(detection.command)
+        self.assertEqual(observed, ["RIGHT"])
+
+    def test_live_60_fps_jittered_dark_cell_still_requires_unique_pattern(self):
+        decoder = OpticalDecoder()
+        for frame in range(60 * 3):
+            decoder.feed(frame / 60, .02, "stack_up")
+        start = 3.2
+        samples = [(-.064, 0), (-.046, 0), (-.031, 0), (-.015, 0),
+                   (0, 1), (.016, 0), (.034, 1), (.054, 1), (.072, 1),
+                   (.085, 0), (.105, 1), (.127, 0), (.136, 1),
+                   (.153, 0), (.162, 0), (.170, 0), (.185, 0)]
+        observed = []
+        for offset, level in samples:
+            detection = decoder.feed(start + offset, .4 if level else .02, "stack_up")
+            if detection:
+                observed.append(detection.command)
+        self.assertEqual(observed, ["RIGHT"])
+
     def test_realistic_camera_rates_fail_closed_when_bits_are_missed(self):
         # Unsynchronized 30/60 fps capture of 60 Hz one-frame bits cannot be
         # assumed complete. Preserve correct-command rate and no wrong actions.

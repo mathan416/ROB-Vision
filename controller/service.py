@@ -97,6 +97,7 @@ class Controller:
         self.camera_index = 0
         self.camera_roi = camera_roi
         self.preview_frame = None
+        self.camera_trace = deque(maxlen=1800)
         self.receiver_last_seen = 0.0
         self.receiver_name = None
         self.test_armed_at = 0.0
@@ -203,6 +204,7 @@ class Controller:
 
     def sample(self, timestamp, brightness):
         with self.lock:
+            self.camera_trace.append((round(timestamp, 6), round(brightness, 4)))
             self.camera["brightness"] = round(brightness, 3)
             self.camera["last_frame"] = time()
             if self.test_armed_at and self.test_flash_detector.feed(timestamp, brightness):
@@ -324,14 +326,10 @@ class Controller:
                         )
                     self.sample(timestamp, brightness)
                     if timestamp - last_preview >= .5:
-                        preview = frame.copy()
                         x0, y0 = int(x * width), int(y * height)
                         x1, y1 = int((x + w) * width), int((y + h) * height)
-                        cv2.rectangle(preview, (x0, y0), (x1, y1), (84, 225, 117), 2)
-                        ok_jpeg, encoded = cv2.imencode(".jpg", preview, [cv2.IMWRITE_JPEG_QUALITY, 68])
-                        if ok_jpeg:
-                            with self.lock:
-                                self.preview_frame = encoded.tobytes()
+                        with self.lock:
+                            self.preview_frame = (frame.copy(), (x0, y0, x1, y1))
                         last_preview = timestamp
             except Exception as exc:
                 with self.lock:
@@ -445,11 +443,21 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                                         {"available": False, "bridge_ok": False, "mode": None})
                 if path == "/api/camera/frame":
                     with controller.lock:
-                        frame = controller.preview_frame
-                    if frame is None:
+                        preview = controller.preview_frame
+                    if preview is None:
                         self.send_response(204)
                         self.end_headers()
                         return
+                    import cv2
+                    frame, (x0, y0, x1, y1) = preview
+                    frame = frame.copy()
+                    cv2.rectangle(frame, (x0, y0), (x1, y1), (84, 225, 117), 2)
+                    ok_jpeg, encoded = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 68])
+                    if not ok_jpeg:
+                        self.send_response(204)
+                        self.end_headers()
+                        return
+                    frame = encoded.tobytes()
                     self.send_response(200)
                     self.send_header("Content-Type", "image/jpeg")
                     self.send_header("Cache-Control", "no-store")
@@ -457,6 +465,10 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                     self.end_headers()
                     self.wfile.write(frame)
                     return
+                if path == "/api/camera/trace":
+                    with controller.lock:
+                        trace = list(controller.camera_trace)
+                    return self.respond(200, {"samples": trace, "roi": controller.camera_roi})
                 return self.respond(404, {"error": "Unknown endpoint."})
             if path == "/":
                 self.send_response(302)
