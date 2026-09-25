@@ -279,7 +279,13 @@ class Controller:
                     previous = timestamp
                     with self.lock:
                         self.camera["fps"] = round(fps, 1)
-                        self.camera["message"] = "Frame rate below 120 fps; optical commands may be missed." if fps and fps < 110 else "Watching for complete optical commands."
+                        self.camera["message"] = (
+                            "Below 60 delivered fps: one-frame flashes may be missed."
+                            if fps and fps < 60 else
+                            "At this frame rate, check Test mode; exposure and display timing may still hide flashes."
+                            if fps and fps < 120 else
+                            "Watching for complete optical commands."
+                        )
                     self.sample(timestamp, brightness)
                     if timestamp - last_preview >= .5:
                         preview = frame.copy()

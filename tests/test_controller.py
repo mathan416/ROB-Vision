@@ -30,6 +30,11 @@ class OpticalTests(unittest.TestCase):
             game = "stack_up" if command.endswith("STACK") else "gyromite"
             self.assertEqual(self.trace(pattern, game), [command], command)
 
+    def test_idealized_60_fps_can_decode_each_pattern(self):
+        for pattern, command in PATTERNS.items():
+            game = "stack_up" if command.endswith("STACK") else "gyromite"
+            self.assertEqual(self.trace(pattern, game, fps=60), [command], command)
+
     def test_wrong_game_and_partial_rejected(self):
         self.assertEqual(self.trace("0001011111010", "gyromite"), [])
         self.assertEqual(self.trace("0001011101", "stack_up"), [])

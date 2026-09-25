@@ -1,7 +1,8 @@
 """Decode complete, ROM-derived R.O.B. light messages from timestamped samples.
 
-Each sample is (monotonic_seconds, brightness). Capture should be at least 120 fps;
-the decoder uses run durations rather than assuming one camera frame per NES frame.
+Each sample is (monotonic_seconds, brightness). The light value can change every
+roughly 60 Hz game frame. Higher capture rates give more timing margin; the
+decoder uses run durations rather than assuming one camera frame per game frame.
 """
 
 from collections import deque
