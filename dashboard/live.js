@@ -8,15 +8,11 @@
   let busy = false;
   let available = true;
   let suspended = false;
-  let token = sessionStorage.getItem('rob-vision-token') || '';
   let lastCameraState = null;
-  const headers = () => ({ 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) });
+  let lastLinkOnline = null;
+  const headers = () => ({ 'Content-Type': 'application/json' });
   async function request(path, data) {
     const response = await fetch(path, { method: data === undefined ? 'GET' : 'POST', headers: headers(), ...(data === undefined ? {} : { body: JSON.stringify(data) }), cache: 'no-store' });
-    if (response.status === 401) {
-      $('controller-token').hidden = false;
-      throw new Error('Enter the controller token, then press Enter.');
-    }
     if (response.status === 404 && path === '/api/state') { available = false; throw new Error('Local preview only.'); }
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Controller request failed.');
@@ -36,8 +32,9 @@
     }
     const noCamera = snapshot.camera.platform === 'linux' && !snapshot.camera.devices.length;
     $('controller-status').textContent = snapshot.camera.state === 'fault' ? snapshot.camera.message : noCamera ? 'CONTROLLER READY · NO CAMERA ATTACHED' : snapshot.game ? `${snapshot.game === 'stack_up' ? 'STACK-UP' : 'GYROMITE'} · ${snapshot.camera.state.toUpperCase()} · ${snapshot.camera.fps} FPS` : 'CONTROLLER READY · SELECT A GAME';
-    if (snapshot.sequence !== lastSequence || snapshot.camera.state !== lastCameraState) {
+    if (snapshot.sequence !== lastSequence || snapshot.camera.state !== lastCameraState || Boolean(snapshot.link?.online) !== lastLinkOnline) {
       lastCameraState = snapshot.camera.state;
+      lastLinkOnline = Boolean(snapshot.link?.online);
       lastSequence = snapshot.sequence;
       window.RobDashboard.applyLive(snapshot);
       const recent = snapshot.events.at(-1);
@@ -60,7 +57,6 @@
     try { accept(await request('/api/state')); }
     catch (error) {
       if (connected) { connected = false; window.RobDashboard.leaveLive(); $('gate-assist').hidden = true; showError(error); }
-      else if (!$('controller-token').hidden) showError(error);
     } finally { busy = false; }
   }
   async function act(path, data) {
@@ -78,7 +74,6 @@
     const color = { '1': 'red', '2': 'blue', '0': 'all' }[event.key];
     if (color) { event.preventDefault(); act('/api/gate-assist', { color, pressed: color === 'all' ? false : !latest.robot?.assist?.[color] }); }
   });
-  $('controller-token').addEventListener('keydown', (event) => { if (event.key === 'Enter') { token = event.target.value.trim(); sessionStorage.setItem('rob-vision-token', token); poll(); } });
   window.RobLive = {
     hasService() { return connected; },
     select(mode) { suspended = false; act('/api/game', { game: mode === 'stack' ? 'stack_up' : 'gyromite' }); },

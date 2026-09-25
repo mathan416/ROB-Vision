@@ -48,6 +48,7 @@ class DeviceNameHandler(BaseHTTPRequestHandler):
             body = self.rfile.read(length) if length else None
             headers = {key: value for key, value in self.headers.items()
                        if key.lower() not in HOP_HEADERS}
+            headers["X-Rob-Original-Host"] = self.headers.get("Host", "")
             connection = HTTPConnection("127.0.0.1", 8766, timeout=10)
             try:
                 connection.request(self.command, self.path, body=body, headers=headers)

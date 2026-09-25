@@ -328,13 +328,28 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
                 return False
             return True
 
+        def browser_request(self):
+            if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json":
+                self.respond(415, {"error": "JSON requests are required."})
+                return False
+            if self.headers.get("Sec-Fetch-Site", "same-origin") not in ("same-origin", "none"):
+                self.respond(403, {"error": "Cross-site controls are not allowed."})
+                return False
+            origin = self.headers.get("Origin")
+            if origin:
+                parsed = urlsplit(origin)
+                hosts = {self.headers.get("Host", "").lower(),
+                         self.headers.get("X-Rob-Original-Host", "").lower()}
+                if parsed.scheme not in ("http", "https") or parsed.netloc.lower() not in hosts:
+                    self.respond(403, {"error": "Cross-site controls are not allowed."})
+                    return False
+            return True
+
         def do_GET(self):
             path = urlsplit(self.path).path
             if path.startswith("/api/"):
-                if not self.authorized():
-                    return
                 if path == "/api/state":
-                    if self.headers.get("X-ROB-Receiver") == "retropie":
+                    if self.headers.get("X-ROB-Receiver") == "retropie" and token and self.headers.get("Authorization") == f"Bearer {token}":
                         controller.receiver_seen("RetroPie")
                     return self.respond(200, controller.snapshot())
                 if path == "/api/camera/frame":
@@ -371,14 +386,16 @@ def serve(host="127.0.0.1", port=8766, token=None, camera_index=None, camera_roi
             self.wfile.write(body)
 
         def do_POST(self):
-            if not self.authorized():
+            path = urlsplit(self.path).path
+            if not self.browser_request():
+                return
+            if path == "/api/launch" and not self.authorized():
                 return
             try:
                 size = int(self.headers.get("Content-Length", "0"))
-                if size > 4096:
+                if size < 0 or size > 4096:
                     raise ValueError("Request too large.")
                 data = json.loads(self.rfile.read(size) or b"{}")
-                path = urlsplit(self.path).path
                 if path == "/api/game":
                     result = controller.select(data.get("game"))
                 elif path == "/api/launch":

@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080f1d">
   <title>R.O.B. Vision // Setup</title>
-  <link rel="stylesheet" href="style.css?v=setup-1">
-  <link rel="stylesheet" href="setup.css?v=setup-1">
-  <script src="setup.js?v=setup-1" defer></script>
+  <link rel="stylesheet" href="style.css?v=setup-3">
+  <link rel="stylesheet" href="setup.css?v=setup-3">
+  <script src="setup.js?v=setup-4" defer></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -18,20 +18,21 @@
       <div class="top-status"><span class="status-dot"></span><span id="setup-connection">CONNECTING</span></div>
     </header>
     <div class="setup-hero"><p class="eyebrow">READY THE MISSION / 00</p><h1>Connect. Aim. Test.</h1><p>Prepare the RetroPie link and camera, then check each game control before playing.</p></div>
-    <section class="setup-card auth-card" id="auth-card" hidden>
-      <div class="section-head"><span>CONTROLLER ACCESS</span><span>UNO Q</span></div>
-      <p>Enter the R.O.B. Vision controller token to use Setup. It stays in this browser tab until you close it.</p>
-      <div class="setup-row"><input id="setup-token" type="password" autocomplete="off" aria-label="Controller token" placeholder="Controller token"><button id="connect-button" type="button">CONNECT</button></div>
-    </section>
     <div class="setup-grid">
       <section class="setup-card" aria-labelledby="pair-heading">
-        <div class="section-head"><span>01 / PAIR</span><span id="pair-link">CHECKING</span></div>
-        <h2 id="pair-heading">Pair RetroPie</h2>
-        <p>On RetroPie, run <code>python3 /home/pi/rob-vision/tools/retropie_pair.py</code>. It displays a six-digit code and a SHA-256 fingerprint for five minutes. Compare both here before pairing.</p>
-        <label>Console address<input id="pair-host" autocomplete="off" value="retropie.local" placeholder="retropie.local"></label>
-        <label>Six-digit code<input id="pair-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"></label>
-        <label>SHA-256 fingerprint<input id="pair-fingerprint" autocomplete="off" spellcheck="false" placeholder="64 hex characters from RetroPie"></label>
-        <div class="setup-row"><button id="pair-button" type="button">PAIR CONSOLE</button><button id="pair-refresh" type="button" class="quiet">CHECK LINK</button></div>
+        <div class="section-head"><span>01 / CONSOLE LINK</span><span id="pair-link">CHECKING</span></div>
+        <h2 id="pair-heading">Connect RetroPie</h2>
+        <div id="pair-connected" hidden>
+          <p class="pair-success">RetroPie is already paired and its receiver is online. You can continue to the camera check.</p>
+          <div class="setup-row"><button id="pair-change" type="button" class="quiet">PAIR ANOTHER CONSOLE</button><button id="pair-refresh" type="button" class="quiet">CHECK LINK</button></div>
+        </div>
+        <div id="pair-details" hidden>
+          <p>On RetroPie, run <code>python3 /home/pi/rob-vision/tools/retropie_pair.py</code>. It displays a six-digit code and a SHA-256 fingerprint for five minutes. Compare both here before pairing.</p>
+          <label>Console address<input id="pair-host" autocomplete="off" value="retropie.local" placeholder="retropie.local"></label>
+          <label>Six-digit code<input id="pair-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"></label>
+          <label>SHA-256 fingerprint<input id="pair-fingerprint" autocomplete="off" spellcheck="false" placeholder="64 hex characters from RetroPie"></label>
+          <div class="setup-row"><button id="pair-button" type="button">PAIR CONSOLE</button><button id="pair-refresh-offline" type="button" class="quiet">CHECK LINK</button><button id="pair-cancel" type="button" class="quiet" hidden>BACK TO STATUS</button></div>
+        </div>
         <p class="setup-feedback" id="pair-feedback" role="status">The receiver must be installed on RetroPie before pairing.</p>
       </section>
       <section class="setup-card" aria-labelledby="camera-heading">

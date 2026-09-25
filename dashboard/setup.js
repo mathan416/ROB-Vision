@@ -1,17 +1,16 @@
 (() => {
   'use strict';
   const $ = (id) => document.getElementById(id);
-  let token = sessionStorage.getItem('rob-vision-token') || '';
   let state = null;
   let previewUrl = null;
   let previewBusy = false;
   let polling = false;
-  const headers = () => ({ 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) });
+  let pairExpanded = false;
+  const headers = () => ({ 'Content-Type': 'application/json' });
 
   async function api(path, data) {
     const response = await fetch(path, { method: data === undefined ? 'GET' : 'POST', headers: headers(),
       ...(data === undefined ? {} : { body: JSON.stringify(data) }), cache: 'no-store' });
-    if (response.status === 401) throw new Error('Enter the controller token to connect.');
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Controller request failed.');
     return result;
@@ -27,7 +26,7 @@
     if (previewBusy || state?.camera.state !== 'capturing') return;
     previewBusy = true;
     try {
-      const response = await fetch('/api/camera/frame', { headers: token ? { Authorization: `Bearer ${token}` } : {}, cache: 'no-store' });
+      const response = await fetch('/api/camera/frame', { cache: 'no-store' });
       if (response.status !== 200) return;
       const next = URL.createObjectURL(await response.blob());
       const previous = previewUrl;
@@ -41,9 +40,13 @@
   }
   function render(snapshot) {
     state = snapshot;
-    $('auth-card').hidden = true;
     message('setup-connection', `${snapshot.game ? snapshot.game.replace('_', '-').toUpperCase() : 'CONTROLLER'} / CONNECTED`);
-    message('pair-link', snapshot.link?.online ? 'RECEIVER ONLINE' : 'RECEIVER OFFLINE');
+    const receiverOnline = Boolean(snapshot.link?.online);
+    message('pair-link', receiverOnline ? 'RECEIVER ONLINE' : 'RECEIVER OFFLINE');
+    $('pair-connected').hidden = !receiverOnline || pairExpanded;
+    $('pair-details').hidden = receiverOnline && !pairExpanded;
+    $('pair-cancel').hidden = !receiverOnline;
+    if (receiverOnline && !pairExpanded) message('pair-feedback', 'Pairing is complete. Continue to the camera check.');
     message('camera-state', snapshot.camera.state.toUpperCase());
     message('camera-device', snapshot.camera.devices?.[0]?.name || 'NO CAMERA DETECTED');
     message('camera-fps', `${snapshot.camera.fps || 0} FPS`);
@@ -55,6 +58,8 @@
     message('buttons-mode', game ? game.replace('_', '-').toUpperCase() : 'SELECT A GAME');
     $('setup-gates').hidden = game !== 'gyromite';
     $('setup-stack').hidden = game !== 'stack_up';
+    if (game === 'gyromite') message('buttons-feedback', 'Use the red and blue buttons to test the matching gates. Stop the camera first.');
+    else if (game === 'stack_up') message('buttons-feedback', 'Send one movement at a time, then watch the virtual discs on Mission.');
     for (const color of ['red', 'blue']) {
       const button = document.querySelector(`[data-setup-gate="${color}"]`);
       const active = Boolean(snapshot.robot?.assist?.[color]);
@@ -78,20 +83,18 @@
     try { render(await api('/api/state')); }
     catch (error) {
       state = null;
-      $('auth-card').hidden = false;
+      $('pair-connected').hidden = true;
+      $('pair-details').hidden = true;
       message('setup-connection', error.message);
-      message('pair-link', 'NOT CONNECTED');
+      message('pair-link', 'CONTROLLER OFFLINE');
+      message('pair-feedback', 'The UNO Q controller is unavailable. Start R.O.B. Vision in App Lab.');
       clearFrame();
     } finally { polling = false; }
   }
-  $('connect-button').addEventListener('click', () => {
-    token = $('setup-token').value.trim();
-    sessionStorage.setItem('rob-vision-token', token);
-    $('setup-token').value = '';
-    poll();
-  });
-  $('setup-token').addEventListener('keydown', (event) => { if (event.key === 'Enter') $('connect-button').click(); });
   $('pair-refresh').addEventListener('click', poll);
+  $('pair-refresh-offline').addEventListener('click', poll);
+  $('pair-change').addEventListener('click', () => { pairExpanded = true; if (state) render(state); });
+  $('pair-cancel').addEventListener('click', () => { pairExpanded = false; if (state) render(state); });
   $('pair-button').addEventListener('click', async () => {
     const button = $('pair-button');
     button.disabled = true;
@@ -99,6 +102,7 @@
     try {
       const result = await api('/api/pair', { host: $('pair-host').value.trim(), code: $('pair-code').value.trim(), fingerprint: $('pair-fingerprint').value.trim() });
       message('pair-feedback', result.paired ? 'Pairing complete. Waiting for the RetroPie receiver to reconnect.' : 'Pairing was not confirmed.');
+      if (result.paired) pairExpanded = false;
       $('pair-code').value = '';
       $('pair-fingerprint').value = '';
       poll();

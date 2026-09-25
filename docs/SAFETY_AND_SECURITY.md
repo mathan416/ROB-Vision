@@ -1,5 +1,7 @@
 # R.O.B. Vision safety and security
 
+The Mission and Setup browser controls are available to devices on the same trusted LAN without a browser token prompt. Keep the UNO Q app off guest and public networks. The RetroPie launch notifier still requires the controller token, and receiver status is marked online only for authenticated receiver polls. Console pairing uses a short-lived code and a checked TLS certificate fingerprint.
+
 R.O.B. and its accessories are virtual. This project has no robot arm, powered gripper, physical spinner, tray sensor, or actuator supply. The dashboard **Emergency Stop** cancels a local animation; it does not cut physical power. The main risks are incorrect game input, stale network state, camera privacy, and misleading UI status.
 
 - Reject incomplete or ambiguous optical commands. A flicker or camera dropout must not repeat the last action.

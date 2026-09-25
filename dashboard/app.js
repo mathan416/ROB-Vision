@@ -592,7 +592,8 @@
       $('demo-button').disabled = true;
       $('tracking-label').textContent = snapshot.camera.state === 'capturing' ? 'CAMERA ACTIVE' : 'CAMERA OFFLINE';
       $('optical-value').textContent = snapshot.camera.state === 'capturing' ? `${snapshot.camera.fps} FPS` : 'CAMERA OFFLINE';
-      $('connection').textContent = 'CONTROLLER CONNECTED / GAME LINK PENDING';
+      $('connection').textContent = snapshot.link?.online ? 'CONTROLLER CONNECTED / RETROPIE ONLINE' : 'CONTROLLER CONNECTED / GAME LINK PENDING';
+      document.querySelector('.gyro-vitals-note').textContent = snapshot.link?.online ? 'Virtual pad states sent to RetroPie Controller 2' : 'Virtual spin and button states; game link offline';
       $('controls-context').textContent = 'LIVE CONTROLLER / CAMERA OR MANUAL';
       document.querySelector('.vitals-card .live-text').textContent = '● CONTROLLER';
       document.querySelector('.stage-panel .chip').textContent = 'LIVE VIRTUAL MOTION';
@@ -600,7 +601,7 @@
       $('gyro-a-value').textContent = robot?.pads?.red ? 'SPINNING / PRESSED' : $('gyro-a-value').textContent;
       $('gyro-b-value').textContent = robot?.pads?.blue ? 'SPINNING / PRESSED' : $('gyro-b-value').textContent;
     },
-    leaveLive() { state.live = false; home(); $('connection').textContent = 'OPTICAL + LAN / SIMULATED'; document.querySelector('.vitals-card .live-text').textContent = '● SIMULATION'; document.querySelector('.stage-panel .chip').textContent = 'SIMULATED MOTION'; }
+    leaveLive() { state.live = false; home(); $('connection').textContent = 'OPTICAL + LAN / SIMULATED'; document.querySelector('.vitals-card .live-text').textContent = '● SIMULATION'; document.querySelector('.stage-panel .chip').textContent = 'SIMULATED MOTION'; document.querySelector('.gyro-vitals-note').textContent = 'Virtual spin and button states; no game link'; }
   };
   $('event-list').querySelector('time').textContent = time();
   function tick() { $('clock').textContent = time(); } tick(); setInterval(tick, 1000); render();
