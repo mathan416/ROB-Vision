@@ -3,7 +3,8 @@
 ## Development installers — 25 September 2026
 
 - Added repeatable UNO Q App Lab and standard RetroPie installers, with app staging, private token preservation, frame wrapper builds, selective NES launch choices, runcommand hook merging, and service setup.
-- Added a post-pairing step that detects the virtual Controller 2 joystick and writes its NES mapping without changing Player 1. The installed test machines have not been reinstalled from scratch with these scripts yet.
+- Added a post-pairing step that detects the virtual Controller 2 joystick and writes its NES mapping without changing Player 1. Adjusted the installer for RetroPie's Python 3.7 and for the virtual joystick's brief restart delay.
+- Ran an in-place upgrade and repeat install on `retropie.local`: both wrappers built, the paired receiver stayed online, Gyromite and Stack-Up launch/end hooks selected and cleared the UNO Q game, and joystick 1 was mapped once. A blank-device install and new gameplay session remain untested.
 
 ## Buddy in the guides — 25 September 2026
 

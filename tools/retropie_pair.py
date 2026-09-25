@@ -25,7 +25,10 @@ def install_token(token, destination):
             file.write(token + "\n")
         os.replace(temporary, destination)
     finally:
-        temporary.unlink(missing_ok=True)
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
 
 
 def main():

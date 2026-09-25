@@ -1,12 +1,13 @@
 """Check installer edits without touching system services or game files."""
 
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from scripts.install import (configure_player2, install_uno, installed_controller, managed_text,
+from scripts.install import (configure_player2, copy_tree_merge, hook_event, install_uno, installed_controller, managed_text,
                              remove_legacy_hook, update_managed, valid_controller)
 
 
@@ -22,7 +23,8 @@ class InstallerTests(unittest.TestCase):
         old = ('#!/bin/sh\n# existing comment\nROB_VISION_URL=http://arduiain.local \\\n'
                'ROB_VISION_TOKEN_FILE=/home/pi/.config/rob-vision/token \\\n'
                '    /usr/bin/python3 /home/pi/rob-vision/tools/notify_game.py start "$@" >/dev/null || :\n')
-        cleaned = remove_legacy_hook(old, "start")
+        self.assertEqual(hook_event("launch"), "start")
+        cleaned = remove_legacy_hook(old, hook_event("launch"))
         self.assertNotIn("notify_game.py", cleaned)
         self.assertIn("# existing comment", cleaned)
         with self.assertRaises(ValueError):
@@ -38,6 +40,19 @@ class InstallerTests(unittest.TestCase):
             self.assertEqual(path.read_text(), first)
             self.assertTrue((path.parent / "retroarch.cfg.before-rob-vision").exists())
             self.assertLess(first.index("#include"), first.index("input_player2_a_btn"))
+
+    def test_player2_migration_stays_above_retroarch_include(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "retroarch.cfg"
+            path.write_text('input_player1_a_btn = "7"\ninput_player2_joypad_index = "1"\n'
+                            '#include "/opt/retropie/configs/all/retroarch.cfg"\n')
+            self.assertEqual(configure_player2(2, config=path), 2)
+            text = path.read_text()
+            self.assertEqual(text.count("input_player2_joypad_index"), 1)
+            self.assertLess(text.index('input_player2_joypad_index = "2"'), text.index("#include"))
+            self.assertIn('input_player1_a_btn = "7"', text)
+            configure_player2(2, config=path)
+            self.assertEqual(path.read_text(), text)
 
     def test_damaged_section_and_bad_hostname_are_rejected(self):
         with self.assertRaises(ValueError):
@@ -64,6 +79,37 @@ class InstallerTests(unittest.TestCase):
             self.assertEqual(configure_player2(sys_root=root / "sys", config=config), 2)
             self.assertIn('input_player1_a_btn = "7"', config.read_text())
             self.assertIn('input_player2_joypad_index = "2"', config.read_text())
+
+    def test_player2_waits_for_receiver_restart(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "retroarch.cfg"
+            config.write_text("#include all.cfg\n")
+            device = root / "sys/js1/device"
+            def appear():
+                device.mkdir(parents=True)
+                (device / "name").write_text("R.O.B. Vision Controller 2\n")
+            timer = threading.Timer(0.15, appear)
+            timer.start()
+            try:
+                self.assertEqual(configure_player2(sys_root=root / "sys", config=config,
+                                                   wait_seconds=1.0), 1)
+            finally:
+                timer.join()
+
+    def test_source_copy_ignores_macos_metadata(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            (source / "module.py").write_text("pass\n")
+            (source / "._module.py").write_bytes(b"\0\0")
+            (source / ".DS_Store").write_bytes(b"junk")
+            target = root / "target"
+            copy_tree_merge(source, target)
+            self.assertTrue((target / "module.py").exists())
+            self.assertFalse((target / "._module.py").exists())
+            self.assertFalse((target / ".DS_Store").exists())
 
     def test_uno_stages_app_and_preserves_private_token_on_upgrade(self):
         with tempfile.TemporaryDirectory() as directory:

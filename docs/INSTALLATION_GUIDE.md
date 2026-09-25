@@ -1,10 +1,10 @@
 # R.O.B. Vision installation guide
 
-**Installed test setup, 25 September 2026:** R.O.B. Vision is a separate UNO Q App Lab app. `retropie.local` has exact-name launch/exit hooks, pairing, a virtual Controller 2 receiver, and FCEUmm and Nestopia frame-link choices. Gyromite launch/exit and both gate colors were verified under FCEUmm. Both games delivered commands through FCEUmm and Nestopia. Nestopia's Gyromite Player 2 gate return still needs a Game A check. There is no physical robot or camera. The installer below is a development preview: its file and configuration behavior is tested locally, but a fresh installation on two new devices has not yet been run.
+**Installed test setup, 25 September 2026:** R.O.B. Vision is a separate UNO Q App Lab app. `retropie.local` has exact-name launch/exit hooks, pairing, a virtual Controller 2 receiver, and FCEUmm and Nestopia frame-link choices. Gyromite launch/exit and both gate colors were verified under FCEUmm. Both games delivered commands through FCEUmm and Nestopia. Nestopia's Gyromite Player 2 gate return still needs a Game A check. There is no physical robot or camera. The installer below is a development preview. It passed local tests and a live in-place RetroPie upgrade, but a fresh installation on two new devices has not yet been run.
 
 ## Before you begin
 
-- Use an Arduino UNO Q with App Lab and a standard RetroPie machine with the `pi` account and `/opt/retropie/configs`. Both need Python 3.10 or newer and `git`. RetroPie also needs `gcc`, `openssl`, `modprobe`, systemd, and at least one installed NES libretro core: `lr-fceumm` or `lr-nestopia`.
+- Use an Arduino UNO Q with App Lab and a standard RetroPie machine with the `pi` account and `/opt/retropie/configs`. The UNO Q needs Python 3.9 or newer; RetroPie needs Python 3.7 or newer. Both need `git`. RetroPie also needs `gcc`, `openssl`, `modprobe`, systemd, and at least one installed NES libretro core: `lr-fceumm` or `lr-nestopia`.
 - Supply your own legally obtained Gyromite or Stack-Up ROM with an exact filename listed in `config/games.json`. The repository and installer contain no ROMs.
 - Keep both devices on a trusted local network. Stop the R.O.B. Vision App Lab app and exit any NES game before installation or upgrade. The UNO Q can run only one App Lab app at a time on the tested device.
 
@@ -48,6 +48,8 @@ The last command discovers **R.O.B. Vision Controller 2** among RetroPie's joyst
 In RetroPie's per-game emulator selection, choose `lr-robvision-fceumm` or `lr-robvision-nestopia`. On Setup, **Check Link** should show the receiver online, and launching a registered ROM through a R.O.B. Vision choice should show **GAME FRAMES LINKED**. Start with Gyromite Test, then test blue and red gates individually in Game A. Stack-Up Direct mode can verify each of its six movements. The installer does not reprogram an existing Player 1 controller or its EmulationStation mapping.
 
 To upgrade, exit the games, stop the UNO Q app, update each `~/rob-vision-src` checkout, rerun the corresponding installer, and restart the App Lab app. Existing pairing is preserved. The RetroPie installer restarts the receiver when a token already exists; no fresh pairing is needed unless the UNO Q token changed.
+
+**Live installer check:** On `retropie.local` (Python 3.7), the installer migrated the original standalone hooks, rebuilt both wrappers, preserved the paired token, restarted the receiver, and detected virtual joystick 1. A repeat installation left one managed hook per event and one Controller 2 mapping. Installed launch/end hooks selected and cleared Gyromite and Stack-Up on the UNO Q. The controller reported an authenticated online receiver after the restart. The check did not run a new gameplay session or exercise a first-time pairing on a blank RetroPie.
 
 ## UNO Q and browser
 

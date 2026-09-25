@@ -12,7 +12,7 @@ The [Setup page](dashboard/setup.html) pairs RetroPie, shows receiver and game-f
 
 ## Install (development preview)
 
-The installer currently supports an Arduino UNO Q running App Lab and a standard RetroPie installation with the `pi` account. It does not include ROMs or emulator cores. Install Python 3.10 or newer on both machines, and install `gcc`, `openssl`, and either `lr-fceumm` or `lr-nestopia` on RetroPie. Stop R.O.B. Vision in App Lab and exit any NES game before installing or upgrading.
+The installer currently supports an Arduino UNO Q running App Lab and a standard RetroPie installation with the `pi` account. It does not include ROMs or emulator cores. The UNO Q needs Python 3.9 or newer; RetroPie needs Python 3.7 or newer, `gcc`, `openssl`, and either `lr-fceumm` or `lr-nestopia`. Stop R.O.B. Vision in App Lab and exit any NES game before installing or upgrading.
 
 Clone this `dev` branch separately on each device. On the **UNO Q**, sign in as `arduino` and run:
 
@@ -29,7 +29,7 @@ sudo python3 ~/rob-vision-src/scripts/install.py retropie --controller your-uno-
 python3 /home/pi/rob-vision/tools/retropie_pair.py
 ```
 
-Enter the displayed code and certificate fingerprint on the UNO Q Setup page. Then on RetroPie run `sudo systemctl enable --now rob-vision-controller2.service` and `sudo python3 ~/rob-vision-src/scripts/install.py player2` to map the detected virtual pad. Restart the game after mapping. See the [installation guide](docs/INSTALLATION_GUIDE.md) for upgrades, checks, and supported layouts. This installer has local automated coverage; a fresh two-device installation has not yet been exercised.
+Enter the displayed code and certificate fingerprint on the UNO Q Setup page. Then on RetroPie run `sudo systemctl enable --now rob-vision-controller2.service` and `sudo python3 ~/rob-vision-src/scripts/install.py player2` to map the detected virtual pad. Restart the game after mapping. See the [installation guide](docs/INSTALLATION_GUIDE.md) for upgrades, checks, and supported layouts. The RetroPie installer passed an in-place upgrade and repeat install on `retropie.local`, including both game launch/end hooks and the live UNO Q link. A fresh two-device installation has not yet been exercised.
 
 ## Play through RetroPie
 
