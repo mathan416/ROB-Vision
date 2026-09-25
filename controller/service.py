@@ -12,6 +12,7 @@ import socket
 import ssl
 import sys
 import threading
+from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from time import monotonic, time
@@ -19,6 +20,7 @@ from urllib.parse import urlsplit
 
 from .model import GyroState, StackState
 from .optical import OpticalDecoder, TestFlashDetector
+from .kiyo_camera import configure_kiyo_pro
 from tools.identify_game import identify, load_registry
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -252,6 +254,12 @@ class Controller:
                                    message="OpenCV is not installed on this controller.")
                 self.event("fault", self.camera["message"])
             raise RuntimeError("OpenCV is needed for camera capture. Install opencv-python on the controller.") from exc
+        kiyo_configured = False
+        try:
+            kiyo_configured = configure_kiyo_pro(index)
+        except (OSError, ValueError, RuntimeError) as exc:
+            with self.lock:
+                self.event("camera", f"Kiyo Pro 60 fps setting unavailable: {exc}")
         capture = cv2.VideoCapture(index)
         if not capture.isOpened():
             capture.release()
@@ -260,8 +268,11 @@ class Controller:
                                    message=f"Camera {index} could not be opened.")
                 self.event("fault", self.camera["message"])
             raise RuntimeError(f"Camera {index} could not be opened.")
-        # This is a best-effort request, not a measurement; the camera may
-        # deliver 30 or 60 fps. Report measured timing below.
+        if kiyo_configured:
+            capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+            capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        # This is a best-effort request; report measured timing below.
         capture.set(cv2.CAP_PROP_FPS, 60)
         self.capture_stop.clear()
         with self.lock:
@@ -274,8 +285,7 @@ class Controller:
             self.event("camera", f"Camera {index} opened.")
 
         def capture_loop():
-            previous = None
-            fps = 0.0
+            frame_times = deque()
             last_preview = 0.0
             try:
                 while not self.capture_stop.is_set():
@@ -292,10 +302,11 @@ class Controller:
                     # brightness and green dominance to reject neutral room light.
                     b, g, r, _ = cv2.mean(crop)
                     brightness = max(0.0, min(1.0, ((g - max(r, b) * .45) / 255)))
-                    if previous is not None:
-                        measured = 1 / max(timestamp - previous, .0001)
-                        fps = measured if fps == 0 else fps * .9 + measured * .1
-                    previous = timestamp
+                    frame_times.append(timestamp)
+                    while frame_times and timestamp - frame_times[0] > 4:
+                        frame_times.popleft()
+                    fps = ((len(frame_times) - 1) / (frame_times[-1] - frame_times[0])
+                           if len(frame_times) > 1 and frame_times[-1] > frame_times[0] else 0.0)
                     with self.lock:
                         self.camera["fps"] = round(fps, 1)
                         self.camera["message"] = (

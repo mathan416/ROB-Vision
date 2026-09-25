@@ -1,5 +1,11 @@
 # R.O.B. Vision changelog
 
+## Kiyo Pro camera commissioning — 25 September 2026
+
+- Confirmed VirtualGlove's 640×480, roughly 60 fps isolated Kiyo Pro capture result applies to this UNO Q only after a temporary HDR-off camera setting. R.O.B. Vision initially received about 30 fps with the default YUYV path; after the setting it received about 60 fps.
+- Added USB identity-checked Kiyo Pro setup at camera start and 640×480 MJPEG negotiation. Other cameras continue through the general OpenCV path. The setting is temporary and does not save to the camera.
+- Changed the live frame-rate display to a four-second delivered-frame measurement because instantaneous intervals overstated the rate during buffered bursts. Gyromite Test mode is armed, but no optical command or Test flash has been confirmed yet.
+
 ## Illustrated guides — 24 September 2026
 
 - Added frame-by-frame 13×8 matrix display images, captured the live Mission and Setup pages, and placed the relevant screenshots in the editable guides and printable manuals.

@@ -31,7 +31,7 @@ The Gyromite pad reducer derives red and blue from gyro location/spin or a held 
 
 Browser controls on the trusted LAN can call `/api/game`, `/api/command`, `/api/gate-assist`, `/api/test/arm`, and camera actions without a token. The browser also reads `/api/state`, `/api/camera/frame`, and matrix status. The service uses JSON and same-origin checks for browser writes. `/api/launch` and receiver identity require the shared token; pairing uses a time-limited code and verified TLS certificate fingerprint to deliver it. Do not expose port 80 or 8766 to an untrusted network.
 
-Setup's **Reset & Reconnect** closes and reopens OpenCV capture; it does not reset the USB hub. UNO Q host recovery units are supplied under `deploy/uno-q` but are not installed by App Lab and currently need separate privileged setup. The camera is not attached in the tested installation.
+Setup's **Reset & Reconnect** closes and reopens OpenCV capture; it does not reset the USB hub. UNO Q host recovery units are supplied under `deploy/uno-q` but are not installed by App Lab and currently need separate privileged setup. The attached Razer Kiyo Pro now runs at 640×480 MJPEG near 60 delivered fps after a temporary, identity-checked HDR-off and fixed-rate exposure request. Live optical commands still need confirmation.
 
 ## Resets and limits
 

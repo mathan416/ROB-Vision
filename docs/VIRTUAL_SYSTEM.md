@@ -4,7 +4,7 @@ R.O.B. is a virtual character and accessory model. The UNO Q runs the controller
 
 ## What is running
 
-The UNO Q App Lab app serves the dashboard, owns virtual game state, receives authenticated RetroPie game-launch events, and sends snapshots to browsers. `retropie.local` has runcommand launch/exit hooks and a paired Linux virtual Controller 2 receiver. Gyromite red and blue gate controls were verified in Game A. Synthetic tests cover the camera decoder, but actual optical play awaits an attached camera and display test. Stack-Up has been booted headlessly and its virtual model exercised; a full interactive Stack-Up session has not been observed.
+The UNO Q App Lab app serves the dashboard, owns virtual game state, receives authenticated RetroPie game-launch events, and sends snapshots to browsers. `retropie.local` has runcommand launch/exit hooks and a paired Linux virtual Controller 2 receiver. Gyromite red and blue gate controls were verified in Game A. The attached Kiyo Pro now delivers about 60 fps at 640×480, and synthetic tests cover the decoder; an optical command has not yet been confirmed from the live display. Stack-Up has been booted headlessly and its virtual model exercised; a full interactive Stack-Up session has not been observed.
 
 ## Game rules in the model
 
