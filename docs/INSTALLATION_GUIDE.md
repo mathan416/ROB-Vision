@@ -1,6 +1,6 @@
 # R.O.B. Vision installation guide
 
-**Installed test setup, 25 September 2026:** R.O.B. Vision is a separate UNO Q App Lab app. `retropie.local` has exact-name launch/exit hooks, pairing, a virtual Controller 2 receiver, and FCEUmm and Nestopia frame-link choices. Gyromite launch/exit and both gate colors were verified under FCEUmm. Both games delivered commands through FCEUmm and Nestopia. Nestopia's Gyromite Player 2 gate return still needs a Game A check. There is no physical robot or camera. The installer below is a development preview. It passed local tests and a live in-place RetroPie upgrade, but a fresh installation on two new devices has not yet been run.
+**Installed test setup, 25 September 2026:** R.O.B. Vision is a separate UNO Q App Lab app. `retropie.local` has exact-name launch/exit hooks, pairing, a virtual Controller 2 receiver, and FCEUmm and Nestopia frame-link choices. Gyromite launch/exit and both gate colors were verified under FCEUmm. Both games delivered commands through FCEUmm and Nestopia. Nestopia's Gyromite Player 2 gate return still needs a Game A check. There is no physical robot or camera. The installer below is a development preview. It passed local tests and live in-place upgrades on both devices, but a fresh installation on two new devices has not yet been run.
 
 ## Before you begin
 
@@ -28,6 +28,8 @@ python3 ~/rob-vision-src/scripts/install.py uno-q
 ```
 
 The installer stages the app in `~/ArduinoApps/rob-vision`, creates a private controller token on first installation, and preserves the token and other app data on upgrade. It retains the prior app in a `rob-vision.previous*` sibling for rollback. Start the new app from **App Lab → My Apps**. The normal panel address is `http://<your-uno-q-hostname>.local/dashboard/`; open `/dashboard/setup.html` to pair the console. App Lab owns ports 80 and 8766 while the app runs. Do not enable the separate `deploy/rob-vision.service` at the same time.
+
+On upgrade, the installer also preserves App Lab's `.deps` and `.cache` folders and refuses to replace a running app. Stop R.O.B. Vision in App Lab first; restart it there afterward. The previous app directory remains available for rollback until you remove it.
 
 ## Install on RetroPie
 
@@ -60,6 +62,8 @@ In RetroPie's per-game emulator selection, choose `lr-robvision-fceumm` or `lr-r
 To upgrade, exit the games, stop the UNO Q app, update each `~/rob-vision-src` checkout, rerun the corresponding installer, and restart the App Lab app. Existing pairing is preserved. The RetroPie installer restarts the receiver when a token already exists; no fresh pairing is needed unless the UNO Q token changed.
 
 **Live installer check:** On `retropie.local` (Python 3.7), the installer migrated the original standalone hooks, rebuilt both wrappers, preserved the paired token, restarted the receiver, and detected virtual joystick 1. A repeat installation left one managed hook per event and one Controller 2 mapping. Installed launch/end hooks selected and cleared Gyromite and Stack-Up on the UNO Q. The controller reported an authenticated online receiver after the restart. The exact published `dev` archive was transferred over SSH and installed successfully. A direct unauthenticated GitHub clone failed because the repository is private; the check did not run a new gameplay session or exercise first-time pairing on a blank RetroPie.
+
+**UNO Q installer check:** On `arduiain.local` (Python 3.13), R.O.B. Vision was stopped through App Lab, upgraded from an SSH-transferred `dev` archive, and started through App Lab. A repeat upgrade also succeeded. The controller token matched the previous app after both upgrades, `.deps` and `.cache` survived, and the sketch recompiled and uploaded. Mission, Setup, Help, and controller endpoints returned HTTP 200; `/api/matrix/state` reported an available, connected bridge in idle mode. RetroPie remained paired and online. A running-app attempt was correctly refused without interrupting the app. A blank-device first install remains untested.
 
 ## UNO Q and browser
 

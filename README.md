@@ -29,7 +29,7 @@ sudo python3 ~/rob-vision-src/scripts/install.py retropie --controller your-uno-
 python3 /home/pi/rob-vision/tools/retropie_pair.py
 ```
 
-Enter the displayed code and certificate fingerprint on the UNO Q Setup page. Then on RetroPie run `sudo systemctl enable --now rob-vision-controller2.service` and `sudo python3 ~/rob-vision-src/scripts/install.py player2` to map the detected virtual pad. Restart the game after mapping. See the [installation guide](docs/INSTALLATION_GUIDE.md) for upgrades, checks, and supported layouts. The RetroPie installer passed an in-place upgrade and repeat install on `retropie.local`, including both game launch/end hooks and the live UNO Q link. A fresh two-device installation has not yet been exercised.
+Enter the displayed code and certificate fingerprint on the UNO Q Setup page. Then on RetroPie run `sudo systemctl enable --now rob-vision-controller2.service` and `sudo python3 ~/rob-vision-src/scripts/install.py player2` to map the detected virtual pad. Restart the game after mapping. See the [installation guide](docs/INSTALLATION_GUIDE.md) for upgrades, checks, and supported layouts. Both the UNO Q and RetroPie installers passed in-place upgrades and repeat installs on the test devices, with pairing and the live link preserved. A fresh two-device installation has not yet been exercised.
 
 ## Play through RetroPie
 

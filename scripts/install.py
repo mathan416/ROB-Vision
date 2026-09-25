@@ -8,6 +8,7 @@ RetroPie: sudo python3 scripts/install.py retropie --controller robvision.local
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import pwd
 import re
@@ -153,6 +154,15 @@ def valid_controller(value: str) -> str:
     return value
 
 
+def app_lab_running() -> bool:
+    result = subprocess.run(["arduino-app-cli", "app", "list", "--format", "json"],
+                            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            universal_newlines=True)
+    listing = json.loads(result.stdout)
+    return any(app.get("name") == "R.O.B. Vision" and app.get("status") == "running"
+               for app in listing.get("apps", []))
+
+
 def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
     if sys.version_info < (3, 9):
         raise RuntimeError("Python 3.9 or newer is required by the UNO Q controller.")
@@ -160,6 +170,8 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
         raise RuntimeError("Run the UNO Q installer as the arduino user, without sudo.")
     if not destination.parent.is_dir():
         raise RuntimeError("ArduinoApps was not found. Install or enable UNO Q App Lab first.")
+    if app_lab_running():
+        raise RuntimeError("Stop R.O.B. Vision in App Lab before installing or upgrading.")
     if destination.is_symlink() or source.resolve() == destination.resolve():
         raise RuntimeError("Install from a separate checkout; the App Lab destination cannot be the source.")
     for required in ("app.yaml", "python/main.py", "sketch/sketch.ino", "dashboard/index.html"):
@@ -175,11 +187,11 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
             if (source / name).exists():
                 shutil.copytree(source / name, staged / name,
                                 ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store", "._*"))
+        for name in ("data", ".deps", ".cache"):
+            if (destination / name).is_dir():
+                shutil.copytree(destination / name, staged / name, symlinks=True)
         data = staged / "data"
-        if (destination / "data").is_dir():
-            shutil.copytree(destination / "data", data)
-        else:
-            data.mkdir()
+        data.mkdir(exist_ok=True)
         data.chmod(0o700)
         token = data / "controller-token"
         if not token.exists():

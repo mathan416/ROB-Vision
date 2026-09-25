@@ -7,7 +7,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from scripts.install import (configure_player2, copy_tree_merge, hook_event, install_uno, installed_controller, managed_text,
+from scripts.install import (app_lab_running, configure_player2, copy_tree_merge, hook_event, install_uno, installed_controller, managed_text,
                              remove_legacy_hook, update_managed, valid_controller)
 
 
@@ -125,9 +125,14 @@ class InstallerTests(unittest.TestCase):
             destination.parent.mkdir()
             with patch("scripts.install.sys.platform", "linux"), \
                  patch("scripts.install.os.geteuid", return_value=1000), \
-                 patch("scripts.install.pwd.getpwuid", return_value=SimpleNamespace(pw_name="arduino")):
+                 patch("scripts.install.pwd.getpwuid", return_value=SimpleNamespace(pw_name="arduino")), \
+                 patch("scripts.install.app_lab_running", return_value=False):
                 install_uno(source, destination)
                 token = (destination / "data/controller-token").read_text()
+                (destination / ".deps").mkdir()
+                (destination / ".deps/bridge.txt").write_text("installed")
+                (destination / ".cache").mkdir()
+                (destination / ".cache/app-compose.yaml").write_text("generated")
                 (source / "dashboard/index.html").write_text("<main>two</main>\n")
                 install_uno(source, destination)
             self.assertEqual((destination / "data/controller-token").read_text(), token)
@@ -135,6 +140,14 @@ class InstallerTests(unittest.TestCase):
             self.assertEqual((root / "ArduinoApps/rob-vision.previous/dashboard/index.html").read_text(),
                              "<main>one</main>\n")
             self.assertEqual((destination / "data/controller-token").stat().st_mode & 0o777, 0o600)
+            self.assertTrue((destination / "data").is_dir())
+            self.assertEqual((destination / ".deps/bridge.txt").read_text(), "installed")
+            self.assertEqual((destination / ".cache/app-compose.yaml").read_text(), "generated")
+
+    def test_running_app_is_detected_from_app_lab(self):
+        sample = '{"apps":[{"name":"R.O.B. Vision","status":"running"}]}'
+        with patch("scripts.install.subprocess.run", return_value=SimpleNamespace(stdout=sample)):
+            self.assertTrue(app_lab_running())
 
 
 if __name__ == "__main__":
