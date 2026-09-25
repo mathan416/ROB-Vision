@@ -10,6 +10,7 @@
   let suspended = false;
   let lastCameraState = null;
   let lastLinkOnline = null;
+  let liveGame = null;
   const headers = () => ({ 'Content-Type': 'application/json' });
   async function request(path, data) {
     const response = await fetch(path, { method: data === undefined ? 'GET' : 'POST', headers: headers(), ...(data === undefined ? {} : { body: JSON.stringify(data) }), cache: 'no-store' });
@@ -22,6 +23,17 @@
   function accept(snapshot) {
     latest = snapshot;
     connected = true;
+    if (!snapshot.game) {
+      $('gate-assist').hidden = true;
+      $('controller-status').textContent = 'CONTROLLER READY · NO GAME RUNNING';
+      if (liveGame) window.RobDashboard.leaveLive();
+      liveGame = null;
+      lastSequence = snapshot.sequence;
+      lastCameraState = snapshot.camera.state;
+      lastLinkOnline = Boolean(snapshot.link?.online);
+      return;
+    }
+    liveGame = snapshot.game;
     const assist = snapshot.game === 'gyromite' && snapshot.camera.state !== 'capturing';
     $('gate-assist').hidden = !assist;
     for (const color of ['red', 'blue']) {
@@ -56,7 +68,7 @@
     busy = true;
     try { accept(await request('/api/state')); }
     catch (error) {
-      if (connected) { connected = false; window.RobDashboard.leaveLive(); $('gate-assist').hidden = true; showError(error); }
+      if (connected) { connected = false; if (liveGame) window.RobDashboard.leaveLive(); liveGame = null; $('gate-assist').hidden = true; showError(error); }
     } finally { busy = false; }
   }
   async function act(path, data) {
@@ -76,6 +88,7 @@
   });
   window.RobLive = {
     hasService() { return connected; },
+    gameActive() { return Boolean(liveGame); },
     select(mode) { suspended = false; act('/api/game', { game: mode === 'stack' ? 'stack_up' : 'gyromite' }); },
     command(action) {
       if (!latest?.game) { $('controller-status').textContent = 'SELECT A GAME FIRST'; return; }

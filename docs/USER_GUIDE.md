@@ -17,6 +17,8 @@ The large **Live Model** shows R.O.B. moving two opposing hands around one piece
 
 The 55-second spin time is a demonstration setting, not a historical measurement. Select **Home** to reset at any point, or **Run Demo Sequence** to start again. No player needs to reposition virtual pieces.
 
+The demos remain available while RetroPie is paired but idle. Launching a supported game switches the dashboard to live control and stops a running demo; exiting the game restores the demo button and accessory choices.
+
 ### Run Stack-Up or Pose Lab
 
 **Stack-Up** starts with five colored discs on Tray 3. The demo moves red alone to Tray 4, then carries blue and white together to Tray 2, and stops. Use **Stack-Up Commands** below the view to try one virtual movement at a time; the grip button switches between **Close Hands** and **Open Hands**. R.O.B. can lift a disc together with every disc above it. **Home** restores all five discs to Tray 3. **Pose Lab** shows R.O.B. alone: its demo is a short greeting, and the **Pose Preview** buttons let you try turning, lifting, and gripping. It uses no game pieces or optical commands. **Emergency Stop** cancels the local sequence until **Reset Stop** is selected. It is a demo control, not a physical safety switch.

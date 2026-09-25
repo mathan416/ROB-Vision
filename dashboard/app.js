@@ -491,8 +491,7 @@
     else { cancelDemo(); resetGyros(); state.stopped = true; $('mission-title').textContent = 'Motion stopped.'; $('mission-description').textContent = 'Simulation stop latched. Reset to return to the home pose.'; $('stage-caption').textContent = 'Movement halted by operator.'; $('mission-step').textContent = 'STOPPED'; log('Emergency stop latched in simulation.'); render(); }
   });
   document.querySelectorAll('[data-mode]').forEach((button) => button.addEventListener('click', () => {
-    if (window.RobLive?.hasService() && button.dataset.mode !== 'free') { window.RobLive.select(button.dataset.mode); return; }
-    if (window.RobLive?.hasService() && button.dataset.mode === 'free') { window.RobLive.disconnect(); state.live = false; }
+    if (window.RobLive?.gameActive()) return;
     if (state.stopped) return;
     cancelDemo(); state.mode = button.dataset.mode;
     document.querySelectorAll('[data-mode]').forEach((tab) => tab.classList.toggle('active', tab === button));
@@ -590,6 +589,7 @@
       $('progress-text').textContent = `#${snapshot.sequence}`;
       render();
       $('demo-button').disabled = true;
+      document.querySelectorAll('[data-mode]').forEach((tab) => { tab.disabled = true; });
       $('tracking-label').textContent = snapshot.camera.state === 'capturing' ? 'CAMERA ACTIVE' : 'CAMERA OFFLINE';
       $('optical-value').textContent = snapshot.camera.state === 'capturing' ? `${snapshot.camera.fps} FPS` : 'CAMERA OFFLINE';
       $('connection').textContent = snapshot.link?.online ? 'CONTROLLER CONNECTED / RETROPIE ONLINE' : 'CONTROLLER CONNECTED / GAME LINK PENDING';
@@ -601,7 +601,7 @@
       $('gyro-a-value').textContent = robot?.pads?.red ? 'SPINNING / PRESSED' : $('gyro-a-value').textContent;
       $('gyro-b-value').textContent = robot?.pads?.blue ? 'SPINNING / PRESSED' : $('gyro-b-value').textContent;
     },
-    leaveLive() { state.live = false; home(); $('connection').textContent = 'OPTICAL + LAN / SIMULATED'; document.querySelector('.vitals-card .live-text').textContent = '● SIMULATION'; document.querySelector('.stage-panel .chip').textContent = 'SIMULATED MOTION'; document.querySelector('.gyro-vitals-note').textContent = 'Virtual spin and button states; no game link'; }
+    leaveLive() { state.live = false; home(); document.querySelectorAll('[data-mode]').forEach((tab) => { tab.disabled = false; }); $('connection').textContent = 'OPTICAL + LAN / SIMULATED'; document.querySelector('.vitals-card .live-text').textContent = '● SIMULATION'; document.querySelector('.stage-panel .chip').textContent = 'SIMULATED MOTION'; document.querySelector('.gyro-vitals-note').textContent = 'Virtual spin and button states; no game link'; }
   };
   $('event-list').querySelector('time').textContent = time();
   function tick() { $('clock').textContent = time(); } tick(); setInterval(tick, 1000); render();
