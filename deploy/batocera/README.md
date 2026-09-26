@@ -8,7 +8,7 @@ The installer retains an existing pairing token and controller URL on repeat run
 
 The console command prints the first-time pairing code and fingerprint. Enter them on Setup while it is still running.
 
-Enter the code and certificate fingerprint on the UNO Q Setup page, using the Batocera hostname. Pairing restarts the service. The receiver creates a virtual Controller 2; only Gyromite receives per-ROM Player 2 settings. Its joystick index is detected at service startup before Batocera generates RetroArch's game configuration. Stack-Up sends six movement commands to the virtual robot and has no controller return path.
+Enter the code and certificate fingerprint on the UNO Q Setup page, using the Batocera hostname. Pairing restarts the service. The receiver creates a virtual Controller 2; only Gyromite receives per-ROM Player 2 settings. Its joystick index is detected in SDL2 order at service startup before Batocera generates RetroArch's game configuration; the Linux `jsN` number can differ. Stack-Up sends six movement commands to the virtual robot and has no controller return path.
 
 Batocera keeps system core paths read-only. The service adds the R.O.B. Vision wrappers through a runtime overlay. If VirtualGlove already mounted that overlay, R.O.B. Vision adds its own files without changing VirtualGlove's service, hook, core, or game choice. The wrappers call the installed stock FCEUmm and Nestopia libraries. The frame socket and virtual pad disappear when the receiver stops; the overlay is rebuilt at boot.
 

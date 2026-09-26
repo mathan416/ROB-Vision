@@ -1,5 +1,6 @@
 """Batocera-specific configuration for the shared R.O.B. Vision receiver."""
 
+import ctypes
 import re
 import shutil
 import sys
@@ -47,9 +48,24 @@ def select_games(config=CONFIG, roms=Path("/userdata/roms/nes")):
     return chosen
 
 
-def pad_index(sys_root=Path("/sys/class/input")):
-    found = [int(path.parents[1].name[2:]) for path in sys_root.glob("js*/device/name")
-             if path.read_text().strip() == PAD_NAME]
+def pad_index():
+    """Find the pad in RetroArch's joystick order, not Linux's jsN order."""
+    try:
+        sdl = ctypes.CDLL("libSDL2-2.0.so.0")
+    except OSError as exc:
+        raise RuntimeError("Batocera's SDL2 joystick library is required.") from exc
+    sdl.SDL_Init.argtypes = [ctypes.c_uint32]
+    sdl.SDL_Init.restype = ctypes.c_int
+    sdl.SDL_NumJoysticks.restype = ctypes.c_int
+    sdl.SDL_JoystickNameForIndex.argtypes = [ctypes.c_int]
+    sdl.SDL_JoystickNameForIndex.restype = ctypes.c_char_p
+    if sdl.SDL_Init(0x200) != 0:
+        raise RuntimeError("Could not enumerate Batocera joysticks.")
+    try:
+        found = [i for i in range(sdl.SDL_NumJoysticks())
+                 if (sdl.SDL_JoystickNameForIndex(i) or b"").decode(errors="replace") == PAD_NAME]
+    finally:
+        sdl.SDL_QuitSubSystem(0x200)
     if len(found) != 1:
         raise RuntimeError("Start the receiver before launching Gyromite; exactly one virtual pad is required.")
     return found[0]

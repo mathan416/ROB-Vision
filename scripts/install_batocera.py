@@ -80,6 +80,10 @@ def install(source=ROOT, destination=DEST, controller=None):
         raise RuntimeError("Batocera service manager is missing.")
     if not shutil.which("openssl"):
         raise RuntimeError("OpenSSL is required for first-time pairing.")
+    try:
+        ctypes.CDLL("libSDL2-2.0.so.0")
+    except OSError as exc:
+        raise RuntimeError("Batocera's SDL2 joystick library is required.") from exc
     supported_hardware()
     if not Path("/usr/lib/libretro/fceumm_libretro.so").is_file():
         raise RuntimeError("The stock Batocera FCEUmm core is required before installation.")
