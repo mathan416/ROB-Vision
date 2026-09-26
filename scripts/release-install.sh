@@ -25,7 +25,14 @@ else
     fail "sha256sum or shasum is required"
 fi
 work="$(mktemp -d)" || fail "Could not create temporary directory"
-trap 'rm -rf "$work"' EXIT HUP INT TERM
+cleanup() {
+    if [ "$target" = console ] && [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null; then
+        sudo -n rm -rf "$work" 2>/dev/null || rm -rf "$work"
+    else
+        rm -rf "$work"
+    fi
+}
+trap cleanup 0 HUP INT TERM
 archive="$work/rob-vision.tar.gz"
 curl -fL --retry 3 --connect-timeout 15 -o "$archive" \
     "$BASE/rob-vision-$VERSION.tar.gz" || fail "Could not download $VERSION"
@@ -41,10 +48,10 @@ if [ "$target" = uno-q ]; then
 fi
 
 if [ "$(id -u)" -eq 0 ]; then
-    as_root() { "$@"; }
+    as_root() { PYTHONDONTWRITEBYTECODE=1 "$@"; }
 else
     command -v sudo >/dev/null || fail "Run as root or install sudo"
-    as_root() { sudo "$@"; }
+    as_root() { sudo env PYTHONDONTWRITEBYTECODE=1 "$@"; }
 fi
 if [ -f /userdata/system/batocera.conf ] && [ -d /usr/lib/libretro ]; then
     platform=batocera
