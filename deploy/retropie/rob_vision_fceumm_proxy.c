@@ -145,9 +145,6 @@ static void video_tap(const void *data, unsigned width, unsigned height, size_t 
 static int16_t input_tap(unsigned port, unsigned device, unsigned index, unsigned id) {
     int16_t original = frontend_input_state ? frontend_input_state(port, device, index, id) : 0;
 #ifdef ROB_PAD_RETURN_PATH
-    static unsigned debug_calls, debug_holds;
-    if (debug_calls++ < 80) fprintf(stderr, "ROB input port=%u device=%u index=%u id=%u value=%d\n",
-                                    port, device, index, id, original);
     /* Batocera may assign its generated Player 2 joystick index to Player 1.
      * Read the receiver's short-lived pad state directly at the libretro boundary.
      * A dead receiver cannot leave either gate held for more than two seconds. */
@@ -162,8 +159,6 @@ static int16_t input_tap(unsigned port, unsigned device, unsigned index, unsigne
                 read(fd, state, sizeof(state)) == sizeof(state)) {
                 unsigned bits = (state[0] == '1' ? 1u : 0u) |
                                 (state[1] == '1' ? 1u << 8 : 0u);
-                if (bits && debug_holds++ < 20)
-                    fprintf(stderr, "ROB pad return id=%u bits=%u\n", id, bits);
                 if (id == 256) original |= (int16_t)bits;
                 else if (bits & (1u << id)) original = 1;
             }
