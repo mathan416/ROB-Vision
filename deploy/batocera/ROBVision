@@ -12,8 +12,24 @@ overlay() {
     mount -t overlay "robvision-$name" -o "lowerdir=$target,upperdir=$RUN/$name-upper,workdir=$RUN/$name-work" "$RUN/$name-merged"
     mount --bind "$RUN/$name-merged" "$target"
 }
+wait_for_virtualglove_core() {
+    # Batocera starts enabled user services concurrently. VirtualGlove may
+    # mount (or reset) the same core paths during its startup. Let it finish
+    # before placing our wrappers into whichever overlay owns those paths.
+    [ -f /userdata/system/services/VirtualGlove ] || return 0
+    enabled=$(batocera-settings-get system.services 2>/dev/null || :)
+    case " $enabled " in *" VirtualGlove "*) ;; *) return 0 ;; esac
+    count=0
+    while [ "$count" -lt 30 ]; do
+        [ -f /usr/lib/libretro/nestopia_powerglove_libretro.so ] && return 0
+        sleep 1
+        count=$((count + 1))
+    done
+    echo "R.O.B. Vision: VirtualGlove core was not ready; continuing with R.O.B. Vision cores" >&2
+}
 start() {
     mkdir -p "$RUN"
+    wait_for_virtualglove_core
     overlay /usr/lib/libretro core
     overlay /usr/share/libretro/info info
     for core in fceumm nestopia; do
@@ -28,7 +44,7 @@ start() {
     modprobe uinput 2>/dev/null || :
     ROB_VISION_URL="$(cat "$APP/controller.url")" \
     ROB_VISION_TOKEN_FILE="$APP/token" \
-    python3 "$APP/tools/retropie_controller2.py" --platform batocera \
+    python3 "$APP/tools/retropie_controller2.py" --platform batocera --swap-buttons \
         >>"$APP/receiver.log" 2>&1 &
     echo "$!" >"$RUN/receiver.pid"
     python3 "$APP/tools/batocera.py" configure || echo "R.O.B. Vision: virtual Controller 2 override needs attention" >&2

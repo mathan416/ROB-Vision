@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 from identify_game import load_registry
 from retropie_controller2 import running_game
-from tools.batocera import configure_player2_overrides, map_player2, pad_index, select_games
+from tools.batocera import configure_player2_overrides, map_player2, pad_index, player1_index, select_games
 from scripts.install_batocera import supported_hardware, suspend_menu, resume_menu
 from tools.retropie_frame_hook import sender_game
 
@@ -25,6 +25,20 @@ class BatoceraTests(unittest.TestCase):
         with patch("tools.batocera.ctypes.CDLL", return_value=sdl):
             self.assertEqual(pad_index(), 2)
         sdl.SDL_QuitSubSystem.assert_called_once_with(0x200)
+
+    def test_player1_uses_the_controller_mapped_in_emulationstation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            xml = Path(directory) / "es_input.cfg"
+            xml.write_text('<inputList><inputConfig type="joystick" '
+                           'deviceName="Atari Game Controller"/></inputList>')
+            sdl = MagicMock()
+            sdl.SDL_Init.return_value = 0
+            sdl.SDL_NumJoysticks.return_value = 3
+            sdl.SDL_JoystickNameForIndex.side_effect = [
+                b"Atari Game Controller", b"virtual spinner", b"R.O.B. Vision Controller 2"]
+            with patch("tools.batocera.ctypes.CDLL", return_value=sdl):
+                self.assertEqual(player1_index(xml), 0)
+            sdl.SDL_QuitSubSystem.assert_called_once_with(0x200)
 
     def test_menu_is_suspended_before_receiver_hotplug_and_resumed(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -90,6 +104,8 @@ class BatoceraTests(unittest.TestCase):
             first = config.read_text()
             self.assertIn('input_player1_a_btn = "4"', first)
             self.assertIn('input_player2_joypad_index = "3"', first)
+            self.assertIn('input_player2_a_btn = "0"', first)
+            self.assertIn('input_player2_b_btn = "1"', first)
             map_player2(config, 3)
             self.assertEqual(config.read_text(), first)
 
@@ -102,13 +118,19 @@ class BatoceraTests(unittest.TestCase):
             (roms / "Stack-Up (World).zip").touch()
             config = root / "batocera.conf"
             config.write_text('nes["Super Glove Ball (USA).7z"].core=nestopia_powerglove\n')
-            self.assertEqual(configure_player2_overrides(config, roms, 5), 5)
+            self.assertEqual(configure_player2_overrides(config, roms, 5, player1=0), 5)
             first = config.read_text()
             self.assertIn('nes["Gyromite (World).zip"].retroarch.input_player2_joypad_index=5', first)
-            self.assertNotIn('nes["Stack-Up (World).zip"].retroarch', first)
+            self.assertIn('nes["Gyromite (World).zip"].retroarch.input_player1_joypad_index=0', first)
+            self.assertIn('nes["Stack-Up (World).zip"].retroarch.input_player1_joypad_index=0', first)
+            self.assertNotIn('nes["Stack-Up (World).zip"].retroarch.input_player2', first)
+            self.assertIn('nes["Gyromite (World).zip"].retroarch.input_player2_a_btn=0', first)
+            self.assertIn('nes["Gyromite (World).zip"].retroarch.input_player2_b_btn=1', first)
             self.assertIn('nes["Super Glove Ball (USA).7z"].core=nestopia_powerglove', first)
-            configure_player2_overrides(config, roms, 5)
+            configure_player2_overrides(config, roms, 5, player1=0)
             self.assertEqual(config.read_text(), first)
+            with self.assertRaises(RuntimeError):
+                configure_player2_overrides(config, roms, 5, player1=5)
 
     def test_trust_only_proxy_core_and_exact_rom_path(self):
         registry = load_registry()

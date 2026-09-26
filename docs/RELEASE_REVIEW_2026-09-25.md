@@ -28,3 +28,7 @@
 4. Check the panel from laptop, phone, and iPad together and verify reconnection after a UNO Q restart.
 
 See the [verification plan](VERIFICATION_PLAN.md), [FCEUmm frame-link report](FRAME_LINK_TEST_2026-09-25.md), and [Nestopia report](NESTOPIA_FRAME_LINK_TEST_2026-09-25.md). Historical camera results are in the [archived live optical report](LIVE_OPTICAL_TEST_2026-09-25.md).
+
+## 0.1.0 Nestopia follow-up
+
+Batocera and RetroPie Game A blue-gate hold and release passed after the wrapper selected Nestopia explicit Player 2 gamepad device `257`. RetroPie used a direct RetroArch recording to verify the gate positions. Stack-Up movement under Nestopia was observed in earlier Direct-mode sessions.

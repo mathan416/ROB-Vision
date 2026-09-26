@@ -30,6 +30,14 @@ Each game was closed after its check. Both per-ROM choices were restored to `lr-
 
 ## Remaining checks
 
-These checks establish normal RetroPie launches, real Nestopia frame delivery, exact optical command decoding, and UNO Q model delivery in both games. Gyromite's Player 2 red/blue gate return has been confirmed under FCEUmm but was not observed under Nestopia in Game A. Longer Nestopia sessions, Stack-Up Memory/Bingo, and color behavior with alternate Nestopia palettes or NTSC filters remain to be measured. FCEUmm remains the selected default.
+These checks establish normal RetroPie launches, real Nestopia frame delivery, exact optical command decoding, and UNO Q model delivery in both games. Gyromite's Player 2 red/blue gate return has been confirmed under FCEUmm. Nestopia's blue-gate return was subsequently confirmed on RetroPie and Batocera in Game A; see the follow-ups below. Longer Nestopia sessions, Stack-Up Memory/Bingo, and color behavior with alternate Nestopia palettes or NTSC filters remain to be measured. FCEUmm remains the selected default.
+
+## Batocera Game A follow-up
+
+The Batocera 43.1 x86_64 test identified a separate Nestopia Player 2 issue. In Nestopia, libretro device `1` means Auto; Gyromite then connects its optical R.O.B. peripheral to the second port. Its explicit gamepad device is `257`. The wrapper now selects `257` after ROM load while the normal RetroArch configuration remains at `1`. The release workflow rebuilt the product wrapper, and a live Game A screenshot test measured the blue gate at pixels 209–428 before a blue hold, 356–575 during the hold, and 209–428 after release. A red-only hold left it at 209–428. Reinstalling the bundled wrapper on Batocera preserved its checksum and restarted the receiver and EmulationStation successfully. Stack-Up also selected correctly and reported a live frame link through this wrapper; previous Direct-mode tests establish its movement behavior.
+
+## RetroPie Game A follow-up
+
+The corrected Nestopia wrapper was compiled and installed on `retropie.local`. Its receiver was upgraded and paired using the current console identity protocol. RetroPie's normal launcher selected the product Nestopia wrapper for Gyromite; the UNO Q reported Gyromite selected, the RetroPie console active, and game frames linked. RetroArch recorded the NES video at 256×224 and 60 fps while the UNO Q held blue, released blue, and held red alone. A cyan column of the first visible blue gate at x=69 occupied y=40–87 before the blue hold, y=64–110 and then y=72–119 during the hold, and y=40–87 after release. During the red-only hold it stayed at y=40–87. The per-game FCEUmm choice and unrecorded Nestopia launcher were restored after the test.
 
 See [RetroPie setup](../deploy/retropie/README.md) for selecting either core and [FCEUmm live results](FRAME_LINK_TEST_2026-09-25.md) for the established end-to-end baseline.

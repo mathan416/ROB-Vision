@@ -159,6 +159,12 @@ void retro_deinit(void) {
 void retro_get_system_info(struct retro_system_info *info) { REAL(retro_get_system_info); if (fn) fn(info); }
 void retro_get_system_av_info(struct retro_system_av_info *info) { REAL(retro_get_system_av_info); if (fn) fn(info); }
 void retro_set_controller_port_device(unsigned port, unsigned device) {
+#ifdef ROB_USE_NESTOPIA
+    /* Nestopia defines 1 as Auto. Gyromite's ROM selects the optical R.O.B.
+     * peripheral for port 2 in that mode, so a virtual joypad cannot press
+     * the gates. Its explicit Gamepad device is subclass 0 of Joypad (257). */
+    if (port == 1 && device == 1) device = 257;
+#endif
     REAL(retro_set_controller_port_device); if (fn) fn(port, device);
 }
 void retro_reset(void) { REAL(retro_reset); if (fn) fn(); }
@@ -172,7 +178,15 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code) {
 }
 bool retro_load_game(const struct retro_game_info *game) {
     frame_index = 0; pixel_format = 0;
-    REAL(retro_load_game); return fn && fn(game);
+    REAL(retro_load_game);
+    bool loaded = fn && fn(game);
+#ifdef ROB_USE_NESTOPIA
+    /* Nestopia auto-selects the ROM's peripheral while loading. Restore the
+     * explicit second gamepad after that selection, including when RetroArch
+     * sent its device choice before retro_load_game. */
+    if (loaded) retro_set_controller_port_device(1, 257);
+#endif
+    return loaded;
 }
 bool retro_load_game_special(unsigned type, const struct retro_game_info *games, size_t count) {
     frame_index = 0; pixel_format = 0;

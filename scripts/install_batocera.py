@@ -114,7 +114,7 @@ def install(source=ROOT, destination=DEST, controller=None):
         write_file(old_url, f"http://{controller}\n", 0o600)
         copy_file(source / "deploy/batocera/ROBVision", SERVICES / "ROBVision", 0o755)
         copy_file(source / "deploy/batocera/zz-robvision-game", SCRIPTS / "zz-robvision-game", 0o755)
-        copy_file(source / "deploy/retropie/retroarch-joypad.cfg",
+        copy_file(source / "deploy/batocera/retroarch-joypad.cfg",
                   Path("/userdata/system/configs/retroarch/inputs/R.O.B. Vision Controller 2.cfg"))
         chosen = select_games(CONFIG, Path("/userdata/roms/nes"))
         subprocess.run(["batocera-services", "enable", "ROBVision"], check=True)
