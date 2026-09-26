@@ -288,7 +288,7 @@ def build_book(filename: str, title: str, subtitle: str, chapter_files: list[str
         chapter_starts_page = (n == 1 or page_size[1] > page_size[0]
                                or name in {"TROUBLESHOOTING.md", "DASHBOARD_DESIGN.md", "UNO_Q_MATRIX_DISPLAY.md"})
         image_height = (300 if name == "MEET_BUDDY.md"
-                        else 170 if name == "UNO_Q_MATRIX_DISPLAY.md"
+                        else 135 if name == "UNO_Q_MATRIX_DISPLAY.md"
                         else 430 if page_size[1] > page_size[0] else 285)
         chapter_label = ("STORY" if name == "MEET_BUDDY.md"
                          else "TECHNICAL REFERENCE" if title == "Technical Reference"
@@ -327,7 +327,7 @@ if __name__ == "__main__":
                     "STACK_UP_MANUAL_NOTES.md", "GAME_IDENTIFICATION.md",
                     "optical-input.md", "ROM_SIGNAL_ANALYSIS.md", "DASHBOARD_DESIGN.md",
                     "HARDWARE_BUILD_GUIDE.md", "CONFIGURATION_REFERENCE.md",
-                    "SAFETY_AND_SECURITY.md", "VERIFICATION_PLAN.md", "UNO_Q_MATRIX_DISPLAY.md"],
+                    "SAFETY_AND_SECURITY.md", "VERIFICATION_PLAN.md"],
                    page_size=landscape(A4)),
         build_book("R.O.B.-Vision-Matrix-Display-Guide.pdf", "Matrix Display Guide",
                    "UNO Q status animations and display states",

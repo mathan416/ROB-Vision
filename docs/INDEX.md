@@ -16,7 +16,7 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 | Everyone | [Virtual system contract](VIRTUAL_SYSTEM.md) | UNO Q, browser, virtual pieces, and game-link responsibilities. |
 | Player | [User guide](USER_GUIDE.md) | Live controls, preview, and current limitations. |
 | Player and installer | [Setup guide](SETUP_GUIDE.md) | Pairing, frame-link status, Test mode, and manual checks. |
-| Player and installer | [UNO Q matrix display design](UNO_Q_MATRIX_DISPLAY.md) | Implemented matrix software and pending visual checks. |
+| Player and installer | [UNO Q matrix display guide](UNO_Q_MATRIX_DISPLAY.md) | What Buddy's hourglass, eyes, game marks, Test light, and pairing cue mean. |
 | Player | [Gameplay guide](GAMEPLAY_GUIDE.md) | Gyromite, Stack-Up, holders, spin, and virtual button rules. |
 | Player | [Quick reference](QUICK_REFERENCE.md) | Controls and indicators at a glance. |
 | Installer | [Installation guide](INSTALLATION_GUIDE.md) | One command per device, browser pairing, upgrades, and supported hardware. |

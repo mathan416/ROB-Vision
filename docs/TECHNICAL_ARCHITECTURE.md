@@ -14,6 +14,12 @@ NES frames --> FCEUmm or Nestopia wrapper --> local frame receiver
 
 The App Lab `python/main.py` gateway publishes port 80 and forwards to `controller/service.py` on port 8766. Router Bridge sends controller status and action hints to `sketch/sketch.ino` for the UNO Q LED matrix. The dashboard polls `/api/state` every 500 ms. A local file preview uses a separate scripted JavaScript model; a served page with a controller enters live mode.
 
+## UNO Q matrix behavior
+
+The sketch owns the 13×8 LED framebuffer and starts an hourglass before Router Bridge becomes available. Linux sends requested display modes and accepted action hints; the sketch handles frame timing. It shows idle eyes, `GY` or `SU` title cues followed by game eyes, a pulsing `T` for a detected Test signal, a brief steady `T` for the separate ready-light command, and a pulsing `P` during pairing. Movement hints briefly change the eyes without changing game state. The sketch contains a blinking `X` fault glyph, but the controller does not currently request that mode; do not present it as a live user indication.
+
+Active display priority is pairing, Test or ready signal, selected game, then idle. Startup and lost heartbeat show the hourglass. Linux sends a heartbeat at least once per second; if none arrives for about 3.5 seconds, the sketch returns to the hourglass. App Lab can control the matrix only after the platform releases its boot display. The [Matrix Display Guide](UNO_Q_MATRIX_DISPLAY.md) explains these cues to players; [verification](VERIFICATION_PLAN.md) tracks direct visual checks on the board.
+
 ## Network and console identity
 
 The UNO Q owns the virtual pose and pieces. A browser on the trusted LAN reads its state, while a paired console identifies game launches, sends validated frame commands, and receives Gyromite's virtual Controller 2 pad states. Wi-Fi and Ethernet carry the same HTTP protocol. The App Lab gateway serves the dashboard on port 80; port 8766 is the controller service behind it. The device's existing mDNS service advertises its own hostname, so a UNO Q named `virtualglove` is reached at `http://virtualglove.local/dashboard/`, while one named `arduiain` uses `http://arduiain.local/dashboard/`. The numeric address assigned to that UNO Q works as well.
