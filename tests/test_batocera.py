@@ -1,18 +1,37 @@
 import sys
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 from identify_game import load_registry
 from retropie_controller2 import running_game
 from tools.batocera import configure_player2_overrides, map_player2, select_games
-from scripts.install_batocera import supported_hardware
+from scripts.install_batocera import supported_hardware, suspend_menu, resume_menu
 from tools.retropie_frame_hook import sender_game
 
 
 class BatoceraTests(unittest.TestCase):
+    def test_menu_is_suspended_before_receiver_hotplug_and_resumed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            service = Path(directory) / "S31emulationstation"
+            service.touch()
+            results = [subprocess.CompletedProcess([], 0) for _ in range(2)]
+            results.append(subprocess.CompletedProcess([], 1))
+            results.append(subprocess.CompletedProcess([], 0))
+            with patch("scripts.install_batocera.ES_SERVICE", service), patch(
+                "scripts.install_batocera.subprocess.run", side_effect=results
+            ) as run:
+                self.assertTrue(suspend_menu())
+                resume_menu()
+            self.assertEqual([call.args[0] for call in run.call_args_list], [
+                ["pidof", "emulationstation"], [str(service), "suspend"],
+                ["pidof", "emulationstation"], [str(service), "resume"],
+            ])
+
     def test_hardware_gate_precedes_installation(self):
         with tempfile.TemporaryDirectory() as directory:
             version = Path(directory) / "batocera.version"
