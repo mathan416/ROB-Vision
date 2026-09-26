@@ -1,6 +1,6 @@
 # UNO Q matrix display design
 
-**Status: implemented in the R.O.B. Vision App Lab sketch and Linux bridge; physical display behavior still needs direct visual confirmation.** RetroPie pairing code is generated on RetroPie and entered on the browser Setup page. The UNO Q matrix shows a pairing cue only. This guide defines the behavior for the built-in 13-column by 8-row blue LED matrix. The large browser dashboard remains the place for the full R.O.B. animation, accessories, and explanations.
+**Status: implemented in the R.O.B. Vision App Lab sketch and Linux bridge; display behavior still needs direct visual confirmation.** The console installer generates the pairing code, which is entered on the browser Setup page. The UNO Q matrix shows a pairing cue only. This guide defines the behavior for the built-in 13-column by 8-row blue LED matrix. The large browser dashboard remains the place for the full R.O.B. animation, accessories, and explanations.
 
 These images show the 13×8 display states defined in `sketch/sketch.ino`. Each panel is one frame of an animation. Buddy's full-color portrait in the User Guide is an illustration, not a matrix state.
 
@@ -37,7 +37,7 @@ These images show the 13×8 display states defined in `sketch/sketch.ino`. Each 
 | Valid movement command accepted | Eyes glance in the movement direction, rise/fall for vertical motion, or narrow briefly for grip | Mirror the authoritative virtual action, then return to the selected game's eye loop. Never animate from an undecoded flash alone. |
 | Test flashes detected | `T` gently pulses | The frame link has reported the game's Test signal automatically. |
 | Ready-light command detected | Brief steady `T` | The game sent a separate ready-light command; the game eyes return within one second. |
-| Pairing in progress | Large `P` with a slow pulse | Open the browser Setup page and read the pairing code and fingerprint shown on RetroPie. Do not show invented or unrelated digits on the UNO Q. |
+| Pairing in progress | Large `P` with a slow pulse | Open the browser Setup page and read the pairing code and fingerprint shown by the console installer. Do not show invented or unrelated digits on the UNO Q. |
 | Controller fault | Blinking `X` | Open Setup for the actual problem; the matrix alone cannot explain it. |
 | App stopped | Matrix released/blank as the platform permits | R.O.B. Vision is no longer driving the display. |
 

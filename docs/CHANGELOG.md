@@ -1,5 +1,10 @@
 # R.O.B. Vision changelog
 
+## 0.1.3 documentation consistency
+
+- Aligned current Help and manuals with paired RetroPie and Batocera behavior, Test indication, and console-neutral status.
+- Rebuilt all four PDF manuals from the corrected sources.
+
 ## 0.1.2 documentation update
 
 - Removed repeated explanations about absent robot hardware from Help and reader-facing guides. Help now gives a play tip in the sidebar.

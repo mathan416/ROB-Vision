@@ -1,6 +1,6 @@
 # R.O.B. Vision troubleshooting
 
-If EmulationStation exits with an InputManager joystick assertion, return to its shell, stop the R.O.B. Vision receiver if it is repeatedly failing, and rerun the console installer with EmulationStation closed. The installer now checks module compatibility before restarting the receiver.
+If RetroPie's EmulationStation exits with an InputManager joystick assertion, return to its shell and rerun the console installer with EmulationStation closed. The installer checks module compatibility before restarting the virtual controller.
 
 For installation failures, check the prerequisite or unsupported-device message from the single release command, then rerun that same command. The archive checksum must pass before the installer changes the device. After removing a console in Setup, rerun its command with `--pair`.
 
@@ -9,10 +9,10 @@ First check which page is open: `http://arduiain.local/dashboard/` is live; a `f
 | Symptom | Check |
 | --- | --- |
 | App does not start, port 8766 in use | Stop VirtualGlove or the separate `rob-vision.service`; App Lab and that service cannot both bind the port. |
-| `GYROMITE / CONNECTED` but no robot movement | Check **RETROPIE ONLINE** and **GAME FRAMES LINKED** separately. If the latter is absent, restart the game so RetroPie loads the R.O.B. Vision core. Check Mission's Activity Feed for decoded or blocked actions. |
-| RetroPie is online but no game is selected | A receiver can be online with no active game. Launch a registered ROM; then reload Mission if needed. |
+| `GYROMITE / CONNECTED` but no robot movement | Check the active console's **ONLINE** indicator and **GAME FRAMES LINKED** separately. If the latter is absent, restart the game with its R.O.B. Vision core. Check Mission's Activity Feed for decoded or blocked actions. |
+| Console is online but no game is selected | A receiver can be online with no active game. Launch a registered ROM; then reload Mission if needed. |
 | Test light never blinks | Enter the game's Test mode and confirm **GAME FRAMES LINKED** with the correct game selected. The light responds automatically to linked game frames. A red-light preview is only an animation demonstration. |
-| Movement command is missed | On RetroPie, confirm **GAME FRAMES LINKED** and the correct game is selected. The frame link reads every rendered NES frame; check the Activity Feed for a decoded command or a model move blocked by height, grip, or station. |
+| Movement command is missed | Confirm **GAME FRAMES LINKED** and the correct game is selected. On RetroPie, choose `lr-robvision-fceumm` or `lr-robvision-nestopia`; on Batocera, launch the registered ROM with its installed R.O.B. Vision wrapper. Check the Activity Feed for a decoded command or a model move blocked by height, grip, or station. |
 | Red/blue gate does not move | Confirm Gyromite is the active RetroArch game, Setup **Check Link** is online, and RetroArch port 2 is configured. Inspect the game screen during an isolated color hold. |
 | Fast Gates vanished | They show only in live Gyromite. |
 | Gate remains down | Select **Release Both**; a hold also expires at 60 seconds. The receiver releases on game exit or stale network data. |
@@ -20,4 +20,4 @@ First check which page is open: `http://arduiain.local/dashboard/` is live; a `f
 | Demo does not start | Exit the running game first. Demo mode works when paired and idle; **Home** resets it. |
 | Browser shows stale scene | Reload for a fresh `/api/state` snapshot. A local preview cannot show UNO Q state. |
 
-On the dedicated RetroPie test setup, `systemctl status rob-vision-controller2.service` checks the root virtual-controller service. Inspect RetroPie's runcommand log and configured ROM basename if launch identity is missing. `/dev/input/js1` is expected for the virtual Controller 2 while the player's controller is generally `/dev/input/js0`. Keep tokens and ROM files out of bug reports.
+On RetroPie, `systemctl status rob-vision-controller2.service` checks the virtual-controller service; inspect the runcommand log and configured ROM basename if launch identity is missing. On Batocera, check its `ROBVision` service, the per-ROM core choice, and the exact ROM basename. Linux `/dev/input/jsN` numbering is not necessarily RetroArch's pad index; use the installed receiver's detected mapping. Keep credentials and ROM files out of bug reports.

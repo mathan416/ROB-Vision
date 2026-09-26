@@ -1,6 +1,6 @@
 # Gyromite and Stack-Up ROM signal analysis
 
-**Status:** Static analysis of the user-supplied `Gyromite (World)` and `Stack-Up (World)` ROMs, 24 September 2026. The ZIP and 7z copies of each game contain identical NES data. No ROM or extracted graphics is stored in this project. The derived patterns are decoded from RetroPie rendered NES frames by the FCEUmm and Nestopia frame-link wrappers.
+**Status:** Static analysis of the user-supplied `Gyromite (World)` and `Stack-Up (World)` ROMs, 24 September 2026. The ZIP and 7z copies of each game contain identical NES data. No ROM or extracted graphics is stored in this project. The derived patterns are decoded from console-rendered NES frames by the FCEUmm and Nestopia frame-link wrappers.
 
 Run `python3 tools/analyze_rob_roms.py --gyromite '/path/to/Gyromite (World).zip' --stack-up '/path/to/Stack-Up (World).zip'` to reproduce the command report from the archives in place. The program rejects unexpected ROM layout or changed evidence bytes. The inspected full-file SHA-256 hashes are `bf1b323ba39c84b964f93127598b267ff3f16cbf99c533ae1e9b8332232b3e5b` (Gyromite) and `3ab6bc99246783a6bf7083481027fe358ccdb147dcf1165eaf08aaf4e1b06548` (Stack-Up). Each is an iNES mapper-0 image with 32 KiB program ROM and 8 KiB character ROM.
 
@@ -40,7 +40,7 @@ These addresses refer to the CPU view of these exact 32 KiB program images (`$80
 
 ## Implemented frame decoder
 
-The FCEUmm and Nestopia wrappers classify each rendered NES frame as dark, green, or other. The local RetroPie receiver uses the verified game identity and complete frame numbers to decode the 13-frame patterns above. It forwards accepted commands to the UNO Q over the paired HTTP link. Incomplete patterns, gaps, unexpected frame classes, and actions outside the selected game's allowed set do not move R.O.B. The ready-light command and Test-mode signal update status only. Separate identical commands remain valid.
+The FCEUmm and Nestopia wrappers classify each rendered NES frame as dark, green, or other. The local console receiver uses the verified game identity and complete frame numbers to decode the 13-frame patterns above. It forwards accepted commands to the UNO Q over the paired HTTP link. Incomplete patterns, gaps, unexpected frame classes, and actions outside the selected game's allowed set do not move R.O.B. The ready-light command and Test-mode signal update status only. Separate identical commands remain valid.
 
 Game identification follows the exact launch-filename registry described in [Game Identification](GAME_IDENTIFICATION.md). It selects the allowed action set and virtual accessory profile; a launch event by itself does not imply a decoded command. Mission reports link activity and accepted or blocked actions.
 

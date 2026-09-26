@@ -16,7 +16,7 @@ The current scripted preview applies one virtual command per step. It first move
 
 | Mode | Booklet behavior | Virtual design implication |
 | --- | --- | --- |
-| Test | Optical aiming signal over the ROBOT BLOCK artwork | Press Select to open the mode list, select Test, then Start. The frame-link Test detector recognizes alternating light frames without a virtual movement; live acknowledgement still needs confirmation. |
+| Test | Optical aiming signal over the ROBOT BLOCK artwork | Press Select to open the mode list, select Test, then Start. The frame link recognizes alternating light frames and blinks the virtual red head light without moving R.O.B. |
 | Direct | Professor lands on six command keys | Decode and display left, right, up, down, open, or close. Player scores/advances with Start after arrangement. |
 | Memory | Up to 100 programmed commands at selected speed, then `END` | Measure cadence; the current model applies commands immediately and has no bounded queue. Report misses during sustained frame-link validation. `END` is a programming marker, not a robot movement flash. |
 | Bingo, one player | Row or column completion sends a command | Apply only a complete validated optical command. |
@@ -24,6 +24,6 @@ The current scripted preview applies one virtual command per step. It first move
 
 The booklet says a simultaneous completed row and column is a no-command condition until one line changes. Do not turn that pattern into two virtual actions. The flash stream does not report a target pattern or a victory result. The UNO Q knows its own modeled block stacks but cannot infer the game's scoring outcome without another source. In Direct, Memory, and one-player Bingo, the human presses Start to request scoring after matching the displayed arrangement; a successful animation alone does not advance a round.
 
-Stack-Up's documented modes have no Gyromite-style accessory that presses Controller 2. Its tray model needs no button return path to the game. The browser preview now demonstrates both a one-block transfer and an ordered two-block carry. The live virtual model conserves five blocks and updates a placement on a valid open command. Optical Memory timing still needs hardware validation.
+Stack-Up's documented modes have no Gyromite-style accessory that presses Controller 2. Its tray model needs no button return path to the game. The browser preview demonstrates both a one-block transfer and an ordered two-block carry. The live virtual model conserves five blocks and updates a placement on a valid open command. Longer Memory-mode sequences still need live validation.
 
 See the [virtual system contract](VIRTUAL_SYSTEM.md), [ROM signal analysis](ROM_SIGNAL_ANALYSIS.md), and [verification plan](VERIFICATION_PLAN.md).
