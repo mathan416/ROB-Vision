@@ -6,6 +6,8 @@
 
 Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [Technical Reference](../output/pdf/R.O.B.-Vision-Technical-Reference.pdf), [Matrix Display Guide](../output/pdf/R.O.B.-Vision-Matrix-Display-Guide.pdf), and [Quick Reference](../output/pdf/R.O.B.-Vision-Quick-Reference.pdf).
 
+The Technical Reference contains current architecture, configuration, frame protocol, and verification material. Historical manual research and earlier camera experiments remain in the editable research section below.
+
 ## Start here
 
 | Reader | Guide | What it covers |
