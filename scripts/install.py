@@ -8,6 +8,7 @@ RetroPie: sudo python3 scripts/install.py retropie --controller robvision.local
 from __future__ import annotations
 
 import argparse
+import ctypes
 import ipaddress
 import json
 import os
@@ -329,23 +330,121 @@ def pi_owned(path: Path, user: str = "pi") -> None:
             os.chown(os.path.join(root, name), account.pw_uid, account.pw_gid)
 
 
+def retroarch_udev_event_nodes() -> list[str]:
+    """List joypad event nodes in RetroArch's udev discovery order.
+
+    RetroArch's udev driver numbers event devices independently of Linux jsN.
+    In particular, another virtual pad can make those two indices differ.
+    """
+    try:
+        udev = ctypes.CDLL("libudev.so.1")
+    except OSError as exc:
+        raise RuntimeError("libudev is required to map RetroArch Controller 2.") from exc
+    signatures = {
+        "udev_new": (ctypes.c_void_p, []),
+        "udev_unref": (ctypes.c_void_p, [ctypes.c_void_p]),
+        "udev_enumerate_new": (ctypes.c_void_p, [ctypes.c_void_p]),
+        "udev_enumerate_unref": (ctypes.c_void_p, [ctypes.c_void_p]),
+        "udev_enumerate_add_match_property": (ctypes.c_int, [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]),
+        "udev_enumerate_add_match_subsystem": (ctypes.c_int, [ctypes.c_void_p, ctypes.c_char_p]),
+        "udev_enumerate_scan_devices": (ctypes.c_int, [ctypes.c_void_p]),
+        "udev_enumerate_get_list_entry": (ctypes.c_void_p, [ctypes.c_void_p]),
+        "udev_list_entry_get_name": (ctypes.c_char_p, [ctypes.c_void_p]),
+        "udev_list_entry_get_next": (ctypes.c_void_p, [ctypes.c_void_p]),
+        "udev_device_new_from_syspath": (ctypes.c_void_p, [ctypes.c_void_p, ctypes.c_char_p]),
+        "udev_device_get_devnode": (ctypes.c_char_p, [ctypes.c_void_p]),
+        "udev_device_unref": (ctypes.c_void_p, [ctypes.c_void_p]),
+    }
+    for name, (result, arguments) in signatures.items():
+        function = getattr(udev, name)
+        function.restype, function.argtypes = result, arguments
+    context = udev.udev_new()
+    if not context:
+        raise RuntimeError("Could not initialize udev for RetroArch controller mapping.")
+    enumeration = None
+    try:
+        enumeration = udev.udev_enumerate_new(context)
+        if not enumeration:
+            raise RuntimeError("Could not enumerate RetroArch controllers.")
+        udev.udev_enumerate_add_match_property(enumeration, b"ID_INPUT_JOYSTICK", b"1")
+        udev.udev_enumerate_add_match_subsystem(enumeration, b"input")
+        if udev.udev_enumerate_scan_devices(enumeration) < 0:
+            raise RuntimeError("Could not scan RetroArch controllers.")
+        nodes = []
+        item = udev.udev_enumerate_get_list_entry(enumeration)
+        while item:
+            path = udev.udev_list_entry_get_name(item)
+            device = udev.udev_device_new_from_syspath(context, path)
+            if device:
+                try:
+                    node = udev.udev_device_get_devnode(device)
+                    if node and re.fullmatch(rb"/dev/input/event\d+", node):
+                        nodes.append(node.decode())
+                finally:
+                    udev.udev_device_unref(device)
+            item = udev.udev_list_entry_get_next(item)
+        return nodes
+    finally:
+        if enumeration:
+            udev.udev_enumerate_unref(enumeration)
+        udev.udev_unref(context)
+
+
+def retroarch_index_for_js(js_index: int, sys_root: Path = Path("/sys/class/input"),
+                           event_nodes: list[str] | None = None) -> int:
+    """Find the RetroArch udev slot for the same input device as jsN."""
+    events = event_nodes if event_nodes is not None else retroarch_udev_event_nodes()
+    joystick = sys_root / f"js{js_index}" / "device"
+    for index, node in enumerate(events):
+        event_device = sys_root / Path(node).name / "device"
+        if event_device.exists() and joystick.samefile(event_device):
+            return index
+    raise RuntimeError("Player 2 pad was not found in RetroArch's udev controller list.")
+
+
+def retroarch_player2_name(router_config: Path = Path("/etc/virtualglove/controller-router.json")) -> str:
+    """Use the merged Player 2 pad when Controller Router includes R.O.B."""
+    try:
+        router = json.loads(router_config.read_text())
+    except (OSError, ValueError, TypeError):
+        return "R.O.B. Vision Controller 2"
+    if isinstance(router, dict):
+        for player in router.get("players", []):
+            if (isinstance(player, dict) and player.get("player") == 2 and
+                    isinstance(player.get("sources"), list) and
+                    any(isinstance(source, dict) and
+                        source.get("name") == "R.O.B. Vision Controller 2"
+                        for source in player["sources"])):
+                return "VirtualGlove Merged Player 2"
+    return "R.O.B. Vision Controller 2"
+
+
 def configure_player2(index: int | None = None, sys_root: Path = Path("/sys/class/input"),
-                      config: Path = NES_CONFIG, wait_seconds: float = 15.0) -> int:
+                      config: Path = NES_CONFIG, wait_seconds: float = 15.0,
+                      event_nodes: list[str] | None = None,
+                      router_config: Path = Path("/etc/virtualglove/controller-router.json")) -> int:
     if index is None:
+        target_name = retroarch_player2_name(router_config)
         deadline = time.monotonic() + wait_seconds
         while True:
             matches = []
             for path in sys_root.glob("js*/device/name"):
                 try:
-                    if path.read_text().strip() == "R.O.B. Vision Controller 2":
+                    if path.read_text().strip() == target_name:
                         matches.append(int(path.parents[1].name[2:]))
                 except FileNotFoundError:
                     continue  # A joystick may disappear during receiver restart.
             if len(matches) == 1:
-                index = matches[0]
-                break
+                try:
+                    index = retroarch_index_for_js(matches[0], sys_root, event_nodes)
+                    break
+                except RuntimeError:
+                    # uinput creates jsN before udev marks its event node as
+                    # a joystick. Keep the pad alive while udev catches up.
+                    if time.monotonic() >= deadline:
+                        raise
             if len(matches) > 1 or time.monotonic() >= deadline:
-                raise RuntimeError("Start the paired receiver, then retry; one R.O.B. Vision virtual pad must be visible.")
+                raise RuntimeError(f"Start the paired receiver, then retry; one {target_name} pad must be visible.")
             time.sleep(0.1)
     if not 0 <= index <= 15:
         raise ValueError("Player 2 joystick index must be between 0 and 15.")
@@ -451,7 +550,11 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
     write_file(Path("/etc/modules-load.d/rob-vision.conf"), "uinput\n")
     copy_file(source / "deploy/retropie/rob-vision-controller2.service", SERVICE)
     copy_file(source / "deploy/retropie/retroarch-joypad.cfg",
-              Path("/opt/retropie/configs/all/retroarch-joypads/R.O.B. Vision Controller 2.cfg"))
+              Path("/opt/retropie/configs/all/retroarch/autoconfig/udev/R.O.B. Vision Controller 2.cfg"))
+    # Older releases placed this profile where RetroArch's udev driver does
+    # not search. Retire those project-owned copies during an upgrade.
+    unlink_if_exists(Path("/opt/retropie/configs/all/retroarch-joypads/R.O.B. Vision Controller 2.cfg"))
+    unlink_if_exists(Path("/opt/retropie/configs/all/retroarch/autoconfig/R.O.B. Vision Controller 2.cfg"))
     for action in ("launch", "end"):
         target = RUNCOMMAND / f"runcommand-on{action}.sh"
         body = ("/bin/sh /home/pi/rob-vision/deploy/retropie/"
@@ -499,7 +602,7 @@ def main() -> int:
             if os.geteuid() != 0:
                 raise RuntimeError("Run this configuration step with sudo on RetroPie.")
             index = configure_player2()
-            print(f"NES Controller 2 mapped to R.O.B. Vision joystick {index}. Restart the game to apply it.")
+            print(f"NES Controller 2 mapped to {retroarch_player2_name()} at RetroArch slot {index}. Restart the game to apply it.")
         return 0
     except (OSError, RuntimeError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"Installation stopped: {exc}", file=sys.stderr)

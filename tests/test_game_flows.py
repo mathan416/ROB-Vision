@@ -35,8 +35,7 @@ class GameFlowTests(unittest.TestCase):
             game.send(command)
         self.assertEqual(game.state()['pieces']['a'], 'spinner')
         self.assertTrue(game.state()['spinning']['a'])
-        for command in ['CLOSE', 'UP_GYRO', 'UP_GYRO', 'LEFT', 'LEFT',
-                        'DOWN_GYRO', 'DOWN_GYRO', 'OPEN']:
+        for command in ['CLOSE', 'UP_GYRO', 'UP_GYRO', 'LEFT', 'LEFT', 'DOWN_GYRO', 'DOWN_GYRO', 'OPEN']:
             game.send(command)
         self.assertEqual(game.state()['pieces']['a'], 'red_pad')
         self.assertEqual(game.state()['pads'], {'red': True, 'blue': False})
@@ -44,6 +43,27 @@ class GameFlowTests(unittest.TestCase):
         game.send('UP_GYRO')
         self.assertEqual(game.state()['pads'], {'red': False, 'blue': False})
         self.assertEqual(game.state()['pieces']['b'], 'holder_b')
+
+    def test_far_gyro_holds_blue_pad_at_same_working_height(self):
+        game = FrameFlow('gyromite')
+        for command in ['LEFT', 'DOWN_GYRO', 'DOWN_GYRO', 'CLOSE', 'UP_GYRO', 'UP_GYRO',
+                        'RIGHT', 'RIGHT', 'RIGHT', 'DOWN_GYRO', 'DOWN_GYRO']:
+            game.send(command)
+        self.assertEqual(game.state()['height'], 2)
+        self.assertEqual(game.state()['held'], 'b')
+        self.assertEqual(game.state()['pads'], {'red': False, 'blue': True})
+        game.send('UP_GYRO')
+        self.assertEqual(game.state()['pads'], {'red': False, 'blue': False})
+
+    def test_gyromite_carries_at_middle_height_to_blue_pad(self):
+        game = FrameFlow('gyromite')
+        for command in ['DOWN_GYRO', 'DOWN_GYRO', 'CLOSE', 'UP_GYRO', 'RIGHT', 'RIGHT',
+                        'DOWN_GYRO']:
+            game.send(command)
+        self.assertEqual(game.state()['station'], 4)
+        self.assertEqual(game.state()['height'], 2)
+        self.assertEqual(game.state()['held'], 'a')
+        self.assertEqual(game.state()['pads'], {'red': False, 'blue': True})
 
     def test_stack_up_red_then_grouped_blue_white_transfer(self):
         game = FrameFlow('stack_up')

@@ -8,6 +8,8 @@ The [original Gyromite booklet](https://www.digitpress.com/library/manuals/nes/g
 
 The manual explicitly says a gyro **does not need to spin to operate only one gate**. R.O.B. can hold an unspun gyro on the virtual pad, then lift it to release that pad. If both gates must be controlled, spinning one gyro lets it stay upright on one pad while R.O.B. uses his hands to put the other on the other pad. A gyro that is no longer needed belongs on its holder. The spinner is a means to free R.O.B.'s hands, not an obligatory step for every pad press.
 
+In Mission's live model, Buddy starts at the top (level 6). Two Down commands move through level 4 to the shared working height, level 2, where his hands meet either gyro holder, the spinner, or either colored pad. This is the virtual model's working height; the original manual's positions 1–5 label slots around the base, not arm levels. A gyro resting on a colored pad presses its button at level 2. Raise a carried gyro once to level 4 before turning; level 6 is also available for higher clearance. Their different screen positions come from the scene's 3D perspective, not different command heights.
+
 **Try the demo:** with no game running, select Gyromite and **Run Demo Sequence**. Buddy presses a pad with an unspun gyro, uses two spinning gyros, and returns them to their holders. The sequence stops at `COMPLETE`. Select **Home** to reset. The demo's spin lifetime is illustrative.
 
 **During play:** the UNO Q tracks both gyros and sends red and blue pad states to the active console. It releases both buttons on game exit or a lost link. **Fast Gates** presses or releases a matching pad immediately; each hold expires after 60 seconds. Watch the game screen for Hector and the gate response.

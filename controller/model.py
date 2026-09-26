@@ -69,6 +69,19 @@ class StackState:
 
 
 GYRO_STATIONS = ("holder_b", "holder_a", "red_pad", "blue_pad", "spinner")
+GYRO_STATION_HEIGHTS = {
+    "holder_b": 2,
+    "holder_a": 2,
+    "red_pad": 2,
+    "blue_pad": 2,
+    "spinner": 2,
+}
+GYRO_CARRY_HEIGHT = 4
+
+
+def gyro_station_height(place):
+    """Return the command level at which Buddy's hands meet this station."""
+    return GYRO_STATION_HEIGHTS[place]
 
 
 @dataclass
@@ -107,7 +120,7 @@ class GyroState:
             self.assisted_until[color] = monotonic() + 60.0
             self.spinning_until[which] = self.assisted_until[color]
             self.station = 3 if color == "red" else 4
-            self.height = 2
+            self.height = gyro_station_height(f"{color}_pad")
             self.grip = "open"
         elif self.assisted_until[color]:
             self.assisted_until[color] = 0.0
@@ -122,7 +135,7 @@ class GyroState:
             for color in pads:
                 if place == f"{color}_pad" and spinning[key]:
                     pads[color] = True
-        if self.held and self.height <= 2:
+        if self.held and self.height == gyro_station_height("red_pad"):
             station = GYRO_STATIONS[self.station - 1]
             for color in pads:
                 if station == f"{color}_pad":
@@ -143,26 +156,30 @@ class GyroState:
             target = self.station + (-1 if command == "LEFT" else 1)
             if not 1 <= target <= len(GYRO_STATIONS):
                 return "There is no station in that direction."
-            if self.held and self.height <= 2:
+            if self.held and self.height < GYRO_CARRY_HEIGHT:
                 return "Raise the gyro before turning."
             self.station = target
         elif command == "CLOSE":
             if self.grip == "closed":
                 return "Hands are already closed."
             place = GYRO_STATIONS[self.station - 1]
-            if self.height <= 2:
+            level = gyro_station_height(place)
+            if self.height == level:
                 candidates = [key for key, location in self.pieces.items() if location == place]
                 if candidates:
                     self.held = candidates[0]
                     self.pieces[self.held] = "held"
+            elif place in self.pieces.values():
+                return f"Align the hands with the gyro at level {level} before closing."
             self.grip = "closed"
         elif command == "OPEN":
             if self.grip == "open":
                 return "Hands are already open."
             if self.held:
-                if self.height > 2:
-                    return "Lower the gyro before releasing."
                 place = GYRO_STATIONS[self.station - 1]
+                level = gyro_station_height(place)
+                if self.height != level:
+                    return f"Align the hands with the station at level {level} before releasing."
                 if place in self.pieces.values():
                     return "That station already holds a gyro."
                 self.pieces[self.held] = place

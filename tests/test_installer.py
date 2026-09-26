@@ -9,6 +9,8 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from scripts.install import (app_lab_status, configure_player2, copy_tree_merge, hook_event, install_uno, installed_controller, managed_text,
+                             retroarch_index_for_js,
+                             retroarch_player2_name,
                              uno_dashboard_urls,
                              remove_legacy_hook, update_managed, valid_controller)
 from scripts.install import validate_receiver_source
@@ -104,7 +106,12 @@ class InstallerTests(unittest.TestCase):
                 (device / "name").write_text(name)
             config = root / "retroarch.cfg"
             config.write_text('input_player1_a_btn = "7"\n')
-            self.assertEqual(configure_player2(sys_root=root / "sys", config=config), 2)
+            event = root / "sys/event6/device"
+            event.parent.mkdir()
+            event.symlink_to(root / "sys/js2/device")
+            events = ["/dev/input/event0", "/dev/input/event4", "/dev/input/event6"]
+            self.assertEqual(configure_player2(sys_root=root / "sys", config=config,
+                                               event_nodes=events), 2)
             self.assertIn('input_player1_a_btn = "7"', config.read_text())
             self.assertIn('input_player2_joypad_index = "2"', config.read_text())
 
@@ -117,13 +124,69 @@ class InstallerTests(unittest.TestCase):
             def appear():
                 device.mkdir(parents=True)
                 (device / "name").write_text("R.O.B. Vision Controller 2\n")
+                event = root / "sys/event6/device"
+                event.parent.mkdir()
+                event.symlink_to(device)
             timer = threading.Timer(0.15, appear)
             timer.start()
             try:
                 self.assertEqual(configure_player2(sys_root=root / "sys", config=config,
-                                                   wait_seconds=1.0), 1)
+                                                   wait_seconds=1.0,
+                                                   event_nodes=["/dev/input/event0", "/dev/input/event6"]), 1)
             finally:
                 timer.join()
+
+    def test_player2_waits_for_udev_event_after_joystick(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "retroarch.cfg"
+            config.write_text("#include all.cfg\n")
+            device = root / "sys/js1/device"
+            device.mkdir(parents=True)
+            (device / "name").write_text("R.O.B. Vision Controller 2\n")
+            event = root / "sys/event6/device"
+            event.parent.mkdir()
+            timer = threading.Timer(0.15, lambda: event.symlink_to(device))
+            timer.start()
+            try:
+                self.assertEqual(configure_player2(sys_root=root / "sys", config=config,
+                                                   wait_seconds=1.0,
+                                                   event_nodes=["/dev/input/event0", "/dev/input/event6"]), 1)
+            finally:
+                timer.join()
+
+    def test_player2_uses_merged_pad_when_router_assigns_rob(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            router = root / "router.json"
+            router.write_text('{"players":[{"player":2,"sources":'
+                              '[{"name":"R.O.B. Vision Controller 2"}]}]}')
+            self.assertEqual(retroarch_player2_name(router), "VirtualGlove Merged Player 2")
+            for index, name in ((1, "R.O.B. Vision Controller 2"),
+                                (2, "VirtualGlove Merged Player 2")):
+                device = root / "sys" / f"js{index}" / "device"
+                device.mkdir(parents=True)
+                (device / "name").write_text(name)
+                event = root / "sys" / f"event{index + 5}" / "device"
+                event.parent.mkdir()
+                event.symlink_to(device)
+            config = root / "retroarch.cfg"
+            config.write_text("#include all.cfg\n")
+            self.assertEqual(configure_player2(sys_root=root / "sys", config=config,
+                                               router_config=router,
+                                               event_nodes=["/dev/input/event6", "/dev/input/event7"]), 1)
+            self.assertIn('input_player2_joypad_index = "1"', config.read_text())
+
+    def test_retroarch_udev_index_can_differ_from_js_number(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            joystick = root / "js5/device"
+            joystick.mkdir(parents=True)
+            event = root / "event6/device"
+            event.parent.mkdir()
+            event.symlink_to(joystick)
+            events = [f"/dev/input/event{number}" for number in (0, 4, 15, 16, 6)]
+            self.assertEqual(retroarch_index_for_js(5, root, events), 4)
 
     def test_source_copy_ignores_macos_metadata(self):
         with tempfile.TemporaryDirectory() as directory:

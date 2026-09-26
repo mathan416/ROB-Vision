@@ -12,6 +12,8 @@ With no supported game active, choose a game on Mission and run its finite **Dem
 
 Gyromite gives Buddy two gyros, two holders, one spinner, and red and blue pads. A gyro pressing a colored pad lowers the matching gate through the console's virtual Controller 2. Buddy can hold an **unspun** gyro on one pad, then lift it to release that gate. A **spinning** gyro can remain upright on one pad while Buddy moves the second gyro to the other. He returns a gyro to its holder when it is no longer needed. Spin duration in the virtual model is illustrative.
 
+Buddy has six vertical levels, with Home at the top, level 6. Gyromite's Up and Down commands move two levels at a time: two Down commands from Home pass through level 4 and reach level 2, where his hands meet either holder, the spinner, and both pads. Raise a carried gyro once to level 4 before turning; level 6 gives more clearance. This level-2 working height is our virtual scene's alignment, not a numbered accessory height from Nintendo's manual. The manual's positions 1–5 are slots around R.O.B.'s base: spinner at 1, button tray at 2–3, and holders at 4–5. A gyro presses a button by resting on its colored tray; lifting it releases the button. The accessories appear at different heights on screen because the table is shown in perspective.
+
 | Mode | What to expect |
 | --- | --- |
 | Test | The game's Test signal blinks Buddy's red light. It does not move him. |

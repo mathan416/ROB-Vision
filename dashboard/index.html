@@ -10,7 +10,7 @@
   <script src="header-clock.js?v=1" defer></script>
   <script src="status.js?v=receiver-2" defer></script>
   <script src="stack-model.js?v=blocks-1" defer></script>
-  <script src="app.js?v=stack-hand-height-2" defer></script>
+  <script src="app.js?v=held-gyro-grip-4" defer></script>
   <script src="live.js?v=status-1" defer></script>
 </head>
 <body>
@@ -126,10 +126,6 @@
                 </g>
                 <text x="145" y="560" text-anchor="middle">TRAY 1</text><text x="230" y="571" text-anchor="middle">TRAY 2</text><text x="325" y="576" text-anchor="middle">TRAY 3</text><text x="410" y="570" text-anchor="middle">TRAY 4</text><text x="500" y="560" text-anchor="middle">TRAY 5</text>
               </g>
-              <g id="second-gyro-prop" class="gyro-piece" transform="translate(145 469) scale(.85)"><use href="#gyro-body"/><ellipse class="gyro-spin-ring" cy="4" rx="25" ry="9" fill="none" stroke="#a4f7ff" stroke-width="3" stroke-dasharray="11 9"/></g>
-              <g id="move-prop" transform="translate(225 496)">
-                <g id="gyro-prop" class="gyro-piece"><use href="#gyro-body"/><ellipse class="gyro-spin-ring" cy="4" rx="25" ry="9" fill="none" stroke="#a4f7ff" stroke-width="3" stroke-dasharray="11 9"/></g>
-              </g>
             </g>
             <g id="arm-carriage" transform="translate(0 0)">
               <rect x="267" y="292" width="116" height="52" rx="21" fill="url(#body)" stroke="#eef7fb" stroke-width="4"/>
@@ -141,6 +137,10 @@
               <circle id="left-elbow" cx="245" cy="381" r="10" fill="#536a7e" stroke="#e8f2f3" stroke-width="3"/><circle id="right-elbow" cx="405" cy="381" r="10" fill="#536a7e" stroke="#e8f2f3" stroke-width="3"/>
               <circle cx="285" cy="317" r="24" fill="#34495d" stroke="#e2edf2" stroke-width="7"/><circle cx="365" cy="317" r="24" fill="#34495d" stroke="#e2edf2" stroke-width="7"/>
               <circle cx="285" cy="317" r="8" fill="#c9dfe8"/><circle cx="365" cy="317" r="8" fill="#c9dfe8"/>
+            </g>
+            <g id="second-gyro-prop" class="gyro-piece" transform="translate(145 469) scale(.85)"><use href="#gyro-body"/><ellipse class="gyro-spin-ring" cy="4" rx="25" ry="9" fill="none" stroke="#a4f7ff" stroke-width="3" stroke-dasharray="11 9"/></g>
+            <g id="move-prop" transform="translate(225 496)">
+              <g id="gyro-prop" class="gyro-piece"><use href="#gyro-body"/><ellipse class="gyro-spin-ring" cy="4" rx="25" ry="9" fill="none" stroke="#a4f7ff" stroke-width="3" stroke-dasharray="11 9"/></g>
             </g>
             <g id="stack-colors"></g>
             <g id="disc-prop" transform="translate(325 486)"></g>
@@ -218,7 +218,7 @@
       </div>
     </section>
 
-        <section class="vitals-card"><div class="section-head"><span>SYSTEM VITALS</span><span class="live-text">● SIMULATION</span></div><div class="vital"><span>GAME FRAME LINK</span><strong id="optical-value">SIMULATED</strong></div><div class="vital-track"><i id="optical-bar"></i></div><div class="vital"><span>HEAD + BODY TURN</span><strong id="head-value">0°</strong></div><div class="vital-track"><i id="head-bar"></i></div><div class="vital"><span>ARM POSITION</span><strong id="arm-value">HOME</strong></div><div class="vital-track"><i id="arm-bar"></i></div><div class="vital"><span>GRIP</span><strong id="grip-value">OPEN</strong></div><div class="vital-track"><i id="grip-bar"></i></div><div id="gyro-vitals"><div class="vital"><span>GYRO A / RED PAD</span><strong id="gyro-a-value">IDLE / RELEASED</strong></div><div class="vital-track"><i id="gyro-a-bar"></i></div><div class="vital"><span>GYRO B / BLUE PAD</span><strong id="gyro-b-value">IDLE / RELEASED</strong></div><div class="vital-track"><i id="gyro-b-bar"></i></div><small class="gyro-vitals-note">Virtual spin and button states; no game link</small></div></section>
+        <section class="vitals-card"><div class="section-head"><span>SYSTEM VITALS</span><span class="live-text">● SIMULATION</span></div><div class="vital"><span>GAME FRAME LINK</span><strong id="frame-link-value">SIMULATED</strong></div><div class="vital-track"><i id="frame-link-bar"></i></div><div class="vital"><span>HEAD + BODY TURN</span><strong id="head-value">0°</strong></div><div class="vital-track"><i id="head-bar"></i></div><div class="vital"><span>ARM POSITION</span><strong id="arm-value">HOME</strong></div><div class="vital-track"><i id="arm-bar"></i></div><div class="vital"><span>GRIP</span><strong id="grip-value">OPEN</strong></div><div class="vital-track"><i id="grip-bar"></i></div><div id="gyro-vitals"><div class="vital"><span>GYRO A / RED PAD</span><strong id="gyro-a-value">IDLE / RELEASED</strong></div><div class="vital-track"><i id="gyro-a-bar"></i></div><div class="vital"><span>GYRO B / BLUE PAD</span><strong id="gyro-b-value">IDLE / RELEASED</strong></div><div class="vital-track"><i id="gyro-b-bar"></i></div><small class="gyro-vitals-note">Virtual spin and button states; no game link</small></div></section>
     </div>
     <div class="bottom-grid">
       <section class="event-panel"><div class="section-head"><span>ACTIVITY FEED</span><span id="event-count">001 EVENTS</span></div><ol id="event-list" aria-live="polite"><li><time>00:00:00</time><span>Simulation initialized. R.O.B. is ready.</span></li></ol></section>

@@ -121,6 +121,23 @@ class ModelTests(unittest.TestCase):
         controller.select('gyromite')
         self.assertEqual(controller.command('READY')['robot']['station'], 2)
 
+    def test_six_levels_with_game_specific_vertical_steps(self):
+        gyro = GyroState()
+        self.assertEqual(gyro.height, 6)
+        self.assertIsNone(gyro.apply('DOWN'))
+        self.assertEqual(gyro.height, 4)
+        self.assertIsNone(gyro.apply('DOWN'))
+        self.assertEqual(gyro.height, 2)
+        self.assertIsNotNone(gyro.apply('DOWN'))
+
+        stack = StackState()
+        levels = [stack.height]
+        for _ in range(5):
+            self.assertIsNone(stack.apply('DOWN'))
+            levels.append(stack.height)
+        self.assertEqual(levels, [6, 5, 4, 3, 2, 1])
+        self.assertIsNotNone(stack.apply('DOWN'))
+
     def test_setup_ready_signal_and_receiver_status(self):
         controller = Controller()
         controller.select('stack_up')
@@ -133,19 +150,83 @@ class ModelTests(unittest.TestCase):
 
     def test_held_unspun_gyro_press_releases_on_lift(self):
         model = GyroState()
-        for command in ('DOWN', 'DOWN', 'CLOSE', 'UP', 'RIGHT'):
+        for command in ('DOWN', 'DOWN', 'CLOSE', 'UP', 'UP', 'RIGHT'):
             model.apply(command)
+        self.assertEqual(model.held, 'a')
         self.assertEqual(model.snapshot()['pads'], {'red': False, 'blue': False})
+        model.apply('DOWN')
         model.apply('DOWN')
         self.assertEqual(model.snapshot()['pads'], {'red': True, 'blue': False})
         model.apply('UP')
         self.assertEqual(model.snapshot()['pads'], {'red': False, 'blue': False})
+
+    def test_gyro_grip_requires_visible_stem_level(self):
+        model = GyroState()
+        self.assertIn('level 2', model.apply('CLOSE'))
+        self.assertEqual(model.grip, 'open')
+        model.apply('DOWN')
+        self.assertIn('level 2', model.apply('CLOSE'))
+        model.apply('DOWN')
+        self.assertIsNone(model.apply('CLOSE'))
+        self.assertEqual(model.held, 'a')
+        model.apply('UP')
+        self.assertIsNotNone(model.apply('OPEN'))
+        model.apply('DOWN')
+        self.assertIsNone(model.apply('OPEN'))
+        self.assertEqual(model.pieces['a'], 'holder_a')
+
+    def test_far_gyro_grips_at_same_command_level(self):
+        model = GyroState()
+        model.apply('LEFT')
+        model.apply('DOWN')
+        model.apply('DOWN')
+        self.assertIsNone(model.apply('CLOSE'))
+        self.assertEqual(model.held, 'b')
+
+    def test_gyro_can_turn_with_middle_height_clearance(self):
+        model = GyroState()
+        model.apply('DOWN')
+        model.apply('DOWN')
+        model.apply('CLOSE')
+        self.assertIn('Raise the gyro', model.apply('RIGHT'))
+        self.assertEqual(model.station, 2)
+        model.apply('UP')
+        self.assertEqual(model.height, 4)
+        self.assertIsNone(model.apply('RIGHT'))
+        self.assertEqual(model.station, 3)
+
+    def test_every_gyro_station_uses_its_visible_grip_level(self):
+        station_cases = (
+            ('holder_b', 1, 2, 'b'),
+            ('holder_a', 2, 2, 'a'),
+            ('red_pad', 3, 2, 'a'),
+            ('blue_pad', 4, 2, 'b'),
+            ('spinner', 5, 2, 'a'),
+        )
+        for place, station, level, piece in station_cases:
+            with self.subTest(place=place):
+                model = GyroState()
+                model.station = station
+                model.pieces[piece] = place
+                model.height = 4
+                self.assertIn(f'level {level}', model.apply('CLOSE'))
+                self.assertEqual(model.grip, 'open')
+                self.assertEqual(model.pieces[piece], place)
+                model.height = level
+                self.assertIsNone(model.apply('CLOSE'))
+                self.assertEqual(model.held, piece)
+                model.height = 6
+                self.assertIn(f'level {level}', model.apply('OPEN'))
+                model.height = level
+                self.assertIsNone(model.apply('OPEN'))
+                self.assertEqual(model.pieces[piece], place)
 
     def test_gate_assist_is_immediate_and_expires(self):
         controller = Controller()
         controller.select('gyromite')
         blue = controller.gate_assist('blue', True)
         self.assertEqual(blue['robot']['pads'], {'red': False, 'blue': True})
+        self.assertEqual(blue['robot']['height'], 2)
         red = controller.gate_assist('red', True)
         self.assertEqual(red['robot']['pads'], {'red': True, 'blue': True})
         controller.gate_assist('blue', False)

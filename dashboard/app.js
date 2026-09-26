@@ -3,10 +3,18 @@
   const $ = (id) => document.getElementById(id);
   const StackModel = window.RobStackModel;
   let stackState = StackModel.create();
-  const state = { mode: 'gyro', live: false, head: 0, arms: 0, turn: 0, depth: 1, grip: false, manualActive: false, manualCommand: null, stopped: false, running: false, timer: null, recoveryTimer: null, recoveryQueue: [], recoveryCount: { a: 0, b: 0 }, cleanupStarted: false, sequence: null, step: -1, prop: { x: 225, y: 496, scale: 1 }, propFrame: null, secondProp: { x: 145, y: 469, scale: .85 }, secondPropFrame: null, motion: { turn: 0, arms: 0, grip: 0, head: 0, depth: 1, handOffset: 0 }, motionFrame: null };
+  const state = { mode: 'gyro', live: false, liveHeight: null, liveHeldPiece: null, liveHeldScale: 1, head: 0, arms: 0, turn: 0, depth: 1, grip: false, manualActive: false, manualCommand: null, stopped: false, running: false, timer: null, recoveryTimer: null, recoveryQueue: [], recoveryCount: { a: 0, b: 0 }, cleanupStarted: false, sequence: null, step: -1, prop: { x: 225, y: 496, scale: 1 }, propFrame: null, secondProp: { x: 145, y: 469, scale: .85 }, secondPropFrame: null, motion: { turn: 0, arms: 0, grip: 0, head: 0, depth: 1, handOffset: 0, gyroOffset: 0 }, motionFrame: null };
   // Local demo timing is illustrative; live sessions use the UNO Q controller state.
   const GYRO_SPIN_MS = 55000;
   const gyros = { a: { startedAt: null, phase: 'idle' }, b: { startedAt: null, phase: 'idle' } };
+  const gyroStationView = {
+    holder_b: { x: 145, y: 469, scale: .85, level: 2, arms: 11, turn: -180 },
+    holder_a: { x: 225, y: 496, scale: 1, level: 2, arms: 34, turn: -100 },
+    red_pad: { x: 285, y: 514.5, scale: 1.12, level: 2, arms: 55, turn: -40 },
+    blue_pad: { x: 370, y: 514.5, scale: 1.12, level: 2, arms: 55, turn: 45 },
+    spinner: { x: 445, y: 477, scale: .85, level: 2, arms: 17, turn: 120 }
+  };
+  const gyroStationOrder = ['holder_b', 'holder_a', 'red_pad', 'blue_pad', 'spinner'];
   let gyroTimer = null;
   const gyroLevel = (gyro, now = performance.now()) => gyro.startedAt === null ? 0 : Math.max(0, 1 - (now - gyro.startedAt) / GYRO_SPIN_MS);
   const gyroPhase = (gyro, now = performance.now()) => gyro.startedAt === null ? 'idle' : gyroLevel(gyro, now) === 0 ? 'stopped' : gyroLevel(gyro, now) <= .2 ? 'wobbling' : 'spinning';
@@ -178,11 +186,24 @@
   function moveMechanism(turn, arms, grip, head, depth) {
     if (state.motionFrame) cancelAnimationFrame(state.motionFrame);
     const start = { ...state.motion };
+    // The gyro's broad middle, rather than its pointed tip, sits in the hands.
+    const handBaseY = state.mode === 'gyro' ? 465 : 453;
+    const item = currentItem();
+    const heldPiece = state.mode === 'gyro' ? state.live ? state.liveHeldPiece : item?.location === 'held' && grip ? item.piece || 'a' : null : null;
+    const heldSlot = heldPiece === 'b' ? 'secondProp' : 'prop';
+    const heldElement = heldPiece === 'b' ? 'second-gyro-prop' : 'move-prop';
+    if (heldPiece) {
+      const frameSlot = heldPiece === 'b' ? 'secondPropFrame' : 'propFrame';
+      if (state[frameSlot]) cancelAnimationFrame(state[frameSlot]);
+      state[frameSlot] = null;
+      start.gyroOffset = state[heldSlot].y - (handBaseY + start.arms);
+    }
     const level = stackState.height - 1;
     // Tray perspective changes the block height. Reach to its body center,
     // while the shoulder carriage remains on the robot's central column.
     const handOffset = state.mode === 'stack' ? stackBases[stackState.station - 1] - stackBases[2] + 7 - 2 * level : 0;
-    const target = { turn, arms, grip: grip ? 1 : 0, head, depth, handOffset };
+    const target = { turn, arms, grip: grip ? 1 : 0, head, depth, handOffset,
+      gyroOffset: heldPiece && item?.prop ? item.prop[1] - (handBaseY + arms) : start.gyroOffset };
     const started = performance.now();
     function frame(now) {
       const t = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : Math.min(1, (now - started) / 950);
@@ -200,7 +221,7 @@
       const leftElbow = 245 + state.motion.turn * .25;
       const rightElbow = 405 + state.motion.turn * .25;
       const elbowY = 381 + state.motion.handOffset * .35;
-      const handY = 453 + state.motion.handOffset;
+      const handY = handBaseY + state.motion.handOffset;
       const leftPath = `M285 318 L${leftElbow} ${elbowY} L${leftX} ${handY - 4}`;
       const rightPath = `M365 318 L${rightElbow} ${elbowY} L${rightX} ${handY - 4}`;
       $('left-arm-body').setAttribute('d', leftPath);
@@ -213,6 +234,12 @@
       $('right-elbow').setAttribute('cy', elbowY);
       $('left-hand').setAttribute('transform', `translate(${leftX} ${handY}) scale(${state.motion.depth})`);
       $('right-hand').setAttribute('transform', `translate(${rightX} ${handY}) scale(${-state.motion.depth} ${state.motion.depth})`);
+      if (heldPiece) {
+        const position = { x: center, y: handY + state.motion.arms + state.motion.gyroOffset,
+          scale: state.live ? state.liveHeldScale : item.prop?.[2] ?? state[heldSlot].scale };
+        state[heldSlot] = position;
+        $(heldElement).setAttribute('transform', `translate(${position.x} ${position.y}) scale(${position.scale})`);
+      }
       $('head').setAttribute('transform', `rotate(${state.motion.head} 325 265)`);
       state.motionFrame = t < 1 ? requestAnimationFrame(frame) : null;
     }
@@ -385,26 +412,33 @@
     const locations = gyroLocations(item);
     const firstLocation = state.mode === 'gyro' ? locations.a : null;
     const secondLocation = state.mode === 'gyro' ? locations.b : null;
-    const atSpinner = firstLocation === 'spinner' || secondLocation === 'spinner';
-    $('red-dock-piece').hidden = firstLocation !== 'holder';
-    $('second-dock-piece').hidden = secondLocation !== 'holder';
-    $('red-spinner-piece').hidden = !atSpinner;
-    $('red-tray-piece').hidden = firstLocation !== 'redTray';
-    $('blue-tray-piece').hidden = secondLocation !== 'blueTray';
-    $('red-spinner-piece').classList.toggle('spinning', atSpinner && gyroLevel(gyros[item?.piece === 'b' ? 'b' : 'a']) > 0 && !state.stopped);
-    const redActive = firstLocation === 'redTray' && (gyroLevel(gyros.a) > 0 || (item?.heldPress && item.piece !== 'b')) && !state.stopped;
-    const blueActive = secondLocation === 'blueTray' && (gyroLevel(gyros.b) > 0 || (item?.heldPress && item.piece === 'b')) && !state.stopped;
-    $('red-tray-piece').classList.toggle('wobbling', redActive && gyros.a.phase === 'wobbling');
-    $('blue-tray-piece').classList.toggle('wobbling', blueActive && gyros.b.phase === 'wobbling');
-    $('red-tray-piece').classList.toggle('toppled', firstLocation === 'redTray' && gyros.a.phase === 'stopped');
-    $('blue-tray-piece').classList.toggle('toppled', secondLocation === 'blueTray' && gyros.b.phase === 'stopped');
+    const places = item?.stations || {
+      a: firstLocation === 'holder' ? 'holder_a' : firstLocation === 'redTray' ? 'red_pad' : firstLocation === 'blueTray' ? 'blue_pad' : firstLocation,
+      b: secondLocation === 'holder' ? 'holder_b' : secondLocation === 'redTray' ? 'red_pad' : secondLocation === 'blueTray' ? 'blue_pad' : secondLocation
+    };
+    const at = place => Object.keys(places).find(which => places[which] === place);
+    const spinnerPiece = at('spinner');
+    const redPiece = at('red_pad');
+    const bluePiece = at('blue_pad');
+    $('red-dock-piece').hidden = !at('holder_a');
+    $('second-dock-piece').hidden = !at('holder_b');
+    $('red-spinner-piece').hidden = !spinnerPiece;
+    $('red-tray-piece').hidden = !redPiece;
+    $('blue-tray-piece').hidden = !bluePiece;
+    $('red-spinner-piece').classList.toggle('spinning', Boolean(spinnerPiece) && gyroLevel(gyros[spinnerPiece]) > 0 && !state.stopped);
+    const redActive = Boolean(redPiece) && (gyroLevel(gyros[redPiece]) > 0 || (item?.heldPress && item.piece === redPiece)) && !state.stopped;
+    const blueActive = Boolean(bluePiece) && (gyroLevel(gyros[bluePiece]) > 0 || (item?.heldPress && item.piece === bluePiece)) && !state.stopped;
+    $('red-tray-piece').classList.toggle('wobbling', redActive && gyros[redPiece].phase === 'wobbling');
+    $('blue-tray-piece').classList.toggle('wobbling', blueActive && gyros[bluePiece].phase === 'wobbling');
+    $('red-tray-piece').classList.toggle('toppled', Boolean(redPiece) && gyros[redPiece].phase === 'stopped');
+    $('blue-tray-piece').classList.toggle('toppled', Boolean(bluePiece) && gyros[bluePiece].phase === 'stopped');
     $('red-tray-piece').parentElement.classList.toggle('pad-active', redActive);
     $('blue-tray-piece').parentElement.classList.toggle('pad-active', blueActive);
     if (state.mode === 'stack') renderStackPieces();
     $('fixture-mode-label').textContent = state.mode === 'gyro' ? 'GYROMITE SETUP' : state.mode === 'stack' ? 'STACK-UP / FIVE TRAYS' : 'POSE LAB / NO GAME PIECES';
     $('world-title').textContent = state.mode === 'free' ? 'ROBOT MOTION / NO GAME' : 'GAME TABLE / SIMULATED PIECES';
     $('fixture-note').textContent = state.mode === 'gyro'
-      ? state.cleanupStarted ? firstLocation === 'holder' && secondLocation === 'holder' ? 'Demo complete: both gyros stored; red and blue buttons released.' : `Returning stopped gyros to their holders. Red ${redActive ? 'PRESSED' : 'RELEASED'} · blue ${blueActive ? 'PRESSED' : 'RELEASED'}.` : secondLocation === 'blueTray' ? `Virtual buttons: red ${redActive ? 'PRESSED' : 'RELEASED'} · blue ${blueActive ? 'PRESSED' : 'RELEASED'}. Game link offline.` : item?.piece === 'b' ? `Gyro A on red: ${redActive ? 'pad pressed' : 'pad released'}. Gyro B moving toward blue.` : firstLocation === 'redTray' ? `Gyro A on red: ${redActive ? 'pad pressed' : 'pad released'}. Game link offline.` : firstLocation === 'spinner' ? 'Illustration: Gyro A spins at the right spinner.' : firstLocation === 'held' ? 'Illustration: Gyro A is held between both hands.' : 'Two matching gyros, one spinner, and two button pads. Positions are illustrative.'
+      ? state.cleanupStarted && at('holder_a') && at('holder_b') ? 'Demo complete: both gyros stored; red and blue buttons released.' : `Gyro A: ${places.a?.replaceAll('_', ' ') || 'moving'} · Gyro B: ${places.b?.replaceAll('_', ' ') || 'moving'}. Red ${redActive ? 'PRESSED' : 'RELEASED'} · blue ${blueActive ? 'PRESSED' : 'RELEASED'}.`
       : state.mode === 'stack'
         ? `Virtual stack: ${stackState.held.length ? `${stackState.held.join(' + ')} in R.O.B.'s hands` : 'hands empty'} · ${stackState.trays.map((tray, index) => `T${index + 1} ${tray.length}`).join(' · ')}. Game link offline.`
         : 'Pose Lab is for trying R.O.B.’s movement without game accessories.';
@@ -420,8 +454,8 @@
     $('gyro-prop').style.display = state.mode === 'gyro' ? '' : 'none';
     $('disc-prop').style.display = state.mode === 'stack' && stackState.held.length ? '' : 'none';
     $('scene-spinner').classList.toggle('station-active', state.mode === 'gyro' && (item?.location === 'spinner' || (item?.location === 'held' && item.prop?.[0] === 445)));
-    $('scene-target-gyro').classList.toggle('station-active', state.mode === 'gyro' && gyroLocations(item).a === 'redTray');
-    $('scene-blue-tray').classList.toggle('station-active', state.mode === 'gyro' && gyroLocations(item).b === 'blueTray');
+    $('scene-target-gyro').classList.toggle('station-active', state.mode === 'gyro' && Object.values(gyroLocations(item)).includes('redTray'));
+    $('scene-blue-tray').classList.toggle('station-active', state.mode === 'gyro' && Object.values(gyroLocations(item)).includes('blueTray'));
     for (let station = 1; station <= 5; station += 1) $('stack-tray-' + station).classList.toggle('station-active', state.mode === 'stack' && stackState.station === station);
     const gyroPositions = gyroLocations(item);
     for (const [which, id] of [['a', 'gyro-prop'], ['b', 'second-gyro-prop']]) {
@@ -451,16 +485,16 @@
     $('stage-action-label').textContent = item ? `${item.action || 'PLAY'} / ${String(state.step + 1).padStart(2, '0')}` : state.manualActive ? `${state.manualCommand || 'POSE'} / MANUAL` : 'HOME / 00';
     $('head-value').textContent = `${state.head}°`;
     $('head-bar').style.width = `${50 + state.head * .6}%`;
-    $('arm-value').textContent = state.arms === 0 ? 'HOME' : state.arms > 0 ? 'LOWERED' : 'RAISED';
+    $('arm-value').textContent = state.live && state.liveHeight ? `LEVEL ${state.liveHeight} / 6` : state.arms === 0 ? 'HOME' : state.arms > 0 ? 'LOWERED' : 'RAISED';
     $('arm-bar').style.width = `${50 + state.arms * .9}%`;
     $('grip-value').textContent = state.grip ? 'CLOSED' : 'OPEN';
     $('grip-bar').style.width = state.grip ? '91%' : '14%';
     $('tracking-label').textContent = 'PREVIEW ONLY';
-    $('optical-value').textContent = state.running ? 'SCRIPTED DEMO' : 'PREVIEW ONLY';
-    $('optical-bar').style.width = state.running ? '75%' : '12%';
+    $('frame-link-value').textContent = state.running ? 'SCRIPTED DEMO' : 'PREVIEW ONLY';
+    $('frame-link-bar').style.width = state.running ? '75%' : '12%';
     $('gyro-vitals').hidden = state.mode !== 'gyro';
     $('controls-title').textContent = state.mode === 'stack' ? 'STACK-UP COMMANDS' : 'POSE PREVIEW';
-    $('controls-context').textContent = state.mode === 'stack' ? 'LOCAL VIRTUAL CONTROL / NO OPTICAL INPUT' : 'MANUAL SIMULATION / NO GAME COMMANDS';
+    $('controls-context').textContent = state.mode === 'stack' ? 'LOCAL VIRTUAL CONTROL / NO GAME FRAMES' : 'MANUAL SIMULATION / NO GAME COMMANDS';
     $('grip-label').textContent = state.mode === 'stack' ? stackState.grip === 'open' ? 'CLOSE HANDS' : 'OPEN HANDS' : 'TOGGLE GRIP';
     $('demo-button').querySelector('.demo-label').textContent = state.mode === 'free' ? 'PLAY R.O.B. GREETING' : 'RUN DEMO SEQUENCE';
     const locations = gyroLocations(item);
@@ -500,7 +534,8 @@
       stackPose();
     } else {
       state.head = item.head; state.arms = item.arms; state.turn = item.turn; state.grip = item.grip; state.depth = item.prop?.[2] ?? 1;
-      if (item.prop) (item.piece === 'b' ? moveSecondProp : moveProp)(...item.prop);
+      if (item.prop && !(state.mode === 'gyro' && item.location === 'held' && item.grip))
+        (item.piece === 'b' ? moveSecondProp : moveProp)(...item.prop);
     }
     $('mission-title').textContent = item.title;
     $('mission-description').textContent = item.caption;
@@ -512,7 +547,7 @@
     if (state.step < sequence.length - 1) state.timer = setTimeout(() => { state.step += 1; runStep(); }, state.mode === 'stack' ? 950 : state.mode === 'gyro' && item.action === 'SPINNING' ? 1750 : 1300);
     else { state.running = false; state.timer = null; render(); startNextRecovery(); }
   }
-  $('demo-button').addEventListener('click', () => { if (state.live) return; cancelDemo(); resetGyros(); stackState = StackModel.create(); state.sequence = null; state.recoveryCount = { a: 0, b: 0 }; state.cleanupStarted = false; moveProp(state.mode === 'gyro' ? 225 : 325, state.mode === 'gyro' ? 496 : 505, 1, true); moveSecondProp(145, 469, .85, true); if (state.mode === 'stack') stackPose(true); state.manualActive = false; state.manualCommand = null; state.step = 0; state.running = true; log(state.mode === 'free' ? 'Pose Lab greeting started; no game commands or pieces.' : `${state.mode.toUpperCase()} scripted demonstration started; no optical command decoded.`); runStep(); });
+  $('demo-button').addEventListener('click', () => { if (state.live) return; cancelDemo(); resetGyros(); stackState = StackModel.create(); state.sequence = null; state.recoveryCount = { a: 0, b: 0 }; state.cleanupStarted = false; moveProp(state.mode === 'gyro' ? 225 : 325, state.mode === 'gyro' ? 496 : 505, 1, true); moveSecondProp(145, 469, .85, true); if (state.mode === 'stack') stackPose(true); state.manualActive = false; state.manualCommand = null; state.step = 0; state.running = true; log(state.mode === 'free' ? 'Pose Lab greeting started; no game commands or pieces.' : `${state.mode.toUpperCase()} scripted demonstration started; no game commands received.`); runStep(); });
   $('home-button').addEventListener('click', () => { if (state.live) window.RobLive.reset(); else home(); });
   $('stop-button').addEventListener('click', () => {
     if (state.live) { window.RobLive.stop(); return; }
@@ -573,6 +608,8 @@
     applyLive(snapshot) {
       cancelDemo();
       state.live = true;
+      state.liveHeight = snapshot.robot?.height ?? null;
+      state.liveHeldPiece = snapshot.game === 'gyromite' ? snapshot.robot?.held || null : null;
       state.stopped = false;
       state.mode = snapshot.game === 'stack_up' ? 'stack' : 'gyro';
       document.querySelectorAll('[data-mode]').forEach((tab) => tab.classList.toggle('active', tab.dataset.mode === state.mode));
@@ -592,18 +629,28 @@
       } else if (robot) {
         const names = { holder_a: 'holder', holder_b: 'holder', red_pad: 'redTray', blue_pad: 'blueTray', spinner: 'spinner', held: 'held' };
         const locations = { a: names[robot.pieces.a], b: names[robot.pieces.b] };
-        const piece = robot.held || (robot.station === 1 || robot.station === 4 ? 'b' : 'a');
+        const stationName = gyroStationOrder[robot.station - 1];
+        const station = gyroStationView[stationName];
+        state.liveHeldScale = station.scale;
+        const piece = robot.held || Object.keys(robot.pieces).find(which => robot.pieces[which] === stationName) || 'a';
         const place = robot.pieces[piece];
-        const coords = { holder_a: [225, 496, 1], holder_b: [145, 469, .85], red_pad: [285, 514.5, 1.12], blue_pad: [370, 514.5, 1.12], spinner: [445, 477, .85] };
-        const target = place === 'held' ? [145, 225, 285, 370, 445][robot.station - 1] : null;
-        const position = place === 'held' ? [target, robot.height <= 2 ? 500 : 445, 1] : coords[place];
-        state.sequence = [{ title: 'Live Gyromite', action: snapshot.events.at(-1)?.command || 'READY', location: names[place], locations, piece, prop: position }];
+        const travel = (robot.height - station.level) / (6 - station.level);
+        const heldPosition = [station.x, station.y + (445 - station.y) * travel, station.scale];
+        const positions = Object.fromEntries(Object.entries(robot.pieces).map(([which, location]) => {
+          const view = gyroStationView[location];
+          return [which, location === 'held' ? heldPosition : [view.x, view.y, view.scale]];
+        }));
+        const position = positions[piece];
+        state.sequence = [{ title: 'Live Gyromite', action: snapshot.events.at(-1)?.command || 'READY', location: names[place], locations, stations: { ...robot.pieces }, piece, prop: position }];
         state.step = 0;
-        state.turn = [-180, -100, -40, 45, 120][robot.station - 1];
+        state.turn = station.turn;
         state.head = Math.round(state.turn * .12);
-        state.arms = 55 - (robot.height - 1) * 14;
+        state.arms = station.arms + (-9 - station.arms) * travel;
         state.grip = robot.grip === 'closed';
-        (piece === 'b' ? moveSecondProp : moveProp)(...position);
+        if (state.liveHeldPiece !== 'a') moveProp(...positions.a);
+        else if (state.propFrame) { cancelAnimationFrame(state.propFrame); state.propFrame = null; }
+        if (state.liveHeldPiece !== 'b') moveSecondProp(...positions.b);
+        else if (state.secondPropFrame) { cancelAnimationFrame(state.secondPropFrame); state.secondPropFrame = null; }
         for (const which of ['a', 'b']) {
           gyros[which].startedAt = robot.spinning[which] ? performance.now() - 1000 : null;
           gyros[which].phase = robot.spinning[which] ? 'spinning' : 'idle';
@@ -626,7 +673,7 @@
       $('demo-button').disabled = true;
       document.querySelectorAll('[data-mode]').forEach((tab) => { tab.disabled = true; });
       $('tracking-label').textContent = status.testSignal(snapshot) ? status.test(snapshot) : status.frames(snapshot);
-      $('optical-value').textContent = status.frames(snapshot);
+      $('frame-link-value').textContent = status.frames(snapshot);
       $('connection').textContent = status.connection(snapshot);
       document.querySelector('.gyro-vitals-note').textContent = snapshot.link?.online ? `Virtual pad states sent to ${snapshot.link.receiver || 'console'} Controller 2` : 'Virtual spin and button states; game link offline';
       $('controls-context').textContent = 'LIVE CONTROLLER / GAME FRAMES OR MANUAL';
@@ -636,7 +683,7 @@
       $('gyro-a-value').textContent = robot?.pads?.red ? 'SPINNING / PRESSED' : $('gyro-a-value').textContent;
       $('gyro-b-value').textContent = robot?.pads?.blue ? 'SPINNING / PRESSED' : $('gyro-b-value').textContent;
     },
-    leaveLive() { state.live = false; $('stage').classList.remove('test-flashing', 'test-ready'); home(); document.querySelectorAll('[data-mode]').forEach((tab) => { tab.disabled = false; }); $('connection').textContent = window.RobStatus.preview; $('connection').closest('.top-status').dataset.connection = 'preview'; document.querySelector('.vitals-card .live-text').textContent = '● SIMULATION'; document.querySelector('.stage-panel .chip').textContent = 'SIMULATED MOTION'; document.querySelector('.gyro-vitals-note').textContent = 'Virtual spin and button states; no game link'; }
+    leaveLive() { state.live = false; state.liveHeight = null; state.liveHeldPiece = null; $('stage').classList.remove('test-flashing', 'test-ready'); home(); document.querySelectorAll('[data-mode]').forEach((tab) => { tab.disabled = false; }); $('connection').textContent = window.RobStatus.preview; $('connection').closest('.top-status').dataset.connection = 'preview'; document.querySelector('.vitals-card .live-text').textContent = '● SIMULATION'; document.querySelector('.stage-panel .chip').textContent = 'SIMULATED MOTION'; document.querySelector('.gyro-vitals-note').textContent = 'Virtual spin and button states; no game link'; }
   };
   $('event-list').querySelector('time').textContent = time();
   render();

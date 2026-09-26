@@ -1,12 +1,13 @@
 [Unit]
 Description=R.O.B. Vision RetroPie controller and frame receiver
-After=network-online.target
+After=network-online.target virtualglove-controller-router.service
 Wants=network-online.target
 
 [Service]
 Type=simple
 EnvironmentFile=/home/pi/.config/rob-vision/receiver.env
-ExecStart=/usr/bin/python3 /home/pi/rob-vision/tools/retropie_controller2.py
+ExecStart=/usr/bin/python3 /home/pi/rob-vision/tools/retropie_controller2.py --swap-buttons
+ExecStartPost=/usr/bin/python3 /home/pi/rob-vision/scripts/install.py player2
 Restart=always
 RestartSec=2
 User=root
