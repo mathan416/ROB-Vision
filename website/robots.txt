@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rob-vision.mathan.ca/sitemap.xml
