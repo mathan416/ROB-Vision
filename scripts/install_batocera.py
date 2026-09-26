@@ -12,11 +12,12 @@ import platform
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from scripts.install import copy_file, copy_tree_merge, valid_controller, write_file
+from scripts.install import copy_file, copy_tree_merge, valid_controller, write_file, validate_receiver_source
 from tools.batocera import select_games
 
 DEST = Path("/userdata/system/rob-vision")
@@ -24,6 +25,29 @@ CONFIG = Path("/userdata/system/batocera.conf")
 SERVICES = Path("/userdata/system/services")
 SCRIPTS = Path("/userdata/system/scripts")
 VERSION_FILE = Path("/usr/share/batocera/batocera.version")
+ES_SERVICE = Path("/etc/init.d/S31emulationstation")
+
+
+def suspend_menu():
+    if subprocess.run(["pidof", "emulationstation"], stdout=subprocess.DEVNULL).returncode:
+        return False
+    if not ES_SERVICE.is_file():
+        raise RuntimeError("EmulationStation is running but its Batocera service was not found.")
+    subprocess.run([str(ES_SERVICE), "suspend"], check=True)
+    try:
+        deadline = time.monotonic() + 12
+        while subprocess.run(["pidof", "emulationstation"], stdout=subprocess.DEVNULL).returncode == 0:
+            if time.monotonic() >= deadline:
+                raise RuntimeError("EmulationStation did not suspend; installation stopped before receiver restart.")
+            time.sleep(.2)
+    except Exception:
+        subprocess.run([str(ES_SERVICE), "resume"], check=False)
+        raise
+    return True
+
+
+def resume_menu():
+    subprocess.run([str(ES_SERVICE), "resume"], check=True)
 
 
 def supported_hardware(machine=None, version_file=VERSION_FILE):
@@ -56,25 +80,33 @@ def install(source=ROOT, destination=DEST, controller=None):
         raise RuntimeError("Both bundled x86_64 Batocera frame wrappers are required.")
     if subprocess.run(["pgrep", "-x", "retroarch"], stdout=subprocess.DEVNULL).returncode == 0:
         raise RuntimeError("Exit the running game before installing.")
+    validate_receiver_source(source)
     old_url = destination / "controller.url"
     if controller is None and old_url.is_file():
         controller = old_url.read_text().strip().removeprefix("http://")
     if not controller:
         raise ValueError("Provide --controller with the UNO Q hostname or IP.")
     valid_controller(controller)
-    destination.mkdir(parents=True, exist_ok=True)
-    for folder in ("tools", "controller", "config"):
-        copy_tree_merge(source / folder, destination / folder)
-    for core in ("fceumm", "nestopia"):
-        library = libraries / f"robvision_{core}_libretro.so"
-        ctypes.CDLL(str(library))
-        copy_file(library, destination / "build" / library.name, 0o755)
-    write_file(old_url, f"http://{controller}\n", 0o600)
-    copy_file(source / "deploy/batocera/ROBVision", SERVICES / "ROBVision", 0o755)
-    copy_file(source / "deploy/batocera/zz-robvision-game", SCRIPTS / "zz-robvision-game", 0o755)
-    chosen = select_games(CONFIG, Path("/userdata/roms/nes"))
-    subprocess.run(["batocera-services", "enable", "ROBVision"], check=True)
-    subprocess.run(["batocera-services", "restart", "ROBVision"], check=True)
+    menu_suspended = suspend_menu()
+    try:
+        if (SERVICES / "ROBVision").is_file():
+            subprocess.run(["batocera-services", "stop", "ROBVision"], check=True)
+        destination.mkdir(parents=True, exist_ok=True)
+        for folder in ("tools", "controller", "config"):
+            copy_tree_merge(source / folder, destination / folder)
+        for core in ("fceumm", "nestopia"):
+            library = libraries / f"robvision_{core}_libretro.so"
+            ctypes.CDLL(str(library))
+            copy_file(library, destination / "build" / library.name, 0o755)
+        write_file(old_url, f"http://{controller}\n", 0o600)
+        copy_file(source / "deploy/batocera/ROBVision", SERVICES / "ROBVision", 0o755)
+        copy_file(source / "deploy/batocera/zz-robvision-game", SCRIPTS / "zz-robvision-game", 0o755)
+        chosen = select_games(CONFIG, Path("/userdata/roms/nes"))
+        subprocess.run(["batocera-services", "enable", "ROBVision"], check=True)
+        subprocess.run(["batocera-services", "restart", "ROBVision"], check=True)
+    finally:
+        if menu_suspended:
+            resume_menu()
     print("Installed R.O.B. Vision for:", ", ".join(chosen) or "no registered ROMs present")
     if not (destination / "token").is_file():
         print("Pair on the UNO Q Setup page using:")

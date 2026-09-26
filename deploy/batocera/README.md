@@ -4,7 +4,7 @@ The Batocera port runs on **Batocera 43.1 x86_64** and uses the stock FCEUmm or 
 
 Install from the [versioned release command](../../docs/INSTALLATION_GUIDE.md) as `root` on Batocera. The same console command detects Batocera or RetroPie, checks supported hardware before changing files, and opens first-time pairing. A source checkout and a separate pairing command are unnecessary for a normal install.
 
-The installer retains an existing pairing token and controller URL on repeat runs. It enables the `ROBVision` Batocera service, installs its separate `zz-robvision-game` hook, and selects `robvision_fceumm` for the exact Gyromite and Stack-Up ROM names in `config/games.json`. An existing FCEUmm/Nestopia selection for one of those ROMs is retained. An unknown custom core choice is left alone. Other games, including VirtualGlove's Super Glove Ball, are not changed. Exit any Batocera game before installation.
+The installer retains an existing pairing token and controller URL on repeat runs. It enables the `ROBVision` Batocera service, installs its separate `zz-robvision-game` hook, and selects `robvision_fceumm` for the exact Gyromite and Stack-Up ROM names in `config/games.json`. An existing FCEUmm/Nestopia selection for one of those ROMs is retained. An unknown custom core choice is left alone. Other games, including VirtualGlove's Super Glove Ball, are not changed. Exit any Batocera game before installation. The installer suspends and resumes EmulationStation around the receiver restart to avoid virtual joystick hotplug during menu input handling.
 
 The console command prints the first-time pairing code and fingerprint. Enter them on Setup while it is still running.
 

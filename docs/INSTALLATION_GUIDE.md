@@ -28,7 +28,7 @@ curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.0/inst
   sh -s -- console your-uno-q.local
 ```
 
-The command detects the console. On RetroPie it uses `sudo` for system changes; on Batocera it runs under the root login. It installs the frame wrappers, receiver, game launch integration, and Gyromite's virtual Controller 2. For a first install it opens a five-minute pairing window and prints a six-digit code and SHA-256 certificate fingerprint. Enter the console's hostname, code, and fingerprint under **Console Link** on the UNO Q Setup page. Keep the console command open until it reports **Pairing complete**. Successful pairing starts the receiver and maps RetroPie's Player 2 automatically. No second terminal command is required.
+The command detects the console. On RetroPie it uses `sudo` for system changes and requires EmulationStation to be closed. On Batocera it runs under the root login and temporarily suspends and resumes its game menu while the virtual joystick is restarted. It installs the frame wrappers, receiver, game launch integration, and Gyromite's virtual Controller 2. For a first install it opens a five-minute pairing window and prints a six-digit code and SHA-256 certificate fingerprint. Enter the console's hostname, code, and fingerprint under **Console Link** on the UNO Q Setup page. Keep the console command open until it reports **Pairing complete**. Successful pairing starts the receiver and maps RetroPie's Player 2 automatically. No second terminal command is required.
 
 <!-- pagebreak -->
 
