@@ -28,4 +28,4 @@ python3 tools/identify_game.py start nes lr-fceumm "/roms/nes/Stack-Up (World).7
 python3 tools/identify_game.py end
 ```
 
-These return `gyromite`, `stack_up`, and `idle`. Use the launched archive filename, not its inner `.nes` member unless that file is actually launched. For live verification, launch each game from the console menu, check the game name and **GAME FRAMES LINKED** on Mission, then exit and confirm the selection clears. See the [release validation report](RELEASE_VALIDATION_0.1.0.md) for dated results and [network architecture](network-architecture.md) for the trust boundary.
+These return `gyromite`, `stack_up`, and `idle`. Use the launched archive filename, not its inner `.nes` member unless that file is actually launched. For live verification, launch each game from the console menu, check the game name and **GAME FRAMES LINKED** on Mission, then exit and confirm the selection clears. See the [release validation report](RELEASE_VALIDATION_0.1.0.md) for dated results and [technical architecture](TECHNICAL_ARCHITECTURE.md) for the trust boundary.
