@@ -250,7 +250,7 @@ def cover(canvas, doc, title: str, subtitle: str, landscape_page: bool = False):
     canvas.drawString(55, 126, subtitle)
     canvas.setStrokeColor(ORANGE); canvas.setLineWidth(3); canvas.line(55, 109, 216, 109)
     canvas.setFillColor(colors.HexColor("#8BA9B8")); canvas.setFont("DM-Bold", 8)
-    canvas.drawString(55, 67, "VERSION 0.1.4")
+    canvas.drawString(55, 67, "VERSION 0.1.5")
     canvas.drawString(55, 52, "UNO Q · RETROPIE · BATOCERA")
     canvas.restoreState()
 
@@ -325,8 +325,8 @@ if __name__ == "__main__":
                    "Architecture, frame protocol, networking, hardware, and verification",
                    ["TECHNICAL_ARCHITECTURE.md", "HISTORICAL_MANUAL_NOTES.md", "GYROMITE_MANUAL_NOTES.md",
                     "STACK_UP_MANUAL_NOTES.md", "GAME_IDENTIFICATION.md",
-                    "optical-input.md", "ROM_SIGNAL_ANALYSIS.md", "DASHBOARD_DESIGN.md", "network-architecture.md",
-                    "HARDWARE_BUILD_GUIDE.md", "parts-plan.md", "CONFIGURATION_REFERENCE.md",
+                    "optical-input.md", "ROM_SIGNAL_ANALYSIS.md", "DASHBOARD_DESIGN.md",
+                    "HARDWARE_BUILD_GUIDE.md", "CONFIGURATION_REFERENCE.md",
                     "SAFETY_AND_SECURITY.md", "VERIFICATION_PLAN.md", "UNO_Q_MATRIX_DISPLAY.md"],
                    page_size=landscape(A4)),
         build_book("R.O.B.-Vision-Matrix-Display-Guide.pdf", "Matrix Display Guide",

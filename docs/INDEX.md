@@ -1,6 +1,6 @@
 # R.O.B. Vision documentation
 
-[Version 0.1.4 release notes](RELEASE_NOTES_0.1.4.md) describe the documentation update and supported devices. The [0.1.3 notes](RELEASE_NOTES_0.1.3.md), [0.1.2 notes](RELEASE_NOTES_0.1.2.md), [0.1.1 notes](RELEASE_NOTES_0.1.1.md), [0.1.0 notes](RELEASE_NOTES_0.1.0.md), and [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remain available.
+[Version 0.1.5 release notes](RELEASE_NOTES_0.1.5.md) describe the documentation update and supported devices. The [0.1.4 notes](RELEASE_NOTES_0.1.4.md), [0.1.3 notes](RELEASE_NOTES_0.1.3.md), [0.1.2 notes](RELEASE_NOTES_0.1.2.md), [0.1.1 notes](RELEASE_NOTES_0.1.1.md), [0.1.0 notes](RELEASE_NOTES_0.1.0.md), and [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remain available.
 
 **Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on RetroPie or Batocera; its rendered NES frames carry complete R.O.B. commands to the UNO Q. A browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. Both games' six commands were decoded during live Direct play, and Gyromite's gate controls were tested in Game A.
 
@@ -32,10 +32,10 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 - [Optical input](optical-input.md) and [ROM signal analysis](ROM_SIGNAL_ANALYSIS.md): flashes, timing, and command decoding.
 - [Kiyo Pro row test](KIYO_PRO_ROW_TEST_2026-09-25.md): archived camera research; no longer part of the runtime.
 - [Game identification](GAME_IDENTIFICATION.md): RetroPie launch-hook research and exact ROM-name matching.
-- [Network architecture](network-architecture.md): virtual Controller 2 return path over Wi-Fi or Ethernet.
+- [Technical architecture](TECHNICAL_ARCHITECTURE.md): network pairing, console identity, and virtual Controller 2 return path.
 - [Dashboard design](DASHBOARD_DESIGN.md): robot art, accessory layout, and live state.
 - [Gyromite manual notes](GYROMITE_MANUAL_NOTES.md), [Stack-Up manual notes](STACK_UP_MANUAL_NOTES.md), and [historical manual notes](HISTORICAL_MANUAL_NOTES.md): original behavior and game modes.
-- [UNO Q setup](HARDWARE_BUILD_GUIDE.md) and [parts plan](parts-plan.md): controller, power, and network hardware only.
+- [UNO Q hardware setup](HARDWARE_BUILD_GUIDE.md): required devices, power, and network connection.
 - [UNO Q host helpers](../deploy/uno-q/README.md), [RetroPie deployment](../deploy/retropie/README.md), and [Batocera deployment](../deploy/batocera/README.md): installed and optional system services.
 - [Unattended engineering test report](UNATTENDED_TEST_REPORT_2026-09-24.md): synthetic optical and model evidence.
 - [Live optical test report](LIVE_OPTICAL_TEST_2026-09-25.md): archived camera research; no longer part of the runtime.

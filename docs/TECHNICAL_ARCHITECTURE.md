@@ -14,6 +14,14 @@ NES frames --> FCEUmm or Nestopia wrapper --> local frame receiver
 
 The App Lab `python/main.py` gateway publishes port 80 and forwards to `controller/service.py` on port 8766. Router Bridge sends controller status and action hints to `sketch/sketch.ino` for the UNO Q LED matrix. The dashboard polls `/api/state` every 500 ms. A local file preview uses a separate scripted JavaScript model; a served page with a controller enters live mode.
 
+## Network and console identity
+
+The UNO Q owns the virtual pose and pieces. A browser on the trusted LAN reads its state, while a paired console identifies game launches, sends validated frame commands, and receives Gyromite's virtual Controller 2 pad states. Wi-Fi and Ethernet carry the same HTTP protocol. The App Lab gateway serves the dashboard on port 80; port 8766 is the controller service behind it. The device's existing mDNS service advertises its own hostname, so a UNO Q named `virtualglove` is reached at `http://virtualglove.local/dashboard/`, while one named `arduiain` uses `http://arduiain.local/dashboard/`. The numeric address assigned to that UNO Q works as well.
+
+The launch notifier, receiver poll, and frame-command POST use the paired console's credential. Pairing verifies a short-lived code and TLS certificate fingerprint before delivering that credential. If two consoles are paired, the UNO Q accepts commands only from the console that launched the active game. The receiver polls about every 50 ms, releases its virtual pads after 750 ms without a valid response, and reports an online heartbeat that expires after three seconds. It scans the running RetroArch process and can resynchronize game identity after a UNO Q restart.
+
+`/api/state` is a schema-versioned snapshot, not a push stream or durable log. A fresh `input.frame_hook` shows that matching game frames recently reached the receiver; it does not prove that a gate moved on the game screen. Browser refresh reads the current snapshot. Browser controls are available on the trusted LAN, so ports 80 and 8766 should stay off public networks.
+
 ## Authority and state
 
 `controller/service.py` owns the selected game, Test state, recent events, and virtual game models. `/api/state` schema 1 contains game, robot, input, events, link, and Test data. `input.frame_hook` reports a fresh console game-frame connection. Recent events are capped at 30 and are display history, not a durable event stream. Browser reload reads a new snapshot without resetting controller state.
@@ -44,7 +52,7 @@ Trusted-LAN browser controls use `/api/game`, `/api/command`, and `/api/gate-ass
 
 Selecting a game or **Home** initializes its virtual pieces. Live **Emergency Stop** clears game selection; file preview cancels its local animation. Game exit clears context and releases buttons. The console receiver can resynchronize game identity after a UNO Q restart. It does not infer Hector's position, gate animation, Stack-Up score, or victory.
 
-See [configuration](CONFIGURATION_REFERENCE.md), [network architecture](network-architecture.md), [frame input](optical-input.md), and the [verification plan](VERIFICATION_PLAN.md).
+See [configuration](CONFIGURATION_REFERENCE.md), [frame input](optical-input.md), and the [verification plan](VERIFICATION_PLAN.md).
 
 ## Release installation path
 

@@ -1,5 +1,10 @@
 # R.O.B. Vision changelog
 
+## 0.1.5 consolidated manuals
+
+- Merged network architecture into the technical reference and the device list into the UNO Q setup guide.
+- Updated navigation and rebuilt the four PDF manuals.
+
 ## 0.1.4 UNO Q access URLs
 
 - UNO Q installer prints the device-specific mDNS and LAN IPv4 Mission and Setup URLs.
