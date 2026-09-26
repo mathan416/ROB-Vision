@@ -1,6 +1,6 @@
-# Gyromite manual: design and test notes
+# Gyromite manual: historical behavior and virtual rules
 
-**Source:** [Gyromite instruction booklet transcript](https://www.digitpress.com/library/manuals/nes/gyromite.txt) at Digital Press. This is a paraphrased summary of Nintendo's physical game accessory, translated into rules for a virtual R.O.B. The transcript includes editorial notes and possible transcription mistakes; confirm game behavior with a user-supplied game before claiming compatibility.
+**Source:** [Gyromite instruction booklet transcript](https://www.digitpress.com/library/manuals/nes/gyromite.txt) at Digital Press. This paraphrases the original accessory rules and relates them to R.O.B. Vision. The transcript may contain transcription mistakes; the [verification plan](VERIFICATION_PLAN.md) records checks against the running game.
 
 ## Original accessory and virtual equivalent
 
@@ -10,19 +10,11 @@ The booklet says that **one gate can be operated without spinning a gyro**. R.O.
 
 ## Game modes
 
-| Mode | Manual behavior | Virtual design implication |
+| Mode | Manual behavior | R.O.B. Vision behavior |
 | --- | --- | --- |
-| Test | Optical aiming signal | Report Test signal from the rendered frame link before play. |
-| Direct | Up/down/left/right/open/close go straight to R.O.B. | Validate six optical commands and show each virtual movement. |
-| Game A | Player controls the professor on a dark screen; Start enters a blue robot-transmission screen | Decode complete robot commands in the correct mode; avoid claiming to know professor position from flashes. |
-| Game B | Professor walks while Controller 1 commands R.O.B. directly | Show ready/busy state and virtual-pad-to-game latency. |
+| Test | Optical aiming signal | Blink the virtual red head light while the linked game sends its Test signal. |
+| Direct | Up/down/left/right/open/close go straight to R.O.B. | Apply each complete game-frame command as one virtual movement. |
+| Game A | Player controls the professor on a dark screen; Start enters a blue robot-transmission screen | Apply complete robot commands; the game screen shows the professor's position. |
+| Game B | Professor walks while Controller 1 commands R.O.B. directly | Apply complete robot commands and return virtual pad states to Controller 2. |
 
-## Acceptance questions
-
-- Capture Test and six Direct commands on the intended LCD/OLED and emulator.
-- Demonstrate held unspun press/release of one virtual pad.
-- Demonstrate two independent gyro positions and spin-down phases, red/blue button state, and return to holders.
-- Measure red/blue-to-A/B mapping, receiver freshness, and actual game gate response. A local visual button state is not proof that the emulator accepted input.
-- Test Game A's transmission switch and Game B's direct command cadence.
-
-Original booklet warnings about touching real spinning gyros are historical context. The [virtual system contract](VIRTUAL_SYSTEM.md) is the current product scope.
+The [verification plan](VERIFICATION_PLAN.md) tracks game-mode and Controller 2 checks. The [virtual system contract](VIRTUAL_SYSTEM.md) describes the current product behavior.

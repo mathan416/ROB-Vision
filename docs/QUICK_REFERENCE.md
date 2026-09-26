@@ -1,6 +1,6 @@
 # R.O.B. Vision quick reference
 
-**Buddy is virtual.** The UNO Q controls his movement and game pieces. RetroPie or supported Batocera sends rendered game frames to the UNO Q. Both Gyromite gate colors responded in Game A during testing; all six commands from each game reached the virtual robot in live Direct play.
+The UNO Q controls Buddy's movement and game pieces. RetroPie or supported Batocera sends rendered game frames to the UNO Q.
 
 | Where | Action | Result |
 | --- | --- | --- |
