@@ -15,6 +15,6 @@ Arduino UNO Q with App Lab; standard RetroPie with the `pi` account and installe
 
 ## Current limits
 
-The virtual model responds to the game's light commands but cannot read Hector's position, score, or Stack-Up's target pattern. Stack-Up Direct movement is supported; longer Memory and Bingo sessions require further live validation. Gyromite's blue gate return under Nestopia passed a live Batocera Game A check after the Player 2 gamepad fix; the RetroPie Nestopia gate check remains pending. Demo mode works while a console is paired and idle.
+The virtual model responds to the game's light commands but cannot read Hector's position, score, or Stack-Up's target pattern. Stack-Up Direct movement is supported; longer Memory and Bingo sessions require further live validation. Gyromite's blue gate return under Nestopia passed live Game A checks on Batocera and RetroPie after the Player 2 gamepad fix. Demo mode works while a console is paired and idle.
 
 R.O.B. Vision is an independent project and is not affiliated with or endorsed by Nintendo. See [Third-party components and rights](THIRD_PARTY_COMPONENTS.md).

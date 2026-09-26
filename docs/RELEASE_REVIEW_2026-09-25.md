@@ -31,4 +31,4 @@ See the [verification plan](VERIFICATION_PLAN.md), [FCEUmm frame-link report](FR
 
 ## 0.1.0 Nestopia follow-up
 
-Batocera Game A blue-gate hold and release passed after the wrapper selected Nestopia explicit Player 2 gamepad device `257`. RetroPie Nestopia still needs the same live return-path check. Stack-Up movement under Nestopia was observed in earlier Direct-mode sessions.
+Batocera and RetroPie Game A blue-gate hold and release passed after the wrapper selected Nestopia explicit Player 2 gamepad device `257`. RetroPie used a direct RetroArch recording to verify the gate positions. Stack-Up movement under Nestopia was observed in earlier Direct-mode sessions.

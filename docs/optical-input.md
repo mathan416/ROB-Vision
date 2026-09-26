@@ -10,6 +10,6 @@ Test mode is separate from movement. `FrameTestDetector` recognizes a sustained 
 
 ## Current evidence and limits
 
-Both games delivered all six command types during live FCEUmm Direct play. Nestopia delivered live movement commands from both games. Its Gyromite blue gate return passed a Batocera Game A check after the Player 2 device fix; RetroPie still needs the same check. The frame path does not depend on display refresh, a camera frame rate, or screen placement. It still requires the R.O.B. Vision emulator launch choice and exact registered ROM identity. Longer sessions and Stack-Up Memory/Bingo remain to be checked. See the [FCEUmm](FRAME_LINK_TEST_2026-09-25.md) and [Nestopia](NESTOPIA_FRAME_LINK_TEST_2026-09-25.md) reports.
+Both games delivered all six command types during live FCEUmm Direct play. Nestopia delivered live movement commands from both games. Its Gyromite blue gate return passed Game A checks on Batocera and RetroPie after the Player 2 device fix. The frame path does not depend on display refresh, a camera frame rate, or screen placement. It still requires the R.O.B. Vision emulator launch choice and exact registered ROM identity. Longer sessions and Stack-Up Memory/Bingo remain to be checked. See the [FCEUmm](FRAME_LINK_TEST_2026-09-25.md) and [Nestopia](NESTOPIA_FRAME_LINK_TEST_2026-09-25.md) reports.
 
 Dated Kiyo Pro and live camera reports in this repository document an abandoned research path; their measurements do not describe the current runtime.
