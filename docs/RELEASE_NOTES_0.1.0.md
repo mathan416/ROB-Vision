@@ -5,7 +5,7 @@ R.O.B. Vision is a virtual robot companion for Gyromite and Stack-Up. The UNO Q 
 ## New in 0.1.0
 
 - One versioned, SHA-256-checked install command on the UNO Q and one common console command on RetroPie or Batocera. Neither device needs a Git checkout or SSH source transfer.
-- First-time console pairing opens during installation. The code and fingerprint go into UNO Q Setup; pairing starts the receiver and configures Gyromite's virtual Controller 2 without another console command.
+- First-time console pairing opens during installation. RetroPie updates stop the receiver before replacing its modules and require EmulationStation to be closed during virtual joystick restart. The code and fingerprint go into UNO Q Setup; pairing starts the receiver and configures Gyromite's virtual Controller 2 without another console command.
 - Batocera hardware/version preflight before installation. The validated Batocera target is 43.1 x86_64; other boards are reported clearly and are not claimed as supported.
 - Updated built-in Help, user and technical guides, four PDF manuals, MIT license, provenance notes, and release checksums.
 

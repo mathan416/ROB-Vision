@@ -313,6 +313,17 @@ def installed_controller(path: Path = PI_CONFIG / "receiver.env") -> str | None:
     return None
 
 
+def validate_receiver_source(source: Path) -> None:
+    """Reject an incomplete source bundle before stopping the installed receiver."""
+    result = subprocess.run(
+        [sys.executable, str(source / "tools/retropie_controller2.py"), "--help"],
+        cwd=source, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
+    )
+    if result.returncode:
+        detail = (result.stderr.strip().splitlines() or ["import failed"])[-1]
+        raise RuntimeError("Incomplete receiver module set: " + detail)
+
+
 def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
                      controller: str | None = None, player2_index: int | None = None) -> None:
     if sys.version_info < (3, 7):
@@ -337,6 +348,10 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
         raise RuntimeError("Install lr-fceumm or lr-nestopia through RetroPie-Setup first.")
     if subprocess.run(["pgrep", "-x", "retroarch"], stdout=subprocess.DEVNULL).returncode == 0:
         raise RuntimeError("Exit the running NES game before installing or upgrading.")
+    if any(subprocess.run(["pgrep", "-x", name], stdout=subprocess.DEVNULL).returncode == 0
+           for name in ("emulationstation", "emulationstatio")):
+        raise RuntimeError("Exit EmulationStation before installing; restarting the virtual joystick while it runs can crash its input manager.")
+    validate_receiver_source(source)
     for action in ("launch", "end"):
         hook = RUNCOMMAND / f"runcommand-on{action}.sh"
         if hook.exists():
@@ -346,6 +361,9 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
     run("modprobe", "uinput")
     if not Path("/dev/uinput").exists():
         raise RuntimeError("/dev/uinput is unavailable after loading the uinput module.")
+    # Avoid loading a mixed module set if an earlier update was interrupted.
+    if SERVICE.exists():
+        run("systemctl", "stop", "rob-vision-controller2.service")
     destination.mkdir(parents=True, exist_ok=True)
     for name in ("tools", "controller", "config", "scripts"):
         copy_tree_merge(source / name, destination / name)

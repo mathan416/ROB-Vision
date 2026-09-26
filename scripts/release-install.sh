@@ -1,6 +1,7 @@
 #!/bin/sh
 # Rendered with a version and source-archive digest by package_release.py.
 set -eu
+export PYTHONDONTWRITEBYTECODE=1
 VERSION="@VERSION@"
 ARCHIVE_SHA256="@SHA256@"
 BASE="https://github.com/mathan416/ROB-Vision/releases/download/$VERSION"
