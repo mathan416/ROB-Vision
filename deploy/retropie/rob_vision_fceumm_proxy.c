@@ -172,18 +172,7 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code) {
 }
 bool retro_load_game(const struct retro_game_info *game) {
     frame_index = 0; pixel_format = 0;
-    REAL(retro_load_game);
-    bool loaded = fn && fn(game);
-#ifdef ROB_USE_NESTOPIA
-    /* Nestopia auto-selects both controller ports while loading the ROM,
-     * replacing the gamepad choice RetroArch sent before this call. Restore
-     * the two standard pads after its auto-selection has completed. */
-    if (loaded) {
-        retro_set_controller_port_device(0, 1);
-        retro_set_controller_port_device(1, 1);
-    }
-#endif
-    return loaded;
+    REAL(retro_load_game); return fn && fn(game);
 }
 bool retro_load_game_special(unsigned type, const struct retro_game_info *games, size_t count) {
     frame_index = 0; pixel_format = 0;
