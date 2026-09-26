@@ -1,5 +1,7 @@
 # RetroPie game-frame link verification, 25 September 2026
 
+This is a dated engineering record. References below to camera preview or concurrent camera decoding describe the earlier test build. The current release uses emulator frames and has no camera input path; the current behavior is specified in the [technical reference](TECHNICAL_ARCHITECTURE.md).
+
 ## Purpose
 
 The Kiyo Pro delivered roughly 60 camera frames per second, but some one-frame light cells were missed. This test checks an alternate path that observes the NES image once per emulated frame inside RetroArch. It tests game command identity and UNO Q model actions; it does not measure camera-only reliability.

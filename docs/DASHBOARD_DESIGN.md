@@ -12,6 +12,8 @@ Fast Gates appears during live Gyromite. Blue (`2`), red (`1`), and Release Both
 
 ![Mission control row with Pose Preview, Game Table, and System Vitals](images/mission-controls-screenshot.png)
 
+![Stack-Up Game Table illustration with five trays and the starting block stack](images/stack-up-game-table.png)
+
 ## Setup layout
 
 Setup lists paired RetroPie and Batocera consoles and provides **Check Link**, frame-link status, Test-mode indication and red-light preview, Gyromite pad checks, and Stack-Up movement checks.

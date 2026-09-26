@@ -1,12 +1,12 @@
 # R.O.B. Vision user guide
 
-The UNO Q controls Buddy, the virtual robot shown in Mission. RetroPie or Batocera sends Gyromite and Stack-Up commands through the game-frame link. The robot, gyros, blocks, trays, and spinner are graphics and software state. Start with the [Buddy story](MEET_BUDDY.md) if you want to meet him, or follow these instructions to set up and play.
+The UNO Q controls Buddy, the virtual robot shown in Mission. RetroPie or Batocera sends Gyromite and Stack-Up commands through the game-frame link. His movements and game pieces appear in your browser.
 
 ## Open R.O.B. Vision
 
-Install version 0.1.5 with the two commands in the [installation guide](INSTALLATION_GUIDE.md): one on the UNO Q, one on the console. The console command prints first-time pairing details for Setup and configures its receiver automatically.
+Install version 0.1.6 with the two commands in the [installation guide](INSTALLATION_GUIDE.md): one on the UNO Q, one on the console. The console command prints first-time pairing details for Setup and configures its receiver automatically.
 
-Start **R.O.B. Vision** in UNO Q App Lab, then open one of the Mission URLs printed by the installer on a laptop, phone, or tablet. They use the UNO Q's `.local` name, such as `http://virtualglove.local/dashboard/`, and its LAN IP, such as `http://10.0.2.84/dashboard/`. Stop another App Lab app first if one is running; this UNO Q runs one App Lab app at a time. The same hostname or IP with port 8766 reaches the controller directly. A `file://` page is an offline preview.
+Start **R.O.B. Vision** in UNO Q App Lab, then open one of the Mission URLs printed by the installer on a laptop, phone, or tablet. The installer prints both the UNO Q's `.local` hostname and its LAN IP address. Stop another App Lab app first if one is running. A `file://` page is an offline preview.
 
 Mission shows R.O.B., Accessory Bay, Game Table, Pose Preview, System Vitals, and Activity Feed. **GYROMITE / CONNECTED** means the browser reaches the UNO Q with Gyromite selected. **RETROPIE ONLINE** or **BATOCERA ONLINE** means that console's receiver has contacted the UNO Q recently. **GAME FRAMES LINKED** means the selected game is sending its rendered frames.
 
@@ -18,17 +18,21 @@ When no supported game is running, select **Gyromite** or **Stack-Up** and **Run
 
 ## Choose an NES emulator
 
-For automatic R.O.B. movement, select **lr-robvision-fceumm** or **lr-robvision-nestopia** for the game in RetroPie. Each entry uses the corresponding installed original core and forwards the game's rendered light cells to the UNO Q. The plain **lr-fceumm** and **lr-nestopia** entries play normally without the R.O.B. Vision frame link. Gyromite and Stack-Up currently default to the FCEUmm choice on the test RetroPie. See the [RetroPie setup guide](../deploy/retropie/README.md).
+For automatic R.O.B. movement on RetroPie, select **lr-robvision-fceumm** or **lr-robvision-nestopia** for the game. Each entry uses the corresponding installed core and forwards the game's rendered light cells to the UNO Q. On supported Batocera, the installer selects the R.O.B. Vision FCEUmm wrapper for registered games; Nestopia is available as a per-game choice. See the [RetroPie](../deploy/retropie/README.md) and [Batocera](../deploy/batocera/README.md) setup guides.
 
 ## Play Gyromite
 
 Open [Setup](../dashboard/setup.html) to check the console and game-frame status. Start Gyromite and watch Mission for **GAME FRAMES LINKED**. R.O.B. follows complete commands from the game. A spinning virtual gyro on a pad keeps its gate pressed while R.O.B. moves elsewhere; an unspun gyro can press one gate while held there. The UNO Q sends those pad states to the active console's virtual Controller 2.
 
-**Fast Gates** responds immediately while Gyromite is selected. Tap **Lower Blue** or **Lower Red** to press, tap again to release, or choose **Release Both**. Keyboard shortcuts are **2**, **1**, and **0**. Holds expire after 60 seconds; both buttons release on game exit or lost receiver data. If regular controls moved a gyro, use **Home** to restore its holder before Fast Gates. Both gate colors have been verified in Game A under FCEUmm. The game screen remains the authority for Hector's position and gate animation.
+**Fast Gates** responds immediately while Gyromite is selected. Tap **Lower Blue** or **Lower Red** to press, tap again to release, or choose **Release Both**. Keyboard shortcuts are **2**, **1**, and **0**. Holds expire after 60 seconds; both buttons release on game exit or lost receiver data. If regular controls moved a gyro, use **Home** to restore its holder before Fast Gates. Watch the game screen to confirm the gate's response.
 
 ## Play Stack-Up
 
-The live model begins with five colored blocks on Tray 3. In Direct mode, jumping Hector onto a command tile sends **Left, Right, Up, Down, Open,** or **Close** through the frame link. Manual controls use the same virtual model. A lower grip carries the contacted block and all blocks above it. Impossible moves are rejected and leave pieces in place. **Home** restores the initial stack. The model does not score the game or initialize Bingo's distinct historical layout. Stack-Up has no Gyromite-style Controller 2 gate return.
+The live model begins with five colored blocks on Tray 3. In Direct mode, jumping Hector onto a command tile sends **Left, Right, Up, Down, Open,** or **Close** through the frame link. Manual controls use the same virtual model. A lower grip carries the contacted block and all blocks above it. Impossible moves are rejected and leave pieces in place. **Home** restores the initial stack.
+
+## Current game limits
+
+Stack-Up's virtual arrangement does not score a round or initialize Bingo's distinct starting layout. Use the game screen to check its target and result. Stack-Up does not use Gyromite's gate-button return path.
 
 ## Test mode and reset
 

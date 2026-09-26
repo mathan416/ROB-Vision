@@ -4,7 +4,7 @@ This reference lists the 0.1.x code defaults and installed settings. R.O.B. Visi
 
 | Setting | Current value or location | Meaning |
 | --- | --- | --- |
-| App Lab gateway | HTTP port 80 | `http://arduiain.local/dashboard/` forwards to the controller. |
+| App Lab gateway | HTTP port 80 | `http://<uno-hostname>.local/dashboard/` or the UNO Q's LAN IP forwards to the controller. |
 | Controller service | Port 8766 | Direct `/dashboard/` and `/api/` access. Local CLI binds loopback by default; use `--host 0.0.0.0` for a trusted LAN. |
 | Controller token | UNO Q app `data/controller-token`, overridden by `ROB_VISION_TOKEN` when set | The installer creates and preserves the private file. Paired console credentials authenticate launch events, game-frame commands, and receiver polls. Browser controls on the trusted LAN do not use a token. |
 | Gyro spin lifetime | 55 seconds | Illustrative virtual lifetime. |
@@ -14,10 +14,10 @@ This reference lists the 0.1.x code defaults and installed settings. R.O.B. Visi
 | Console stale release | 750 ms since last good response | Both virtual buttons release; game exit and missing RetroArch also release them. |
 | Console process scan | 250 ms | Identifies an active RetroArch launch and can resync UNO Q game context, throttled to two seconds. |
 | Game-frame socket | `/run/rob-vision/frames.sock` on RetroPie | The FCEUmm or Nestopia proxy sends one classified cell per rendered NES frame. The receiver verifies sender credentials, approved proxy path, ROM identity, and complete 13-frame commands. |
-| RetroPie per-game NES choice | `lr-robvision-fceumm` or `lr-robvision-nestopia` | Both use the installed original core through the frame wrapper. Current Gyromite and Stack-Up selections remain FCEUmm. Plain `lr-fceumm` and `lr-nestopia` bypass the link. For a per-game core switch after installation, the low-level `tools/install_retropie_frame_hook.py` accepts `--gyromite-core` and `--stack-up-core`. |
+| RetroPie per-game NES choice | `lr-robvision-fceumm` or `lr-robvision-nestopia` | Both wrap the installed original core. The installer preserves an existing supported per-game choice, otherwise follows the NES default when available; unknown custom choices are left alone. Plain `lr-fceumm` and `lr-nestopia` bypass the link. The low-level `tools/install_retropie_frame_hook.py` accepts `--gyromite-core` and `--stack-up-core` for a per-game switch. |
 | Game-frame indicator | Last matching receiver heartbeat within one second | `/api/state.input.frame_hook` is true. |
 | Test signal indicator | Sustained green or alternating rendered frames | The receiver reports a recent signal automatically; the UNO Q blinks R.O.B.'s red light. |
-| Batocera per-game NES choice | R.O.B. Vision FCEUmm by default for exact registered ROMs | Supported Batocera uses a runtime core overlay and per-ROM settings; Nestopia is available as a per-game choice. Unrelated games retain their core settings. |
+| Batocera per-game NES choice | R.O.B. Vision FCEUmm or Nestopia for exact registered ROMs | Supported Batocera uses a runtime core overlay and per-ROM settings. An existing supported Nestopia choice is preserved; otherwise the installer selects FCEUmm. Unknown custom choices and unrelated games retain their settings. |
 | Receiver online indicator | Authenticated poll within three seconds | Otherwise Setup and Mission show the relevant console offline. |
 | Game registry | `config/games.json` | Exact case-insensitive ROM basenames for Gyromite and Stack-Up, including configured ZIP, 7z, and NES names. |
 
@@ -33,4 +33,4 @@ python3 tools/identify_game.py start nes lr-fceumm "/roms/nes/Gyromite (World).z
 python3 tools/identify_game.py end
 ```
 
-The optional standalone `deploy/rob-vision.service` must stay disabled while App Lab owns port 8766. App Lab runs one app at a time on this UNO Q. The repository includes UNO Q shutdown, early-start, and network-status host units; App Lab does not install them. Existing Avahi provides `arduiain.local`. See [UNO Q host helpers](../deploy/uno-q/README.md).
+The optional standalone `deploy/rob-vision.service` must stay disabled while App Lab owns port 8766. App Lab runs one app at a time on this UNO Q. The repository includes UNO Q shutdown, early-start, and network-status host units; App Lab does not install them. Existing Avahi provides the UNO Q hostname as a `.local` address. See [UNO Q host helpers](../deploy/uno-q/README.md).

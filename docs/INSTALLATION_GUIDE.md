@@ -1,6 +1,6 @@
-# R.O.B. Vision installation guide — 0.1.5
+# R.O.B. Vision installation guide — 0.1.6
 
-R.O.B. Vision runs on an Arduino UNO Q and connects to either RetroPie or Batocera. Install the UNO Q first, then install each console. The release installer downloads a versioned source package, checks its SHA-256 digest, and runs the platform installer. No Git checkout, ROM transfer, or SSH transfer is required.
+R.O.B. Vision runs on an Arduino UNO Q and connects to either RetroPie or Batocera. Install the UNO Q first, then install each console. The release installer downloads and verifies the app before installing it.
 
 ## Before you begin
 
@@ -14,17 +14,17 @@ R.O.B. Vision runs on an Arduino UNO Q and connects to either RetroPie or Batoce
 Run this one command in the UNO Q terminal as `arduino`:
 
 ```sh
-curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.5/install.sh | sh -s -- uno-q
+curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.6/install.sh | sh -s -- uno-q
 ```
 
-The command downloads and verifies R.O.B. Vision, installs the separate App Lab app, and starts it. On upgrades, App Lab stops and restarts the app while preserving its pairing data. The installation includes the UNO Q matrix sketch; App Lab compiles and uploads that sketch when starting the app. It does not replace the board's bootloader or firmware. At the end, the installer prints Mission and Setup links using the device's `.local` name and available LAN IPv4 addresses. Open either form in a browser on the same network. For example, a UNO Q named `virtualglove` uses `http://virtualglove.local/dashboard/setup.html`; its IP form is `http://<LAN-IP>/dashboard/setup.html`.
+The command downloads and verifies R.O.B. Vision, installs the App Lab app, and starts it. On upgrades, App Lab stops and restarts the app while preserving its pairing data. App Lab also compiles and uploads the UNO Q matrix sketch. At the end, the installer prints Mission and Setup links using the device's `.local` name and available LAN IPv4 addresses. Open either form in a browser on the same network.
 
 ## Install a console
 
 Run this one command **on RetroPie or Batocera**, replacing `your-uno-q.local` with your UNO Q's LAN hostname or IP address:
 
 ```sh
-curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.5/install.sh | \
+curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.6/install.sh | \
   sh -s -- console your-uno-q.local
 ```
 
@@ -40,12 +40,12 @@ The installer leaves ROM files and unrelated games alone. RetroPie registers `lr
 
 ## Check the link and play
 
-On Setup, select **Check Link** after pairing. It should show the console online. Launch Gyromite or Stack-Up using a R.O.B. Vision core; Mission and Setup should show **GAME FRAMES LINKED**. In Gyromite Test mode the matrix Test light blinks automatically. In Game A, test blue and red gates independently. Stack-Up Direct mode supplies Left, Right, Up, Down, Open, and Close. The virtual robot and game pieces appear in Mission on a laptop, phone, or tablet. The frame link needs no camera. Game A blue-gate hold and release passed with the corrected Nestopia wrapper on both tested consoles and with FCEUmm on Batocera.
+On Setup, select **Check Link** after pairing. It should show the console online. Launch Gyromite or Stack-Up using a R.O.B. Vision core; Mission and Setup should show **GAME FRAMES LINKED**. In Gyromite Test mode the Test light blinks automatically. In Game A, test blue and red gates independently. Stack-Up Direct mode supplies Left, Right, Up, Down, Open, and Close. The virtual robot and game pieces appear in Mission on a laptop, phone, or tablet.
 
 If a game is already running during installation, the console installer stops before changing its configuration. Exit the game and run the same command again. An unsupported Batocera board or version is reported before any changes. For a failed link, see [Troubleshooting](TROUBLESHOOTING.md) and the built-in Help page.
 
 ## Supported releases and integrity
 
-Version 0.1.5 supports the same validated platforms as 0.1.0: UNO Q App Lab, standard RetroPie with the `pi` account, and Batocera 43.1 x86_64. Other Batocera boards are detected by the same command and rejected until their core libraries and gameplay pass validation. Release assets include the source package, installer, PDFs, and `SHA256SUMS`. The installer pins the source package's digest; the checksum file also lets you check downloaded assets independently. The repository contains no ROMs.
+Version 0.1.6 supports UNO Q App Lab, standard RetroPie with the `pi` account, and Batocera 43.1 x86_64. Other Batocera boards are detected and reported as unsupported. Release assets include the source package, installer, PDFs, and `SHA256SUMS`. The installer checks the source package's digest before installing it.
 
-For development or repair, the [RetroPie](../deploy/retropie/README.md) and [Batocera](../deploy/batocera/README.md) guides document individual components. The normal install path is the one command above for each device, followed by browser pairing.
+For advanced repair, see the [RetroPie](../deploy/retropie/README.md) and [Batocera](../deploy/batocera/README.md) guides.

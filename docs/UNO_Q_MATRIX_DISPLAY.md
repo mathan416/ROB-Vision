@@ -1,64 +1,33 @@
-# UNO Q matrix display design
+# UNO Q matrix display guide
 
-**Status: implemented in the R.O.B. Vision App Lab sketch and Linux bridge; display behavior still needs direct visual confirmation.** The console installer generates the pairing code, which is entered on the browser Setup page. The UNO Q matrix shows a pairing cue only. This guide defines the behavior for the built-in 13-column by 8-row blue LED matrix. The large browser dashboard remains the place for the full R.O.B. animation, accessories, and explanations.
+The UNO Q's blue LED matrix gives you a quick view of Buddy's state while the full scene plays in your browser. The examples below show the small display animations. For the robot, game pieces, console connection, and detailed messages, open Mission or Setup using the links printed by the UNO Q installer.
 
-These images show the 13×8 display states defined in `sketch/sketch.ino`. Each panel is one frame of an animation. Buddy's full-color portrait in the User Guide is an illustration, not a matrix state.
+## Starting and waiting
 
-## The animations
+When R.O.B. Vision starts or reconnects, an hourglass moves across the matrix. Once the controller is ready, Buddy's eyes appear. They glance around and blink while he waits for a game.
 
-**Starting and reconnecting.** Three hourglass frames repeat until the controller is ready.
+![Three hourglass frames shown while R.O.B. Vision starts](images/matrix-startup.png)
 
-![Three hourglass frames from the UNO Q matrix sketch](images/matrix-startup.png)
+![Buddy's ready eyes, glance, and blink](images/matrix-idle.png)
 
-**Ready, glance, blink.** The eyes move slowly while R.O.B. waits for a game.
+## Playing a game
 
-![Ready eyes, glance, and blink from the UNO Q matrix sketch](images/matrix-idle.png)
-
-**Game selected.** A brief title cue identifies the game; the eyes then return with a small decorative accent. The accents do not indicate a physical gyro or block movement.
+Starting Gyromite briefly shows `GY`; starting Stack-Up briefly shows `SU`. Buddy's eyes then return, with a small accent for the selected game. When he accepts a movement command, his eyes react briefly to the action.
 
 ![Gyromite and Stack-Up title cues](images/matrix-game-titles.png)
 
-![Gyromite and Stack-Up eye loops](images/matrix-game-eyes.png)
+![Gyromite and Stack-Up eye animations](images/matrix-game-eyes.png)
 
-**Game Test and faults.** The T gently pulses while a game Test signal is detected and stays steady for up to one second after a separate ready-light command. It then returns to the game eyes. P pulses during pairing; X blinks for a fault.
+## Test and pairing
 
-![Test light states](images/matrix-test.png)
-
-## What people should see
-
-| State | Matrix | Meaning |
+| You see | Meaning | What to do |
 | --- | --- | --- |
-| Board power-on, before our sketch runs | Arduino's own boot graphics | System startup; R.O.B. Vision cannot own the matrix yet. |
-| R.O.B. Vision sketch starts | Pulsing hourglass | The app and Linux side are starting. Begin it as early as the platform permits, before waiting for Router Bridge setup. |
-| Linux bridge connects but the controller is still starting or reconnecting | The same hourglass, restarted or continuing smoothly | The bridge is available; the controller has not yet reported ready. A bridge connection alone must not imply game readiness. |
-| Controller ready, no game selected | A pair of curious R.O.B. eyes: slow left/right glance and occasional blink | R.O.B. is awake and waiting for a game. This is an attract animation, not proof that a game is linked. |
-| Gyromite selected | Brief `GY`, then eyes with a small spinning-dot accent | The selected game is Gyromite. The accent is decorative; it must not claim a gyro is actually spinning. |
-| Stack-Up selected | Brief `SU`, then eyes with a small rising-block accent | The selected game is Stack-Up. The accent is decorative; it must not claim a block was moved. |
-| Valid movement command accepted | Eyes glance in the movement direction, rise/fall for vertical motion, or narrow briefly for grip | Mirror the authoritative virtual action, then return to the selected game's eye loop. Never animate from an undecoded flash alone. |
-| Test flashes detected | `T` gently pulses | The frame link has reported the game's Test signal automatically. |
-| Ready-light command detected | Brief steady `T` | The game sent a separate ready-light command; the game eyes return within one second. |
-| Pairing in progress | Large `P` with a slow pulse | Open the browser Setup page and read the pairing code and fingerprint shown by the console installer. Do not show invented or unrelated digits on the UNO Q. |
-| Controller fault | Blinking `X` | Open Setup for the actual problem; the matrix alone cannot explain it. |
-| App stopped | Matrix released/blank as the platform permits | R.O.B. Vision is no longer driving the display. |
+| Moving hourglass | R.O.B. Vision is starting or reconnecting. | Wait for Buddy's eyes. If the hourglass stays, check that the App Lab app is running. |
+| Buddy's eyes | The controller is ready. | Open Mission for the selected game and console link. |
+| `GY` or `SU` | Gyromite or Stack-Up was selected. | Watch Mission for the virtual game table and **GAME FRAMES LINKED**. |
+| Pulsing `T` | The game-frame link recognizes a game's Test signal. | Continue the game's Test check on Setup. A brief steady `T` can also follow a ready-light command. |
+| Pulsing `P` | Console pairing is in progress. | Enter the code and fingerprint printed by the console installer on the browser Setup page. |
 
-![Pairing and fault indications](images/matrix-pair-fault.png)
+![The `T` display for a game's Test signal and ready-light command](images/matrix-test.png)
 
-The face should be drawn for the physical 13×8 grid, with two distinct eyes and enough dark space to make a blink or sideways glance readable. The blue LEDs are monochrome: eye shapes and brightness, not color, carry the expression. Limit idle motion to an occasional glance or blink so it feels alive without competing with the game. Show `GY`/`SU` long enough to identify the title, then let the eyes take over. A brief repeat of the title mark after a long idle period is acceptable.
-
-## State ownership and priority
-
-The sketch owns all framebuffer writes and animates the startup hourglass without waiting for Linux. Linux sends compact *requested states* and accepted action hints through Router Bridge, using the UNO Q controller's authoritative game, frame-link, test, and fault state. It sends a heartbeat at least once per second. If Linux disappears for about 3.5 seconds, the display returns to the hourglass rather than freezing a misleading game face. The sketch cannot replace Arduino's protected boot logo before App Lab releases the microcontroller.
-
-Display priority: **fault → pairing → active Test or ready signal → startup/reconnect → selected game → idle eyes**. A movement hint is temporary within the selected game and never overrides fault, pairing, or Test. Frame-link status is visible on Setup; the idle eyes alone do not claim a linked game. Pairing has a bounded lifetime and returns to the prior state when complete or expired.
-
-## Pairing distinction
-
-R.O.B. Vision pairs a console with the UNO Q. The console produces a six-digit code and certificate fingerprint, while the UNO Q browser Setup page accepts them. The matrix `P` is a status cue when **Pair another console** is opened or pairing is submitted; it expires or clears afterward. The matrix does not show the pairing code.
-
-## Physical acceptance checks still needed
-
-1. Cold boot shows the protected system graphics, then the hourglass as soon as the R.O.B. Vision sketch can run; the hourglass remains through Router Bridge initialization.
-2. When the Linux controller is ready, the hourglass changes to the idle eyes. Stopping/restarting Linux restores the hourglass and then the correct current game display.
-3. Real Gyromite and Stack-Up launch/exit notifications select and clear their distinct marks and eye loops.
-4. Test `T`, pairing `P`, and fault `X` follow the priority and timeout rules. No matrix state claims a Test signal or game action that the controller has not observed.
-5. Verify brightness and animation are comfortable beside the game display.
+The matrix returns to the game eyes after a Test or ready signal ends. Its small game accents are decoration; use Mission and the game screen to check piece positions and gate responses.
