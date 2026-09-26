@@ -4,7 +4,7 @@ If RetroPie's EmulationStation exits with an InputManager joystick assertion, re
 
 For installation failures, check the prerequisite or unsupported-device message from the single release command, then rerun that same command. The archive checksum must pass before the installer changes the device. After removing a console in Setup, rerun its command with `--pair`.
 
-First check which page is open: `http://arduiain.local/dashboard/` is live; a `file://` page or a simple static web server shows the independent preview.
+First check which page is open: use the UNO Q installer’s device-specific `.local` or LAN IP dashboard link for live state. A `file://` page or a simple static web server shows the independent preview. If `.local` does not resolve on a device, use the printed IP link on the same LAN and check Avahi on the UNO Q.
 
 | Symptom | Check |
 | --- | --- |
@@ -20,4 +20,4 @@ First check which page is open: `http://arduiain.local/dashboard/` is live; a `f
 | Demo does not start | Exit the running game first. Demo mode works when paired and idle; **Home** resets it. |
 | Browser shows stale scene | Reload for a fresh `/api/state` snapshot. A local preview cannot show UNO Q state. |
 
-On RetroPie, `systemctl status rob-vision-controller2.service` checks the virtual-controller service; inspect the runcommand log and configured ROM basename if launch identity is missing. On Batocera, check its `ROBVision` service, the per-ROM core choice, and the exact ROM basename. Linux `/dev/input/jsN` numbering is not necessarily RetroArch's pad index; use the installed receiver's detected mapping. Keep credentials and ROM files out of bug reports.
+On RetroPie, check `rob-vision-controller2.service`, runcommand, and the ROM basename. On Batocera, check `ROBVision`, the per-ROM core, and the ROM basename. Linux `/dev/input/jsN` may differ from RetroArch's pad index; use the receiver's mapping. Exclude credentials and ROM files from bug reports.

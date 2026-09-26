@@ -1,5 +1,10 @@
 # R.O.B. Vision changelog
 
+## 0.1.4 UNO Q access URLs
+
+- UNO Q installer prints the device-specific mDNS and LAN IPv4 Mission and Setup URLs.
+- Help and guides explain both address forms for any UNO Q hostname.
+
 ## 0.1.3 documentation consistency
 
 - Aligned current Help and manuals with paired RetroPie and Batocera behavior, Test indication, and console-neutral status.

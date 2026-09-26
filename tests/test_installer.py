@@ -8,11 +8,24 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from scripts.install import (app_lab_status, configure_player2, copy_tree_merge, hook_event, install_uno, installed_controller, managed_text,
+                             uno_dashboard_urls,
                              remove_legacy_hook, update_managed, valid_controller)
 from scripts.install import validate_receiver_source
 
 
 class InstallerTests(unittest.TestCase):
+    def test_uno_urls_show_mdns_and_lan_addresses_without_container_bridges(self):
+        interfaces = [
+            {"ifname": "eth0", "addr_info": [{"family": "inet", "local": "10.0.2.84"}]},
+            {"ifname": "wlan0", "addr_info": [{"family": "inet", "local": "10.0.2.86"}]},
+            {"ifname": "docker0", "addr_info": [{"family": "inet", "local": "172.17.0.1"}]},
+        ]
+        self.assertEqual(uno_dashboard_urls("virtualglove", interfaces), [
+            "http://virtualglove.local/dashboard/",
+            "http://10.0.2.84/dashboard/",
+            "http://10.0.2.86/dashboard/",
+        ])
+
     def test_receiver_source_is_importable_before_installation(self):
         validate_receiver_source(Path(__file__).resolve().parents[1])
         with tempfile.TemporaryDirectory() as directory:

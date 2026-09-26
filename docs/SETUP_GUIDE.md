@@ -1,6 +1,6 @@
 # R.O.B. Vision Setup
 
-Open `http://arduiain.local/dashboard/setup.html`. Console Link lists every saved RetroPie and Batocera console separately, with its address and live status. Setup has four checks:
+Open the Setup URL printed by the UNO Q installer: `http://<hostname>.local/dashboard/setup.html` or `http://<LAN-IP>/dashboard/setup.html`. Console Link lists every saved RetroPie and Batocera console separately, with its address and live status. Setup has four checks:
 
 Install the [current release](INSTALLATION_GUIDE.md) with one command on the UNO Q and one on RetroPie or Batocera. The console command detects its platform and opens first-time pairing automatically. Batocera 43.1 x86_64 is the validated Batocera target; unsupported boards are reported before installation.
 
