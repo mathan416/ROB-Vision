@@ -41,13 +41,22 @@ def suspend_menu():
                 raise RuntimeError("EmulationStation did not suspend; installation stopped before receiver restart.")
             time.sleep(.2)
     except Exception:
-        subprocess.run([str(ES_SERVICE), "resume"], check=False)
+        resume_menu()
         raise
     return True
 
 
 def resume_menu():
-    subprocess.run([str(ES_SERVICE), "resume"], check=True)
+    if subprocess.run(["pidof", "emulationstation"], stdout=subprocess.DEVNULL).returncode == 0:
+        Path("/tmp/suspend.please").unlink(missing_ok=True)
+        return
+    try:
+        subprocess.run([str(ES_SERVICE), "resume"], check=True, timeout=8)
+    except subprocess.TimeoutExpired as exc:
+        if subprocess.run(["pidof", "emulationstation"], stdout=subprocess.DEVNULL).returncode == 0:
+            Path("/tmp/suspend.please").unlink(missing_ok=True)
+            return
+        raise RuntimeError("EmulationStation did not resume after installation.") from exc
 
 
 def supported_hardware(machine=None, version_file=VERSION_FILE):

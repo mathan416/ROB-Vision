@@ -20,7 +20,7 @@ class BatoceraTests(unittest.TestCase):
             service = Path(directory) / "S31emulationstation"
             service.touch()
             results = [subprocess.CompletedProcess([], 0) for _ in range(2)]
-            results.append(subprocess.CompletedProcess([], 1))
+            results.extend([subprocess.CompletedProcess([], 1) for _ in range(2)])
             results.append(subprocess.CompletedProcess([], 0))
             with patch("scripts.install_batocera.ES_SERVICE", service), patch(
                 "scripts.install_batocera.subprocess.run", side_effect=results
@@ -29,8 +29,17 @@ class BatoceraTests(unittest.TestCase):
                 resume_menu()
             self.assertEqual([call.args[0] for call in run.call_args_list], [
                 ["pidof", "emulationstation"], [str(service), "suspend"],
-                ["pidof", "emulationstation"], [str(service), "resume"],
+                ["pidof", "emulationstation"], ["pidof", "emulationstation"],
+                [str(service), "resume"],
             ])
+
+    def test_resume_skips_fifo_when_menu_already_restarted(self):
+        with patch("scripts.install_batocera.subprocess.run", return_value=subprocess.CompletedProcess([], 0)) as run, patch(
+            "scripts.install_batocera.Path.unlink"
+        ) as unlink:
+            resume_menu()
+        run.assert_called_once_with(["pidof", "emulationstation"], stdout=subprocess.DEVNULL)
+        unlink.assert_called_once_with(missing_ok=True)
 
     def test_hardware_gate_precedes_installation(self):
         with tempfile.TemporaryDirectory() as directory:
