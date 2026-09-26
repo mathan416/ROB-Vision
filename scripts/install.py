@@ -8,12 +8,14 @@ RetroPie: sudo python3 scripts/install.py retropie --controller robvision.local
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
 import pwd
 import re
 import secrets
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -185,6 +187,47 @@ def wait_for_uno(seconds: float = 30) -> None:
         time.sleep(0.5)
 
 
+def uno_dashboard_urls(hostname: str, address_data: list[dict]) -> list[str]:
+    """Return the mDNS URL and usable LAN IPv4 URLs for this UNO Q."""
+    name = hostname.split(".", 1)[0].strip().lower()
+    urls = [f"http://{name}.local/dashboard/"] if re.fullmatch(r"[a-z0-9][a-z0-9-]*", name) else []
+    for interface in address_data:
+        device = interface.get("ifname", "")
+        if device.startswith(("docker", "br-", "veth", "virbr", "tun", "tap", "wg", "tailscale", "podman", "cni")):
+            continue
+        for address in interface.get("addr_info", []):
+            if address.get("family") != "inet":
+                continue
+            try:
+                ip = ipaddress.ip_address(address.get("local", ""))
+            except ValueError:
+                continue
+            if ip.is_loopback or ip.is_link_local:
+                continue
+            url = f"http://{ip}/dashboard/"
+            if url not in urls:
+                urls.append(url)
+    return urls
+
+
+def print_uno_dashboard_urls() -> None:
+    try:
+        result = subprocess.run(["ip", "-j", "-4", "addr", "show", "up", "scope", "global"],
+                                check=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                universal_newlines=True)
+        address_data = json.loads(result.stdout)
+    except (OSError, subprocess.CalledProcessError, ValueError):
+        address_data = []
+    urls = uno_dashboard_urls(socket.gethostname(), address_data)
+    if not urls:
+        print("Open /dashboard/ on this UNO Q; check its hostname or LAN IP address.")
+        return
+    print("Open R.O.B. Vision on this network:")
+    for url in urls:
+        print(f"  Mission: {url}")
+        print(f"  Setup:   {url}setup.html")
+
+
 def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
     if sys.version_info < (3, 9):
         raise RuntimeError("Python 3.9 or newer is required by the UNO Q controller.")
@@ -262,7 +305,7 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
     print(f"UNO Q app installed and running at {destination}")
     if backup.exists():
         print(f"Previous app retained at {backup}; remove it after checking the new app.")
-    print("Open /dashboard/setup.html on your UNO Q.")
+    print_uno_dashboard_urls()
 
 
 def pi_owned(path: Path, user: str = "pi") -> None:
