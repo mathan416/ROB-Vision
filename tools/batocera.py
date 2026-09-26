@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from tools.identify_game import identify, load_registry
+from tools.identify_game import DEFAULT_REGISTRY, identify, load_registry
 
 CONFIG = Path("/userdata/system/batocera.conf")
 RETROARCH_CONFIG = Path("/userdata/system/configs/retroarch/retroarchcustom.cfg")
@@ -17,11 +17,12 @@ PAD_NAME = "R.O.B. Vision Controller 2"
 ES_INPUT = Path("/userdata/system/configs/emulationstation/es_input.cfg")
 
 
-def select_games(config=CONFIG, roms=Path("/userdata/roms/nes")):
+def select_games(config=CONFIG, roms=Path("/userdata/roms/nes"), available=("fceumm", "nestopia"),
+                 registry_path=DEFAULT_REGISTRY):
     """Select the proxy for exact known ROMs, preserving unrelated settings."""
     original = config.read_text()
     lines = original.splitlines()
-    registry = load_registry()
+    registry = load_registry(registry_path)
     chosen = []
     for rom in sorted(roms.iterdir()):
         if not rom.is_file() or not identify("nes", rom.name, registry):
@@ -34,6 +35,8 @@ def select_games(config=CONFIG, roms=Path("/userdata/roms/nes")):
         if existing and existing not in ("fceumm", "nestopia", "robvision_fceumm", "robvision_nestopia"):
             continue
         core = "nestopia" if existing.endswith("nestopia") else "fceumm"
+        if core not in available:
+            core = available[0]
         for setting, value in ((core_key, "robvision_" + core), (emu_key, "libretro")):
             match = next((i for i, line in enumerate(lines) if line.startswith(setting + "=")), None)
             if match is None:

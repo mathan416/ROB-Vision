@@ -2,10 +2,7 @@
 # Batocera launch hook. Invoked after generated RetroArch configuration exists.
 APP=/userdata/system/rob-vision
 [ "${2:-}" = nes ] || exit 0
-case "${5##*/}" in
-    'Gyromite (World).7z'|'Gyromite (World).zip'|'Gyromite (World).nes'|'Stack-Up (World).7z'|'Stack-Up (World).zip'|'Stack-Up (World).nes') ;;
-    *) exit 0 ;;
-esac
+# The notifier checks the editable console registry for this NES filename.
 case "${1:-}" in
     gameStart) action=start ;;
     gameStop) action=end ;;

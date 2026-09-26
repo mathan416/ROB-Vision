@@ -4,3 +4,5 @@ icon: "🤖"
 ports:
   - 80
   - 8766
+bricks:
+  - local:avahi_resolver:

@@ -2,6 +2,7 @@
 
 import tempfile
 import threading
+import os
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -139,7 +140,7 @@ class InstallerTests(unittest.TestCase):
             self.assertFalse((target / ".DS_Store").exists())
 
     def test_uno_stages_app_and_preserves_private_token_on_upgrade(self):
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory(prefix="rv-", dir="/tmp") as directory:
             root = Path(directory)
             source = root / "source"
             destination = root / "ArduinoApps" / "rob-vision"
@@ -159,18 +160,23 @@ class InstallerTests(unittest.TestCase):
                  patch("scripts.install.wait_for_uno"):
                 install_uno(source, destination)
                 token = (destination / "data/controller-token").read_text()
+                paired = '{"schema":1,"consoles":[{"id":"saved-console"}]}'
+                (destination / "data/paired-consoles.json").write_text(paired)
                 (destination / ".deps").mkdir()
                 (destination / ".deps/bridge.txt").write_text("installed")
                 (destination / ".cache").mkdir()
                 (destination / ".cache/app-compose.yaml").write_text("generated")
                 (source / "dashboard/index.html").write_text("<main>two</main>\n")
+                os.mkfifo(destination / "data/.avahi-resolver.sock")
                 install_uno(source, destination)
             self.assertEqual((destination / "data/controller-token").read_text(), token)
+            self.assertEqual((destination / "data/paired-consoles.json").read_text(), paired)
             self.assertEqual((destination / "dashboard/index.html").read_text(), "<main>two</main>\n")
             self.assertEqual((root / "ArduinoApps/rob-vision.previous/dashboard/index.html").read_text(),
                              "<main>one</main>\n")
             self.assertEqual((destination / "data/controller-token").stat().st_mode & 0o777, 0o600)
             self.assertTrue((destination / "data").is_dir())
+            self.assertFalse((destination / "data/.avahi-resolver.sock").exists())
             self.assertEqual((destination / ".deps/bridge.txt").read_text(), "installed")
             self.assertEqual((destination / ".cache/app-compose.yaml").read_text(), "generated")
             self.assertEqual(actions, ["start", "stop", "start"])

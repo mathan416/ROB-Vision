@@ -9,12 +9,34 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from identify_game import load_registry  # noqa: E402
-from retropie_controller2 import pads_from_state, running_game, source_selected, sync_game  # noqa: E402
+from retropie_controller2 import (controller_route_address, fetch_state, pads_from_state,
+                                  running_game, source_selected, sync_game)  # noqa: E402
 from tools.retropie_frame_hook import FrameHookServer, sender_game  # noqa: E402
 from tools.install_retropie_frame_hook import install  # noqa: E402
 
 
 class ReceiverTests(unittest.TestCase):
+    def test_receiver_advertises_the_private_route_address_to_its_controller(self):
+        class Route:
+            def __enter__(self): return self
+            def __exit__(self, *_args): return False
+            def connect(self, target): self.target = target
+            def getsockname(self): return ('10.0.2.26', 12345)
+        route = Route()
+        with patch('retropie_controller2.socket.socket', return_value=route):
+            self.assertEqual(controller_route_address('http://arduiain.local'), '10.0.2.26')
+        self.assertEqual(route.target, ('arduiain.local', 9))
+
+        class Response:
+            def __enter__(self): return self
+            def __exit__(self, *_args): return False
+            def read(self): return b'{"schema":1}'
+        with patch('retropie_controller2.urlopen', return_value=Response()) as open_url:
+            fetch_state('http://arduiain.local', 'secret', .25,
+                        console_id='a' * 32, console_address='10.0.2.26')
+        request = open_url.call_args.args[0]
+        self.assertEqual(request.get_header('X-rob-console-address'), '10.0.2.26')
+
     def test_two_consoles_on_same_platform_follow_only_the_active_identity(self):
         state = {"link": {"receiver": "Batocera", "consoles": [
             {"id": "a" * 32, "active": True}, {"id": "b" * 32, "active": False}]}}

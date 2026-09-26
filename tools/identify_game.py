@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 
@@ -19,12 +20,24 @@ SUPPORTED_SYSTEMS = frozenset({"nes", "famicom"})
 SUPPORTED_EXTENSIONS = frozenset({".nes", ".zip", ".7z"})
 
 
-def load_registry(path: Path = DEFAULT_REGISTRY) -> dict[str, str]:
-    """Load exact, case-insensitive ROM basenames with no ambiguous entries."""
-    data = json.loads(path.read_text(encoding="utf-8"))
+def parse_registry(text: str) -> dict[str, str]:
+    """Validate a registry document and return case-insensitive ROM mappings."""
+    if not isinstance(text, str):
+        raise ValueError("Game registry must be JSON text")
+    if len(text.encode("utf-8")) > 65536:
+        raise ValueError("Game registry exceeds 64 KiB")
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"Duplicate JSON key: {key}")
+            result[key] = value
+        return result
+    data = json.loads(text, object_pairs_hook=unique)
     if not isinstance(data, dict) or data.get("schema") != 1 or not isinstance(data.get("games"), dict):
         raise ValueError("Expected a schema 1 games registry")
     result: dict[str, str] = {}
+    overrides: dict[str, str] = {}
     for filename, game in data["games"].items():
         if (not isinstance(filename, str) or not filename or Path(filename).name != filename
                 or any(ord(char) < 32 for char in filename)
@@ -35,8 +48,23 @@ def load_registry(path: Path = DEFAULT_REGISTRY) -> dict[str, str]:
         key = filename.casefold()
         if key in result:
             raise ValueError(f"Duplicate ROM basename: {filename!r}")
+        override = retropie_override_key(filename)
+        if override in overrides and overrides[override] != game:
+            raise ValueError(f"RetroPie filename collision: {filename!r}")
+        overrides[override] = game
         result[key] = game
     return result
+
+
+def load_registry(path: Path = DEFAULT_REGISTRY) -> dict[str, str]:
+    """Load exact, case-insensitive ROM basenames with no ambiguous entries."""
+    return parse_registry(path.read_text(encoding="utf-8"))
+
+
+def registry_roms(path: Path = DEFAULT_REGISTRY) -> dict[str, str]:
+    """Return validated ROM names with their original spelling for console setup."""
+    load_registry(path)
+    return json.loads(path.read_text(encoding="utf-8"))["games"]
 
 
 def identify(system: str, rom: str, registry: dict[str, str]) -> str | None:
@@ -44,6 +72,11 @@ def identify(system: str, rom: str, registry: dict[str, str]) -> str | None:
     if system.casefold() not in SUPPORTED_SYSTEMS or not rom:
         return None
     return registry.get(Path(rom).name.casefold())
+
+
+def retropie_override_key(filename: str) -> str:
+    """Match runcommand's clean_name("nes_${ROM_BN}") for per-ROM choices."""
+    return re.sub(r"[^A-Za-z0-9_-]", "", "nes_" + Path(filename).stem)
 
 
 def event(action: str, system: str = "", rom: str = "",

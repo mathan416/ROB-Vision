@@ -16,11 +16,9 @@ from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas as pdfcanvas
 from reportlab.graphics.shapes import Drawing, Group, Line, Polygon, Rect, String
 from reportlab.platypus import (
     CondPageBreak,
-    Flowable,
     Image as GuideImage,
     LongTable,
     PageBreak,
@@ -38,7 +36,6 @@ OUTPUT = ROOT / "output" / "pdf"
 WEB_GUIDES = ROOT / "dashboard" / "guides"
 FONTS = ROOT / "dashboard" / "fonts"
 BUDDY_ART = DOCS / "images" / "buddy-concept-v1.png"
-BUDDY_COMIC_ART = DOCS / "images" / "buddy-comic-v1.png"
 
 NAVY = colors.HexColor("#0C2030")
 MIDNIGHT = colors.HexColor("#07131F")
@@ -428,7 +425,7 @@ def cover(canvas, doc, title: str, subtitle: str, landscape_page: bool = False):
     canvas.drawString(55, 126, subtitle)
     canvas.setStrokeColor(ORANGE); canvas.setLineWidth(3); canvas.line(55, 109, 216, 109)
     canvas.setFillColor(colors.HexColor("#8BA9B8")); canvas.setFont("DM-Bold", 8)
-    canvas.drawString(55, 67, "VERSION 0.1.6")
+    canvas.drawString(55, 67, "VERSION 0.1.7")
     canvas.drawString(55, 52, "UNO Q · RETROPIE · BATOCERA")
     canvas.restoreState()
 
@@ -452,60 +449,19 @@ def body_page(canvas, doc, label: str):
     canvas.restoreState()
 
 
-def draw_comic_page(canvas):
-    """Full-page art with editable, typeset captions in its blank strips."""
-    width, height = A4
-    canvas.saveState()
-    canvas.drawImage(str(BUDDY_COMIC_ART), 0, 0, width=width, height=height)
-    captions = [
-        ("01 / THE EDGE", "Buddy knew every signal, but not what lay beyond the picture."),
-        ("02 / A BLINK", "A little grid of lights appeared. Buddy blinked back."),
-        ("03 / THE WINDOW", "The signal opened a larger world. Buddy stepped through."),
-        ("04 / THE FIRST BLOCK", "He placed a block on the table, ready for the next round."),
-    ]
-    for (heading, line), baseline in zip(captions, (654, 452, 251, 34)):
-        canvas.setFillColor(TEAL)
-        canvas.setFont("DM-Bold", 8.2)
-        canvas.drawString(36, baseline + 8, heading)
-        canvas.setFillColor(NAVY)
-        canvas.setFont("DM", 9.3)
-        canvas.drawString(36, baseline - 5, line)
-    canvas.restoreState()
-
-
-class ComicPage(Flowable):
-    """Reserve one story page, then draw the comic edge to edge."""
-
-    def wrap(self, availWidth, availHeight):
-        return availWidth, min(availHeight, 700)
-
-    def drawOn(self, canvas, x, y, _sW=0):
-        draw_comic_page(canvas)
-
-
-def build_comic():
-    path = OUTPUT / "R.O.B.-Vision-Buddy-Story-Comic.pdf"
-    canvas = pdfcanvas.Canvas(str(path), pagesize=A4,
-                              pageCompression=1,
-                              title="R.O.B. Vision - Buddy and the Way Out",
-                              author="R.O.B. Vision project")
-    draw_comic_page(canvas)
-    canvas.showPage()
-    canvas.save()
-    return path
-
-
 def build_book(filename: str, title: str, subtitle: str, chapter_files: list[str],
                page_size=A4):
     OUTPUT.mkdir(parents=True, exist_ok=True)
     path = OUTPUT / filename
-    vertical_margin = 50 if title == "Technical Reference" else 58
+    vertical_margin = 36 if title == "Technical Reference" else 58
     doc = SimpleDocTemplate(str(path), pagesize=page_size, leftMargin=48,
                             rightMargin=48, topMargin=vertical_margin,
                             bottomMargin=vertical_margin,
                             title=f"R.O.B. Vision - {title}", author="R.O.B. Vision project")
     st = styles(compact=title in {"Technical Reference", "Engineering Journey", "Technical Test Results"})
-    if title == "Engineering Journey":
+    if title == "Technical Reference":
+        st["body"].spaceAfter = 6
+    elif title == "Engineering Journey":
         st["body"].leading = 11.8
         st["body"].spaceAfter = 4
         st["h2"].spaceBefore = 10
@@ -534,8 +490,6 @@ def build_book(filename: str, title: str, subtitle: str, chapter_files: list[str
                                     new_page=chapter_starts_page,
                                     max_image_height=image_height,
                                     chapter_label=chapter_label))
-        if title == "User Guide" and name == "MEET_BUDDY.md":
-            story.extend([PageBreak(), ComicPage()])
     doc.build(story,
               onFirstPage=lambda c, d: cover(c, d, title, subtitle, page_size[0] > page_size[1]),
               onLaterPages=lambda c, d: body_page(c, d, title))
@@ -576,7 +530,6 @@ if __name__ == "__main__":
         build_book("R.O.B.-Vision-Game-Manual.pdf", "Game Manual",
                    "Play Gyromite and Stack-Up with Buddy",
                    ["GAME_MANUAL.md"]),
-        build_comic(),
         build_book("R.O.B.-Vision-Matrix-Display-Guide.pdf", "Matrix Display Guide",
                    "UNO Q status animations and display states",
                    ["UNO_Q_MATRIX_DISPLAY.md"], page_size=landscape(A4)),

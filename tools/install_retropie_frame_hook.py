@@ -4,7 +4,11 @@
 import argparse
 import re
 import shutil
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools.identify_game import DEFAULT_REGISTRY, registry_roms, retropie_override_key
 
 BUILD = Path('/home/pi/rob-vision/build')
 CORES = {
@@ -13,9 +17,6 @@ CORES = {
     'nestopia': (BUILD / 'rob_vision_nestopia_libretro.so',
                 Path('/opt/retropie/libretrocores/lr-nestopia/nestopia_libretro.so')),
 }
-ROM_KEYS = ('nes_GyromiteWorld', 'nes_Stack-UpWorld')
-
-
 def get_entry(path, key):
     if not path.exists():
         return None
@@ -55,7 +56,8 @@ def selected_core(value):
     return None
 
 
-def install(root, proxy=None, real=None, choices=None, cores=None):
+def install(root, proxy=None, real=None, choices=None, cores=None, registry_path=DEFAULT_REGISTRY,
+            roms=Path('/home/pi/RetroPie/roms/nes')):
     """Install available cores; explicit choices may select either per ROM.
 
     proxy/real retain the original FCEUmm installer API for local installations.
@@ -66,11 +68,21 @@ def install(root, proxy=None, real=None, choices=None, cores=None):
         cores['fceumm'] = (Path(proxy or CORES['fceumm'][0]),
                            Path(real or CORES['fceumm'][1]))
     choices = choices or {}
+    mappings = registry_roms(registry_path)
+    # The registry matches without case, but RetroPie's per-ROM key keeps the
+    # real filename's capitalization. Prefer the file on disk when present.
+    actual_names = {rom.name.casefold(): rom.name for rom in roms.iterdir() if rom.is_file()} if roms.is_dir() else {}
+    rom_keys = {}
+    for filename, game in mappings.items():
+        key = retropie_override_key(actual_names.get(filename.casefold(), filename))
+        if key in rom_keys and rom_keys[key] != game:
+            raise ValueError(f"RetroPie ROM choice collision for {filename!r}")
+        rom_keys[key] = game
     available = {}
     for core, (core_proxy, core_real) in cores.items():
         if core_proxy.is_file() and core_real.is_file():
             available[core] = core_proxy
-        elif choices.get('nes_GyromiteWorld') == core or choices.get('nes_Stack-UpWorld') == core:
+        elif any(choices.get(key) == core for key in rom_keys):
             raise FileNotFoundError('Requested {} proxy and real core must both exist'.format(core))
     if not available:
         raise FileNotFoundError('Build a frame proxy and verify its real NES core first.')
@@ -82,7 +94,7 @@ def install(root, proxy=None, real=None, choices=None, cores=None):
         command = ('/opt/retropie/emulators/retroarch/bin/retroarch -L {} '
                    '--config /opt/retropie/configs/nes/retroarch.cfg %ROM%').format(core_proxy)
         set_entry(emulators, 'lr-robvision-' + core, command)
-    for key in ROM_KEYS:
+    for key in rom_keys:
         previous = get_entry(overrides, key)
         wanted = choices.get(key) or selected_core(previous) or (default if previous is None else None)
         if wanted is None:
@@ -100,6 +112,6 @@ if __name__ == '__main__':
     parser.add_argument('--gyromite-core', choices=tuple(CORES))
     parser.add_argument('--stack-up-core', choices=tuple(CORES))
     args = parser.parse_args()
-    chosen = {'nes_GyromiteWorld': args.gyromite_core,
-              'nes_Stack-UpWorld': args.stack_up_core}
+    chosen = {retropie_override_key(filename): args.gyromite_core if game == 'gyromite'
+              else args.stack_up_core for filename, game in registry_roms().items()}
     install(args.config_root, choices={key: value for key, value in chosen.items() if value})

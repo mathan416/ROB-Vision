@@ -1,5 +1,12 @@
 # R.O.B. Vision changelog
 
+## 0.1.7 console registry and Buddy episodes
+
+- Added per-console ROM registry editing, `.local` pairing resolution, and target updates when a console is re-paired to another UNO Q.
+- Added capability checks and packaged Batocera wrappers for six CPU families.
+- Published the three *Buddy & the Big Wide Window* newspaper episodes, updated Help and website artwork, and aligned the controller page headers.
+- Replaced the original comic in release downloads while retaining it in the source archive.
+
 ## 0.1.6 complete guide set
 
 - Added illustrated Installation & Setup, Game Manual, Technical Test Results, Engineering Journey, and Buddy Story Comic PDFs.
