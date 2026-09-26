@@ -6,18 +6,19 @@ This reference lists the 0.1.x code defaults and installed settings. R.O.B. Visi
 | --- | --- | --- |
 | App Lab gateway | HTTP port 80 | `http://arduiain.local/dashboard/` forwards to the controller. |
 | Controller service | Port 8766 | Direct `/dashboard/` and `/api/` access. Local CLI binds loopback by default; use `--host 0.0.0.0` for a trusted LAN. |
-| Controller token | UNO Q app `data/controller-token`, overridden by `ROB_VISION_TOKEN` when set | The installer creates and preserves the private file. It authenticates RetroPie launch events, game-frame commands, and receiver polls. Browser controls on the trusted LAN do not use it. |
+| Controller token | UNO Q app `data/controller-token`, overridden by `ROB_VISION_TOKEN` when set | The installer creates and preserves the private file. Paired console credentials authenticate launch events, game-frame commands, and receiver polls. Browser controls on the trusted LAN do not use a token. |
 | Gyro spin lifetime | 55 seconds | Illustrative virtual lifetime. |
 | Fast Gate hold | 60 seconds maximum | Each manual Gyromite press automatically releases. |
 | Browser state polling | 500 ms | `/api/state` snapshot; recent events capped at 30. |
-| RetroPie receiver polling | 50 ms; request timeout 250 ms | Root uinput service reads the UNO Q state. |
-| RetroPie stale release | 750 ms since last good response | Both virtual buttons release; game exit and missing RetroArch also release them. |
-| RetroPie process scan | 250 ms | Identifies an active RetroArch launch and can resync UNO Q game context, throttled to two seconds. |
-| RetroPie game-frame socket | `/run/rob-vision/frames.sock` | The FCEUmm or Nestopia proxy sends one classified cell per rendered NES frame. The receiver verifies sender credentials, approved proxy path, ROM identity, and complete 13-frame commands. |
+| Console receiver polling | 50 ms; request timeout 250 ms | Root uinput service reads the UNO Q state. |
+| Console stale release | 750 ms since last good response | Both virtual buttons release; game exit and missing RetroArch also release them. |
+| Console process scan | 250 ms | Identifies an active RetroArch launch and can resync UNO Q game context, throttled to two seconds. |
+| Game-frame socket | `/run/rob-vision/frames.sock` on RetroPie | The FCEUmm or Nestopia proxy sends one classified cell per rendered NES frame. The receiver verifies sender credentials, approved proxy path, ROM identity, and complete 13-frame commands. |
 | RetroPie per-game NES choice | `lr-robvision-fceumm` or `lr-robvision-nestopia` | Both use the installed original core through the frame wrapper. Current Gyromite and Stack-Up selections remain FCEUmm. Plain `lr-fceumm` and `lr-nestopia` bypass the link. For a per-game core switch after installation, the low-level `tools/install_retropie_frame_hook.py` accepts `--gyromite-core` and `--stack-up-core`. |
 | Game-frame indicator | Last matching receiver heartbeat within one second | `/api/state.input.frame_hook` is true. |
 | Test signal indicator | Sustained green or alternating rendered frames | The receiver reports a recent signal automatically; the UNO Q blinks R.O.B.'s red light. |
-| Receiver online indicator | Authenticated poll within three seconds | Otherwise Setup and Mission show RetroPie offline. |
+| Batocera per-game NES choice | R.O.B. Vision FCEUmm by default for exact registered ROMs | Supported Batocera uses a runtime core overlay and per-ROM settings; Nestopia is available as a per-game choice. Unrelated games retain their core settings. |
+| Receiver online indicator | Authenticated poll within three seconds | Otherwise Setup and Mission show the relevant console offline. |
 | Game registry | `config/games.json` | Exact case-insensitive ROM basenames for Gyromite and Stack-Up, including configured ZIP, 7z, and NES names. |
 
 ## Release installation

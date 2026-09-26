@@ -4,9 +4,9 @@ The running Mission page puts virtual R.O.B. and the accessories first. A browse
 
 ## Mission layout
 
-The large Live Model animates R.O.B.'s connected shoulders, shared opposing hands, head turn, and vertical carriage. Accessory Bay and Game Table show the same gyro or block state. Gyromite has two holders, a spinner, red/blue pads, and two gyros; Stack-Up has five trays and all five blocks. Pose Preview, Game Table, and System Vitals are grouped beneath the model. The Activity Feed distinguishes manual, optical, and link events. The selected game and RetroPie connection are separate statuses: `GYROMITE / CONNECTED` means Gyromite is selected and the browser reaches the UNO Q. The separate **RETROPIE ONLINE/OFFLINE** indicator reports receiver polling.
+The large Live Model animates R.O.B.'s connected shoulders, shared opposing hands, head turn, and vertical carriage. Accessory Bay and Game Table show the same gyro or block state. Gyromite has two holders, a spinner, red/blue pads, and two gyros; Stack-Up has five trays and all five blocks. Pose Preview, Game Table, and System Vitals are grouped beneath the model. The Activity Feed distinguishes manual, game-frame, and link events. The selected game and console connection are separate statuses: `GYROMITE / CONNECTED` means Gyromite is selected and the browser reaches the UNO Q. The separate **RETROPIE** or **BATOCERA ONLINE/OFFLINE** indicator reports receiver polling.
 
-Fast Gates appears during live Gyromite. Blue (`2`), red (`1`), and Release Both (`0`) act immediately; each hold expires after 60 seconds. A manual pose preview or scripted demo is not evidence of a decoded game command. Demo mode can run while RetroPie is paired and idle; a game launch stops it.
+Fast Gates appears during live Gyromite. Blue (`2`), red (`1`), and Release Both (`0`) act immediately; each hold expires after 60 seconds. A manual pose preview or scripted demo is not evidence of a decoded game command. Demo mode can run while a console is paired and idle; a game launch stops it.
 
 ![Live Mission page with R.O.B. and Gyromite accessories](images/mission-model-screenshot.png)
 
@@ -14,7 +14,7 @@ Fast Gates appears during live Gyromite. Blue (`2`), red (`1`), and Release Both
 
 ## Setup layout
 
-Setup contains RetroPie pairing and **Check Link**, frame-link status, Test-mode frame watching and red-light preview, Gyromite pad checks, and Stack-Up movement checks.
+Setup lists paired RetroPie and Batocera consoles and provides **Check Link**, frame-link status, Test-mode indication and red-light preview, Gyromite pad checks, and Stack-Up movement checks.
 
 
 

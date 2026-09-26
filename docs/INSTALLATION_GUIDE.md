@@ -1,4 +1,4 @@
-# R.O.B. Vision installation guide — 0.1.2
+# R.O.B. Vision installation guide — 0.1.3
 
 R.O.B. Vision runs on an Arduino UNO Q and connects to either RetroPie or Batocera. Install the UNO Q first, then install each console. The release installer downloads a versioned source package, checks its SHA-256 digest, and runs the platform installer. No Git checkout, ROM transfer, or SSH transfer is required.
 
@@ -14,7 +14,7 @@ R.O.B. Vision runs on an Arduino UNO Q and connects to either RetroPie or Batoce
 Run this one command in the UNO Q terminal as `arduino`:
 
 ```sh
-curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.2/install.sh | sh -s -- uno-q
+curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.3/install.sh | sh -s -- uno-q
 ```
 
 The command downloads and verifies R.O.B. Vision, installs the separate App Lab app, and starts it. On upgrades, App Lab stops and restarts the app while preserving its pairing data. The installation includes the UNO Q matrix sketch; App Lab compiles and uploads that sketch when starting the app. It does not replace the board's bootloader or firmware. Open `http://<your-uno-q-hostname>.local/dashboard/setup.html` in a browser on the same network. `http://arduiain.local/dashboard/setup.html` is the address of the project's test UNO Q.
@@ -24,11 +24,11 @@ The command downloads and verifies R.O.B. Vision, installs the separate App Lab 
 Run this one command **on RetroPie or Batocera**, replacing `your-uno-q.local` with your UNO Q's LAN hostname or IP address:
 
 ```sh
-curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.2/install.sh | \
+curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.3/install.sh | \
   sh -s -- console your-uno-q.local
 ```
 
-The command detects the console. On RetroPie it uses `sudo` for system changes and requires EmulationStation to be closed. On Batocera it runs under the root login and temporarily suspends and resumes its game menu while the virtual joystick is restarted. It installs the frame wrappers, receiver, game launch integration, and Gyromite's virtual Controller 2. For a first install it opens a five-minute pairing window and prints a six-digit code and SHA-256 certificate fingerprint. Enter the console's hostname, code, and fingerprint under **Console Link** on the UNO Q Setup page. Keep the console command open until it reports **Pairing complete**. Successful pairing starts the receiver and maps RetroPie's Player 2 automatically. No second terminal command is required.
+The command detects the console. On RetroPie it uses `sudo` for system changes and requires EmulationStation to be closed. On Batocera it runs under the root login and temporarily suspends and resumes its game menu while the virtual joystick is restarted. It installs the frame wrappers, receiver, game launch integration, and Gyromite's virtual Controller 2. For a first install it opens a five-minute pairing window and prints a six-digit code and SHA-256 certificate fingerprint. Enter the console's hostname, code, and fingerprint under **Console Link** on the UNO Q Setup page. Keep the console command open until it reports **Pairing complete**. Successful pairing starts the receiver and maps the active console's Player 2 automatically. No second terminal command is required.
 
 <!-- pagebreak -->
 
@@ -46,6 +46,6 @@ If a game is already running during installation, the console installer stops be
 
 ## Supported releases and integrity
 
-Version 0.1.2 supports the same validated platforms as 0.1.0: UNO Q App Lab, standard RetroPie with the `pi` account, and Batocera 43.1 x86_64. Other Batocera boards are detected by the same command and rejected until their core libraries and gameplay pass validation. Release assets include the source package, installer, PDFs, and `SHA256SUMS`. The installer pins the source package's digest; the checksum file also lets you check downloaded assets independently. The repository contains no ROMs.
+Version 0.1.3 supports the same validated platforms as 0.1.0: UNO Q App Lab, standard RetroPie with the `pi` account, and Batocera 43.1 x86_64. Other Batocera boards are detected by the same command and rejected until their core libraries and gameplay pass validation. Release assets include the source package, installer, PDFs, and `SHA256SUMS`. The installer pins the source package's digest; the checksum file also lets you check downloaded assets independently. The repository contains no ROMs.
 
 For development or repair, the [RetroPie](../deploy/retropie/README.md) and [Batocera](../deploy/batocera/README.md) guides document individual components. The normal install path is the one command above for each device, followed by browser pairing.

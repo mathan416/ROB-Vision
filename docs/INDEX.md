@@ -1,6 +1,6 @@
 # R.O.B. Vision documentation
 
-[Version 0.1.2 release notes](RELEASE_NOTES_0.1.2.md) describe the documentation update and supported devices. The [0.1.1 notes](RELEASE_NOTES_0.1.1.md), [0.1.0 notes](RELEASE_NOTES_0.1.0.md), and [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remain available.
+[Version 0.1.3 release notes](RELEASE_NOTES_0.1.3.md) describe the documentation update and supported devices. The [0.1.2 notes](RELEASE_NOTES_0.1.2.md), [0.1.1 notes](RELEASE_NOTES_0.1.1.md), [0.1.0 notes](RELEASE_NOTES_0.1.0.md), and [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remain available.
 
 **Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on RetroPie or Batocera; its rendered NES frames carry complete R.O.B. commands to the UNO Q. A browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. Both games' six commands were decoded during live Direct play, and Gyromite's gate controls were tested in Game A.
 
@@ -31,7 +31,7 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 - [Documentation standard](DOCUMENTATION_STANDARD.md): editorial rules for player Help, manuals, and engineering reference.
 - [Optical input](optical-input.md) and [ROM signal analysis](ROM_SIGNAL_ANALYSIS.md): flashes, timing, and command decoding.
 - [Kiyo Pro row test](KIYO_PRO_ROW_TEST_2026-09-25.md): archived camera research; no longer part of the runtime.
-- [Game identification](GAME_IDENTIFICATION.md): exact RetroPie launch-name matching.
+- [Game identification](GAME_IDENTIFICATION.md): RetroPie launch-hook research and exact ROM-name matching.
 - [Network architecture](network-architecture.md): virtual Controller 2 return path over Wi-Fi or Ethernet.
 - [Dashboard design](DASHBOARD_DESIGN.md): robot art, accessory layout, and live state.
 - [Gyromite manual notes](GYROMITE_MANUAL_NOTES.md), [Stack-Up manual notes](STACK_UP_MANUAL_NOTES.md), and [historical manual notes](HISTORICAL_MANUAL_NOTES.md): original behavior and game modes.
@@ -43,4 +43,4 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 - [Nestopia frame-link report](NESTOPIA_FRAME_LINK_TEST_2026-09-25.md): second NES core, isolated game-frame checks, and remaining live validation.
 - [Safety and security](SAFETY_AND_SECURITY.md), [third-party components](THIRD_PARTY_COMPONENTS.md), and [changelog](CHANGELOG.md).
 
-The UNO Q app, RetroPie frame link, and Gyromite return path are running. All six frame command types in both games have been observed; longer unattended gameplay and Stack-Up Memory/Bingo remain to be validated. Historical manuals explain the original physical toy; this project renders those mechanics virtually.
+The UNO Q app, console frame link, and Gyromite return path are running. All six frame command types in both games have been observed; longer unattended gameplay and Stack-Up Memory/Bingo remain to be validated. Historical manuals explain the original accessories that inspired the virtual model.
