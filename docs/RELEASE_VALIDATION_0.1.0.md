@@ -1,6 +1,6 @@
 # 0.1.0 release validation — 26 September 2026
 
-RC8 is a public prerelease. The final release gate has not passed because its Batocera service has a boot-order defect when VirtualGlove is enabled. A fix has passed a live reboot check and needs a new published candidate.
+RC9 is a public prerelease. Its published installer and Batocera reboot checks passed with VirtualGlove and R.O.B. Vision both enabled.
 
 ## Published installation checks
 
@@ -9,6 +9,7 @@ RC8 is a public prerelease. The final release gate has not passed because its Ba
 - The public RC4 through RC7 Batocera commands upgraded the supported 43.1 x86_64 host and resumed EmulationStation. Its receiver remained active and the UNO Q listed both consoles online. RC7 detected the virtual pad as RetroArch index 2; Linux assigned it `js4`.
 - The public RC8 installer downloaded its checksum-pinned package on the UNO Q, stopped and restarted App Lab, compiled and uploaded the matrix sketch, and served the updated Help and PDFs. Both console one-command upgrades passed with existing pairing retained. Batocera suspended and resumed EmulationStation, and its active Nestopia wrapper matched the packaged SHA-256. RetroPie mapped Player 2 to joystick 1, restarted its receiver, and kept the registered games on FCEUmm. The UNO Q listed both consoles online afterward.
 - RetroPie then rebooted and returned with EmulationStation running, the receiver active, and its Player 2 mapping intact. Batocera took several minutes to return. Its receiver and menu ran, but the concurrent service startup left the shared core mounts unavailable. Starting VirtualGlove before R.O.B. Vision restored both. A revised R.O.B. Vision service waits for VirtualGlove's native core when that service is enabled; after another full Batocera reboot, both core files were visible, both services were enabled and running, and the UNO Q saw Batocera online. The published RC8 package does not yet contain this boot fix.
+- The public RC9 Batocera command installed the revised R.O.B. Vision service and retained pairing. After a full reboot with both services enabled, both native core files were visible, the R.O.B. Vision receiver and EmulationStation were running, and the UNO Q showed Batocera online. VirtualGlove's installation and service were left in place. The public RC9 UNO Q command restarted its App Lab app, compiled and uploaded the matrix sketch, and served Help and the technical PDF with HTTP 200; both console pairings remained online. RetroPie, which has no VirtualGlove service, remained online with its receiver active and EmulationStation running.
 
 ## Games and input
 
@@ -23,4 +24,4 @@ RC8 is a public prerelease. The final release gate has not passed because its Ba
 
 The Python suite, five JavaScript model tests, shell syntax, release checksum tests, and Git diff checks passed during candidate preparation. The repository and packages were scanned for tracked ROMs and known credential patterns. The corrected Nestopia wrapper built in the release workflow and passed the live Batocera Game A visual check. Stack-Up selected correctly with a live frame link through that wrapper; its earlier Direct-mode movement tests remain the movement evidence.
 
-**Release decision:** Nestopia's Gyromite blue-gate return and the published RC8 one-command upgrades pass on both supported consoles. Publish and install a candidate containing the Batocera boot fix, then repeat its reboot check before final `v0.1.0`.
+**Release decision:** The published RC9 passes the supported Batocera boot coexistence check, the UNO Q install and Help check, and the prior RetroPie, game input, and installer gates. The final `v0.1.0` may be published from this reviewed code and documentation.
