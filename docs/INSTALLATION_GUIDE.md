@@ -6,7 +6,7 @@ R.O.B. Vision runs on an Arduino UNO Q and connects to either RetroPie or Batoce
 
 - Connect the UNO Q and console to the same trusted network. Sign in to the UNO Q as `arduino`, to RetroPie as `pi`, or to Batocera as `root`.
 - Install UNO Q App Lab. Standard RetroPie needs Python 3.7+, `gcc`, `openssl`, `sudo`, systemd, `uinput`, and at least one installed NES core (`lr-fceumm` or `lr-nestopia`). The UNO Q needs Python 3.9+. Batocera 43.1 x86_64 is the validated Batocera target; the command checks the board and version before installation.
-- Exit any running game. Stop a different App Lab app before installing R.O.B. Vision. Supply your own legally obtained Gyromite or Stack-Up ROM with an exact name in `config/games.json`.
+- Exit any running game and EmulationStation on RetroPie. Restarting the virtual joystick while EmulationStation is open can crash its input manager. Stop a different App Lab app before installing R.O.B. Vision. Supply your own legally obtained Gyromite or Stack-Up ROM with an exact name in `config/games.json`.
 - `curl`, `tar`, Python 3, and either `sha256sum` or `shasum` are needed to run the single-command download. The installer reports a missing prerequisite before installing.
 
 ## Install the UNO Q

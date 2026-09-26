@@ -9,9 +9,23 @@ from unittest.mock import patch
 
 from scripts.install import (app_lab_status, configure_player2, copy_tree_merge, hook_event, install_uno, installed_controller, managed_text,
                              remove_legacy_hook, update_managed, valid_controller)
+from scripts.install import validate_receiver_source
 
 
 class InstallerTests(unittest.TestCase):
+    def test_receiver_source_is_importable_before_installation(self):
+        validate_receiver_source(Path(__file__).resolve().parents[1])
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            tools = root / "tools"
+            tools.mkdir()
+            (tools / "__init__.py").touch()
+            (tools / "retropie_frame_hook.py").write_text("# incomplete older module\n")
+            (tools / "retropie_controller2.py").write_text(
+                "from tools.retropie_frame_hook import BATOCERA_CONFIG\n")
+            with self.assertRaisesRegex(RuntimeError, "Incomplete receiver module set"):
+                validate_receiver_source(root)
+
     def test_hook_is_idempotent_and_runs_before_other_hook_code(self):
         old = "#!/bin/sh\necho existing\nexit 0\n"
         installed = managed_text(old, "echo rob", "#!/bin/sh")
