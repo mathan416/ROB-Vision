@@ -1,6 +1,6 @@
 # Buddy and the way out
 
-An original four-scene comic about Buddy following an old game's light signal into a new window. Artwork: [full-page comic](images/buddy-comic-v1.png).
+This early four-scene concept is preserved in the [comic archive](archive/comics/R.O.B.-Vision-Buddy-Story-Comic.pdf), alongside its [full-page artwork](images/buddy-comic-v1.png). The published story is now the three-part [Buddy & the Big Wide Window](BUDDY_ADVENTURE.md).
 
 1. **The edge.** Buddy knew every signal, but not what lay beyond the picture.
 2. **A blink.** A little grid of lights appeared. Buddy blinked back.

@@ -639,5 +639,5 @@
     leaveLive() { state.live = false; $('stage').classList.remove('test-flashing', 'test-ready'); home(); document.querySelectorAll('[data-mode]').forEach((tab) => { tab.disabled = false; }); $('connection').textContent = window.RobStatus.preview; $('connection').closest('.top-status').dataset.connection = 'preview'; document.querySelector('.vitals-card .live-text').textContent = '● SIMULATION'; document.querySelector('.stage-panel .chip').textContent = 'SIMULATED MOTION'; document.querySelector('.gyro-vitals-note').textContent = 'Virtual spin and button states; no game link'; }
   };
   $('event-list').querySelector('time').textContent = time();
-  function tick() { $('clock').textContent = time(); } tick(); setInterval(tick, 1000); render();
+  render();
 })();

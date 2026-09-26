@@ -12,20 +12,23 @@ import platform
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from scripts.install import copy_file, copy_tree_merge, valid_controller, write_file, validate_receiver_source
+from scripts.install import copy_file, copy_tree_merge, unlink_if_exists, valid_controller, write_file, validate_receiver_source
 from tools.batocera import select_games
+from tools.identify_game import load_registry
 
 DEST = Path("/userdata/system/rob-vision")
 CONFIG = Path("/userdata/system/batocera.conf")
 SERVICES = Path("/userdata/system/services")
 SCRIPTS = Path("/userdata/system/scripts")
-VERSION_FILE = Path("/usr/share/batocera/batocera.version")
 ES_SERVICE = Path("/etc/init.d/S31emulationstation")
+STOCK_CORES = Path("/usr/lib/libretro")
+CORE_INFO = Path("/usr/share/libretro/info")
 
 
 def suspend_menu():
@@ -59,14 +62,57 @@ def resume_menu():
         raise RuntimeError("EmulationStation did not resume after installation.") from exc
 
 
-def supported_hardware(machine=None, version_file=VERSION_FILE):
-    machine = machine or platform.machine()
-    version = version_file.read_text().split()[0] if version_file.is_file() else "unknown"
-    if machine != "x86_64" or version != "43.1":
-        raise RuntimeError(
-            f"Batocera {version} on {machine} has no validated R.O.B. Vision build for this release; "
-            "supported: Batocera 43.1 x86_64. No files were changed."
-        )
+def available_cores(core_dir=STOCK_CORES, info_dir=CORE_INFO):
+    """Install only wrappers for NES cores actually supplied by this Batocera image."""
+    cores = [core for core in ("fceumm", "nestopia")
+             if (core_dir / f"{core}_libretro.so").is_file()
+             and (info_dir / f"{core}_libretro.info").is_file()]
+    if not cores:
+        raise RuntimeError("Batocera needs an installed FCEUmm or Nestopia libretro core and its info file.")
+    return cores
+
+
+def wrapper_arch(machine):
+    """Map Linux machine names to the ABI directories in the release package."""
+    aliases = {"amd64": "x86_64", "i386": "x86", "i486": "x86", "i586": "x86",
+               "i686": "x86", "arm64": "aarch64", "armv7": "armv7l",
+               "armv8l": "armv7l", "armv6": "armv6l"}
+    return aliases.get(machine.lower(), machine.lower())
+
+
+def prepare_wrappers(source, build_dir, cores, machine=None):
+    """Use a native package or compile for this machine before changing the installation."""
+    machine = wrapper_arch(machine or platform.machine())
+    bundled = source / "deploy/batocera/cores" / machine
+    compiler = shutil.which("gcc") or shutil.which("cc")
+    proxy_source = source / "deploy/retropie/rob_vision_fceumm_proxy.c"
+    prepared = {}
+    for core in cores:
+        name = f"robvision_{core}_libretro.so"
+        packaged = bundled / name
+        if packaged.is_file():
+            try:
+                ctypes.CDLL(str(packaged))
+            except OSError:
+                if not compiler:
+                    raise RuntimeError(f"The bundled {machine} {core} wrapper cannot load on this Batocera build; a native C compiler is required.")
+            else:
+                prepared[core] = packaged
+                continue
+        if not compiler:
+            raise RuntimeError(f"No {machine} {core} wrapper is bundled and this Batocera image has no C compiler. No files were changed.")
+        if not proxy_source.is_file():
+            raise RuntimeError("The frame wrapper source is missing from the release package.")
+        output = build_dir / name
+        command = [compiler, "-std=gnu11", "-O2", "-fPIC", "-shared", "-Wall", "-Wextra"]
+        if core == "nestopia":
+            command.append("-DROB_USE_NESTOPIA")
+        command.extend((f'-DROB_REAL_CORE_PATH="/usr/lib/libretro/{core}_libretro.so"',
+                        "-o", str(output), str(proxy_source), "-ldl"))
+        subprocess.run(command, check=True)
+        ctypes.CDLL(str(output))
+        prepared[core] = output
+    return prepared
 
 
 def install(source=ROOT, destination=DEST, controller=None):
@@ -84,44 +130,45 @@ def install(source=ROOT, destination=DEST, controller=None):
         ctypes.CDLL("libSDL2-2.0.so.0")
     except OSError as exc:
         raise RuntimeError("Batocera's SDL2 joystick library is required.") from exc
-    supported_hardware()
-    if not Path("/usr/lib/libretro/fceumm_libretro.so").is_file():
-        raise RuntimeError("The stock Batocera FCEUmm core is required before installation.")
-    libraries = source / "deploy/batocera/cores/x86_64"
-    if any(not (libraries / f"robvision_{core}_libretro.so").is_file()
-           for core in ("fceumm", "nestopia")):
-        raise RuntimeError("Both bundled x86_64 Batocera frame wrappers are required.")
+    cores = available_cores()
     if subprocess.run(["pgrep", "-x", "retroarch"], stdout=subprocess.DEVNULL).returncode == 0:
         raise RuntimeError("Exit the running game before installing.")
     validate_receiver_source(source)
+    load_registry(destination / "config/games.json" if (destination / "config/games.json").is_file()
+                  else source / "config/games.json")
     old_url = destination / "controller.url"
     if controller is None and old_url.is_file():
         controller = old_url.read_text().strip().removeprefix("http://")
     if not controller:
         raise ValueError("Provide --controller with the UNO Q hostname or IP.")
     valid_controller(controller)
-    menu_suspended = suspend_menu()
-    try:
-        if (SERVICES / "ROBVision").is_file():
-            subprocess.run(["batocera-services", "stop", "ROBVision"], check=True)
-        destination.mkdir(parents=True, exist_ok=True)
-        for folder in ("tools", "controller", "config"):
-            copy_tree_merge(source / folder, destination / folder)
-        for core in ("fceumm", "nestopia"):
-            library = libraries / f"robvision_{core}_libretro.so"
-            ctypes.CDLL(str(library))
-            copy_file(library, destination / "build" / library.name, 0o755)
-        write_file(old_url, f"http://{controller}\n", 0o600)
-        copy_file(source / "deploy/batocera/ROBVision", SERVICES / "ROBVision", 0o755)
-        copy_file(source / "deploy/batocera/zz-robvision-game", SCRIPTS / "zz-robvision-game", 0o755)
-        copy_file(source / "deploy/batocera/retroarch-joypad.cfg",
-                  Path("/userdata/system/configs/retroarch/inputs/R.O.B. Vision Controller 2.cfg"))
-        chosen = select_games(CONFIG, Path("/userdata/roms/nes"))
-        subprocess.run(["batocera-services", "enable", "ROBVision"], check=True)
-        subprocess.run(["batocera-services", "restart", "ROBVision"], check=True)
-    finally:
-        if menu_suspended:
-            resume_menu()
+    with tempfile.TemporaryDirectory(prefix="rob-vision-cores-") as build:
+        libraries = prepare_wrappers(source, Path(build), cores)
+        menu_suspended = suspend_menu()
+        try:
+            if (SERVICES / "ROBVision").is_file():
+                subprocess.run(["batocera-services", "stop", "ROBVision"], check=True)
+            destination.mkdir(parents=True, exist_ok=True)
+            for folder in ("tools", "controller", "config"):
+                copy_tree_merge(source / folder, destination / folder,
+                                preserve_registry=(folder == "config"))
+            for library in libraries.values():
+                copy_file(library, destination / "build" / library.name, 0o755)
+            for core in ("fceumm", "nestopia"):
+                if core not in libraries:
+                    unlink_if_exists(destination / "build" / f"robvision_{core}_libretro.so")
+            write_file(old_url, f"http://{controller}\n", 0o600)
+            copy_file(source / "deploy/batocera/ROBVision", SERVICES / "ROBVision", 0o755)
+            copy_file(source / "deploy/batocera/zz-robvision-game", SCRIPTS / "zz-robvision-game", 0o755)
+            copy_file(source / "deploy/batocera/retroarch-joypad.cfg",
+                      Path("/userdata/system/configs/retroarch/inputs/R.O.B. Vision Controller 2.cfg"))
+            chosen = select_games(CONFIG, Path("/userdata/roms/nes"), available=cores,
+                                  registry_path=destination / "config/games.json")
+            subprocess.run(["batocera-services", "enable", "ROBVision"], check=True)
+            subprocess.run(["batocera-services", "restart", "ROBVision"], check=True)
+        finally:
+            if menu_suspended:
+                resume_menu()
     print("Installed R.O.B. Vision for:", ", ".join(chosen) or "no registered ROMs present")
     if not (destination / "token").is_file():
         print("Pair on the UNO Q Setup page using:")

@@ -6,18 +6,22 @@ Run as root on RetroPie so /dev/uinput is available. No third-party packages.
 
 import argparse
 import fcntl
+import ipaddress
 import json
 import os
 import signal
+import socket
 import struct
 import sys
 import time
 from collections import deque
 from pathlib import Path
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from identify_game import identify, load_registry
+from tools.game_registry import RegistryStore, serve
 from tools.retropie_frame_hook import BATOCERA_CONFIG, BATOCERA_PROXY_CORES, FrameHookServer
 
 
@@ -76,11 +80,28 @@ class VirtualPad:
             os.close(self.fd)
 
 
+def controller_route_address(url):
+    """Find the console's LAN address on the route used for this UNO Q."""
+    try:
+        host = urlsplit(url).hostname
+        if not host:
+            return ""
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as connection:
+            connection.connect((host, 9))
+            address = connection.getsockname()[0]
+        parsed = ipaddress.IPv4Address(address)
+        return address if parsed.is_private and not (parsed.is_loopback or parsed.is_link_local) else ""
+    except (OSError, ValueError):
+        return ""
+
+
 def fetch_state(url, token, timeout, frame_hook_game=None, test_signal_game=None,
-                platform="retropie", console_id=""):
+                platform="retropie", console_id="", console_address=""):
     headers = {"Authorization": "Bearer " + token, "X-ROB-Receiver": platform}
     if console_id:
         headers["X-ROB-Console-ID"] = console_id
+    if console_address:
+        headers["X-ROB-Console-Address"] = console_address
     if frame_hook_game in ("gyromite", "stack_up"):
         headers["X-ROB-Frame-Hook"] = frame_hook_game
     if test_signal_game == frame_hook_game and test_signal_game in ("gyromite", "stack_up"):
@@ -144,9 +165,10 @@ def running_game(registry, proc_root=Path("/proc"), platform="retropie"):
     return None
 
 
-def sync_game(url, token, system, rom, timeout, platform="retropie", console_id=""):
+def sync_game(url, token, system, rom, timeout, platform="retropie", console_id="", game=None):
     """Replay a known launch after the UNO Q restarts mid-game."""
-    payload = json.dumps({"event": "start", "system": system, "rom": Path(rom).name}).encode()
+    payload = json.dumps({"event": "start", "system": system, "rom": Path(rom).name,
+                          **({"game": game} if game else {})}).encode()
     headers = {"Content-Type": "application/json", "Authorization": "Bearer " + token,
                "X-ROB-Receiver": platform}
     if console_id:
@@ -197,19 +219,42 @@ def main():
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
     pad = VirtualPad()
-    registry = load_registry()
+    registry_path = Path(__file__).resolve().parents[1] / "config/games.json"
+    registry = load_registry(registry_path)
+    registry_mtime = registry_path.stat().st_mtime_ns
     hook = FrameHookServer(registry, platform=args.platform)
     hook.start()
+    try:
+        games_server = serve(RegistryStore(registry_path, args.platform), args.token_file)
+    except OSError as exc:
+        print(f"R.O.B. Vision registry editor unavailable: {exc}", file=sys.stderr)
+        games_server = None
     desired = (False, False)
     last_good = 0.0
     active_game = None
     next_process_check = 0.0
+    next_address_check = 0.0
+    console_address = ""
+    next_registry_check = 0.0
     next_sync = 0.0
     pending_frames = deque()
     state = {}
     try:
         while running:
             started = time.monotonic()
+            if started >= next_address_check:
+                console_address = controller_route_address(args.url)
+                next_address_check = started + 15.0
+            if started >= next_registry_check:
+                next_registry_check = started + 1.0
+                try:
+                    modified = registry_path.stat().st_mtime_ns
+                    if modified != registry_mtime:
+                        registry = load_registry(registry_path)
+                        hook.registry = registry
+                        registry_mtime = modified
+                except (OSError, ValueError, TypeError, UnicodeError, json.JSONDecodeError) as exc:
+                    print(f"R.O.B. Vision registry reload failed: {exc}", file=sys.stderr)
             if started >= next_process_check:
                 active_game = running_game(registry, platform=args.platform)
                 next_process_check = started + .25
@@ -217,7 +262,8 @@ def main():
                 hook_game = hook.recent_game()
                 state = fetch_state(args.url, token, args.timeout,
                                     hook_game if active_game and hook_game == active_game[0] else None,
-                                    hook.recent_test_game(), platform=args.platform, console_id=console_id)
+                                    hook.recent_test_game(), platform=args.platform, console_id=console_id,
+                                    console_address=console_address)
                 selected_here = source_selected(state, args.platform, console_id)
                 if not selected_here:
                     desired = (False, False)
@@ -229,7 +275,7 @@ def main():
                     next_sync = started + 2.0
                     try:
                         sync_game(args.url, token, active_game[1], active_game[2], args.timeout,
-                                  args.platform, console_id)
+                                  args.platform, console_id, game=active_game[0])
                     except (OSError, ValueError):
                         pass
             except (OSError, ValueError, json.JSONDecodeError):
@@ -257,6 +303,9 @@ def main():
             if running:
                 time.sleep(max(0, args.interval - (time.monotonic() - started)))
     finally:
+        if games_server is not None:
+            games_server.shutdown()
+            games_server.server_close()
         hook.stop()
         pad.close()
 

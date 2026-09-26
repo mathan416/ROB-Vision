@@ -15,18 +15,110 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from time import monotonic, time
 from urllib.parse import urlsplit
+from urllib.error import HTTPError
+from urllib.request import ProxyHandler, Request, build_opener
 
 from .model import GyroState, StackState
 from .optical import ALLOWED, PATTERNS
 from .pairings import PairingStore, PLATFORMS
-from tools.identify_game import identify, load_registry
+from .resolver import resolve_ipv4
+from tools.identify_game import SUPPORTED_EXTENSIONS, SUPPORTED_GAMES, SUPPORTED_SYSTEMS, identify, load_registry
 
 ROOT = Path(__file__).resolve().parents[1]
 READY_LIGHT_SECONDS = 1.0
 MIME = {".html": "text/html", ".js": "text/javascript", ".css": "text/css",
         ".svg": "image/svg+xml", ".pdf": "application/pdf", ".png": "image/png",
         ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".ttf": "font/ttf"}
-def pair_retropie(host, code, fingerprint, token, console_id, port=8768):
+
+
+def game_from_launch(data):
+    """Accept a known game asserted by a paired console's validated registry."""
+    if data.get("event") != "start":
+        return None
+    system, rom, reported = data.get("system"), data.get("rom"), data.get("game")
+    if (isinstance(system, str) and system.casefold() in SUPPORTED_SYSTEMS
+            and isinstance(rom, str) and rom == Path(rom).name
+            and Path(rom).suffix.casefold() in SUPPORTED_EXTENSIONS
+            and isinstance(reported, str) and reported in SUPPORTED_GAMES):
+        return reported
+    if isinstance(system, str) and isinstance(rom, str):
+        return identify(system, rom, load_registry())
+    return None
+
+
+def console_registry(pairings, console_id, action, document=None, revision=None):
+    """Proxy a bounded registry edit to one paired console without exposing its token."""
+    with pairings.lock:
+        record = dict(pairings.records.get(console_id, {})) if isinstance(console_id, str) else {}
+        observed = (pairings.last_address.get(console_id)
+                    if monotonic() - pairings.last_seen.get(console_id, 0) < 10 else None)
+    if not record:
+        raise ValueError("Choose a paired console from the list.")
+    host = record["host"]
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]{0,252}", host):
+        raise ValueError("The paired console address is invalid.")
+    if action not in ("read", "validate", "save", "restore"):
+        raise ValueError("Unknown registry action.")
+    payload = {"action": action, "revision": revision}
+    if action in ("validate", "save"):
+        payload["document"] = document
+    body = json.dumps(payload).encode()
+    if len(body) > 70000:
+        raise ValueError("Game registry exceeds 64 KiB.")
+    addresses = [observed] if observed else []
+    try:
+        resolved = resolve_ipv4(host)
+        if resolved not in addresses:
+            addresses.append(resolved)
+    except OSError:
+        if not addresses:
+            raise ValueError("The paired console name cannot be resolved from this UNO Q.") from None
+    opener = build_opener(ProxyHandler({}))
+    answer = None
+    for address in addresses:
+        if not ipaddress.ip_address(address).is_private:
+            continue
+        request = Request(f"http://{address}:8769/registry", data=body, method="POST",
+                          headers={"Authorization": "Bearer " + record["token"],
+                                   "Content-Type": "application/json"})
+        try:
+            with opener.open(request, timeout=3) as response:
+                answer = response.read(70001)
+            break
+        except HTTPError as exc:
+            try:
+                raise ValueError(json.loads(exc.read(4096)).get("error", "Console rejected the registry change.")) from exc
+            except (json.JSONDecodeError, AttributeError):
+                raise ValueError("Console rejected the registry change.") from exc
+        except OSError:
+            continue
+    if answer is None:
+        raise ValueError("The paired console's registry editor is unavailable. Update its R.O.B. Vision receiver, then check the link.")
+    if len(answer) > 70000:
+        raise ValueError("Console registry response is too large.")
+    return json.loads(answer)
+def controller_url_from_host(host):
+    """Use the address the browser used to reach this UNO Q for its console link."""
+    if not isinstance(host, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.:-]{0,258}", host):
+        raise ValueError("Open Setup using this UNO Q's LAN hostname or IP address before pairing.")
+    parsed = urlsplit("http://" + host)
+    try:
+        port = parsed.port
+    except ValueError as exc:
+        raise ValueError("Invalid UNO Q address for pairing.") from exc
+    if not parsed.hostname or parsed.hostname.lower() == "localhost" or (port is not None and not 1 <= port <= 65535):
+        raise ValueError("Open Setup using this UNO Q's LAN hostname or IP address before pairing.")
+    try:
+        address = ipaddress.ip_address(parsed.hostname)
+    except ValueError:
+        pass
+    else:
+        if not address.is_private or address.is_loopback or address.is_link_local:
+            raise ValueError("Pairing requires this UNO Q's private LAN address.")
+    return "http://" + host
+
+
+def pair_retropie(host, code, fingerprint, token, console_id, port=8768, controller_url=None):
     """Send the controller token only after checking the console's TLS fingerprint."""
     if not isinstance(host, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]{0,252}", host):
         raise ValueError("Enter a console hostname or local IP address.")
@@ -39,19 +131,21 @@ def pair_retropie(host, code, fingerprint, token, console_id, port=8768):
         raise ValueError("Invalid pairing port.")
     if not token:
         raise ValueError("Configure a controller token before pairing.")
-    addresses = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
-    if not addresses or any(not ipaddress.ip_address(item[4][0]).is_private for item in addresses):
+    addresses = ([resolve_ipv4(host)] if host.lower().endswith(".local") else
+                 [item[4][0] for item in socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)])
+    if not addresses or any(not ipaddress.ip_address(address).is_private for address in addresses):
         raise ValueError("Pairing is available only on a private network.")
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
-    connection = http.client.HTTPSConnection(addresses[0][4][0], port, context=context, timeout=8)
+    connection = http.client.HTTPSConnection(addresses[0], port, context=context, timeout=8)
     try:
         connection.connect()
         actual = hashlib.sha256(connection.sock.getpeercert(binary_form=True)).hexdigest()
         if actual != fingerprint:
             raise ValueError("Console fingerprint does not match. Pairing stopped before sending the token.")
-        body = json.dumps({"code": code, "token": token, "console_id": console_id}).encode()
+        body = json.dumps({"code": code, "token": token, "console_id": console_id,
+                           "controller_url": controller_url}).encode()
         connection.request("POST", "/pair", body=body, headers={"Content-Type": "application/json"})
         response = connection.getresponse()
         result = json.load(response)
@@ -267,7 +361,8 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                     identity = pairings.verify(self.headers) if token else None
                     if identity:
                         receiver = identity["platform"]
-                        pairings.seen(identity["id"])
+                        pairings.seen(identity["id"],
+                                      self.headers.get("X-ROB-Console-Address") or self.client_address[0])
                         controller.receiver_seen("RetroPie" if receiver == "retropie" else "Batocera",
                                                  self.headers.get("X-ROB-Frame-Hook"),
                                                  self.headers.get("X-ROB-Test-Signal"), identity["id"])
@@ -303,7 +398,7 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                 return
             try:
                 size = int(self.headers.get("Content-Length", "0"))
-                if size < 0 or size > 4096:
+                if size < 0 or size > (70000 if path == "/api/games" else 4096):
                     raise ValueError("Request too large.")
                 data = json.loads(self.rfile.read(size) or b"{}")
                 if path == "/api/game":
@@ -316,7 +411,7 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                     console_id = self.console_identity["id"]
                     if data.get("event") == "end" and controller.active_console_id not in (None, console_id):
                         return self.respond(200, controller.snapshot())
-                    game = identify(data.get("system", ""), data.get("rom", ""), load_registry()) if data.get("event") == "start" else None
+                    game = game_from_launch(data)
                     result = controller.select(game)
                     with controller.lock:
                         controller.active_receiver = receiver if game else None
@@ -337,7 +432,10 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                     try:
                         console_id, console_token = pairings.new_credentials()
                         result = pair_retropie(data["host"], data["code"], data["fingerprint"],
-                                               console_token, console_id)
+                                               console_token, console_id,
+                                               controller_url=controller_url_from_host(
+                                                   self.headers.get("X-Rob-Original-Host") or
+                                                   self.headers.get("Host")))
                         pairings.add(console_id, console_token, result["platform"], result["host"])
                     finally:
                         if matrix is not None:
@@ -355,6 +453,9 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                             controller.receiver_name = None
                             controller.receiver_last_seen = 0.0
                     result = controller.snapshot()
+                elif path == "/api/games":
+                    result = console_registry(pairings, data.get("console_id"), data.get("action"),
+                                              data.get("document"), data.get("revision"))
                 elif path == "/api/matrix/pairing":
                     if not isinstance(data.get("active"), bool):
                         raise ValueError("Choose whether pairing is active.")

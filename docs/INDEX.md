@@ -1,10 +1,10 @@
 # R.O.B. Vision documentation
 
-[Version 0.1.6 release notes](RELEASE_NOTES_0.1.6.md) describe the documentation update and supported devices. The [0.1.5 notes](RELEASE_NOTES_0.1.5.md), [0.1.4 notes](RELEASE_NOTES_0.1.4.md), [0.1.3 notes](RELEASE_NOTES_0.1.3.md), [0.1.2 notes](RELEASE_NOTES_0.1.2.md), [0.1.1 notes](RELEASE_NOTES_0.1.1.md), [0.1.0 notes](RELEASE_NOTES_0.1.0.md), and [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remain available.
+[Version 0.1.7 release notes](RELEASE_NOTES_0.1.7.md) describe the latest changes. The [0.1.6 notes](RELEASE_NOTES_0.1.6.md), [0.1.5 notes](RELEASE_NOTES_0.1.5.md), [0.1.4 notes](RELEASE_NOTES_0.1.4.md), [0.1.3 notes](RELEASE_NOTES_0.1.3.md), [0.1.2 notes](RELEASE_NOTES_0.1.2.md), [0.1.1 notes](RELEASE_NOTES_0.1.1.md), [0.1.0 notes](RELEASE_NOTES_0.1.0.md), and [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remain available.
 
 **Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on RetroPie or Batocera; its rendered NES frames carry complete R.O.B. commands to the UNO Q. A browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. Both games' six commands were decoded during live Direct play, and Gyromite's gate controls were tested in Game A.
 
-Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [Installation & Setup](../output/pdf/R.O.B.-Vision-Installation-and-Setup.pdf), [Game Manual](../output/pdf/R.O.B.-Vision-Game-Manual.pdf), [Buddy Story Comic](../output/pdf/R.O.B.-Vision-Buddy-Story-Comic.pdf), [Technical Reference](../output/pdf/R.O.B.-Vision-Technical-Reference.pdf), [Technical Test Results](../output/pdf/R.O.B.-Vision-Technical-Test-Results.pdf), [Engineering Journey](../output/pdf/R.O.B.-Vision-Engineering-Journey.pdf), [Matrix Display Guide](../output/pdf/R.O.B.-Vision-Matrix-Display-Guide.pdf), and [Quick Reference](../output/pdf/R.O.B.-Vision-Quick-Reference.pdf).
+Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [Installation & Setup](../output/pdf/R.O.B.-Vision-Installation-and-Setup.pdf), [Game Manual](../output/pdf/R.O.B.-Vision-Game-Manual.pdf), [Buddy newspaper Episode 1](../output/pdf/Buddy-Big-Wide-Window-Episode-1.pdf), [Buddy newspaper Episode 2](../output/pdf/Buddy-Big-Wide-Window-Episode-2.pdf), [Buddy newspaper Episode 3](../output/pdf/Buddy-Big-Wide-Window-Episode-3.pdf), [Technical Reference](../output/pdf/R.O.B.-Vision-Technical-Reference.pdf), [Technical Test Results](../output/pdf/R.O.B.-Vision-Technical-Test-Results.pdf), [Engineering Journey](../output/pdf/R.O.B.-Vision-Engineering-Journey.pdf), [Matrix Display Guide](../output/pdf/R.O.B.-Vision-Matrix-Display-Guide.pdf), and [Quick Reference](../output/pdf/R.O.B.-Vision-Quick-Reference.pdf).
 
 The Technical Reference is generated from one cohesive [technical source](TECHNICAL_ARCHITECTURE.md). It covers current architecture, ROM-derived frame protocol, game identity, virtual model, Controller 2 return path, pairing, platform installation, recovery, and verified limits. Dated test reports and earlier camera research remain as separate evidence below.
 
@@ -15,7 +15,7 @@ The Technical Reference is generated from one cohesive [technical source](TECHNI
 | Everyone | [Built-in Help center](../dashboard/help.html) | Searchable setup, play, controls, indicators, and troubleshooting inside the dashboard. |
 | Everyone | [Project README](../README.md) | Scope, preview, and document links. |
 | Everyone | [Meet Buddy](MEET_BUDDY.md) | Illustrated story chapter used in the printable User Guide. |
-| Everyone | [Buddy and the way out](BUDDY_COMIC.md) | Full-page four-scene comic, also included in the User Guide. |
+| Everyone | [Buddy & the Big Wide Window](BUDDY_ADVENTURE.md) | Three full-page newspaper episodes and printable PDFs. |
 | Everyone | [Virtual system contract](VIRTUAL_SYSTEM.md) | UNO Q, browser, virtual pieces, and game-link responsibilities. |
 | Player | [User guide](USER_GUIDE.md) | Live controls, preview, and current limitations. |
 | Player and installer | [Setup guide](SETUP_GUIDE.md) | Pairing, frame-link status, Test mode, and manual checks. |

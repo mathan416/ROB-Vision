@@ -10,7 +10,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 from identify_game import load_registry
 from retropie_controller2 import running_game
 from tools.batocera import configure_player2_overrides, map_player2, pad_index, player1_index, select_games
-from scripts.install_batocera import supported_hardware, suspend_menu, resume_menu
+from scripts.install_batocera import available_cores, prepare_wrappers, suspend_menu, resume_menu, wrapper_arch
 from tools.retropie_frame_hook import sender_game
 
 
@@ -66,15 +66,63 @@ class BatoceraTests(unittest.TestCase):
         run.assert_called_once_with(["pidof", "emulationstation"], stdout=subprocess.DEVNULL)
         unlink.assert_called_once_with(missing_ok=True)
 
-    def test_hardware_gate_precedes_installation(self):
+    def test_core_preflight_uses_installed_cores_instead_of_a_version_gate(self):
         with tempfile.TemporaryDirectory() as directory:
-            version = Path(directory) / "batocera.version"
-            version.write_text("43.1 2026/09/01 12:00\n")
-            supported_hardware("x86_64", version)
-            for machine, value in (("aarch64", "43.1"), ("x86_64", "44")):
-                version.write_text(value + " 2026/09/01\n")
-                with self.subTest(machine=machine, version=value), self.assertRaises(RuntimeError):
-                    supported_hardware(machine, version)
+            root = Path(directory)
+            cores, info = root / "cores", root / "info"
+            cores.mkdir()
+            info.mkdir()
+            (cores / "nestopia_libretro.so").touch()
+            (info / "nestopia_libretro.info").touch()
+            self.assertEqual(available_cores(cores, info), ["nestopia"])
+            (info / "nestopia_libretro.info").unlink()
+            with self.assertRaisesRegex(RuntimeError, "FCEUmm or Nestopia"):
+                available_cores(cores, info)
+
+    def test_uses_matching_architecture_bundle_without_version_check(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bundle = root / "deploy/batocera/cores/aarch64"
+            bundle.mkdir(parents=True)
+            library = bundle / "robvision_fceumm_libretro.so"
+            library.touch()
+            with patch("scripts.install_batocera.ctypes.CDLL") as load:
+                self.assertEqual(prepare_wrappers(root, root, ["fceumm"], "aarch64"),
+                                 {"fceumm": library})
+            load.assert_called_once_with(str(library))
+
+    def test_release_bundles_both_wrappers_for_linux_cpu_families(self):
+        machines = {"x86_64": (2, 62), "x86": (1, 3), "aarch64": (2, 183),
+                    "armv7l": (1, 40), "armv6l": (1, 40), "riscv64": (2, 243)}
+        for machine, (elf_class, elf_machine) in machines.items():
+            for core in ("fceumm", "nestopia"):
+                path = ROOT / "deploy/batocera/cores" / machine / f"robvision_{core}_libretro.so"
+                with self.subTest(machine=machine, core=core):
+                    header = path.read_bytes()[:20]
+                    self.assertEqual(header[:4], b"\x7fELF")
+                    self.assertEqual(header[4], elf_class)
+                    self.assertEqual(int.from_bytes(header[18:20], "little"), elf_machine)
+        self.assertEqual(wrapper_arch("i686"), "x86")
+        self.assertEqual(wrapper_arch("armv8l"), "armv7l")
+        self.assertEqual(wrapper_arch("arm64"), "aarch64")
+
+    def test_can_build_a_missing_architecture_wrapper_before_install(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            proxy = root / "deploy/retropie/rob_vision_fceumm_proxy.c"
+            proxy.parent.mkdir(parents=True)
+            proxy.touch()
+            with patch("scripts.install_batocera.shutil.which", return_value="/usr/bin/gcc"), patch(
+                "scripts.install_batocera.subprocess.run"
+            ) as compile_core, patch("scripts.install_batocera.ctypes.CDLL"):
+                libraries = prepare_wrappers(root, root, ["fceumm"], "armv7l")
+            self.assertEqual(libraries["fceumm"], root / "robvision_fceumm_libretro.so")
+            self.assertIn('-DROB_REAL_CORE_PATH="/usr/lib/libretro/fceumm_libretro.so"',
+                          compile_core.call_args.args[0])
+            with patch("scripts.install_batocera.shutil.which", return_value=None), self.assertRaisesRegex(
+                RuntimeError, "no C compiler"
+            ):
+                prepare_wrappers(root, root, ["fceumm"], "armv7l")
 
     def test_select_only_registered_roms_and_preserve_virtualglove(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -95,6 +143,19 @@ class BatoceraTests(unittest.TestCase):
             self.assertNotIn('Other.nes', first)
             select_games(config, roms)
             self.assertEqual(config.read_text(), first)
+
+    def test_selects_installed_nestopia_when_fceumm_is_absent(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "batocera.conf"
+            config.write_text('')
+            roms = root / "roms"
+            roms.mkdir()
+            (roms / "Gyromite (World).zip").touch()
+            self.assertEqual(select_games(config, roms, available=["nestopia"]),
+                             ["Gyromite (World).zip"])
+            self.assertIn('nes["Gyromite (World).zip"].core=robvision_nestopia',
+                          config.read_text())
 
     def test_player2_changes_only_its_keys(self):
         with tempfile.TemporaryDirectory() as directory:

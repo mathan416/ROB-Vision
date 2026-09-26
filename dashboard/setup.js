@@ -51,7 +51,9 @@
       meta.className = 'console-meta';
       const badge = document.createElement('span');
       badge.className = `console-state${item.online ? ' online' : ''}`;
-      badge.textContent = item.active ? 'PLAYING' : item.online ? 'ONLINE' : 'OFFLINE';
+      badge.textContent = item.active ? 'PLAYING' : item.online ? 'RECEIVER LINKED' : 'RECEIVER WAITING';
+      badge.title = item.online ? 'This console’s R.O.B. Vision receiver recently checked in.' :
+        'Pairing is saved, but this UNO Q has not heard from the console receiver recently.';
       meta.append(badge);
       if (removingId === item.id) {
         const confirm = document.createElement('button');
@@ -74,6 +76,19 @@
         cancel.addEventListener('click', () => { removingId = null; if (state) render(state); });
         meta.append(confirm, cancel);
       } else {
+        if (!item.legacy) {
+          const edit = document.createElement('button');
+          edit.type = 'button';
+          edit.className = 'console-edit';
+          edit.textContent = 'EDIT ROMS';
+          edit.setAttribute('aria-label', `Edit ${item.name} game registry on ${item.host}`);
+          edit.addEventListener('click', () => {
+            if (!window.RobGamesRegistry?.editConsole(item.id)) return;
+            $('registry-heading').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            $('registry-console').focus({ preventScroll: true });
+          });
+          meta.append(edit);
+        }
         const remove = document.createElement('button');
         remove.type = 'button';
         remove.className = 'console-remove';
@@ -92,16 +107,17 @@
     $('setup-connection').closest('.top-status').dataset.connection = 'connected';
     const consoles = snapshot.link?.consoles || [];
     renderConsoles(consoles);
+    window.RobGamesRegistry?.setConsoles(consoles);
     const onlineCount = consoles.filter(item => item.online).length;
     const receiverOnline = onlineCount > 0 || Boolean(snapshot.link?.online);
-    message('pair-link', consoles.length > 1 ? `${onlineCount} OF ${consoles.length} ONLINE` : status.receiver(snapshot));
+    message('pair-link', consoles.length > 1 ? `${onlineCount} OF ${consoles.length} LINKED` : status.receiver(snapshot));
     $('pair-link').dataset.state = receiverOnline ? 'online' : 'offline';
     $('pair-connected').hidden = !receiverOnline || pairExpanded;
     $('pair-details').hidden = receiverOnline && !pairExpanded;
     $('pair-cancel').hidden = !receiverOnline;
     if (receiverOnline !== lastReceiverOnline) {
-      message('pair-feedback', receiverOnline ? 'Console receiver is online. Continue to the game-frame check.' :
-        'No recent console receiver heartbeat. Check its power and network connection.');
+      message('pair-feedback', receiverOnline ? '' :
+        'Pairings are saved. Waiting for a receiver to connect to this UNO Q; console power alone does not establish the link.');
       lastReceiverOnline = receiverOnline;
     }
     message('frame-state', status.frames(snapshot));
@@ -172,8 +188,8 @@
       const consoles = snapshot.link?.consoles || [];
       const online = consoles.filter(item => item.online).length;
       message('pair-feedback', online ?
-        `Checked ${checkedAt}: ${online} of ${consoles.length} paired consoles online.` :
-        `Checked ${checkedAt}: no paired console is online. Check power and network.`);
+        `Checked ${checkedAt}: ${online} of ${consoles.length} paired receivers linked.` :
+        `Checked ${checkedAt}: no paired receiver has checked in. Check its R.O.B. Vision service and controller address.`);
     } catch (error) { message('pair-feedback', `Link check failed: ${error.message}`); }
     finally { linkChecking = false; $('pair-refresh').disabled = false; $('pair-refresh-offline').disabled = false; }
   }

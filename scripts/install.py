@@ -26,6 +26,7 @@ from urllib.request import urlopen
 
 SOURCE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SOURCE))
+from tools.identify_game import load_registry
 BEGIN = "# BEGIN R.O.B. Vision (managed by installer)"
 END = "# END R.O.B. Vision (managed by installer)"
 UNO_DEST = Path("/home/arduino/ArduinoApps/rob-vision")
@@ -51,13 +52,15 @@ def unlink_if_exists(path: Path) -> None:
         pass
 
 
-def copy_tree_merge(source: Path, destination: Path) -> None:
+def copy_tree_merge(source: Path, destination: Path, preserve_registry: bool = False) -> None:
     for root, dirs, files in os.walk(source):
         dirs[:] = [name for name in dirs if name != "__pycache__" and not name.startswith("._")]
         target = destination / Path(root).relative_to(source)
         target.mkdir(parents=True, exist_ok=True)
         for name in files:
             if name.startswith("._") or name == ".DS_Store" or name.endswith((".pyc", ".pyo")):
+                continue
+            if preserve_registry and name == "games.json" and (target / name).is_file():
                 continue
             copy_file(Path(root) / name, target / name)
 
@@ -237,7 +240,12 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
         raise RuntimeError("ArduinoApps was not found. Install or enable UNO Q App Lab first.")
     if destination.is_symlink() or source.resolve() == destination.resolve():
         raise RuntimeError("Install from a separate checkout; the App Lab destination cannot be the source.")
-    for required in ("app.yaml", "python/main.py", "sketch/sketch.ino", "dashboard/index.html"):
+    required_files = ["app.yaml", "python/main.py", "sketch/sketch.ino", "dashboard/index.html"]
+    if (source / "app.yaml").is_file() and "local:avahi_resolver" in (source / "app.yaml").read_text():
+        required_files.extend(("bricks/local/avahi_resolver/brick_config.yaml",
+                               "bricks/local/avahi_resolver/brick_compose.yaml",
+                               "scripts/avahi-resolver-service.py"))
+    for required in required_files:
         if not (source / required).is_file():
             raise RuntimeError(f"Incomplete checkout: missing {required}")
     status, other_running = app_lab_status()
@@ -257,13 +265,18 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
             staged = Path(directory) / "rob-vision"
             staged.mkdir()
             shutil.copy2(source / "app.yaml", staged / "app.yaml")
-            for name in ("controller", "python", "dashboard", "config", "tools", "sketch", "docs", "output"):
+            for name in ("controller", "python", "dashboard", "config", "tools", "sketch", "docs", "output", "bricks"):
                 if (source / name).exists():
                     shutil.copytree(source / name, staged / name,
                                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store", "._*"))
+            if (source / "scripts/avahi-resolver-service.py").is_file():
+                (staged / "scripts").mkdir(exist_ok=True)
+                shutil.copy2(source / "scripts/avahi-resolver-service.py",
+                             staged / "scripts/avahi-resolver-service.py")
             for name in ("data", ".deps", ".cache"):
                 if (destination / name).is_dir():
-                    shutil.copytree(destination / name, staged / name, symlinks=True)
+                    shutil.copytree(destination / name, staged / name, symlinks=True,
+                                    ignore=shutil.ignore_patterns(".avahi-resolver.sock") if name == "data" else None)
             data = staged / "data"
             data.mkdir(exist_ok=True)
             data.chmod(0o700)
@@ -395,6 +408,8 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
            for name in ("emulationstation", "emulationstatio")):
         raise RuntimeError("Exit EmulationStation before installing; restarting the virtual joystick while it runs can crash its input manager.")
     validate_receiver_source(source)
+    load_registry(destination / "config/games.json" if (destination / "config/games.json").is_file()
+                  else source / "config/games.json")
     for action in ("launch", "end"):
         hook = RUNCOMMAND / f"runcommand-on{action}.sh"
         if hook.exists():
@@ -409,7 +424,7 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
         run("systemctl", "stop", "rob-vision-controller2.service")
     destination.mkdir(parents=True, exist_ok=True)
     for name in ("tools", "controller", "config", "scripts"):
-        copy_tree_merge(source / name, destination / name)
+        copy_tree_merge(source / name, destination / name, preserve_registry=(name == "config"))
     build = destination / "build"
     build.mkdir(exist_ok=True)
     proxy_source = source / "deploy/retropie/rob_vision_fceumm_proxy.c"
@@ -450,7 +465,7 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
     pi_owned(destination)
     # Reuse the existing selective installer: only the two registered games get wrappers.
     from tools.install_retropie_frame_hook import install
-    install(Path("/opt/retropie/configs"))
+    install(Path("/opt/retropie/configs"), registry_path=destination / "config/games.json")
     if player2_index is not None:
         configure_player2(player2_index)
     run("systemctl", "daemon-reload")

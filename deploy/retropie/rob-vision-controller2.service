@@ -15,7 +15,7 @@ ProtectSystem=strict
 ProtectHome=read-only
 RuntimeDirectory=rob-vision
 RuntimeDirectoryMode=0755
-ReadWritePaths=/dev/uinput /run/rob-vision
+ReadWritePaths=/dev/uinput /run/rob-vision /home/pi/rob-vision/config /opt/retropie/configs/all /opt/retropie/configs/nes
 
 [Install]
 WantedBy=multi-user.target

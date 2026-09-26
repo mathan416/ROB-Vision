@@ -19,11 +19,12 @@ This reference lists the 0.1.x code defaults and installed settings. R.O.B. Visi
 | Test signal indicator | Sustained green or alternating rendered frames | The receiver reports a recent signal automatically; the UNO Q blinks R.O.B.'s red light. |
 | Batocera per-game NES choice | R.O.B. Vision FCEUmm or Nestopia for exact registered ROMs | Supported Batocera uses a runtime core overlay and per-ROM settings. An existing supported Nestopia choice is preserved; otherwise the installer selects FCEUmm. Unknown custom choices and unrelated games retain their settings. |
 | Receiver online indicator | Authenticated poll within three seconds | Otherwise Setup and Mission show the relevant console offline. |
-| Game registry | `config/games.json` | Exact case-insensitive ROM basenames for Gyromite and Stack-Up, including configured ZIP, 7z, and NES names. |
+| Game registry | `<console install>/config/games.json` | Exact case-insensitive ROM basenames for Gyromite and Stack-Up. Edit through Setup → Game Registry; console upgrades preserve the file. |
+| Registry editor | Console TCP port 8769; UNO Q `POST /api/games` | The paired UNO Q proxies bounded read/validate/save/restore requests. Saves require a closed game and an unchanged revision. |
 
 ## Release installation
 
-The versioned installer URL and supported hardware are listed in the [installation guide](INSTALLATION_GUIDE.md). The Uno Q uses `uno-q`; both consoles use `console <Uno-Q-hostname>`. The same command upgrades an existing installation. Add `--pair` to the console command after revoking its credential in Setup. Batocera 43.1 x86_64 is the validated Batocera build; other board/version combinations are rejected before installation.
+The versioned installer URL and supported hardware are listed in the [installation guide](INSTALLATION_GUIDE.md). The Uno Q uses `uno-q`; both consoles use `console <Uno-Q-hostname>`. The same command upgrades an existing installation. Add `--pair` to the console command after revoking its credential in Setup. Batocera installation is based on available NES cores and a usable native frame wrapper, rather than a board or version allowlist.
 
 ## Local commands
 

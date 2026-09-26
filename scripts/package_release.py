@@ -32,12 +32,16 @@ def main():
     installer.write_text(template.replace("@VERSION@", args.version).replace("@SHA256@", digest))
     installer.chmod(0o755)
     pdfs = []
-    for guide in sorted((ROOT / "output/pdf").glob("R.O.B.-Vision-*.pdf")):
+    guide_paths = sorted((ROOT / "output/pdf").glob("R.O.B.-Vision-*.pdf"))
+    guide_paths += sorted((ROOT / "output/pdf").glob("Buddy-Big-Wide-Window-Episode-*.pdf"))
+    for guide in guide_paths:
         copy = output / guide.name
         shutil.copy2(guide, copy)
         pdfs.append(copy)
     required_guides = {
-        "R.O.B.-Vision-Buddy-Story-Comic.pdf",
+        "Buddy-Big-Wide-Window-Episode-1.pdf",
+        "Buddy-Big-Wide-Window-Episode-2.pdf",
+        "Buddy-Big-Wide-Window-Episode-3.pdf",
         "R.O.B.-Vision-Engineering-Journey.pdf",
         "R.O.B.-Vision-Game-Manual.pdf",
         "R.O.B.-Vision-Installation-and-Setup.pdf",

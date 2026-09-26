@@ -10,6 +10,10 @@
 .setup-card code{display:inline-block;max-width:100%;overflow-wrap:anywhere;color:#dcf6e8;background:#0b1b2b;padding:2px 5px}
 .setup-card label{display:block;color:#9cbdc9;font:800 10px 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-top:13px}
 .setup-card input{display:block;width:100%;margin-top:5px;padding:12px 10px;border:1px solid #486e80;background:#081b29;color:#f3f8f7;font:600 13px 'DM Sans',sans-serif;min-width:0}
+.registry-card{grid-column:1/-1}
+.registry-card select,.registry-card textarea{display:block;width:100%;margin-top:5px;padding:12px 10px;border:1px solid #486e80;background:#081b29;color:#f3f8f7;min-width:0}
+.registry-card select{font:600 13px 'DM Sans',sans-serif}
+.registry-card textarea{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;tab-size:2;min-height:190px}
 .setup-row{display:flex;gap:8px;align-items:stretch;margin-top:15px;flex-wrap:wrap}
 .setup-row>input{flex:1;margin:0}
 .setup-card button{border:1px solid #de866d;background:#b95b48;color:#fff;min-height:40px;padding:9px 13px;font:800 10px 'DM Sans',sans-serif;letter-spacing:.08em;cursor:pointer}
@@ -18,6 +22,7 @@
 .setup-card button.quiet:hover{background:#25566a}
 .setup-card button:disabled{opacity:.5;cursor:not-allowed}
 .setup-feedback{min-height:32px;margin-bottom:0;color:#96d5d5!important}
+.setup-feedback:empty{display:none}
 .pair-success{background:#16473866;border:1px solid #4b9678;color:#c9f5df!important;padding:14px;margin:12px 0}
 #pair-connected[hidden],#pair-details[hidden],#setup-gates[hidden],#setup-stack[hidden]{display:none}
 .test-caption{font-weight:800!important;color:#78d5d2!important;letter-spacing:.14em;margin:15px 0 0}
@@ -39,6 +44,8 @@
 .console-list-head{display:flex;justify-content:space-between;gap:12px;margin:20px 0 8px;color:#81d7d1;font:800 10px 'DM Sans',sans-serif;letter-spacing:.12em}
 .console-list{display:grid;gap:8px}
 .console-list>p{margin:0;padding:13px;border:1px dashed #486e80;color:#9cbdc9}
+.console-list-note{margin:10px 0 0!important;color:#94b5c2!important}
+.console-list-note strong{color:#d2eceb}
 .console-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid #3c6274;background:#0a2030}
 .console-item.active{border-color:#6ac6bd;background:#103b43}
 .console-identity{min-width:0}
@@ -48,5 +55,6 @@
 .console-state{color:#9fb8c5;font:800 10px 'DM Sans',sans-serif;letter-spacing:.09em}
 .console-state.online{color:#86dfc7}
 .console-item .console-remove{min-height:31px;padding:6px 9px;background:transparent;border-color:#6c7f89;color:#d3e2e7}
+.console-item .console-edit{min-height:31px;padding:6px 9px;background:#173f4d;border-color:#5b9b9d;color:#d9faf4}
 .console-item .console-confirm{min-height:31px;padding:6px 9px;background:#a9433f;border-color:#dd7c70}
 @media(max-width:530px){.console-item{align-items:flex-start;flex-direction:column}.console-meta{justify-content:flex-start}}

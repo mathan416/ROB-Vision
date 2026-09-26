@@ -42,4 +42,27 @@
   document.querySelectorAll('.help-toc a').forEach(link => link.addEventListener('click', () => {
     if (search.value) { search.value = ''; update(); }
   }));
+
+  const connection = document.getElementById('help-connection');
+  const indicator = connection.closest('.top-status');
+  let checking = false;
+  let preview = location.protocol === 'file:';
+  const updateConnection = async () => {
+    if (checking) return;
+    checking = true;
+    try {
+      const response = await fetch('/api/state', { cache: 'no-store' });
+      if (response.status === 404) preview = true;
+      if (!response.ok) throw new Error('Controller unavailable');
+      connection.textContent = window.RobStatus.connection(await response.json());
+      indicator.dataset.connection = 'connected';
+    } catch {
+      connection.textContent = preview ? window.RobStatus.preview : window.RobStatus.offline;
+      indicator.dataset.connection = preview ? 'preview' : 'offline';
+    } finally {
+      checking = false;
+    }
+  };
+  updateConnection();
+  setInterval(updateConnection, 2000);
 })();

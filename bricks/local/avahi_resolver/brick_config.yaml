@@ -1,0 +1,3 @@
+id: local:avahi_resolver
+name: Avahi resolver
+description: Resolve console .local names through the UNO Q host without a public port.

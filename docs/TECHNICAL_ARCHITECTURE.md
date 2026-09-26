@@ -101,26 +101,28 @@ The console receiver creates a Linux `/dev/uinput` pad named `R.O.B. Vision Cont
 | Frame-link freshness / receiver-online freshness | 1 s / 3 s | `controller/service.py` |
 | Recent event history / retry keys | 30 events / 128 keys | `controller/service.py` |
 | Gyro spin / manual gate maximum | 55 / 60 s | `controller/model.py` |
-| Game registry | `config/games.json` | Console and UNO Q |
+| Game registry | Installed `config/games.json` on each console | Console receiver; UNO Q trusts its authenticated game assertion |
+| Console registry editor | HTTP port 8769 | Paired console, proxied through UNO Q Setup |
 | Frame socket | `/run/rob-vision/frames.sock` | Console receiver |
 
 RetroPie installs a virtual-pad RetroArch profile, detects the current joystick index, and configures NES Player 2 as a gamepad. Batocera detects joystick order through SDL2, which may differ from Linux `/dev/input/jsN`. It writes persistent Player 1 index overrides for registered games and **Gyromite-only** Player 2 overrides before Batocera generates RetroArch's runtime config. Its receiver swaps Linux buttons to match the Batocera profile. The physical controller remains Player 1; Buddy's pad is Player 2. Nestopia interprets device `1` as Auto, so its wrapper selects explicit gamepad device `257` after ROM load. The tested FCEUmm and Nestopia paths returned Gyromite's blue gate after release; the [release validation](RELEASE_VALIDATION_0.1.0.md) records observed results.
 
 ## Pairing, API, and trust boundary
 
-App Lab starts a port-80 gateway that forwards to `controller/service.py` on port 8766. The UNO Q's existing hostname and mDNS service provide its `.local` address; R.O.B. Vision does not advertise a separate name. A reachable LAN IP works too. Wi-Fi and Ethernet carry the same HTTP protocol. Keep ports 80 and 8766 on a trusted LAN.
+App Lab starts a port-80 gateway that forwards to `controller/service.py` on port 8766. The UNO Q's existing hostname and mDNS service provide its `.local` address; R.O.B. Vision does not advertise a separate name. A reachable LAN IP works too. Wi-Fi and Ethernet carry the same HTTP protocol. Keep ports 80 and 8766 on a trusted LAN. For console pairing and registry requests, an App Lab resolver sidecar forwards bounded `.local` lookups to the UNO Q host's Avahi socket. The controller checks that the resolved address is private before connecting. This is needed because the App Lab container does not inherit the host's mDNS name resolution.
 
 | Endpoint | Effect | Access |
 | --- | --- | --- |
 | `GET /api/state` | Browser snapshot; receiver poll carries frame/Test headers | LAN read; credential verified when supplied |
 | `GET /api/matrix/state` | Matrix bridge status | LAN read |
-| `POST /api/launch` | Console start/end | Paired console credential |
+| `POST /api/launch` | Console start/end and registered game assertion | Paired console credential |
+| `POST /api/games` | Read, validate, save, or restore one console registry | Trusted-LAN browser; UNO Q proxies with that console’s private credential |
 | `POST /api/emulator/command` | One ROM-derived word | Paired credential and active-source checks |
 | `POST /api/game`, `/api/command`, `/api/gate-assist` | Manual browser controls | Trusted-LAN browser, JSON and same-origin checks |
 | `POST /api/pair`, `/api/consoles/remove` | Pair or revoke console | Trusted-LAN browser; pairing also checks code and certificate fingerprint |
 | `POST /api/matrix/pairing` | Show or clear pairing cue | Trusted-LAN browser |
 
-On first install, a temporary TLS pairing server on console port 8768 prints a six-digit code and SHA-256 certificate fingerprint. Its window is five minutes, with a limit on wrong attempts. Setup sends a newly generated console ID and bearer credential only after checking the fingerprint and private-network destination. The console stores them with owner-only permissions; the UNO Q stores a separate revocable record per console. An upgrade retains that credential. Removing a console revokes the UNO Q record; `--pair` establishes a fresh one. After pairing, console traffic uses authenticated LAN HTTP. Browser controls intentionally have no token on the trusted LAN. JSON, Fetch Metadata, and Origin checks reduce cross-site writes but do not replace network isolation.
+On first install, a temporary TLS pairing server on console port 8768 prints a six-digit code and SHA-256 certificate fingerprint. Its window is five minutes, with a limit on wrong attempts. Setup sends a newly generated console ID and bearer credential only after checking the fingerprint and private-network destination. The console stores them with owner-only permissions; the UNO Q stores a separate revocable record per console. An upgrade retains that credential. Removing a console revokes the UNO Q record; `--pair` establishes a fresh one. After pairing, console traffic uses authenticated LAN HTTP. Each receiver also serves a bounded registry editor on port 8769; the UNO Q proxies Setup requests using the selected console’s credential. The receiver reports its LAN address for the route to the UNO Q in authenticated check-ins. The proxy tries this recent private address, then the saved hostname. This lets registry editing follow a DHCP address change even when App Lab's container sees its Docker gateway as the TCP peer. Saves are revision-checked, backed up, and rejected during a running game. The receiver reloads the saved registry and the console’s per-ROM emulator choices are refreshed. Browser controls intentionally have no token on the trusted LAN. JSON, Fetch Metadata, and Origin checks reduce cross-site writes but do not replace network isolation.
 
 ## Matrix and browser
 
@@ -134,7 +136,7 @@ The versioned release installer downloads a source package, checks its embedded 
 
 RetroPie installs launch/end hooks, a systemd receiver, a virtual-pad RetroArch profile, and FCEUmm/Nestopia wrapper launch choices. Its installer builds wrappers against installed cores and detects the Player 2 joystick after first pairing. It retains an existing per-ROM supported core choice rather than forcing every host to FCEUmm. EmulationStation must be closed while the virtual input service is replaced.
 
-Batocera 43.1 x86_64 uses packaged wrappers, a separate `ROBVision` service and game hook, runtime core overlay, and persistent per-ROM overrides. The installer preserves an existing supported Nestopia choice; otherwise it selects the FCEUmm wrapper for registered ROMs. Other board/version combinations are rejected before writes. It suspends and resumes EmulationStation around receiver restart. When VirtualGlove is installed and enabled, `ROBVision` waits for its core overlay before adding its own wrappers; it does not stop or disable VirtualGlove. The [installation guide](INSTALLATION_GUIDE.md) has the supported command and prerequisites; the [configuration reference](CONFIGURATION_REFERENCE.md) lists tunable defaults.
+Batocera selects a packaged wrapper for x86_64, 32-bit x86, AArch64, ARMv7, ARMv6, or RISC-V 64, or compiles one locally for an unmatched ABI when a C compiler is available. It then installs a separate `ROBVision` service and game hook, runtime core overlay, and persistent per-ROM overrides. The installer preserves an existing supported Nestopia choice; otherwise it selects an available FCEUmm or Nestopia wrapper for registered ROMs. The installer checks for the required NES core, libretro info, and loadable native wrapper before writes. It suspends and resumes EmulationStation around receiver restart. When VirtualGlove is installed and enabled, `ROBVision` waits for its core overlay before adding its own wrappers; it does not stop or disable VirtualGlove. The [installation guide](INSTALLATION_GUIDE.md) has the supported command and prerequisites; the [configuration reference](CONFIGURATION_REFERENCE.md) lists tunable defaults.
 
 ## Recovery and verification boundary
 

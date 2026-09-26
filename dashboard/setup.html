@@ -5,10 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080f1d">
   <title>R.O.B. Vision // Setup</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css?v=setup-3">
-  <link rel="stylesheet" href="setup.css?v=consoles-1">
-  <script src="status.js?v=test-auto-1" defer></script>
-  <script src="setup.js?v=test-auto-1" defer></script>
+  <link rel="stylesheet" href="setup.css?v=consoles-3">
+  <script src="header-clock.js?v=1" defer></script>
+  <script src="status.js?v=receiver-2" defer></script>
+  <script src="games-registry.js?v=2" defer></script>
+  <script src="setup.js?v=consoles-6" defer></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -16,7 +19,7 @@
     <header class="topbar">
       <div class="brand"><span class="brand-mark">R<span>·</span>O<span>·</span>B</span><span class="brand-sub">SETUP <i>///</i> MK·01</span></div>
       <nav class="page-nav" aria-label="Pages"><a href="index.html">MISSION</a><a href="setup.html" aria-current="page">SETUP</a><a href="help.html">HELP</a></nav>
-      <div class="top-status" data-connection="connecting"><span class="status-dot"></span><span id="setup-connection">CONTROLLER / CONNECTING</span></div>
+      <div class="top-status" data-connection="connecting"><span class="status-dot"></span><span id="setup-connection">CONTROLLER / CONNECTING</span><span class="top-separator"></span><span id="clock">00:00:00</span></div>
     </header>
     <div class="setup-hero"><p class="eyebrow">READY THE MISSION / 00</p><h1>Connect. Link. Test.</h1><p>Pair your game console, check the game-frame link, and try each game control before playing.</p></div>
     <div class="setup-grid">
@@ -26,17 +29,18 @@
         <div class="console-list-head"><span>PAIRED CONSOLES</span><span id="console-count">0 SAVED</span></div>
         <div id="console-list" class="console-list" aria-live="polite"><p>No consoles paired yet.</p></div>
         <div id="pair-connected" hidden>
-          <p class="pair-success">Your console receiver is online. You can continue to the game-frame check.</p>
+          <p class="pair-success">Console receiver is linked. Continue to the game-frame check.</p>
+          <p class="console-list-note">Each console links to one UNO Q at a time. Choose <strong>Edit ROMs</strong> to change its game filenames.</p>
           <div class="setup-row"><button id="pair-change" type="button" class="quiet">PAIR ANOTHER CONSOLE</button><button id="pair-refresh" type="button" class="quiet">CHECK LINK</button></div>
         </div>
         <div id="pair-details" hidden>
-          <p>Run the pairing command on your console: RetroPie <code>python3 /home/pi/rob-vision/tools/retropie_pair.py</code>, or Batocera <code>python3 /userdata/system/rob-vision/tools/retropie_pair.py --platform batocera</code>. Compare its six-digit code and SHA-256 fingerprint here.</p>
+          <p>Run the pairing command on your console: RetroPie <code>python3 /home/pi/rob-vision/tools/retropie_pair.py</code>, or Batocera <code>python3 /userdata/system/rob-vision/tools/retropie_pair.py</code>. The helper detects the platform. Compare its six-digit code and SHA-256 fingerprint here.</p>
           <label>Console address<input id="pair-host" autocomplete="off" placeholder="retropie.local or batocera.local"></label>
           <label>Six-digit code<input id="pair-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000"></label>
           <label>SHA-256 fingerprint<input id="pair-fingerprint" autocomplete="off" spellcheck="false" placeholder="64 hex characters from the console"></label>
           <div class="setup-row"><button id="pair-button" type="button">PAIR CONSOLE</button><button id="pair-refresh-offline" type="button" class="quiet">CHECK LINK</button><button id="pair-cancel" type="button" class="quiet" hidden>BACK TO STATUS</button></div>
         </div>
-        <p class="setup-feedback" id="pair-feedback" role="status">Install the receiver on your console before pairing.</p><a class="setup-help-link" href="help.html#pairing">NEED HELP PAIRING? ↗</a>
+        <p class="setup-feedback" id="pair-feedback" role="status">Install the receiver on your console before pairing.</p><a class="setup-help-link" href="help.html#pairing">NEED HELP PAIRING? ↗</a> <a class="setup-help-link" href="#registry-heading">EDIT GAME REGISTRY ↗</a>
       </section>
       <section class="setup-card" aria-labelledby="frames-heading">
         <div class="section-head"><span>02 / GAME FRAMES</span><span id="frame-state">GAME FRAMES WAITING</span></div>
@@ -60,6 +64,15 @@
         <div id="setup-gates" hidden><p class="test-caption">GYROMITE / FAST GATES</p><div class="setup-row"><button data-setup-gate="red" type="button">LOWER RED</button><button data-setup-gate="blue" type="button">LOWER BLUE</button><button data-setup-gate="all" type="button" class="quiet">RELEASE BOTH</button></div></div>
         <div id="setup-stack" hidden><p class="test-caption">STACK-UP / R.O.B. COMMANDS</p><div class="setup-command-grid"><button data-setup-command="LEFT" type="button">LEFT</button><button data-setup-command="RIGHT" type="button">RIGHT</button><button data-setup-command="UP" type="button">UP</button><button data-setup-command="DOWN" type="button">DOWN</button><button data-setup-command="OPEN" type="button">OPEN</button><button data-setup-command="CLOSE" type="button">CLOSE</button></div></div>
         <p class="setup-feedback" id="buttons-feedback" role="status">Manual tests are available after selecting Gyromite or Stack-Up.</p><a class="setup-help-link" href="help.html#controls">CONTROL GUIDE ↗</a>
+      </section>
+      <section class="setup-card registry-card" aria-labelledby="registry-heading">
+        <div class="section-head"><span>05 / GAME REGISTRY</span><span>CONSOLE FILE</span></div>
+        <h2 id="registry-heading">Recognize your ROMs</h2>
+        <p>Choose a paired console and map each exact NES filename to <code>gyromite</code> or <code>stack_up</code>. Saving updates that console's installed registry and emulator choices for the next launch. Exit the game before saving.</p>
+        <label for="registry-console">Paired console</label><select id="registry-console"><option value="">Choose a console</option></select>
+        <label for="registry-json">Game mappings JSON</label><textarea id="registry-json" rows="12" spellcheck="false" aria-describedby="registry-feedback" placeholder="Select a paired console to load its registry"></textarea>
+        <div class="setup-row"><button id="registry-validate" type="button" class="quiet">VALIDATE</button><button id="registry-format" type="button" class="quiet">FORMAT</button><button id="registry-save" type="button">SAVE TO CONSOLE</button><button id="registry-reload" type="button" class="quiet">RELOAD</button><button id="registry-restore" type="button" class="quiet">RESTORE PREVIOUS</button><button id="registry-download" type="button" class="quiet">DOWNLOAD BACKUP</button></div>
+        <p class="setup-feedback" id="registry-feedback" role="status">Pair a console to edit its game mappings.</p><a class="setup-help-link" href="help.html#game-registry">GAME REGISTRY HELP ↗</a>
       </section>
     </div>
     <footer><span>R.O.B. VISION <b>·</b> SETUP</span><span>PAIR / GAME FRAMES / SIGNAL / CONTROLS</span></footer>

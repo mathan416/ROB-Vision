@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import secrets
 import ssl
 import subprocess
@@ -13,6 +14,7 @@ import tempfile
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+from urllib.parse import urlsplit
 
 
 def activate_receiver(platform):
@@ -33,18 +35,11 @@ def activate_receiver(platform):
 def install_token(token, destination):
     if not isinstance(token, str) or not 16 <= len(token) <= 256 or any(c.isspace() for c in token):
         raise ValueError("Invalid controller token.")
-    destination.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-    temporary = destination.with_name(destination.name + ".pairing-" + secrets.token_hex(6))
-    try:
-        fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        with os.fdopen(fd, "w") as file:
-            file.write(token + "\n")
-        os.replace(temporary, destination)
-    finally:
-        try:
-            temporary.unlink()
-        except FileNotFoundError:
-            pass
+    owner = destination.stat() if destination.exists() else None
+    restore_file(destination, (token + "\n").encode("utf-8"), owner)
+    if owner is None and os.geteuid() == 0:
+        parent = destination.parent.stat()
+        os.chown(destination, parent.st_uid, parent.st_gid)
 
 
 def install_console_id(console_id, destination):
@@ -54,16 +49,105 @@ def install_console_id(console_id, destination):
     install_token(console_id, destination)
 
 
+def controller_target(platform, token_file, url):
+    """Prepare the installed receiver address supplied by the paired UNO Q."""
+    if url is None:  # Compatibility with UNO Q controllers installed before this update.
+        return None, None
+    if not isinstance(url, str) or not re.fullmatch(r"http://[A-Za-z0-9][A-Za-z0-9.:-]{0,258}", url):
+        raise ValueError("Invalid UNO Q receiver address.")
+    parsed = urlsplit(url)
+    try:
+        port = parsed.port
+    except ValueError as exc:
+        raise ValueError("Invalid UNO Q receiver port.") from exc
+    if (not parsed.hostname or parsed.hostname.lower() == "localhost" or
+            port is not None and not 1 <= port <= 65535):
+        raise ValueError("Invalid UNO Q receiver address.")
+    path = token_file.with_name("controller.url" if platform == "batocera" else "receiver.env")
+    original = path.read_text(encoding="utf-8")
+    if platform == "batocera":
+        return path, url + "\n"
+    updated, count = re.subn(r"(?m)^ROB_VISION_URL=[^\n]*$", "ROB_VISION_URL=" + url,
+                             original)
+    if count != 1:
+        raise ValueError("RetroPie receiver configuration is missing its UNO Q address.")
+    return path, updated
+
+
+def restore_file(path, content, stat=None):
+    """Atomically write or restore a pairing file without leaving partial data."""
+    if content is None:
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            pass
+        return
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + ".pairing-" + secrets.token_hex(6))
+    try:
+        fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, "wb") as file:
+            if stat is not None:
+                os.fchmod(file.fileno(), stat.st_mode & 0o777)
+                if os.geteuid() == 0:
+                    os.fchown(file.fileno(), stat.st_uid, stat.st_gid)
+            file.write(content)
+            file.flush()
+            os.fsync(file.fileno())
+        os.replace(temporary, path)
+    finally:
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def apply_pairing(platform, token_file, console_id, token, controller_url):
+    """Change credentials and destination together, restoring the old link on failure."""
+    target, new_target = controller_target(platform, token_file, controller_url)
+    identifier = token_file.with_name("console-id")
+    paths = [identifier, token_file] + ([target] if target else [])
+    previous = [(path, path.read_bytes() if path.exists() else None,
+                 path.stat() if path.exists() else None) for path in paths]
+    try:
+        install_console_id(console_id, identifier)
+        install_token(token, token_file)
+        if target:
+            restore_file(target, new_target.encode("utf-8"), previous[-1][2])
+        activate_receiver(platform)
+    except Exception:
+        for path, content, stat in previous:
+            restore_file(path, content, stat)
+        try:
+            activate_receiver(platform)
+        except (OSError, subprocess.SubprocessError):
+            pass
+        raise
+
+
+def detect_platform():
+    """Select the console's service manager when the helper is run directly."""
+    if Path("/userdata/system/batocera.conf").is_file() and Path("/usr/lib/libretro").is_dir():
+        return "batocera"
+    if Path("/opt/retropie/configs").is_dir():
+        return "retropie"
+    raise ValueError("This console is neither a RetroPie nor Batocera installation.")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Pair this console with R.O.B. Vision.")
     parser.add_argument("--port", type=int, default=8768)
-    parser.add_argument("--platform", choices=("retropie", "batocera"), default="retropie")
+    parser.add_argument("--platform", choices=("retropie", "batocera"),
+                        help="Console platform; detected automatically when omitted")
     parser.add_argument("--token-file", type=Path)
     args = parser.parse_args()
+    detected = detect_platform()
+    if args.platform and args.platform != detected:
+        parser.error(f"This is {detected}, not {args.platform}.")
+    args.platform = detected
     if args.token_file is None:
         args.token_file = (Path("/userdata/system/rob-vision/token") if args.platform == "batocera"
                            else Path.home() / ".config/rob-vision/token")
-    console_id_file = args.token_file.with_name("console-id")
     code = f"{secrets.randbelow(1_000_000):06d}"
     expires = time.monotonic() + 300
     with tempfile.TemporaryDirectory(prefix="rob-vision-pair-") as directory:
@@ -93,9 +177,8 @@ def main():
                     if (not isinstance(offered_token, str) or not 16 <= len(offered_token) <= 256 or
                             any(char.isspace() for char in offered_token)):
                         raise ValueError("Invalid controller token.")
-                    install_console_id(console_id, console_id_file)
-                    install_token(offered_token, args.token_file)
-                    activate_receiver(args.platform)
+                    apply_pairing(args.platform, args.token_file, console_id,
+                                  offered_token, data.get("controller_url"))
                     self.reply(200, {"paired": True, "platform": args.platform,
                                      "console_id": console_id})
                     self.server.paired = True

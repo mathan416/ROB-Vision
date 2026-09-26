@@ -1,6 +1,7 @@
 """Persistent, independently revocable game-console credentials."""
 
 import json
+import ipaddress
 import os
 import secrets
 import tempfile
@@ -18,6 +19,7 @@ class PairingStore:
         self.lock = threading.RLock()
         self.records = {}
         self.last_seen = {}
+        self.last_address = {}
         self.legacy_seen = set()
         self.blocked_legacy = set()
         if self.path.exists():
@@ -59,6 +61,7 @@ class PairingStore:
                 if record["host"].casefold() == host.casefold():
                     del self.records[old_id]
                     self.last_seen.pop(old_id, None)
+                    self.last_address.pop(old_id, None)
             self.records[console_id] = {"id": console_id, "token": token,
                                         "platform": platform, "host": host}
             self.blocked_legacy.add(platform)
@@ -83,9 +86,15 @@ class PairingStore:
                 return {"id": "legacy:" + platform, "platform": platform, "host": ""}
         return None
 
-    def seen(self, console_id):
+    def seen(self, console_id, address=None):
         with self.lock:
             self.last_seen[console_id] = monotonic()
+            try:
+                ip = ipaddress.IPv4Address(address)
+            except (ipaddress.AddressValueError, TypeError):
+                return
+            if ip.is_private and not (ip.is_loopback or ip.is_link_local):
+                self.last_address[console_id] = str(ip)
 
     def list_public(self, active_id=None):
         with self.lock:
@@ -115,4 +124,5 @@ class PairingStore:
             else:
                 raise ValueError("Console pairing was not found.")
             self.last_seen.pop(console_id, None)
+            self.last_address.pop(console_id, None)
             self._save()
