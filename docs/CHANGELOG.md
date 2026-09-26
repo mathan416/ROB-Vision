@@ -1,5 +1,11 @@
 # R.O.B. Vision changelog
 
+## 0.1.6 complete guide set
+
+- Added illustrated Installation & Setup, Game Manual, Technical Test Results, Engineering Journey, and Buddy Story Comic PDFs.
+- Updated the Game Manual and User Guide with both Gyromite and Stack-Up game tables; revised built-in Help to point to the matching play guide and all nine PDFs.
+- Updated the release package check to require the complete nine-guide set.
+
 ## 0.1.5 consolidated manuals
 
 - Merged network architecture into the technical reference and the device list into the UNO Q setup guide.

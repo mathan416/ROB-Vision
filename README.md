@@ -10,18 +10,18 @@ Start **R.O.B. Vision** from UNO Q App Lab **My Apps**, then open `http://<your-
 
 The [Setup page](dashboard/setup.html) pairs either console, shows receiver and game-frame status, acknowledges Test mode from the frame link, and offers Gyromite and Stack-Up manual checks. [Mission](dashboard/index.html) keeps R.O.B. and the Game Table as the main view. The [Help center](dashboard/help.html) covers play, controls, indicators, and troubleshooting.
 
-## Install version 0.1.5
+## Install version 0.1.6
 
 The public release provides one command for the UNO Q and the same console command for RetroPie or Batocera. Run the UNO Q command as `arduino`:
 
 ```sh
-curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.5/install.sh | sh -s -- uno-q
+curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.6/install.sh | sh -s -- uno-q
 ```
 
 Run the console command on RetroPie as `pi`, or on Batocera as `root`, replacing the UNO Q hostname:
 
 ```sh
-curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.5/install.sh | sh -s -- console your-uno-q.local
+curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.6/install.sh | sh -s -- console your-uno-q.local
 ```
 
 The console command installs the receiver, starts a first-time pairing window, and prints a code and fingerprint. Enter them on the UNO Q [Setup page](dashboard/setup.html). Pairing starts the receiver and configures Gyromite's virtual Controller 2; no further console command is needed. Upgrades preserve existing pairing. See the [installation guide](docs/INSTALLATION_GUIDE.md) for requirements, supported Batocera hardware, repair, and verification.
@@ -44,6 +44,6 @@ For local development, run `python3 -m controller.service` and open `http://127.
 
 ## Guides
 
-Start with the [installation guide](docs/INSTALLATION_GUIDE.md), [user guide](docs/USER_GUIDE.md), [technical architecture](docs/TECHNICAL_ARCHITECTURE.md), and [release notes](docs/RELEASE_NOTES_0.1.5.md). Printable editions are under [output/pdf](output/pdf).
+Start with [Installation & Setup](docs/INSTALLATION_AND_SETUP.md), the [Game Manual](docs/GAME_MANUAL.md), and the [User Guide](docs/USER_GUIDE.md). The [Buddy Story Comic](docs/BUDDY_COMIC.md), [Technical Reference](docs/TECHNICAL_ARCHITECTURE.md), [Technical Test Results](docs/TEST_RESULTS_TECHNICAL.md), [Engineering Journey](docs/ENGINEERING_JOURNEY.md), and [release notes](docs/RELEASE_NOTES_0.1.6.md) provide more detail. Printable editions are under [output/pdf](output/pdf).
 
 Historical Nintendo manuals and the Robert project informed behavior, but their text or code is not reused here. Nintendo's characters, game artwork, and marks remain with their owners. R.O.B. Vision is not affiliated with or endorsed by Nintendo.

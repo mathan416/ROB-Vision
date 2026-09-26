@@ -4,7 +4,7 @@ The UNO Q controls Buddy, the virtual robot shown in Mission. RetroPie or Batoce
 
 ## Open R.O.B. Vision
 
-Install version 0.1.5 with the two commands in the [installation guide](INSTALLATION_GUIDE.md): one on the UNO Q, one on the console. The console command prints first-time pairing details for Setup and configures its receiver automatically.
+Install version 0.1.6 with the two commands in the [installation guide](INSTALLATION_GUIDE.md): one on the UNO Q, one on the console. The console command prints first-time pairing details for Setup and configures its receiver automatically.
 
 Start **R.O.B. Vision** in UNO Q App Lab, then open one of the Mission URLs printed by the installer on a laptop, phone, or tablet. The installer prints both the UNO Q's `.local` hostname and its LAN IP address. Stop another App Lab app first if one is running. A `file://` page is an offline preview.
 

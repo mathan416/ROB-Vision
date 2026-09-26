@@ -36,8 +36,22 @@ def main():
         copy = output / guide.name
         shutil.copy2(guide, copy)
         pdfs.append(copy)
-    if len(pdfs) != 4:
-        parser.error("Build all four PDF guides before packaging the release")
+    required_guides = {
+        "R.O.B.-Vision-Buddy-Story-Comic.pdf",
+        "R.O.B.-Vision-Engineering-Journey.pdf",
+        "R.O.B.-Vision-Game-Manual.pdf",
+        "R.O.B.-Vision-Installation-and-Setup.pdf",
+        "R.O.B.-Vision-Matrix-Display-Guide.pdf",
+        "R.O.B.-Vision-Quick-Reference.pdf",
+        "R.O.B.-Vision-Technical-Reference.pdf",
+        "R.O.B.-Vision-Technical-Test-Results.pdf",
+        "R.O.B.-Vision-User-Guide.pdf",
+    }
+    actual_guides = {path.name for path in pdfs}
+    if actual_guides != required_guides:
+        missing = sorted(required_guides - actual_guides)
+        unexpected = sorted(actual_guides - required_guides)
+        parser.error(f"PDF guide set mismatch: missing={missing}, unexpected={unexpected}")
     checksums = output / "SHA256SUMS"
     checksums.write_text("".join(
         f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}\n"

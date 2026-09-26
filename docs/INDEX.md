@@ -1,12 +1,12 @@
 # R.O.B. Vision documentation
 
-[Version 0.1.5 release notes](RELEASE_NOTES_0.1.5.md) describe the documentation update and supported devices. The [0.1.4 notes](RELEASE_NOTES_0.1.4.md), [0.1.3 notes](RELEASE_NOTES_0.1.3.md), [0.1.2 notes](RELEASE_NOTES_0.1.2.md), [0.1.1 notes](RELEASE_NOTES_0.1.1.md), [0.1.0 notes](RELEASE_NOTES_0.1.0.md), and [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remain available.
+[Version 0.1.6 release notes](RELEASE_NOTES_0.1.6.md) describe the documentation update and supported devices. The [0.1.5 notes](RELEASE_NOTES_0.1.5.md), [0.1.4 notes](RELEASE_NOTES_0.1.4.md), [0.1.3 notes](RELEASE_NOTES_0.1.3.md), [0.1.2 notes](RELEASE_NOTES_0.1.2.md), [0.1.1 notes](RELEASE_NOTES_0.1.1.md), [0.1.0 notes](RELEASE_NOTES_0.1.0.md), and [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remain available.
 
 **Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on RetroPie or Batocera; its rendered NES frames carry complete R.O.B. commands to the UNO Q. A browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. Both games' six commands were decoded during live Direct play, and Gyromite's gate controls were tested in Game A.
 
-Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [Technical Reference](../output/pdf/R.O.B.-Vision-Technical-Reference.pdf), [Matrix Display Guide](../output/pdf/R.O.B.-Vision-Matrix-Display-Guide.pdf), and [Quick Reference](../output/pdf/R.O.B.-Vision-Quick-Reference.pdf).
+Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [Installation & Setup](../output/pdf/R.O.B.-Vision-Installation-and-Setup.pdf), [Game Manual](../output/pdf/R.O.B.-Vision-Game-Manual.pdf), [Buddy Story Comic](../output/pdf/R.O.B.-Vision-Buddy-Story-Comic.pdf), [Technical Reference](../output/pdf/R.O.B.-Vision-Technical-Reference.pdf), [Technical Test Results](../output/pdf/R.O.B.-Vision-Technical-Test-Results.pdf), [Engineering Journey](../output/pdf/R.O.B.-Vision-Engineering-Journey.pdf), [Matrix Display Guide](../output/pdf/R.O.B.-Vision-Matrix-Display-Guide.pdf), and [Quick Reference](../output/pdf/R.O.B.-Vision-Quick-Reference.pdf).
 
-The Technical Reference contains current architecture, configuration, frame protocol, and verification material. Historical manual research and earlier camera experiments remain in the editable research section below.
+The Technical Reference is generated from one cohesive [technical source](TECHNICAL_ARCHITECTURE.md). It covers current architecture, ROM-derived frame protocol, game identity, virtual model, Controller 2 return path, pairing, platform installation, recovery, and verified limits. Dated test reports and earlier camera research remain as separate evidence below.
 
 ## Start here
 
@@ -15,14 +15,19 @@ The Technical Reference contains current architecture, configuration, frame prot
 | Everyone | [Built-in Help center](../dashboard/help.html) | Searchable setup, play, controls, indicators, and troubleshooting inside the dashboard. |
 | Everyone | [Project README](../README.md) | Scope, preview, and document links. |
 | Everyone | [Meet Buddy](MEET_BUDDY.md) | Illustrated story chapter used in the printable User Guide. |
+| Everyone | [Buddy and the way out](BUDDY_COMIC.md) | Full-page four-scene comic, also included in the User Guide. |
 | Everyone | [Virtual system contract](VIRTUAL_SYSTEM.md) | UNO Q, browser, virtual pieces, and game-link responsibilities. |
 | Player | [User guide](USER_GUIDE.md) | Live controls, preview, and current limitations. |
 | Player and installer | [Setup guide](SETUP_GUIDE.md) | Pairing, frame-link status, Test mode, and manual checks. |
 | Player and installer | [UNO Q matrix display guide](UNO_Q_MATRIX_DISPLAY.md) | What Buddy's hourglass, eyes, game marks, Test light, and pairing cue mean. |
 | Player | [Gameplay guide](GAMEPLAY_GUIDE.md) | Gyromite, Stack-Up, holders, spin, and virtual button rules. |
+| Player | [Game manual](GAME_MANUAL.md) | Printable game rules, live controls, and recovery for both games. |
 | Player | [Quick reference](QUICK_REFERENCE.md) | Controls and indicators at a glance. |
 | Installer | [Installation guide](INSTALLATION_GUIDE.md) | One command per device, browser pairing, upgrades, and supported hardware. |
-| Developer | [Technical architecture](TECHNICAL_ARCHITECTURE.md) | State, commands, return path, and failure behavior. |
+| Installer | [Installation & Setup](INSTALLATION_AND_SETUP.md) | Standalone printable path from prerequisites to first game check. |
+| Developer | [Technical reference source](TECHNICAL_ARCHITECTURE.md) | Complete current implementation and evidence boundaries. |
+| Developer and tester | [Technical test results](TEST_RESULTS_TECHNICAL.md) | Consolidated optical, Kiyo Pro row, FCEUmm, Nestopia, and gate-return measurements. |
+| Everyone | [Engineering journey](ENGINEERING_JOURNEY.md) | How camera testing led to the verified libretro frame link. |
 | Developer | [Configuration reference](CONFIGURATION_REFERENCE.md) | Code defaults, deployed settings, and calibration. |
 | Tester | [Verification plan](VERIFICATION_PLAN.md) | Evidence before claiming a connected game works. |
 | Everyone | [Troubleshooting](TROUBLESHOOTING.md) | Live and preview diagnostics. |

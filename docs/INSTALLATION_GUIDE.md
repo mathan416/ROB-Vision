@@ -1,4 +1,4 @@
-# R.O.B. Vision installation guide — 0.1.5
+# R.O.B. Vision installation guide — 0.1.6
 
 R.O.B. Vision runs on an Arduino UNO Q and connects to either RetroPie or Batocera. Install the UNO Q first, then install each console. The release installer downloads and verifies the app before installing it.
 
@@ -14,7 +14,7 @@ R.O.B. Vision runs on an Arduino UNO Q and connects to either RetroPie or Batoce
 Run this one command in the UNO Q terminal as `arduino`:
 
 ```sh
-curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.5/install.sh | sh -s -- uno-q
+curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.6/install.sh | sh -s -- uno-q
 ```
 
 The command downloads and verifies R.O.B. Vision, installs the App Lab app, and starts it. On upgrades, App Lab stops and restarts the app while preserving its pairing data. App Lab also compiles and uploads the UNO Q matrix sketch. At the end, the installer prints Mission and Setup links using the device's `.local` name and available LAN IPv4 addresses. Open either form in a browser on the same network.
@@ -24,7 +24,7 @@ The command downloads and verifies R.O.B. Vision, installs the App Lab app, and 
 Run this one command **on RetroPie or Batocera**, replacing `your-uno-q.local` with your UNO Q's LAN hostname or IP address:
 
 ```sh
-curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.5/install.sh | \
+curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.6/install.sh | \
   sh -s -- console your-uno-q.local
 ```
 
@@ -46,6 +46,6 @@ If a game is already running during installation, the console installer stops be
 
 ## Supported releases and integrity
 
-Version 0.1.5 supports UNO Q App Lab, standard RetroPie with the `pi` account, and Batocera 43.1 x86_64. Other Batocera boards are detected and reported as unsupported. Release assets include the source package, installer, PDFs, and `SHA256SUMS`. The installer checks the source package's digest before installing it.
+Version 0.1.6 supports UNO Q App Lab, standard RetroPie with the `pi` account, and Batocera 43.1 x86_64. Other Batocera boards are detected and reported as unsupported. Release assets include the source package, installer, PDFs, and `SHA256SUMS`. The installer checks the source package's digest before installing it.
 
 For advanced repair, see the [RetroPie](../deploy/retropie/README.md) and [Batocera](../deploy/batocera/README.md) guides.

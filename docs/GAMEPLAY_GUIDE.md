@@ -20,6 +20,10 @@ The manual explicitly says a gyro **does not need to spin to operate only one ga
 
 The [Stack-Up booklet](https://www.digitpress.com/library/manuals/nes/Stack-up.pdf) describes Direct, Memory, and Bingo. Buddy's Game Table has five trays and five colored blocks. Direct and Memory start with all five on Tray 3, top to bottom **red, white, blue, yellow, green**. In Direct mode, move Professor Hector onto the **left, right, up, down, open,** or **close** command keys. Memory plays a programmed command series; Bingo sends a command when one row or column completes. Buddy can carry a block with all the blocks above it.
 
+![Stack-Up Game Table with five trays and the starting stack on Tray 3](images/stack-up-game-table.png)
+
+*Illustration of the initial Stack-Up Game Table, using the dashboard's tray layout and block order.*
+
 **Try the demo:** with no game running, select Stack-Up and **Run Demo Sequence**. Buddy moves red alone, then carries blue and white together. All five blocks remain visible in the Live Model, Accessory Bay, and Game Table. The **Stack-Up Commands** buttons apply one virtual action at a time. **Home** restores the starting stack. If a move is blocked, the pieces stay in place and the Activity Feed explains why.
 
 **Current limits:** Buddy starts with the Direct/Memory stack in every Stack-Up mode; Bingo's different starting arrangements are not modeled. Compare the virtual arrangement with the game's target on its screen. The game sends movement commands but does not tell Buddy its target, score, or whether the round was completed. Stack-Up does not use Gyromite's gate-button return path.

@@ -4,16 +4,16 @@ R.O.B. Vision selects Gyromite or Stack-Up from the exact filename launched by a
 
 ## Registry and launch path
 
-The [registry](../config/games.json) lists accepted case-insensitive ROM basenames, including configured `.nes`, `.zip`, and `.7z` names. Only NES/Famicom launches are eligible. A renamed archive needs an explicit registry entry. ROM files and extracted game graphics are never installed with R.O.B. Vision.
+The [registry](../config/games.json) lists accepted case-insensitive ROM basenames, including configured `.nes`, `.zip`, and `.7z` names. The resolver accepts NES/Famicom launch metadata, while the installed emulator frame integration and ROM directories are for NES. A renamed archive needs an explicit registry entry. ROM files and extracted game graphics are never installed with R.O.B. Vision.
 
 RetroPie uses runcommand launch/end hooks. The installer preserves existing hook behavior and adds the R.O.B. Vision notifier and receiver. Supported Batocera uses its separate `zz-robvision-game` launch hook. The notifier sends a paired, authenticated game event to the UNO Q; the frame receiver also checks the exact ROM identity before forwarding a decoded command. A launch event alone never moves Buddy.
 
-```text
-Console game launch or exit
-  → exact local registry match
-  → authenticated LAN game-state event
-  → UNO Q selects or clears the virtual game and accessories
-  → verified game frames may drive one movement at a time
+```mermaid
+flowchart LR
+  EVENT["Console game launch or exit"] --> MATCH{"Exact registered NES ROM?"}
+  MATCH -->|"recognized launch"| SELECT["UNO Q selects game<br/>and resets accessories"]
+  MATCH -->|"exit or unknown"| IDLE["UNO Q clears game selection"]
+  SELECT --> FRAMES["Verified game frames may<br/>drive one primitive at a time"]
 ```
 
 On RetroPie, the receiver scans the running RetroArch process and can resend game identity after a UNO Q restart. Both consoles identify themselves in launch events, receiver heartbeats, and frame commands. When two consoles are paired, only the active game's console may drive the model. Game exit releases Gyromite's virtual buttons.
