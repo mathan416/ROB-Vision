@@ -32,24 +32,6 @@ UI_SET_EVBIT = ioctl_write(100, 4)
 UI_SET_KEYBIT = ioctl_write(101, 4)
 EV_SYN, EV_KEY, SYN_REPORT = 0, 1, 0
 BTN_SOUTH, BTN_EAST = 304, 305
-BATOCERA_PAD_RETURN = Path("/run/rob-vision/pads")
-
-
-class PadReturn:
-    """Publish Batocera's gate state for the libretro wrapper, with atomic updates."""
-
-    def __init__(self, path=BATOCERA_PAD_RETURN):
-        self.path = path
-        self.temporary = path.with_name(path.name + ".tmp")
-
-    def update(self, red, blue):
-        self.temporary.write_bytes(bytes((ord("1") if red else ord("0"),
-                                          ord("1") if blue else ord("0"))))
-        os.replace(self.temporary, self.path)
-
-    def close(self):
-        self.temporary.unlink(missing_ok=True)
-        self.path.unlink(missing_ok=True)
 
 
 class VirtualPad:
@@ -215,7 +197,6 @@ def main():
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
     pad = VirtualPad()
-    pad_return = PadReturn() if args.platform == "batocera" else None
     registry = load_registry()
     hook = FrameHookServer(registry, platform=args.platform)
     hook.start()
@@ -273,15 +254,11 @@ def main():
                     item["next_try"] = time.monotonic() + .2
                     break
             pad.update(*desired, swap=args.swap_buttons)
-            if pad_return is not None:
-                pad_return.update(*desired)
             if running:
                 time.sleep(max(0, args.interval - (time.monotonic() - started)))
     finally:
         hook.stop()
         pad.close()
-        if pad_return is not None:
-            pad_return.close()
 
 
 if __name__ == "__main__":

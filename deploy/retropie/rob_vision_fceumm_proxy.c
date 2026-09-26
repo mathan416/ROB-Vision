@@ -7,15 +7,12 @@
  */
 #define _GNU_SOURCE
 #include <dlfcn.h>
-#include <fcntl.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
 #include <sys/un.h>
-#include <time.h>
 #include <unistd.h>
 
 struct retro_game_info;
@@ -31,7 +28,6 @@ typedef int16_t (*input_state_cb)(unsigned, unsigned, unsigned, unsigned);
 static void *real_core;
 static environment_cb frontend_environment;
 static video_cb frontend_video;
-static input_state_cb frontend_input_state;
 static unsigned pixel_format;
 static uint32_t frame_index;
 static int frame_socket = -1;
@@ -142,33 +138,6 @@ static void video_tap(const void *data, unsigned width, unsigned height, size_t 
     if (frontend_video) frontend_video(data, width, height, pitch);
 }
 
-static int16_t input_tap(unsigned port, unsigned device, unsigned index, unsigned id) {
-    int16_t original = frontend_input_state ? frontend_input_state(port, device, index, id) : 0;
-#ifdef ROB_PAD_RETURN_PATH
-    /* Batocera may assign its generated Player 2 joystick index to Player 1.
-     * Read the receiver's short-lived pad state directly at the libretro boundary.
-     * A dead receiver cannot leave either gate held for more than two seconds. */
-    if (port == 1 && device == 1 && index == 0 && (id == 0 || id == 8 || id == 256)) {
-        int fd = open(ROB_PAD_RETURN_PATH, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
-        if (fd >= 0) {
-            struct stat info;
-            char state[2];
-            time_t now = time(NULL);
-            if (fstat(fd, &info) == 0 && info.st_size == 2 &&
-                info.st_mtime <= now && now - info.st_mtime <= 2 &&
-                read(fd, state, sizeof(state)) == sizeof(state)) {
-                unsigned bits = (state[0] == '1' ? 1u : 0u) |
-                                (state[1] == '1' ? 1u << 8 : 0u);
-                if (id == 256) original |= (int16_t)bits;
-                else if (bits & (1u << id)) original = 1;
-            }
-            close(fd);
-        }
-    }
-#endif
-    return original;
-}
-
 unsigned retro_api_version(void) { REAL(retro_api_version); return fn ? fn() : 0; }
 void retro_set_environment(environment_cb cb) {
     frontend_environment = cb;
@@ -181,10 +150,7 @@ void retro_set_video_refresh(video_cb cb) {
 void retro_set_audio_sample(audio_cb cb) { REAL(retro_set_audio_sample); if (fn) fn(cb); }
 void retro_set_audio_sample_batch(audio_batch_cb cb) { REAL(retro_set_audio_sample_batch); if (fn) fn(cb); }
 void retro_set_input_poll(input_poll_cb cb) { REAL(retro_set_input_poll); if (fn) fn(cb); }
-void retro_set_input_state(input_state_cb cb) {
-    frontend_input_state = cb;
-    REAL(retro_set_input_state); if (fn) fn(input_tap);
-}
+void retro_set_input_state(input_state_cb cb) { REAL(retro_set_input_state); if (fn) fn(cb); }
 void retro_init(void) { REAL(retro_init); if (fn) fn(); }
 void retro_deinit(void) {
     REAL(retro_deinit); if (fn) fn();

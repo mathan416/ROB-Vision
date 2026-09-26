@@ -9,24 +9,12 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from identify_game import load_registry  # noqa: E402
-from retropie_controller2 import PadReturn, pads_from_state, running_game, source_selected, sync_game  # noqa: E402
+from retropie_controller2 import pads_from_state, running_game, source_selected, sync_game  # noqa: E402
 from tools.retropie_frame_hook import FrameHookServer, sender_game  # noqa: E402
 from tools.install_retropie_frame_hook import install  # noqa: E402
 
 
 class ReceiverTests(unittest.TestCase):
-    def test_pad_return_publishes_both_colors_and_removes_stale_state(self):
-        with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / "pads"
-            state = PadReturn(path)
-            state.update(True, False)
-            self.assertEqual(path.read_bytes(), b"10")
-            state.update(False, True)
-            self.assertEqual(path.read_bytes(), b"01")
-            self.assertFalse(state.temporary.exists())
-            state.close()
-            self.assertFalse(path.exists())
-
     def test_two_consoles_on_same_platform_follow_only_the_active_identity(self):
         state = {"link": {"receiver": "Batocera", "consoles": [
             {"id": "a" * 32, "active": True}, {"id": "b" * 32, "active": False}]}}
