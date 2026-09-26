@@ -3,18 +3,29 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 from identify_game import load_registry
 from retropie_controller2 import running_game
-from tools.batocera import configure_player2_overrides, map_player2, select_games
+from tools.batocera import configure_player2_overrides, map_player2, pad_index, select_games
 from scripts.install_batocera import supported_hardware, suspend_menu, resume_menu
 from tools.retropie_frame_hook import sender_game
 
 
 class BatoceraTests(unittest.TestCase):
+    def test_pad_index_uses_joystick_order_not_js_device_number(self):
+        sdl = MagicMock()
+        sdl.SDL_Init.return_value = 0
+        sdl.SDL_NumJoysticks.return_value = 3
+        sdl.SDL_JoystickNameForIndex.side_effect = [
+            b"Atari Game Controller", b"virtual spinner", b"R.O.B. Vision Controller 2"
+        ]
+        with patch("tools.batocera.ctypes.CDLL", return_value=sdl):
+            self.assertEqual(pad_index(), 2)
+        sdl.SDL_QuitSubSystem.assert_called_once_with(0x200)
+
     def test_menu_is_suspended_before_receiver_hotplug_and_resumed(self):
         with tempfile.TemporaryDirectory() as directory:
             service = Path(directory) / "S31emulationstation"
