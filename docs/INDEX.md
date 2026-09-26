@@ -1,8 +1,8 @@
 # R.O.B. Vision documentation
 
-[Version 0.1.1 release notes](RELEASE_NOTES_0.1.1.md) describe the documentation update and supported devices. The [0.1.0 notes](RELEASE_NOTES_0.1.0.md) and [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remain available.
+[Version 0.1.2 release notes](RELEASE_NOTES_0.1.2.md) describe the documentation update and supported devices. The [0.1.1 notes](RELEASE_NOTES_0.1.1.md), [0.1.0 notes](RELEASE_NOTES_0.1.0.md), and [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remain available.
 
-**Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on RetroPie or Batocera; its rendered NES frames carry complete R.O.B. commands to the UNO Q. A browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. No physical robot or game pieces are planned. Both games' six commands were decoded during live Direct play, and Gyromite's gate controls were tested in Game A.
+**Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on RetroPie or Batocera; its rendered NES frames carry complete R.O.B. commands to the UNO Q. A browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. Both games' six commands were decoded during live Direct play, and Gyromite's gate controls were tested in Game A.
 
 Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [Technical Reference](../output/pdf/R.O.B.-Vision-Technical-Reference.pdf), [Matrix Display Guide](../output/pdf/R.O.B.-Vision-Matrix-Display-Guide.pdf), and [Quick Reference](../output/pdf/R.O.B.-Vision-Quick-Reference.pdf).
 

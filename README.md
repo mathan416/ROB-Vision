@@ -1,6 +1,6 @@
 # R.O.B. Vision
 
-R.O.B. Vision plays Gyromite and Stack-Up with a **virtual robot companion**. The Arduino UNO Q owns the companion's pose and game pieces. RetroPie or Batocera sends game light commands from each rendered NES frame to the UNO Q over Wi-Fi or Ethernet. A browser on a laptop, iPad, or phone animates the robot, gyros, spinner, pads, trays, and blocks. Gyromite's virtual Controller 2 buttons return to the game console over the network. There is no physical robot or camera.
+R.O.B. Vision plays Gyromite and Stack-Up with a **virtual robot companion**. The Arduino UNO Q owns the companion's pose and game pieces. RetroPie or Batocera sends game light commands from each rendered NES frame to the UNO Q over Wi-Fi or Ethernet. A browser on a laptop, iPad, or phone animates the robot, gyros, spinner, pads, trays, and blocks. Gyromite's virtual Controller 2 buttons return to the game console over the network. The frame link needs no camera.
 
 **Meet Buddy:** a little robot follows the game's light signals beyond the emulator. His first blink appears on the UNO Q; his movements appear in the browser. Read [Buddy's story](docs/MEET_BUDDY.md).
 
@@ -10,18 +10,18 @@ Start **R.O.B. Vision** from UNO Q App Lab **My Apps**, then open `http://arduia
 
 The [Setup page](dashboard/setup.html) pairs either console, shows receiver and game-frame status, acknowledges Test mode from the frame link, and offers Gyromite and Stack-Up manual checks. [Mission](dashboard/index.html) keeps R.O.B. and the Game Table as the main view. The [Help center](dashboard/help.html) covers play, controls, indicators, and troubleshooting.
 
-## Install version 0.1.1
+## Install version 0.1.2
 
 The public release provides one command for the UNO Q and the same console command for RetroPie or Batocera. Run the UNO Q command as `arduino`:
 
 ```sh
-curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.1/install.sh | sh -s -- uno-q
+curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.2/install.sh | sh -s -- uno-q
 ```
 
 Run the console command on RetroPie as `pi`, or on Batocera as `root`, replacing the UNO Q hostname:
 
 ```sh
-curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.1/install.sh | sh -s -- console your-uno-q.local
+curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.2/install.sh | sh -s -- console your-uno-q.local
 ```
 
 The console command installs the receiver, starts a first-time pairing window, and prints a code and fingerprint. Enter them on the UNO Q [Setup page](dashboard/setup.html). Pairing starts the receiver and configures Gyromite's virtual Controller 2; no further console command is needed. Upgrades preserve existing pairing. See the [installation guide](docs/INSTALLATION_GUIDE.md) for requirements, supported Batocera hardware, repair, and verification.
@@ -44,6 +44,6 @@ For local development, run `python3 -m controller.service` and open `http://127.
 
 ## Guides and release status
 
-Start with the [installation guide](docs/INSTALLATION_GUIDE.md), [user guide](docs/USER_GUIDE.md), [technical architecture](docs/TECHNICAL_ARCHITECTURE.md), and [0.1.1 release notes](docs/RELEASE_NOTES_0.1.1.md). Printable editions are under [output/pdf](output/pdf). The dated release review remains a historical engineering report.
+Start with the [installation guide](docs/INSTALLATION_GUIDE.md), [user guide](docs/USER_GUIDE.md), [technical architecture](docs/TECHNICAL_ARCHITECTURE.md), and [0.1.2 release notes](docs/RELEASE_NOTES_0.1.2.md). Printable editions are under [output/pdf](output/pdf). The dated release review remains a historical engineering report.
 
 Historical Nintendo manuals and the Robert project informed behavior, but their text or code is not reused here. Nintendo's characters, game artwork, and marks remain with their owners. R.O.B. Vision is not affiliated with or endorsed by Nintendo.

@@ -1,6 +1,6 @@
 # R.O.B. Vision virtual system contract
 
-R.O.B. is a virtual character and accessory model. The UNO Q runs the controller; a laptop, iPad, or phone renders the robot and pieces. There are no physical arms, gyros, trays, blocks, or motors to build. RetroPie remains the game host.
+R.O.B. is a virtual character and accessory model. The UNO Q runs the controller; a laptop, iPad, or phone renders the robot and pieces. RetroPie remains the game host.
 
 ## What is running
 

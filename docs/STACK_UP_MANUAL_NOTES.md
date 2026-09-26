@@ -1,6 +1,6 @@
 # Stack-Up manual: design and test notes
 
-**Source:** [Stack-Up instruction booklet scan](https://www.digitpress.com/library/manuals/nes/Stack-up.pdf) at Digital Press. This paraphrases the original accessory and game rules. R.O.B. Vision models the robot and pieces virtually; no physical tray or block is built.
+**Source:** [Stack-Up instruction booklet scan](https://www.digitpress.com/library/manuals/nes/Stack-up.pdf) at Digital Press. This paraphrases the original accessory and game rules. R.O.B. Vision models the robot and pieces virtually.
 
 ## Virtual set and starting layouts
 

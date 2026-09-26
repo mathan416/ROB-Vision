@@ -250,7 +250,7 @@ def cover(canvas, doc, title: str, subtitle: str, landscape_page: bool = False):
     canvas.drawString(55, 126, subtitle)
     canvas.setStrokeColor(ORANGE); canvas.setLineWidth(3); canvas.line(55, 109, 216, 109)
     canvas.setFillColor(colors.HexColor("#8BA9B8")); canvas.setFont("DM-Bold", 8)
-    canvas.drawString(55, 67, "VERSION 0.1.1")
+    canvas.drawString(55, 67, "VERSION 0.1.2")
     canvas.drawString(55, 52, "UNO Q · RETROPIE · BATOCERA")
     canvas.restoreState()
 

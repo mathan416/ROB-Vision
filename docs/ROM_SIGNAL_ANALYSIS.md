@@ -46,7 +46,7 @@ Game identification follows the exact launch-filename registry described in [Gam
 
 ## Implemented virtual action mapping
 
-Every accepted optical message advances **one bounded virtual primitive**. The UNO Q owns the virtual state and the browser animates it. No physical motion controller is part of this design.
+Every accepted optical message advances **one bounded virtual primitive**. The UNO Q owns the virtual state and the browser animates it.
 
 | Optical event | Robot operation | Display/state requirement |
 | --- | --- | --- |

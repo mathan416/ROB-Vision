@@ -1,6 +1,6 @@
 # R.O.B. Vision 0.1.0
 
-R.O.B. Vision is a virtual robot companion for Gyromite and Stack-Up. The UNO Q owns the game-piece state and serves the Mission, Setup, and Help pages. RetroPie and supported Batocera systems pass NES frame signals to the UNO Q through FCEUmm or Nestopia wrappers. A physical robot and camera are not required.
+R.O.B. Vision is a virtual robot companion for Gyromite and Stack-Up. The UNO Q owns the game-piece state and serves the Mission, Setup, and Help pages. RetroPie and supported Batocera systems pass NES frame signals to the UNO Q through FCEUmm or Nestopia wrappers. The frame link needs no camera.
 
 ## New in 0.1.0
 
