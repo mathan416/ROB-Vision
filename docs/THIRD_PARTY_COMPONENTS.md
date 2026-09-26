@@ -13,4 +13,4 @@ The project includes an App Lab Python service and matrix sketch, original dashb
 | Aluminite Robert simulator | Behavioral research only | No GPL-3.0 code or assets imported. |
 | User-supplied ROMs | Analysis and play on the user's machines | Remain outside this repository and release bundle. |
 
-Check dependency versions and license inventory again before packaging a redistributable release.
+Release review found no tracked ROMs, private keys, or console token files. The MIT license covers this project’s original code and documentation; bundled font licenses remain separate. Check any newly added assets and dependencies before later releases.

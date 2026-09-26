@@ -8,10 +8,26 @@ import os
 import secrets
 import ssl
 import subprocess
+import sys
 import tempfile
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+
+
+def activate_receiver(platform):
+    """Finish first pairing before reporting success to the Uno Q."""
+    if platform == "batocera":
+        commands = [["batocera-services", "restart", "ROBVision"]]
+    else:
+        prefix = [] if os.geteuid() == 0 else ["sudo", "-n"]
+        service = "rob-vision-controller2.service"
+        commands = [prefix + ["systemctl", "enable", service],
+                    prefix + ["systemctl", "restart", service],
+                    prefix + ["/usr/bin/python3", "/home/pi/rob-vision/scripts/install.py", "player2"]]
+    for command in commands:
+        subprocess.run(command, check=True, timeout=30, stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL)
 
 
 def install_token(token, destination):
@@ -79,17 +95,12 @@ def main():
                         raise ValueError("Invalid controller token.")
                     install_console_id(console_id, console_id_file)
                     install_token(offered_token, args.token_file)
-                    try:
-                        restart = (["batocera-services", "restart", "ROBVision"] if args.platform == "batocera"
-                                   else ["sudo", "-n", "systemctl", "restart", "rob-vision-controller2.service"])
-                        subprocess.run(restart,
-                                       check=True, timeout=15, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    except (OSError, subprocess.SubprocessError):
-                        pass  # The receiver can also pick up the token on its next restart.
+                    activate_receiver(args.platform)
                     self.reply(200, {"paired": True, "platform": args.platform,
                                      "console_id": console_id})
                     self.server.paired = True
-                except (ValueError, TypeError, json.JSONDecodeError) as exc:
+                except (ValueError, TypeError, json.JSONDecodeError, OSError,
+                        subprocess.SubprocessError) as exc:
                     self.reply(400, {"error": str(exc)})
 
             def reply(self, status, payload):
@@ -118,7 +129,8 @@ def main():
         finally:
             server.server_close()
         print("Pairing complete." if server.paired else "Pairing timed out.", flush=True)
+        return server.paired
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(0 if main() else 1)

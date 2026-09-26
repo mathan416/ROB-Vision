@@ -1,5 +1,7 @@
 # R.O.B. Vision troubleshooting
 
+For installation failures, check the prerequisite or unsupported-device message from the single release command, then rerun that same command. The archive checksum must pass before the installer changes the device. After removing a console in Setup, rerun its command with `--pair`.
+
 First check which page is open: `http://arduiain.local/dashboard/` is live; a `file://` page or a simple static web server shows the independent preview.
 
 | Symptom | Check |

@@ -1,6 +1,6 @@
 # R.O.B. Vision configuration reference
 
-**Status:** Current code defaults and installed test-machine behavior as of 25 September 2026. R.O.B. Vision uses RetroPie game frames for automatic input; it has no camera dependency.
+**Status:** Current code defaults and installed test-machine behavior as of 25 September 2026. R.O.B. Vision uses console game frames for automatic input; it has no camera dependency.
 
 | Setting | Current value or location | Meaning |
 | --- | --- | --- |
@@ -19,6 +19,10 @@
 | Test signal indicator | Sustained green or alternating rendered frames | The receiver reports a recent signal automatically; the UNO Q blinks R.O.B.'s red light. |
 | Receiver online indicator | Authenticated poll within three seconds | Otherwise Setup and Mission show RetroPie offline. |
 | Game registry | `config/games.json` | Exact case-insensitive ROM basenames for Gyromite and Stack-Up, including configured ZIP, 7z, and NES names. |
+
+## Release installation
+
+The versioned installer URL and supported hardware are listed in the [installation guide](INSTALLATION_GUIDE.md). The Uno Q uses `uno-q`; both consoles use `console <Uno-Q-hostname>`. The same command upgrades an existing installation. Add `--pair` to the console command after revoking its credential in Setup. Batocera 43.1 x86_64 is the validated Batocera build; other board/version combinations are rejected before installation.
 
 ## Local commands
 

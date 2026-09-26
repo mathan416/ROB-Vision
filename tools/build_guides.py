@@ -171,6 +171,8 @@ def markdown_story(path: Path, usable_width: float, st: dict[str, ParagraphStyle
 
     while i < len(lines):
         line = lines[i]
+        if line.strip() == "<!-- pagebreak -->":
+            flush(); story.append(PageBreak()); i += 1; continue
         if not line.strip():
             flush(); i += 1; continue
         image_match = re.fullmatch(r"!\[([^]]*)\]\(([^)]+)\)", line.strip())

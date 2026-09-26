@@ -43,3 +43,11 @@ Trusted-LAN browser controls use `/api/game`, `/api/command`, and `/api/gate-ass
 Selecting a game or **Home** initializes its virtual pieces. Live **Emergency Stop** clears game selection; file preview cancels its local animation. Game exit clears context and releases buttons. The RetroPie receiver resends game identity after a UNO Q restart. It does not infer Hector's position, gate animation, Stack-Up score, or victory.
 
 See [configuration](CONFIGURATION_REFERENCE.md), [network architecture](network-architecture.md), [frame input](optical-input.md), and the [verification plan](VERIFICATION_PLAN.md).
+
+## 0.1.0 release installation path
+
+`scripts/package_release.py` packages a committed Git tree under `rob-vision/`, calculates its SHA-256 digest, and renders `scripts/release-install.sh` with the release tag and digest. The release also carries four rebuilt PDF guides and `SHA256SUMS`. The downloaded installer checks the archive digest before extraction or platform mutation, detects `uno-q` or `console`, and calls the existing platform installer. Console detection distinguishes Batocera's persistent configuration and core paths from standard RetroPie. Batocera checks its version file and CPU architecture before writes; version 0.1.0 has validated wrappers for Batocera 43.1 x86_64 only.
+
+The RetroPie installer copies its own `scripts` directory into `/home/pi/rob-vision`, enables the receiver unit, and preserves the private credential on upgrade. On first install the bootstrap starts `retropie_pair.py` as root. A successful certificate-pinned pairing enables and restarts the receiver and invokes the installed `player2` detector to write the actual joystick index to the NES RetroArch config. Batocera's pairing restarts `ROBVision`, whose service writes Gyromite-only Player 2 overrides before gameplay. Both paths retain unrelated games and VirtualGlove configuration. The console command's optional `--pair` repeats pairing after a credential has been revoked in Setup.
+
+The release installer requires curl, tar, Python 3, and SHA-256 tooling on the device. The Uno Q installer keeps its App Lab stop, stage, start, and rollback behavior. The release does not ship ROMs or vendor emulator cores.

@@ -8,10 +8,21 @@ sys.path.insert(0, str(ROOT / "tools"))
 from identify_game import load_registry
 from retropie_controller2 import running_game
 from tools.batocera import configure_player2_overrides, map_player2, select_games
+from scripts.install_batocera import supported_hardware
 from tools.retropie_frame_hook import sender_game
 
 
 class BatoceraTests(unittest.TestCase):
+    def test_hardware_gate_precedes_installation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            version = Path(directory) / "batocera.version"
+            version.write_text("43.1 2026/09/01 12:00\n")
+            supported_hardware("x86_64", version)
+            for machine, value in (("aarch64", "43.1"), ("x86_64", "44")):
+                version.write_text(value + " 2026/09/01\n")
+                with self.subTest(machine=machine, version=value), self.assertRaises(RuntimeError):
+                    supported_hardware(machine, version)
+
     def test_select_only_registered_roms_and_preserve_virtualglove(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
