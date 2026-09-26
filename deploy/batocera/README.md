@@ -12,6 +12,8 @@ Enter the code and certificate fingerprint on the UNO Q Setup page, using the Ba
 
 Batocera keeps system core paths read-only. The service adds the R.O.B. Vision wrappers through a runtime overlay. If VirtualGlove already mounted that overlay, R.O.B. Vision adds its own files without changing VirtualGlove's service, hook, core, or game choice. The wrappers call the installed stock FCEUmm and Nestopia libraries. The frame socket and virtual pad disappear when the receiver stops; the overlay is rebuilt at boot.
 
+Batocera starts user services concurrently. When VirtualGlove is enabled, R.O.B. Vision waits for its native core to appear before adding the R.O.B. Vision wrappers. This keeps both sets of cores visible after boot; starting the services in the opposite order can leave the receiver online while RetroArch cannot find the wrappers.
+
 To try Nestopia, edit only the ROM's `nes["ROM filename"].core` entry in `/userdata/system/batocera.conf` to `robvision_nestopia`. The installer preserves this choice on later runs. Keep `.emulator=libretro`. The wrapper selects Nestopia's explicit Player 2 gamepad after ROM load. On the tested host, its Gyromite Game A blue gate lowered during a blue hold, returned on release, and stayed still during a red-only hold.
 
 **Checked on the test machine:** repeat installation, both wrapper libraries loading, automatic exact-ROM FCEUmm selection, explicit Nestopia launches for both games, EmulationStation's physical Player 1 on SDL index 0, Buddy's virtual Player 2 on index 2, matching A=0/B=1 assignments, FCEUmm and Nestopia Gyromite blue gate lowering and returning, live UNO Q Batocera online and frame-linked status during Stack-Up, and preservation of VirtualGlove's core. A full playthrough remains to be checked.
