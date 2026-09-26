@@ -1,6 +1,6 @@
 # R.O.B. Vision quick reference
 
-**Buddy is virtual.** The UNO Q app and RetroPie link are running. Both Gyromite gate colors responded in Game A. RetroPie's game-frame link sent all six commands from each game to the virtual robot during live Direct play.
+**Buddy is virtual.** The UNO Q controls his movement and game pieces. RetroPie or supported Batocera sends rendered game frames to the UNO Q. Both Gyromite gate colors responded in Game A during testing; all six commands from each game reached the virtual robot in live Direct play.
 
 | Where | Action | Result |
 | --- | --- | --- |
@@ -9,10 +9,10 @@
 | Mission | Home | Reset selected virtual game and pieces. |
 | Mission | Emergency Stop | Live: clear game and release pads. Preview: cancel local script. |
 | Mission | Fast Gates during live Gyromite | Blue `2`, red `1`, Release Both `0`; press again to release a color. Auto-release after 60 seconds. |
-| Setup | Pair Console / Check Link | Pair RetroPie or refresh its authenticated online status. |
+| Setup | Pair Console / Check Link | Pair a console or refresh its authenticated online status. |
 | Game Test mode | Automatic red light | Blink R.O.B.'s red light when linked game frames carry the Test signal; no movement. |
 | Setup | Gyromite / Stack-Up checks | Send manual pad or movement commands to the live model. |
-| Mission | GAME FRAMES LINKED | RetroPie is sending rendered game frames for the selected ROM; automatic movement uses those frames. |
+| Mission | GAME FRAMES LINKED | The console is sending rendered game frames for the selected ROM; automatic movement uses those frames. |
 
 In Stack-Up, press Select on the ROBOT BLOCK screen, choose Test, then press Start. The artwork remains visible while the Test signal plays.
 

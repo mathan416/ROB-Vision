@@ -1,6 +1,6 @@
 # R.O.B. Vision configuration reference
 
-**Status:** Current code defaults and installed test-machine behavior as of 25 September 2026. R.O.B. Vision uses console game frames for automatic input; it has no camera dependency.
+This reference lists the 0.1.x code defaults and installed settings. R.O.B. Vision uses console game frames for automatic input; it has no camera dependency. Host-specific validation results are in the [release report](RELEASE_VALIDATION_0.1.0.md).
 
 | Setting | Current value or location | Meaning |
 | --- | --- | --- |

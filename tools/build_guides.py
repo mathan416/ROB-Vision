@@ -146,7 +146,7 @@ def table_block(lines: list[str], usable_width: float, st: dict[str, ParagraphSt
 
 def markdown_story(path: Path, usable_width: float, st: dict[str, ParagraphStyle],
                    chapter_number: int | None = None, new_page: bool = True,
-                   max_image_height: float = 330):
+                   max_image_height: float = 330, chapter_label: str = "GUIDE"):
     lines = path.read_text(encoding="utf-8").splitlines()
     title = lines[0].removeprefix("# ").strip()
     story = []
@@ -156,7 +156,7 @@ def markdown_story(path: Path, usable_width: float, st: dict[str, ParagraphStyle
         story.append(CondPageBreak(160))
         story.append(Spacer(1, 23))
     if chapter_number is not None:
-        story.append(Paragraph(f"CHAPTER {chapter_number:02d} / CURRENT REFERENCE", st["eyebrow"]))
+        story.append(Paragraph(f"CHAPTER {chapter_number:02d} / {chapter_label}", st["eyebrow"]))
     story.append(Paragraph(inline(title), st["chapter"]))
     i = 1
     paragraph: list[str] = []
@@ -250,8 +250,8 @@ def cover(canvas, doc, title: str, subtitle: str, landscape_page: bool = False):
     canvas.drawString(55, 126, subtitle)
     canvas.setStrokeColor(ORANGE); canvas.setLineWidth(3); canvas.line(55, 109, 216, 109)
     canvas.setFillColor(colors.HexColor("#8BA9B8")); canvas.setFont("DM-Bold", 8)
-    canvas.drawString(55, 67, "CURRENT REFERENCE  /  25 SEPTEMBER 2026")
-    canvas.drawString(55, 52, "UNO Q + RETROPIE LIVE · FRAME LINK VERIFIED")
+    canvas.drawString(55, 67, "VERSION 0.1.1")
+    canvas.drawString(55, 52, "UNO Q · RETROPIE · BATOCERA")
     canvas.restoreState()
 
 
@@ -269,7 +269,7 @@ def body_page(canvas, doc, label: str):
     canvas.drawString(48, height-28, "R.O.B. VISION")
     canvas.setFillColor(MUTED); canvas.drawRightString(width-48, height-28, label.upper())
     canvas.line(48, 43, width-48, 43)
-    canvas.setFont("DM", 7); canvas.drawString(48, 29, "GAME FRAMES LINKED · VIRTUAL ROBOT")
+    canvas.setFont("DM", 7); canvas.drawString(48, 29, "UNO Q · VIRTUAL ROBOT COMPANION")
     canvas.drawRightString(width-48, 29, f"{doc.page:02d}")
     canvas.restoreState()
 
@@ -290,9 +290,14 @@ def build_book(filename: str, title: str, subtitle: str, chapter_files: list[str
         image_height = (300 if name == "MEET_BUDDY.md"
                         else 170 if name == "UNO_Q_MATRIX_DISPLAY.md"
                         else 430 if page_size[1] > page_size[0] else 285)
+        chapter_label = ("STORY" if name == "MEET_BUDDY.md"
+                         else "TECHNICAL REFERENCE" if title == "Technical Reference"
+                         else "MATRIX DISPLAY GUIDE" if title == "Matrix Display Guide"
+                         else "USER GUIDE")
         story.extend(markdown_story(DOCS / name, available_width, st, n,
                                     new_page=chapter_starts_page,
-                                    max_image_height=image_height))
+                                    max_image_height=image_height,
+                                    chapter_label=chapter_label))
     doc.build(story,
               onFirstPage=lambda c, d: cover(c, d, title, subtitle, page_size[0] > page_size[1]),
               onLaterPages=lambda c, d: body_page(c, d, title))

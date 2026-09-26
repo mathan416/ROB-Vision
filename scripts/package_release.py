@@ -3,6 +3,7 @@
 
 import argparse
 import hashlib
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -12,13 +13,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("version", help="Release tag, e.g. v0.1.0-rc.1")
+    parser.add_argument("version", help="Release tag, e.g. v0.1.1 or v0.1.1-rc.1")
     parser.add_argument("--ref", default="HEAD", help="Committed Git revision to package")
     args = parser.parse_args()
-    if not args.version.startswith("v0.1.0") or not all(
-        char.isalnum() or char in ".-" for char in args.version
-    ):
-        parser.error("Expected a 0.1.0 release tag")
+    if not re.fullmatch(r"v0\.1\.\d+(?:-rc\.\d+)?", args.version):
+        parser.error("Expected a 0.1.x release tag")
     output = ROOT / "output" / "release" / args.version
     output.mkdir(parents=True, exist_ok=True)
     archive = output / f"rob-vision-{args.version}.tar.gz"

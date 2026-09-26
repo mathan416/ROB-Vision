@@ -1,10 +1,10 @@
 # R.O.B. Vision user guide
 
-The UNO Q hosts Buddy, our virtual robot companion, and receives Gyromite and Stack-Up commands through RetroPie or Batocera's game-frame link. The robot, gyros, blocks, trays, and spinner are graphics and software state. There is no physical robot or camera. [Meet Buddy](MEET_BUDDY.md) introduces his story; the instructions below describe the working controls.
+The UNO Q controls Buddy, the virtual robot shown in Mission. RetroPie or Batocera sends Gyromite and Stack-Up commands through the game-frame link. The robot, gyros, blocks, trays, and spinner are graphics and software state; no physical robot or camera is needed. Start with the [Buddy story](MEET_BUDDY.md) if you want to meet him, or follow these instructions to set up and play.
 
 ## Open R.O.B. Vision
 
-Install version 0.1.0 with the two commands in the [installation guide](INSTALLATION_GUIDE.md): one on the UNO Q, one on the console. The console command prints first-time pairing details for Setup and configures its receiver automatically.
+Install version 0.1.1 with the two commands in the [installation guide](INSTALLATION_GUIDE.md): one on the UNO Q, one on the console. The console command prints first-time pairing details for Setup and configures its receiver automatically.
 
 Start **R.O.B. Vision** in UNO Q App Lab, then open `http://arduiain.local/dashboard/` on a laptop, phone, or tablet. Stop VirtualGlove first if it is running; this UNO Q runs one App Lab app at a time. The direct `http://arduiain.local:8766/dashboard/` address reaches the same controller. A `file://` page is an offline preview.
 
