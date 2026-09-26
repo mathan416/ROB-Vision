@@ -1,5 +1,11 @@
 # R.O.B. Vision changelog
 
+## 0.1.1 documentation update
+
+- Moved Buddy's optional story out of the Help setup flow and rewrote the User Guide chapter as fiction, without project-planning commentary.
+- Corrected guide cover labels, platform names, and technical-reference opening; added a documentation standard and rebuilt all four PDFs.
+- Updated the versioned one-command installer links for this documentation patch.
+
 ## 0.1.0 release candidate
 
 - Added a checksum-pinned, one-command installer for the UNO Q and a common RetroPie/Batocera console installer.

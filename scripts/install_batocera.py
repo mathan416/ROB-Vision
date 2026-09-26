@@ -64,7 +64,7 @@ def supported_hardware(machine=None, version_file=VERSION_FILE):
     version = version_file.read_text().split()[0] if version_file.is_file() else "unknown"
     if machine != "x86_64" or version != "43.1":
         raise RuntimeError(
-            f"Batocera {version} on {machine} has no validated R.O.B. Vision 0.1.0 build; "
+            f"Batocera {version} on {machine} has no validated R.O.B. Vision build for this release; "
             "supported: Batocera 43.1 x86_64. No files were changed."
         )
 

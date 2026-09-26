@@ -2,7 +2,7 @@
 
 **Status: implemented in the R.O.B. Vision App Lab sketch and Linux bridge; physical display behavior still needs direct visual confirmation.** RetroPie pairing code is generated on RetroPie and entered on the browser Setup page. The UNO Q matrix shows a pairing cue only. This guide defines the behavior for the built-in 13-column by 8-row blue LED matrix. The large browser dashboard remains the place for the full R.O.B. animation, accessories, and explanations.
 
-In Buddy's story, this tiny display is his first sign of life outside the emulator. These images show the actual 13×8 display states defined in `sketch/sketch.ino`. Each panel is one frame of an animation; Buddy's full-color guide portrait is an illustration, not a matrix state.
+These images show the 13×8 display states defined in `sketch/sketch.ino`. Each panel is one frame of an animation. Buddy's full-color portrait in the User Guide is an illustration, not a matrix state.
 
 ## The animations
 
@@ -29,7 +29,7 @@ In Buddy's story, this tiny display is his first sign of life outside the emulat
 | State | Matrix | Meaning |
 | --- | --- | --- |
 | Board power-on, before our sketch runs | Arduino's own boot graphics | System startup; R.O.B. Vision cannot own the matrix yet. |
-| R.O.B. Vision sketch starts | VirtualGlove-style pulsing hourglass | The app and Linux side are starting. Begin it as early as the platform permits, before waiting for Router Bridge setup. |
+| R.O.B. Vision sketch starts | Pulsing hourglass | The app and Linux side are starting. Begin it as early as the platform permits, before waiting for Router Bridge setup. |
 | Linux bridge connects but the controller is still starting or reconnecting | The same hourglass, restarted or continuing smoothly | The bridge is available; the controller has not yet reported ready. A bridge connection alone must not imply game readiness. |
 | Controller ready, no game selected | A pair of curious R.O.B. eyes: slow left/right glance and occasional blink | R.O.B. is awake and waiting for a game. This is an attract animation, not proof that a game is linked. |
 | Gyromite selected | Brief `GY`, then eyes with a small spinning-dot accent | The selected game is Gyromite. The accent is decorative; it must not claim a gyro is actually spinning. |
@@ -53,7 +53,7 @@ Display priority: **fault → pairing → active Test or ready signal → startu
 
 ## Pairing distinction
 
-VirtualGlove has a separate physical pairing display for its own device approval PIN. R.O.B. Vision pairs **RetroPie to the UNO Q**: RetroPie produces a six-digit code and certificate fingerprint, while the UNO Q browser Setup page accepts them. The matrix `P` is a status cue when **Pair another console** is opened or pairing is submitted; it expires or clears afterward. Showing the code on the UNO Q would require a deliberate change to the pairing protocol.
+R.O.B. Vision pairs a console with the UNO Q. The console produces a six-digit code and certificate fingerprint, while the UNO Q browser Setup page accepts them. The matrix `P` is a status cue when **Pair another console** is opened or pairing is submitted; it expires or clears afterward. The matrix does not show the pairing code.
 
 ## Physical acceptance checks still needed
 
