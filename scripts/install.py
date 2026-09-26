@@ -392,6 +392,8 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
     pi_owned(PI_CONFIG)
     write_file(Path("/etc/modules-load.d/rob-vision.conf"), "uinput\n")
     copy_file(source / "deploy/retropie/rob-vision-controller2.service", SERVICE)
+    copy_file(source / "deploy/retropie/retroarch-joypad.cfg",
+              Path("/opt/retropie/configs/all/retroarch-joypads/R.O.B. Vision Controller 2.cfg"))
     for action in ("launch", "end"):
         target = RUNCOMMAND / f"runcommand-on{action}.sh"
         body = ("/bin/sh /home/pi/rob-vision/deploy/retropie/"
