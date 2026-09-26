@@ -4,7 +4,7 @@ R.O.B. Vision plays Gyromite and Stack-Up with a **virtual robot companion**. Th
 
 **Meet Buddy:** a little robot follows the game's light signals beyond the emulator. His first blink appears on the UNO Q; his movements appear in the browser. Read [Buddy's story](docs/MEET_BUDDY.md).
 
-Explore the [R.O.B. Vision website](https://mathan416.github.io/ROB-Vision/) for Buddy's story, installation, and the engineering journey. Its source is in [website](website/).
+The Buddy-led public website for `rob-vision.mathan.ca` is in [website](website/). It is a static site prepared for manual upload to the domain's web root.
 
 The app includes Mission and Setup pages, paired RetroPie and Batocera links, FCEUmm and Nestopia frame wrappers, Gyromite gate controls, Stack-Up blocks, UNO Q matrix animations, and demos that run while no game is active.
 
