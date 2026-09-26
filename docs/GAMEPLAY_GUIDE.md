@@ -12,9 +12,9 @@ The manual explicitly says a gyro **does not need to spin to operate only one ga
 
 **Live controller:** the UNO Q maintains the locations and spin phases of Gyro A and B. It derives red and blue virtual button states from those modeled conditions and sends them over LAN to the paired RetroPie Controller 2 receiver. It releases both buttons on game exit, connection loss, stale packets, or mode change. The player confirmed that both red and blue gate controls work in Game A with the corrected Controller 2 mapping. The **Fast Gates** dashboard controls place or return the matching virtual gyro and send the pad state immediately, with a 60-second automatic release. This keeps gate operation responsive while the player moves Hector. The RetroPie frame link controls R.O.B.'s virtual actions from complete rendered-frame commands; the launch hook supplies the game ID. The controller keeps game context and modeled piece state distinct from unknown on-screen professor or gate positions.
 
-![Mission controls and Game Table during Gyromite](images/mission-controls-screenshot.png)
+![Mission preview controls and Gyromite Game Table](images/mission-controls-screenshot.png)
 
-*Pose Preview, Fast Gates, and the simulated Game Table on Mission.*
+*Pose Preview, Game Table, and System Vitals in the local Gyromite preview. Fast Gates appear during live Gyromite play.*
 
 ## Stack-Up
 

@@ -2,7 +2,7 @@
 
 ## Objective and current state
 
-R.O.B. Vision renders Nintendo's robotic companion and accessories as a virtual system controlled by an Arduino UNO Q. The game runs on RetroPie and a modern display; a game-frame link reads its optical messages directly from rendered NES frames. The frame link also reports game Test signals. A laptop, iPad, or phone displays R.O.B. and the game table. Gyromite virtual pad states return over LAN as Controller 2 input. No physical robot or game accessories are built.
+R.O.B. Vision renders Nintendo's robotic companion and accessories as a virtual system controlled by an Arduino UNO Q. The game runs on RetroPie and a modern display; a game-frame link reads its optical messages directly from rendered NES frames. The frame link also reports game Test signals. A laptop, iPad, or phone displays R.O.B. and the game table. Gyromite virtual pad states return over LAN as Controller 2 input.
 
 The UNO Q App Lab app, dashboard, matrix sketch, virtual models, ROM-derived decoder, launch/exit hooks, pairing, and RetroPie receiver are implemented. Gyromite red and blue gate responses were user-confirmed in Game A. The installed frame link decoded all six command types in both games during live Direct play. Stack-Up Memory and Bingo and long-session reliability remain to be measured.
 

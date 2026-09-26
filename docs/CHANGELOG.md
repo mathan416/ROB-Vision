@@ -1,5 +1,10 @@
 # R.O.B. Vision changelog
 
+## 0.1.2 documentation update
+
+- Removed repeated explanations about absent robot hardware from Help and reader-facing guides. Help now gives a play tip in the sidebar.
+- Rebuilt and published the manuals with the corrected wording; gameplay and platform support are unchanged.
+
 ## 0.1.1 documentation update
 
 - Moved Buddy's optional story out of the Help setup flow and rewrote the User Guide chapter as fiction, without project-planning commentary.

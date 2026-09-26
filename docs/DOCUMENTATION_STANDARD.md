@@ -5,6 +5,7 @@ This is an editorial checklist for future R.O.B. Vision guides. It is a contribu
 ## Player Help and game manual
 
 - Put the player's task first: start, pair, play, read a status, or fix a problem. Name the page or device where each action happens, use the visible control label, and state the result to expect.
+- Explain the virtual model once near the introduction. Do not repeat that a physical robot or accessory is absent throughout Help and the manuals.
 - Show game controls and piece behavior near the relevant task. Distinguish what the game sends, what the virtual model shows, and what the game screen alone can confirm.
 - Keep Buddy's fiction in an optional, clearly titled story section. Tell the story as a story. Do not interrupt setup or troubleshooting with character-development notes, legal caveats, or release history.
 - Give essential information as text as well as imagery or color. Screenshots should clarify a specific control or state and have descriptive alternative text.

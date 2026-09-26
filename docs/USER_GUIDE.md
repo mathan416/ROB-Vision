@@ -1,16 +1,16 @@
 # R.O.B. Vision user guide
 
-The UNO Q controls Buddy, the virtual robot shown in Mission. RetroPie or Batocera sends Gyromite and Stack-Up commands through the game-frame link. The robot, gyros, blocks, trays, and spinner are graphics and software state; no physical robot or camera is needed. Start with the [Buddy story](MEET_BUDDY.md) if you want to meet him, or follow these instructions to set up and play.
+The UNO Q controls Buddy, the virtual robot shown in Mission. RetroPie or Batocera sends Gyromite and Stack-Up commands through the game-frame link. The robot, gyros, blocks, trays, and spinner are graphics and software state. Start with the [Buddy story](MEET_BUDDY.md) if you want to meet him, or follow these instructions to set up and play.
 
 ## Open R.O.B. Vision
 
-Install version 0.1.1 with the two commands in the [installation guide](INSTALLATION_GUIDE.md): one on the UNO Q, one on the console. The console command prints first-time pairing details for Setup and configures its receiver automatically.
+Install version 0.1.2 with the two commands in the [installation guide](INSTALLATION_GUIDE.md): one on the UNO Q, one on the console. The console command prints first-time pairing details for Setup and configures its receiver automatically.
 
 Start **R.O.B. Vision** in UNO Q App Lab, then open `http://arduiain.local/dashboard/` on a laptop, phone, or tablet. Stop VirtualGlove first if it is running; this UNO Q runs one App Lab app at a time. The direct `http://arduiain.local:8766/dashboard/` address reaches the same controller. A `file://` page is an offline preview.
 
 Mission shows R.O.B., Accessory Bay, Game Table, Pose Preview, System Vitals, and Activity Feed. **GYROMITE / CONNECTED** means the browser reaches the UNO Q with Gyromite selected. **RETROPIE ONLINE** means the receiver has contacted the UNO Q recently. **GAME FRAMES LINKED** means the selected game is sending its rendered frames.
 
-![Live Mission page showing R.O.B. and the active Gyromite scene](images/mission-model-screenshot.png)
+![Mission preview showing Buddy and the Gyromite accessories](images/mission-model-screenshot.png)
 
 ## Try a demonstration
 
