@@ -1,8 +1,10 @@
 # R.O.B. Vision user guide
 
-The UNO Q hosts Buddy, our virtual robot companion, and receives Gyromite and Stack-Up commands through RetroPie's game-frame link. The robot, gyros, blocks, trays, and spinner are graphics and software state. There is no physical robot or camera. [Meet Buddy](MEET_BUDDY.md) introduces his story; the instructions below describe the working controls.
+The UNO Q hosts Buddy, our virtual robot companion, and receives Gyromite and Stack-Up commands through RetroPie or Batocera's game-frame link. The robot, gyros, blocks, trays, and spinner are graphics and software state. There is no physical robot or camera. [Meet Buddy](MEET_BUDDY.md) introduces his story; the instructions below describe the working controls.
 
 ## Open R.O.B. Vision
+
+Install version 0.1.0 with the two commands in the [installation guide](INSTALLATION_GUIDE.md): one on the UNO Q, one on the console. The console command prints first-time pairing details for Setup and configures its receiver automatically.
 
 Start **R.O.B. Vision** in UNO Q App Lab, then open `http://arduiain.local/dashboard/` on a laptop, phone, or tablet. Stop VirtualGlove first if it is running; this UNO Q runs one App Lab app at a time. The direct `http://arduiain.local:8766/dashboard/` address reaches the same controller. A `file://` page is an offline preview.
 
@@ -30,6 +32,6 @@ The live model begins with five colored blocks on Tray 3. In Direct mode, jumpin
 
 ## Test mode and reset
 
-On Setup, select the game, launch it through the R.O.B. Vision emulator choice, and choose **Watch Test Signal** while the game displays Test mode. The game-frame link makes R.O.B.'s red light blink when it recognizes the Test signal. A separate ready-light command makes the light steady. Neither moves R.O.B. **Preview Red Light** demonstrates the animation without claiming a game signal.
+Launch the game through its R.O.B. Vision emulator choice and enter Test mode. The game-frame link makes R.O.B.'s red light blink automatically on Mission and Setup when it recognizes the Test signal. A separate ready-light command makes the light steady briefly. Exiting Test mode returns the UNO Q matrix to the game's eyes. Neither signal moves R.O.B. **Preview Red Light** on Setup demonstrates the animation without claiming a game signal.
 
 **Home** resets the selected virtual game. Live **Emergency Stop** clears the game selection; in the offline preview it cancels the script until reset. A browser reload restores the UNO Q's current snapshot. See [Setup](SETUP_GUIDE.md), [gameplay](GAMEPLAY_GUIDE.md), and [troubleshooting](TROUBLESHOOTING.md).

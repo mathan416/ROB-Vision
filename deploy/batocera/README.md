@@ -2,19 +2,11 @@
 
 The Batocera port runs on **Batocera 43.1 x86_64** and uses the stock FCEUmm or Nestopia core through a small R.O.B. Vision frame wrapper. The included `.so` files were built for x86_64 Linux; `build-cores.sh` rebuilds them with GCC on an x86_64 Linux host. ARM Batocera systems need a separate build and have not been tested.
 
-Copy this repository to a persistent Batocera directory outside `/userdata/system/rob-vision`, then run as root:
-
-```sh
-python3 scripts/install_batocera.py --controller your-uno-q.local
-```
+Install from the [versioned release command](../../docs/INSTALLATION_GUIDE.md) as `root` on Batocera. The same console command detects Batocera or RetroPie, checks supported hardware before changing files, and opens first-time pairing. A source checkout and a separate pairing command are unnecessary for a normal install.
 
 The installer retains an existing pairing token and controller URL on repeat runs. It enables the `ROBVision` Batocera service, installs its separate `zz-robvision-game` hook, and selects `robvision_fceumm` for the exact Gyromite and Stack-Up ROM names in `config/games.json`. An existing FCEUmm/Nestopia selection for one of those ROMs is retained. An unknown custom core choice is left alone. Other games, including VirtualGlove's Super Glove Ball, are not changed. Exit any Batocera game before installation.
 
-For first-time pairing, run:
-
-```sh
-python3 /userdata/system/rob-vision/tools/retropie_pair.py --platform batocera
-```
+The console command prints the first-time pairing code and fingerprint. Enter them on Setup while it is still running.
 
 Enter the code and certificate fingerprint on the UNO Q Setup page, using the Batocera hostname. Pairing restarts the service. The receiver creates a virtual Controller 2; only Gyromite receives per-ROM Player 2 settings. Its joystick index is detected at service startup before Batocera generates RetroArch's game configuration. Stack-Up sends six movement commands to the virtual robot and has no controller return path.
 

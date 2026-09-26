@@ -26,7 +26,7 @@ The Gyromite pad reducer derives red and blue from gyro location/spin or a held 
 
 `rob_vision_fceumm_proxy.c` builds one wrapper for FCEUmm and one for Nestopia. Each delegates libretro API calls to the installed original core. Its video callback classifies each rendered NES frame as dark, green, or other and sends the frame number and class through a local Unix datagram socket. `retropie_frame_hook.py` verifies the sender's process credentials, approved wrapper path, and exact ROM identity. `controller/optical.py` accepts only complete game-appropriate 13-frame patterns. The receiver forwards commands to token-protected `/api/emulator/command`; retries are idempotent by sender PID and frame number.
 
-The same classified frames recognize Gyromite's sustained green Test field or Stack-Up's alternating Test frames. While Setup's Test check is armed, the receiver reports a recent Test signal in its authenticated heartbeat and the UNO Q blinks R.O.B.'s red light. A separate READY command lights it steadily. Neither Test indication moves the model. FCEUmm remains selected for both registered games on the test RetroPie. Nestopia's Gyromite Player 2 return still needs a Game A check; see the [Nestopia report](NESTOPIA_FRAME_LINK_TEST_2026-09-25.md).
+The same classified frames recognize Gyromite's sustained green Test field or Stack-Up's alternating Test frames. The receiver reports a recent Test signal in its authenticated heartbeat, and the UNO Q blinks R.O.B.'s red light automatically. It returns to the game display after the signal stops. A separate READY command lights it steadily for at most one second, so a ready command sent while exiting Test cannot leave the matrix in T mode. Neither Test indication moves the model. FCEUmm remains selected for both registered games on the test RetroPie. Nestopia's Gyromite Player 2 return still needs a Game A check; see the [Nestopia report](NESTOPIA_FRAME_LINK_TEST_2026-09-25.md).
 
 ## Batocera host
 
@@ -36,10 +36,18 @@ Both console receivers identify themselves in authenticated heartbeats, launch e
 
 ## HTTP and trust boundary
 
-Trusted-LAN browser controls use `/api/game`, `/api/command`, `/api/gate-assist`, and `/api/test/arm` without a token. The browser reads `/api/state` and matrix status. JSON and same-origin checks protect browser writes. `/api/launch` and `/api/emulator/command` require the shared token. Pairing uses a time-limited code and verified TLS certificate fingerprint to deliver it. Keep ports 80 and 8766 off untrusted networks.
+Trusted-LAN browser controls use `/api/game`, `/api/command`, and `/api/gate-assist` without a token. The browser reads `/api/state` and matrix status. JSON and same-origin checks protect browser writes. `/api/launch` and `/api/emulator/command` require the originating console's credential. Pairing uses a time-limited code and verified TLS certificate fingerprint to deliver it. Keep ports 80 and 8766 off untrusted networks.
 
 ## Resets and limits
 
 Selecting a game or **Home** initializes its virtual pieces. Live **Emergency Stop** clears game selection; file preview cancels its local animation. Game exit clears context and releases buttons. The RetroPie receiver resends game identity after a UNO Q restart. It does not infer Hector's position, gate animation, Stack-Up score, or victory.
 
 See [configuration](CONFIGURATION_REFERENCE.md), [network architecture](network-architecture.md), [frame input](optical-input.md), and the [verification plan](VERIFICATION_PLAN.md).
+
+## 0.1.0 release installation path
+
+`scripts/package_release.py` packages a committed Git tree under `rob-vision/`, calculates its SHA-256 digest, and renders `scripts/release-install.sh` with the release tag and digest. The release also carries four rebuilt PDF guides and `SHA256SUMS`. The downloaded installer checks the archive digest before extraction or platform mutation, detects `uno-q` or `console`, and calls the existing platform installer. Console detection distinguishes Batocera's persistent configuration and core paths from standard RetroPie. Batocera checks its version file and CPU architecture before writes; version 0.1.0 has validated wrappers for Batocera 43.1 x86_64 only.
+
+The RetroPie installer copies its own `scripts` directory into `/home/pi/rob-vision`, enables the receiver unit, and preserves the private credential on upgrade. On first install the bootstrap starts `retropie_pair.py` as root. A successful certificate-pinned pairing enables and restarts the receiver and invokes the installed `player2` detector to write the actual joystick index to the NES RetroArch config. Batocera's pairing restarts `ROBVision`, whose service writes Gyromite-only Player 2 overrides before gameplay. Both paths retain unrelated games and VirtualGlove configuration. The console command's optional `--pair` repeats pairing after a credential has been revoked in Setup.
+
+The release installer requires curl, tar, Python 3, and SHA-256 tooling on the device. The Uno Q installer keeps its App Lab stop, stage, start, and rollback behavior. The release does not ship ROMs or vendor emulator cores.

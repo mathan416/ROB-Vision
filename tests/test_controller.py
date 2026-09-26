@@ -58,8 +58,8 @@ class FrameTests(unittest.TestCase):
     def test_frame_test_signal_lights_robot_without_moving_it(self):
         controller = Controller()
         controller.select('gyromite')
-        controller.arm_test()
         initial = controller.snapshot()['robot']
+        self.assertFalse(controller.snapshot()['test']['flash_active'])
         controller.receiver_seen('RetroPie', 'gyromite', 'gyromite')
         controller.receiver_seen('RetroPie', 'gyromite', 'gyromite')
         state = controller.snapshot()
@@ -70,8 +70,23 @@ class FrameTests(unittest.TestCase):
                              for event in state['events']), 1)
         controller.emulator_command('gyromite', '0001011101011', 123, 420)
         self.assertTrue(controller.snapshot()['test']['ready'])
+        controller.test_ready_at -= 1.1
+        self.assertFalse(controller.snapshot()['test']['ready'])
+        controller.emulator_command('gyromite', '0001011101011', 123, 421)
+        self.assertTrue(controller.snapshot()['test']['ready'])
         controller.emulator_command('gyromite', '0001011111011', 123, 440)
-        self.assertFalse(controller.snapshot()['test']['armed'])
+        self.assertFalse(controller.snapshot()['test']['ready'])
+        self.assertFalse(controller.snapshot()['test']['flash_active'])
+
+    def test_test_light_stops_when_signal_expires_and_ignores_wrong_game(self):
+        controller = Controller()
+        controller.select('stack_up')
+        controller.receiver_seen('RetroPie', 'stack_up', 'gyromite')
+        self.assertFalse(controller.snapshot()['test']['flash_active'])
+        controller.receiver_seen('RetroPie', 'stack_up', 'stack_up')
+        self.assertTrue(controller.snapshot()['test']['flash_active'])
+        controller.test_flash_seen_at -= 1
+        self.assertFalse(controller.snapshot()['test']['flash_active'])
 
     def test_active_console_rejects_other_console_frames(self):
         controller = Controller()
@@ -109,13 +124,12 @@ class ModelTests(unittest.TestCase):
     def test_setup_ready_signal_and_receiver_status(self):
         controller = Controller()
         controller.select('stack_up')
-        self.assertFalse(controller.arm_test()['test']['ready'])
         self.assertFalse(controller.command('READY', 'manual')['test']['ready'])
         controller.emulator_command('stack_up', '0001011101011', 123, 401)
         self.assertTrue(controller.snapshot()['test']['ready'])
         controller.receiver_seen('RetroPie')
         self.assertTrue(controller.snapshot()['link']['online'])
-        self.assertFalse(controller.select('gyromite')['test']['armed'])
+        self.assertFalse(controller.select('gyromite')['test']['ready'])
 
     def test_held_unspun_gyro_press_releases_on_lift(self):
         model = GyroState()

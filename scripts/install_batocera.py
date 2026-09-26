@@ -23,17 +23,33 @@ DEST = Path("/userdata/system/rob-vision")
 CONFIG = Path("/userdata/system/batocera.conf")
 SERVICES = Path("/userdata/system/services")
 SCRIPTS = Path("/userdata/system/scripts")
+VERSION_FILE = Path("/usr/share/batocera/batocera.version")
+
+
+def supported_hardware(machine=None, version_file=VERSION_FILE):
+    machine = machine or platform.machine()
+    version = version_file.read_text().split()[0] if version_file.is_file() else "unknown"
+    if machine != "x86_64" or version != "43.1":
+        raise RuntimeError(
+            f"Batocera {version} on {machine} has no validated R.O.B. Vision 0.1.0 build; "
+            "supported: Batocera 43.1 x86_64. No files were changed."
+        )
 
 
 def install(source=ROOT, destination=DEST, controller=None):
     if sys.platform != "linux" or os.geteuid() != 0:
         raise RuntimeError("Run this installer as root on Batocera.")
+    if sys.version_info < (3, 9):
+        raise RuntimeError("Python 3.9 or newer is required on Batocera.")
     if not CONFIG.is_file() or not Path("/usr/lib/libretro").is_dir():
         raise RuntimeError("Batocera configuration and Libretro paths are required.")
     if not shutil.which("batocera-services"):
         raise RuntimeError("Batocera service manager is missing.")
-    if platform.machine() != "x86_64":
-        raise RuntimeError("The bundled Batocera frame wrappers currently support x86_64 only.")
+    if not shutil.which("openssl"):
+        raise RuntimeError("OpenSSL is required for first-time pairing.")
+    supported_hardware()
+    if not Path("/usr/lib/libretro/fceumm_libretro.so").is_file():
+        raise RuntimeError("The stock Batocera FCEUmm core is required before installation.")
     libraries = source / "deploy/batocera/cores/x86_64"
     if any(not (libraries / f"robvision_{core}_libretro.so").is_file()
            for core in ("fceumm", "nestopia")):

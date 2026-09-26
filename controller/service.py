@@ -22,6 +22,7 @@ from .pairings import PairingStore, PLATFORMS
 from tools.identify_game import identify, load_registry
 
 ROOT = Path(__file__).resolve().parents[1]
+READY_LIGHT_SECONDS = 1.0
 MIME = {".html": "text/html", ".js": "text/javascript", ".css": "text/css",
         ".svg": "image/svg+xml", ".pdf": "application/pdf", ".png": "image/png",
         ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".ttf": "font/ttf"}
@@ -80,10 +81,8 @@ class Controller:
         self.frame_hook_last_seen = 0.0
         self.frame_hook_game = None
         self.frame_hook_commands = deque(maxlen=128)
-        self.test_armed_at = 0.0
         self.test_ready_at = 0.0
         self.test_flash_seen_at = 0.0
-        self.test_signal_announced = False
 
     def event(self, kind, message, command=None):
         self.sequence += 1
@@ -102,9 +101,10 @@ class Controller:
                              "receiver": self.receiver_name,
                              "consoles": self.pairings.list_public(self.active_console_id) if self.pairings else []},
                     "input": {"frame_hook": self.frame_hook_active()},
-                    "test": {"armed": bool(self.test_armed_at), "ready": self.test_ready_at >= self.test_armed_at > 0,
+                    "test": {"ready": self.test_ready_at > 0 and
+                             monotonic() - self.test_ready_at < READY_LIGHT_SECONDS and self.frame_hook_active(),
                              "ready_at": self.test_ready_at,
-                             "flash_active": self.test_armed_at > 0 and
+                             "flash_active": self.frame_hook_active() and
                              monotonic() - self.test_flash_seen_at < .25}}
 
     def frame_hook_active(self):
@@ -124,11 +124,11 @@ class Controller:
             if frame_hook_game == self.game and frame_hook_game in ("gyromite", "stack_up"):
                 self.frame_hook_game = frame_hook_game
                 self.frame_hook_last_seen = monotonic()
-                if self.test_armed_at and test_signal_game == self.game:
-                    self.test_flash_seen_at = monotonic()
-                    if not self.test_signal_announced:
+                if test_signal_game == self.game:
+                    now = monotonic()
+                    if now - self.test_flash_seen_at > .5:
                         self.event("test", "Game-frame Test signal detected; R.O.B. light blinking.")
-                        self.test_signal_announced = True
+                    self.test_flash_seen_at = now
 
     def emulator_command(self, game, pattern, sender_pid, frame_index, receiver="retropie", console_id=None):
         with self.lock:
@@ -156,17 +156,6 @@ class Controller:
             self.event("decoded", f"Game frame decoded: {command} ({pattern}).", command)
             return self.command(command, "emulator")
 
-    def arm_test(self):
-        with self.lock:
-            if self.game is None:
-                raise ValueError("Select Gyromite or Stack-Up before arming the test.")
-            self.test_armed_at = monotonic()
-            self.test_ready_at = 0.0
-            self.test_flash_seen_at = 0.0
-            self.test_signal_announced = False
-            self.event("test", "Watching for the game's Test-mode frame signal or ready-light command.")
-            return self.snapshot()
-
     def select(self, game):
         if game not in (None, "gyromite", "stack_up"):
             raise ValueError("Choose Gyromite, Stack-Up, or no game.")
@@ -176,9 +165,8 @@ class Controller:
             self.frame_hook_game = None
             self.frame_hook_last_seen = 0.0
             self.frame_hook_commands.clear()
-            self.test_armed_at = self.test_ready_at = 0.0
+            self.test_ready_at = 0.0
             self.test_flash_seen_at = 0.0
-            self.test_signal_announced = False
             self.event("session", f"{game or 'No game'} selected; virtual pieces reset.")
             return self.snapshot()
 
@@ -189,7 +177,7 @@ class Controller:
             if self.game == "gyromite" and any(self.gyro.assisted_until.values()) and command != "READY":
                 raise ValueError("Release Gate Assist before moving R.O.B. with commands.")
             if command == "READY":
-                if source == "emulator" and self.test_armed_at:
+                if source == "emulator":
                     self.test_ready_at = monotonic()
                 self.event("ready", "R.O.B. ready-light signal received; no movement.", command)
             else:
@@ -198,14 +186,12 @@ class Controller:
                     raise ValueError("Optical command does not belong to the selected game.")
                 if source == "emulator" and command in ("UP_STACK", "DOWN_STACK") and self.game != "stack_up":
                     raise ValueError("Optical command does not belong to the selected game.")
+                self.test_ready_at = self.test_flash_seen_at = 0.0
                 model = self.stack if self.game == "stack_up" else self.gyro
                 error = model.apply(normalized)
                 if error:
                     self.event("blocked", f"{normalized} blocked: {error}", normalized)
                 else:
-                    if self.test_armed_at:
-                        self.test_armed_at = self.test_ready_at = self.test_flash_seen_at = 0.0
-                        self.test_signal_announced = False
                     self.event("action", f"{source.title()} command: {normalized}.", normalized)
             return self.snapshot()
 
@@ -345,8 +331,6 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                                                          self.console_identity["platform"], self.console_identity["id"])
                 elif path == "/api/gate-assist":
                     result = controller.gate_assist(data["color"], data["pressed"])
-                elif path == "/api/test/arm":
-                    result = controller.arm_test()
                 elif path == "/api/pair":
                     if matrix is not None:
                         matrix.show_pairing()

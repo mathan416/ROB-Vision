@@ -1,5 +1,19 @@
 # R.O.B. Vision changelog
 
+## 0.1.0 release candidate
+
+- Added a checksum-pinned, one-command installer for the UNO Q and a common RetroPie/Batocera console installer.
+- Made first-time pairing start the receiver and map RetroPie Player 2 automatically; added a re-pair option.
+- Added Batocera board/version preflight, MIT licensing, release packaging, updated Help and guides, and rebuilt PDFs.
+
+
+
+## Automatic game Test light — 25 September 2026
+
+- Gyromite and Stack-Up Test signals now blink R.O.B.'s red light automatically when linked game frames arrive. The UNO Q matrix also switches to its pulsing T and returns to the game face when the signal ends.
+- Removed the Setup arming button and updated the panel, Help, and printable guides. A separate ready-light command still shows a steady light; neither signal moves the virtual robot.
+- Limited the steady READY indication to one second after a live Stack-Up Test exit left the UNO Q matrix showing T after the flashes stopped.
+
 ## Stack-Up block alignment — 25 September 2026
 
 - Made each virtual block one visible hand level tall in the Live Model, with a glow on the block R.O.B. can grip.

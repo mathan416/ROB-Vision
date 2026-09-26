@@ -10,26 +10,21 @@ Start **R.O.B. Vision** from UNO Q App Lab **My Apps**, then open `http://arduia
 
 The [Setup page](dashboard/setup.html) pairs either console, shows receiver and game-frame status, acknowledges Test mode from the frame link, and offers Gyromite and Stack-Up manual checks. [Mission](dashboard/index.html) keeps R.O.B. and the Game Table as the main view. The [Help center](dashboard/help.html) covers play, controls, indicators, and troubleshooting.
 
-## Install (development preview)
+## Install version 0.1.0
 
-The installers support an Arduino UNO Q running App Lab, standard RetroPie with the `pi` account, and Batocera 43.1 x86_64. They do not include ROMs or stock emulator cores. The UNO Q needs Python 3.9 or newer; RetroPie needs Python 3.7 or newer, `gcc`, `openssl`, and either `lr-fceumm` or `lr-nestopia`. Batocera needs FCEUmm or Nestopia and uses bundled x86_64 frame wrappers. The UNO Q installer stops and restarts R.O.B. Vision automatically. Exit any game on the target console before installing or upgrading.
-
-The GitHub repository is currently private, so cloning requires an account with access and working GitHub authentication on each device. To keep GitHub credentials off the devices, transfer a clean archive from an authorized computer as shown in the [installation guide](docs/INSTALLATION_GUIDE.md). With GitHub access configured, clone this `dev` branch separately on each device. On the **UNO Q**, sign in as `arduino` and run:
+The public release provides one command for the UNO Q and the same console command for RetroPie or Batocera. Run the UNO Q command as `arduino`:
 
 ```sh
-git clone --branch dev https://github.com/mathan416/ROB-Vision.git ~/rob-vision-src
-python3 ~/rob-vision-src/scripts/install.py uno-q
+curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.0/install.sh | sh -s -- uno-q
 ```
 
-The installer starts **R.O.B. Vision** in App Lab. Open `http://<your-uno-q-name>.local/dashboard/setup.html`. On **RetroPie**, sign in as `pi` and run (replace the controller name):
+Run the console command on RetroPie as `pi`, or on Batocera as `root`, replacing the UNO Q hostname:
 
 ```sh
-git clone --branch dev https://github.com/mathan416/ROB-Vision.git ~/rob-vision-src
-sudo python3 ~/rob-vision-src/scripts/install.py retropie --controller your-uno-q.local
-python3 /home/pi/rob-vision/tools/retropie_pair.py
+curl -fsSL https://github.com/mathan416/ROB-Vision/releases/download/v0.1.0/install.sh | sh -s -- console your-uno-q.local
 ```
 
-Enter the displayed code and certificate fingerprint on the UNO Q Setup page. Then on RetroPie run `sudo systemctl enable --now rob-vision-controller2.service` and `sudo python3 ~/rob-vision-src/scripts/install.py player2` to map the detected virtual pad. Restart the game after mapping. See the [installation guide](docs/INSTALLATION_GUIDE.md) for upgrades, checks, and supported layouts. Both the UNO Q and RetroPie installers passed in-place upgrades and repeat installs on the test devices, with pairing and the live link preserved. A fresh two-device installation has not yet been exercised.
+The console command installs the receiver, starts a first-time pairing window, and prints a code and fingerprint. Enter them on the UNO Q [Setup page](dashboard/setup.html). Pairing starts the receiver and configures Gyromite's virtual Controller 2; no further console command is needed. Upgrades preserve existing pairing. See the [installation guide](docs/INSTALLATION_GUIDE.md) for requirements, supported Batocera hardware, repair, and verification.
 
 ## Play through Batocera
 
@@ -49,6 +44,6 @@ For local development, run `python3 -m controller.service` and open `http://127.
 
 ## Guides and release status
 
-Start with the [documentation index](docs/INDEX.md), [user guide](docs/USER_GUIDE.md), [setup guide](docs/SETUP_GUIDE.md), [technical architecture](docs/TECHNICAL_ARCHITECTURE.md), and [release review](docs/RELEASE_REVIEW_2026-09-25.md). Printable editions are under [output/pdf](output/pdf). The remaining live checks include longer sessions, Stack-Up Memory/Bingo, Nestopia Game A gate return, and simultaneous browser clients.
+Start with the [installation guide](docs/INSTALLATION_GUIDE.md), [user guide](docs/USER_GUIDE.md), [technical architecture](docs/TECHNICAL_ARCHITECTURE.md), and [0.1.0 release notes](docs/RELEASE_NOTES_0.1.0.md). Printable editions are under [output/pdf](output/pdf). The dated release review remains a historical engineering report; release validation status is tracked in the current release notes.
 
 Historical Nintendo manuals and the Robert project informed behavior, but their text or code is not reused here. Nintendo's characters, game artwork, and marks remain with their owners. R.O.B. Vision is not affiliated with or endorsed by Nintendo.

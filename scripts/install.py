@@ -274,7 +274,7 @@ def pi_owned(path: Path, user: str = "pi") -> None:
 
 
 def configure_player2(index: int | None = None, sys_root: Path = Path("/sys/class/input"),
-                      config: Path = NES_CONFIG, wait_seconds: float = 5.0) -> int:
+                      config: Path = NES_CONFIG, wait_seconds: float = 15.0) -> int:
     if index is None:
         deadline = time.monotonic() + wait_seconds
         while True:
@@ -347,7 +347,7 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
     if not Path("/dev/uinput").exists():
         raise RuntimeError("/dev/uinput is unavailable after loading the uinput module.")
     destination.mkdir(parents=True, exist_ok=True)
-    for name in ("tools", "controller", "config"):
+    for name in ("tools", "controller", "config", "scripts"):
         copy_tree_merge(source / name, destination / name)
     build = destination / "build"
     build.mkdir(exist_ok=True)
@@ -392,17 +392,15 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
         configure_player2(player2_index)
     run("systemctl", "daemon-reload")
     token = PI_CONFIG / "token"
+    run("systemctl", "enable", "rob-vision-controller2.service")
     if token.exists():
-        run("systemctl", "enable", "rob-vision-controller2.service")
         run("systemctl", "restart", "rob-vision-controller2.service")
+        if player2_index is None:
+            index = configure_player2(wait_seconds=15.0)
+            print(f"NES Controller 2 mapped to joystick {index}.")
         print("Receiver restarted. Open Setup on the UNO Q and select Check Link.")
     else:
-        print("Receiver installed but awaiting pairing. Run as pi:")
-        print("  python3 /home/pi/rob-vision/tools/retropie_pair.py")
-        print("Enter the code and fingerprint on the UNO Q Setup page, then run:")
-        print("  sudo systemctl enable --now rob-vision-controller2.service")
-    if player2_index is None:
-        print("After pairing, run: sudo python3 scripts/install.py player2")
+        print("Receiver installed and will start automatically when pairing completes.")
 
 
 def main() -> int:

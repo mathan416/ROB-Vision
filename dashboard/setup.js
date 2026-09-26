@@ -129,8 +129,7 @@
     message('test-feedback', flashing ? 'Test-mode optical signal detected. R.O.B.’s red light blinks; his arms do not move.' :
       ready ? 'A separate ready-light command was decoded. R.O.B.’s red light stays on; his arms do not move.' :
       previewActive ? 'This is a visual preview only. No game signal was detected.' :
-      snapshot.test?.armed ? 'Waiting for the Test-mode signal from linked game frames.' :
-      'Select a game, link its frames, and arm the check while the game shows Test mode.');
+      'Enter the game’s Test mode with game frames linked. R.O.B.’s light will respond automatically.');
   }
   async function act(path, data, feedback, success) {
     try { render(await api(path, data)); if (feedback && success) message(feedback, success); }
@@ -198,7 +197,6 @@
   });
   $('select-gyro').addEventListener('click', () => act('/api/game', { game: 'gyromite' }, 'test-feedback'));
   $('select-stack').addEventListener('click', () => act('/api/game', { game: 'stack_up' }, 'test-feedback'));
-  $('arm-test').addEventListener('click', () => act('/api/test/arm', {}, 'test-feedback'));
   $('test-preview').addEventListener('click', () => {
     previewActive = true;
     if (previewTimer) clearTimeout(previewTimer);

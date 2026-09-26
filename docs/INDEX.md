@@ -1,6 +1,6 @@
 # R.O.B. Vision documentation
 
-[Latest release review](RELEASE_REVIEW_2026-09-25.md) records the code cleanup, local checks, and live validation still needed before a general release.
+[Version 0.1.0 release notes](RELEASE_NOTES_0.1.0.md) describe the install path, supported devices, and current limits. The [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remains an archive of earlier checks.
 
 **Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on RetroPie or Batocera; its rendered NES frames carry complete R.O.B. commands to the UNO Q. A browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. No physical robot or game pieces are planned. Both games' six commands were decoded during live Direct play, and Gyromite's gate controls were tested in Game A.
 
@@ -20,7 +20,7 @@ Printable editions: [User Guide](../output/pdf/R.O.B.-Vision-User-Guide.pdf), [T
 | Player and installer | [UNO Q matrix display design](UNO_Q_MATRIX_DISPLAY.md) | Implemented matrix software and pending visual checks. |
 | Player | [Gameplay guide](GAMEPLAY_GUIDE.md) | Gyromite, Stack-Up, holders, spin, and virtual button rules. |
 | Player | [Quick reference](QUICK_REFERENCE.md) | Controls and indicators at a glance. |
-| Installer | [Installation guide](INSTALLATION_GUIDE.md) | Installed UNO Q, RetroPie, and Batocera frame-link setup. |
+| Installer | [Installation guide](INSTALLATION_GUIDE.md) | One command per device, browser pairing, upgrades, and supported hardware. |
 | Developer | [Technical architecture](TECHNICAL_ARCHITECTURE.md) | State, commands, return path, and failure behavior. |
 | Developer | [Configuration reference](CONFIGURATION_REFERENCE.md) | Code defaults, deployed settings, and calibration. |
 | Tester | [Verification plan](VERIFICATION_PLAN.md) | Evidence before claiming a connected game works. |
