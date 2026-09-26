@@ -4,6 +4,8 @@ R.O.B. Vision plays Gyromite and Stack-Up with a **virtual robot companion**. Th
 
 **Meet Buddy:** a little robot follows the game's light signals beyond the emulator. His first blink appears on the UNO Q; his movements appear in the browser. Read [Buddy's story](docs/MEET_BUDDY.md).
 
+Explore the [R.O.B. Vision website](https://mathan416.github.io/ROB-Vision/) for Buddy's story, installation, and the engineering journey. Its source is in [website](website/).
+
 The app includes Mission and Setup pages, paired RetroPie and Batocera links, FCEUmm and Nestopia frame wrappers, Gyromite gate controls, Stack-Up blocks, UNO Q matrix animations, and demos that run while no game is active.
 
 Start **R.O.B. Vision** from UNO Q App Lab **My Apps**, then open `http://<your-uno-q-hostname>.local/dashboard/` or `http://<your-uno-q-LAN-IP>/dashboard/` on a laptop, phone, or tablet. The installer prints the actual Mission and Setup URLs for your UNO Q. Stop another App Lab app before starting R.O.B. Vision. Browser controls work on your trusted local network; keep the app off the public Internet.
