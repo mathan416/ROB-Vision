@@ -24,9 +24,15 @@ class ReceiverTests(unittest.TestCase):
         self.assertEqual(queued_frame_action(frame, None, selected, 'retropie', '', 10.1), 'wait')
         game = ('gyromite', 'nes', '/roms/Gyromite.zip')
         self.assertEqual(queued_frame_action(frame, game, selected, 'retropie', '', 10.2), 'send')
-        self.assertEqual(queued_frame_action(frame, game, selected, 'retropie', '', 13.1), 'drop')
+        self.assertEqual(queued_frame_action(frame, game, selected, 'retropie', '', 18.0), 'send')
+        self.assertEqual(queued_frame_action(frame, game, selected, 'retropie', '', 22.1), 'drop')
         self.assertEqual(queued_frame_action(frame, ('stack_up', 'nes', '/roms/Stack-Up.zip'),
                                              selected, 'retropie', '', 10.2), 'drop')
+
+    def test_queued_flash_from_exited_emulator_is_discarded(self):
+        frame = {'game': 'stack_up', 'created_at': 10.0, 'sender_pid': 99999999}
+        game = ('stack_up', 'nes', '/roms/Stack-Up.zip')
+        self.assertEqual(queued_frame_action(frame, game, {}, 'retropie', '', 11.0), 'drop')
 
     def test_emulator_choice_writer_sets_pi_owner_on_update_and_repeat(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -1,12 +1,38 @@
 import unittest
+import tempfile
+from pathlib import Path
+from time import monotonic
 from unittest.mock import patch
 
 from controller.model import COLORS, GyroState, StackState
 from controller.optical import ALLOWED, PATTERNS, ExactFrameDecoder, FrameTestDetector
-from controller.service import Controller
+from controller.service import Controller, router_lease_active
 
 
 class FrameTests(unittest.TestCase):
+    def test_missing_router_lease_fails_closed_only_after_router_install(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "data").mkdir()
+            with patch('controller.service.ROOT', root):
+                self.assertTrue(router_lease_active())
+                (root / "data/controller-router-required").write_text("1\n")
+                self.assertFalse(router_lease_active())
+
+    def test_console_session_expires_without_receiver_and_survives_heartbeats(self):
+        controller = Controller()
+        controller.select('gyromite')
+        controller.active_console_id = 'paired-console'
+        controller.active_receiver = 'retropie'
+        controller.session_started_at = monotonic() - 11
+        controller.receiver_last_seen = monotonic()
+        self.assertTrue(controller.snapshot()['live_game_active'])
+        controller.receiver_last_seen = monotonic() - 11
+        state = controller.snapshot()
+        self.assertFalse(state['live_game_active'])
+        self.assertIsNone(state['game'])
+        self.assertIn('timed out', state['events'][-1]['message'])
+
     def test_live_game_flag_excludes_manual_preview(self):
         controller = Controller()
         controller.select('gyromite')

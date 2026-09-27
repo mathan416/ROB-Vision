@@ -194,7 +194,10 @@ def send_frame_command(url, token, item, timeout, platform="retropie", console_i
 
 def queued_frame_action(item, active_game, state, platform, console_id, now):
     """Keep the first flash while Router selects the game's controller."""
-    if now - item["created_at"] > 3.0 or (active_game and active_game[0] != item["game"]):
+    if now - item["created_at"] > 12.0 or (active_game and active_game[0] != item["game"]):
+        return "drop"
+    sender_pid = item.get("sender_pid")
+    if sender_pid and not (Path("/proc") / str(sender_pid) / "cmdline").is_file():
         return "drop"
     if not active_game:
         return "wait"

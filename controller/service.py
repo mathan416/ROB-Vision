@@ -26,6 +26,7 @@ from tools.identify_game import SUPPORTED_EXTENSIONS, SUPPORTED_GAMES, SUPPORTED
 
 ROOT = Path(__file__).resolve().parents[1]
 READY_LIGHT_SECONDS = 1.0
+RECEIVER_SESSION_TIMEOUT = 10.0
 MIME = {".html": "text/html", ".js": "text/javascript", ".css": "text/css",
         ".svg": "image/svg+xml", ".pdf": "application/pdf", ".png": "image/png",
         ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".ttf": "font/ttf"}
@@ -35,7 +36,7 @@ def router_lease_active():
     """Older standalone installs have no lease; shared Router installs fail closed."""
     path = ROOT / "data/controller-router-lease.json"
     if not path.exists():
-        return True
+        return not path.with_name("controller-router-required").exists()
     try:
         record = json.loads(path.read_text())
         boot = Path("/proc/sys/kernel/random/boot_id")
@@ -236,6 +237,7 @@ class Controller:
         self.sequence = 0
         self.events = []
         self.receiver_last_seen = 0.0
+        self.session_started_at = 0.0
         self.receiver_name = None
         self.active_receiver = None
         self.active_console_id = None
@@ -253,6 +255,7 @@ class Controller:
 
     def snapshot(self):
         with self.lock:
+            self.expire_stale_session()
             if self.game == "gyromite":
                 for color in self.gyro.expire_assist():
                     self.event("assist", f"{color.title()} Gate Assist timed out; button released.")
@@ -278,8 +281,19 @@ class Controller:
     def frame_hook_active(self):
         return self.frame_hook_game == self.game and monotonic() - self.frame_hook_last_seen < 1.0
 
+    def expire_stale_session(self):
+        """Release a console session whose receiver stopped checking in."""
+        if (self.game and self.active_console_id and self.session_started_at and
+                monotonic() - max(self.session_started_at, self.receiver_last_seen) > RECEIVER_SESSION_TIMEOUT):
+            self.select(None)
+            self.active_receiver = None
+            self.active_console_id = None
+            self.receiver_name = None
+            self.event("session", "Console link timed out; R.O.B. returned to standby.")
+
     def receiver_seen(self, name, frame_hook_game=None, test_signal_game=None, console_id=None):
         with self.lock:
+            self.expire_stale_session()
             if self.active_console_id and console_id != self.active_console_id:
                 return
             if self.active_receiver and name.casefold() != self.active_receiver:
@@ -300,6 +314,7 @@ class Controller:
 
     def emulator_command(self, game, pattern, sender_pid, frame_index, receiver="retropie", console_id=None):
         with self.lock:
+            self.expire_stale_session()
             if not router_lease_active():
                 raise ValueError("Select R.O.B. Vision in Controller Router before playing.")
             if self.active_console_id and console_id != self.active_console_id:
@@ -331,6 +346,7 @@ class Controller:
             raise ValueError("Choose Gyromite, Stack-Up, or no game.")
         with self.lock:
             self.game = game
+            self.session_started_at = 0.0
             self.stack, self.gyro = StackState(), GyroState()
             self.frame_hook_game = None
             self.frame_hook_last_seen = 0.0
@@ -498,6 +514,7 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                         controller.active_console_id = console_id if game else None
                         controller.receiver_name = "RetroPie" if receiver == "retropie" else "Batocera"
                         controller.receiver_last_seen = 0.0
+                        controller.session_started_at = monotonic() if game else 0.0
                 elif path == "/api/command":
                     result = controller.command(data["command"])
                 elif path == "/api/emulator/command":
