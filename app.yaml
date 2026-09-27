@@ -2,7 +2,6 @@ name: R.O.B. Vision
 description: Independent virtual robot companion with RetroPie game-frame commands and a live browser dashboard
 icon: "🤖"
 ports:
-  - 80
   - 8766
 bricks:
   - local:avahi_resolver:

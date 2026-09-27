@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from controller.model import COLORS, GyroState, StackState
 from controller.optical import ALLOWED, PATTERNS, ExactFrameDecoder, FrameTestDetector
@@ -6,6 +7,18 @@ from controller.service import Controller
 
 
 class FrameTests(unittest.TestCase):
+    def test_live_game_flag_excludes_manual_preview(self):
+        controller = Controller()
+        controller.select('gyromite')
+        self.assertFalse(controller.snapshot()['live_game_active'])
+        controller.active_console_id = 'paired-console'
+        self.assertTrue(controller.snapshot()['live_game_active'])
+        with patch('controller.service.router_lease_active', return_value=False):
+            self.assertTrue(controller.snapshot()['live_game_active'])
+            self.assertFalse(controller.snapshot()['controller_selected'])
+        controller.select(None)
+        self.assertFalse(controller.snapshot()['live_game_active'])
+
     def test_all_complete_patterns_match_only_their_game(self):
         for pattern, command in PATTERNS.items():
             game = 'stack_up' if command.endswith('STACK') else 'gyromite'

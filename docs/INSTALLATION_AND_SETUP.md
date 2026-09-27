@@ -9,7 +9,7 @@ This guide gets a new Arduino UNO Q and one RetroPie or Batocera console ready t
 - `curl`, `tar`, Python 3, and `sha256sum` or `shasum` on the device running each installer command. The installer reports missing prerequisites.
 - Your own legally obtained Gyromite or Stack-Up ROM. The console identifies the game by an exact registered NES ROM filename. Common World names are included; select **Edit ROMs** beside that console in Setup to add yours after pairing. See [game identification](GAME_IDENTIFICATION.md).
 
-Before installing on RetroPie, exit any game **and EmulationStation**. Restarting the virtual joystick while EmulationStation is open can crash its input manager. On the UNO Q, stop another App Lab app before starting R.O.B. Vision.
+Before installing on RetroPie, exit any game **and EmulationStation**. Restarting the virtual joystick while EmulationStation is open can crash its input manager. Once installed and paired, starting a registered game automatically selects its UNO Q controller app. Both apps remain online; finish a live game before changing apps manually.
 
 ## 1. Install or upgrade the UNO Q
 
@@ -19,7 +19,7 @@ Sign in as `arduino` and run this command in its terminal:
 curl -fsSL https://github.com/mathan416/ROB-Vision/releases/latest/download/install.sh | sh -s -- uno-q
 ```
 
-This is also the UNO Q upgrade command. Rerun it later to get the latest release; there is no separate upgrade command. The installer verifies the release package, installs and starts the App Lab app, and compiles and uploads the LED matrix sketch. It preserves pairing data during upgrades. It prints Mission and Setup links for both the UNO Q's `.local` name and available LAN IPv4 addresses. Open the printed **Setup** link in a browser on your laptop, tablet, or phone. A downloaded `file://` copy of Setup is only a preview and cannot pair a live console.
+This is also the UNO Q upgrade command. Rerun it later to get the latest release; there is no separate upgrade command. The installer verifies the release package, installs or upgrades Controller Router's shared App Lab Matrix service, and starts the R.O.B. Vision Linux service. R.O.B. Vision does not flash its own Matrix sketch during normal installation. It preserves pairing data during upgrades. It prints Mission and Setup links for both the UNO Q's `.local` name and available LAN IPv4 addresses. Open the printed **Setup** link in a browser on your laptop, tablet, or phone. The UNO Q address without a port opens the Controller Router selection page when both controller apps are installed; it selects and opens R.O.B. Vision directly when it is the only one. R.O.B. Vision’s browser pages use port **8101**. Its console receiver continues using port **8766**. A downloaded `file://` copy of Setup is only a preview and cannot pair a live console.
 
 ## 2. Install or upgrade each console
 

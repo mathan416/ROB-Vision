@@ -62,11 +62,23 @@ start() {
 }
 stop() {
     if [ -f "$RUN/router.pid" ]; then
-        kill "$(cat "$RUN/router.pid")" 2>/dev/null || :
+        router_pid=$(cat "$RUN/router.pid")
+        kill "$router_pid" 2>/dev/null || :
+        count=0
+        while kill -0 "$router_pid" 2>/dev/null && [ "$count" -lt 50 ]; do
+            sleep 0.1
+            count=$((count + 1))
+        done
         rm -f "$RUN/router.pid"
     fi
     if [ -f "$RUN/receiver.pid" ]; then
-        kill "$(cat "$RUN/receiver.pid")" 2>/dev/null || :
+        receiver_pid=$(cat "$RUN/receiver.pid")
+        kill "$receiver_pid" 2>/dev/null || :
+        count=0
+        while kill -0 "$receiver_pid" 2>/dev/null && [ "$count" -lt 50 ]; do
+            sleep 0.1
+            count=$((count + 1))
+        done
         rm -f "$RUN/receiver.pid"
     fi
 }

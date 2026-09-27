@@ -1,5 +1,15 @@
 # Controller Router
 
+## Choose a controller app on the UNO Q
+
+Start a registered game on the paired console and Controller Router selects its app automatically. Gyromite and Stack-Up select R.O.B. Vision; games registered with VirtualGlove select VirtualGlove. You do not need to open either website to play. Both websites and Linux services stay running, but only the game's app controls input and the UNO Q Matrix. Router releases that control and shows its neutral animation when the game ends.
+
+Open the UNO Q's `.local` address or LAN IP address without a port when you want to view or manually select an app. If only one app is installed, the page opens it directly; if both are installed, it shows a chooser. **Choose controller** in either app returns to the chooser. Opening a product's direct browser address selects it when no game is active. Finish a live game before changing apps manually.
+
+Controller Router owns the UNO Q Matrix firmware. At startup, neither app is selected and the Matrix shows Router's neutral animation. A registered game selects its app and displays that app's cues. If Router stops or the UNO Q restarts, input stops until the running game's console session is reported again. Pairing and manual controller changes are blocked during a live game.
+
+R.O.B. Vision's browser uses port **8101**. Its console receiver continues on port **8766**. This UNO Q app chooser is separate from the console player assignments described below.
+
 Controller Router decides which game controller supplies each player in RetroArch. R.O.B. Vision installs it on RetroPie and Batocera so Buddy's virtual buttons and your physical gamepads can coexist. Your console still uses its original controllers in EmulationStation; Router takes over their game input only while a Libretro game is running.
 
 ## What goes to each player

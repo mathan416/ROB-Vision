@@ -2,6 +2,7 @@
 
 import tempfile
 import os
+import subprocess
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -22,9 +23,9 @@ class InstallerTests(unittest.TestCase):
             {"ifname": "docker0", "addr_info": [{"family": "inet", "local": "172.17.0.1"}]},
         ]
         self.assertEqual(uno_dashboard_urls("virtualglove", interfaces), [
-            "http://virtualglove.local/dashboard/",
-            "http://10.0.2.84/dashboard/",
-            "http://10.0.2.86/dashboard/",
+            "http://virtualglove.local:8101/dashboard/",
+            "http://10.0.2.84:8101/dashboard/",
+            "http://10.0.2.86:8101/dashboard/",
         ])
 
     def test_receiver_source_is_importable_before_installation(self):
@@ -89,6 +90,10 @@ class InstallerTests(unittest.TestCase):
             self.assertIsNone(installed_controller(env))
             env.write_text("ROB_VISION_URL=http://robvision.local\n")
             self.assertEqual(installed_controller(env), "robvision.local")
+            env.write_text("ROB_VISION_URL=http://robvision.local:8766\n")
+            self.assertEqual(installed_controller(env), "robvision.local")
+            env.write_text("ROB_VISION_URL=http://robvision.local:8101\n")
+            self.assertEqual(installed_controller(env), "robvision.local")
 
     def test_retroarch_udev_index_can_differ_from_js_number(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -120,8 +125,12 @@ class InstallerTests(unittest.TestCase):
             root = Path(directory)
             source = root / "source"
             destination = root / "ArduinoApps" / "rob-vision"
-            for name in ("python", "sketch", "dashboard"):
+            for name in ("python", "sketch", "dashboard", "matrix", "controller_router_portal/app/sketch"):
                 (source / name).mkdir(parents=True)
+            (source / "controller_router_portal/install.py").write_text("pass\n")
+            (source / "controller_router_portal/client.py").write_text("# Router client\n")
+            (source / "controller_router_portal/app/sketch/sketch.ino").write_text("// router\n")
+            (source / "matrix/manifest.json").write_text("{}\n")
             (source / "app.yaml").write_text("name: R.O.B. Vision\n")
             (source / "python/main.py").write_text("pass\n")
             (source / "sketch/sketch.ino").write_text("// sketch\n")
@@ -133,7 +142,9 @@ class InstallerTests(unittest.TestCase):
                  patch("scripts.install.pwd.getpwuid", return_value=SimpleNamespace(pw_name="arduino")), \
                  patch("scripts.install.app_lab_status", side_effect=[(None, False), ("running", False)]), \
                  patch("scripts.install.app_lab_action", side_effect=lambda action, _path: actions.append(action)), \
-                 patch("scripts.install.wait_for_uno"):
+                 patch("scripts.install.wait_for_uno"), \
+                 patch("scripts.install.print_uno_dashboard_urls"), \
+                 patch("scripts.install.subprocess.run"):
                 install_uno(source, destination)
                 token = (destination / "data/controller-token").read_text()
                 paired = '{"schema":1,"consoles":[{"id":"saved-console"}]}'
@@ -148,6 +159,7 @@ class InstallerTests(unittest.TestCase):
             self.assertEqual((destination / "data/controller-token").read_text(), token)
             self.assertEqual((destination / "data/paired-consoles.json").read_text(), paired)
             self.assertEqual((destination / "dashboard/index.html").read_text(), "<main>two</main>\n")
+            self.assertTrue((destination / "controller_router_portal/client.py").is_file())
             self.assertEqual((root / "ArduinoApps/rob-vision.previous/dashboard/index.html").read_text(),
                              "<main>one</main>\n")
             self.assertEqual((destination / "data/controller-token").stat().st_mode & 0o777, 0o600)
@@ -155,7 +167,7 @@ class InstallerTests(unittest.TestCase):
             self.assertFalse((destination / "data/.avahi-resolver.sock").exists())
             self.assertEqual((destination / ".deps/bridge.txt").read_text(), "installed")
             self.assertEqual((destination / ".cache/app-compose.yaml").read_text(), "generated")
-            self.assertEqual(actions, ["start", "stop", "start"])
+            self.assertEqual(actions, ["stop"])
 
     def test_running_app_is_detected_from_app_lab(self):
         sample = '{"apps":[{"name":"R.O.B. Vision","status":"running"}]}'
@@ -167,8 +179,11 @@ class InstallerTests(unittest.TestCase):
             root = Path(directory)
             source = root / "source"
             destination = root / "ArduinoApps/rob-vision"
-            for name in ("python", "sketch", "dashboard"):
+            for name in ("python", "sketch", "dashboard", "matrix", "controller_router_portal/app/sketch"):
                 (source / name).mkdir(parents=True)
+            (source / "controller_router_portal/install.py").write_text("pass\n")
+            (source / "controller_router_portal/app/sketch/sketch.ino").write_text("// router\n")
+            (source / "matrix/manifest.json").write_text("{}\n")
             (source / "app.yaml").write_text("name: R.O.B. Vision\n")
             (source / "python/main.py").write_text("pass\n")
             (source / "sketch/sketch.ino").write_text("// sketch\n")
@@ -177,21 +192,24 @@ class InstallerTests(unittest.TestCase):
             (destination / "dashboard").mkdir()
             (destination / "dashboard/index.html").write_text("old\n")
             actions = []
-            starts = [False, True]
             def action(name, _path):
                 actions.append(name)
-                if name == "start" and not starts.pop(0):
-                    raise RuntimeError("simulated App Lab start failure")
+            real_run = subprocess.run
+            def run(command, *args, **kwargs):
+                if isinstance(command, list) and command and str(command[-1]).endswith("controller_router_portal/install.py"):
+                    raise RuntimeError("simulated shared Router startup failure")
+                return real_run(command, *args, **kwargs)
             with patch("scripts.install.sys.platform", "linux"), \
                  patch("scripts.install.os.geteuid", return_value=1000), \
                  patch("scripts.install.pwd.getpwuid", return_value=SimpleNamespace(pw_name="arduino")), \
                  patch("scripts.install.app_lab_status", return_value=("running", False)), \
                  patch("scripts.install.app_lab_action", side_effect=action), \
-                 patch("scripts.install.wait_for_uno"):
+                 patch("scripts.install.wait_for_uno"), \
+                 patch("scripts.install.subprocess.run", side_effect=run):
                 with self.assertRaisesRegex(RuntimeError, "previous app restored"):
                     install_uno(source, destination)
             self.assertEqual((destination / "dashboard/index.html").read_text(), "old\n")
-            self.assertEqual(actions, ["stop", "start", "stop", "start"])
+            self.assertEqual(actions, ["stop", "stop", "start"])
 
 
 if __name__ == "__main__":

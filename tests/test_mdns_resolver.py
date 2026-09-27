@@ -62,15 +62,17 @@ class MdnsResolverTests(unittest.TestCase):
         ), patch('controller.service.socket.getaddrinfo', side_effect=AssertionError('container DNS used')):
             result = pair_retropie('retropieconsole.local', '123456', fingerprint,
                                    'secret-token-123456', 'a' * 32,
-                                   controller_url='http://virtualglove.local')
+                                   controller_url=controller_url_from_host('virtualglove.local'))
         lookup.assert_called_once_with('retropieconsole.local')
         self.assertEqual(result['host'], 'retropieconsole.local')
-        self.assertEqual(Connection.sent['controller_url'], 'http://virtualglove.local')
+        self.assertEqual(Connection.sent['controller_url'], 'http://virtualglove.local:8766')
 
     def test_pairing_uses_the_uno_q_address_from_setup(self):
         self.assertEqual(controller_url_from_host('virtualglove.local'),
-                         'http://virtualglove.local')
-        self.assertEqual(controller_url_from_host('10.0.2.86'), 'http://10.0.2.86')
+                         'http://virtualglove.local:8766')
+        self.assertEqual(controller_url_from_host('10.0.2.86'), 'http://10.0.2.86:8766')
+        self.assertEqual(controller_url_from_host('virtualglove.local:8101'),
+                         'http://virtualglove.local:8766')
         with self.assertRaises(ValueError):
             controller_url_from_host('127.0.0.1:8766')
 

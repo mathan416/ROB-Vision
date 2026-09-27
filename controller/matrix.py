@@ -2,6 +2,7 @@
 
 from enum import IntEnum
 from time import monotonic
+from pathlib import Path
 
 
 class MatrixMode(IntEnum):
@@ -23,6 +24,24 @@ class MatrixDisplay:
     """Send authoritative state and fresh action hints; keep absence nonfatal."""
 
     def __init__(self, call=None):
+        if call is None:
+            socket = Path("/run/user/1000/controller-router-portal/control.sock")
+            lease = Path(__file__).resolve().parents[1] / "data/controller-router-lease.json"
+            if socket.exists() or lease.exists():
+                from controller_router_portal.client import display
+                names = {MatrixMode.LOADING: "loading", MatrixMode.GYROMITE: "gyromite",
+                         MatrixMode.STACK_UP: "stack_up", MatrixMode.TEST: "test",
+                         MatrixMode.TEST_FLASH: "test_flash", MatrixMode.PAIRING: "pairing",
+                         MatrixMode.FAULT: "fault"}
+                hint_names = {value: "hint_" + key.lower() for key, value in HINTS.items()}
+
+                def router_call(_method, mode, hint):
+                    selected = MatrixMode(mode)
+                    if selected in (MatrixMode.IDLE, MatrixMode.OFF):
+                        return display("rob_vision", "clear")
+                    return display("rob_vision", "play", animation=hint_names.get(hint, names[selected]))
+
+                call = router_call
         if call is None:
             try:
                 from arduino.app_utils import Bridge

@@ -11,12 +11,23 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from identify_game import load_registry  # noqa: E402
 from retropie_controller2 import (controller_route_address, fetch_state, pads_from_state,
-                                  running_game, source_selected, sync_game)  # noqa: E402
+                                  queued_frame_action, running_game, source_selected,
+                                  sync_game)  # noqa: E402
 from tools.retropie_frame_hook import FrameHookServer, sender_game  # noqa: E402
 from tools.install_retropie_frame_hook import install, set_entry  # noqa: E402
 
 
 class ReceiverTests(unittest.TestCase):
+    def test_first_flash_waits_for_game_and_controller_lease(self):
+        frame = {'game': 'gyromite', 'created_at': 10.0}
+        selected = {'link': {'receiver': 'retropie'}}
+        self.assertEqual(queued_frame_action(frame, None, selected, 'retropie', '', 10.1), 'wait')
+        game = ('gyromite', 'nes', '/roms/Gyromite.zip')
+        self.assertEqual(queued_frame_action(frame, game, selected, 'retropie', '', 10.2), 'send')
+        self.assertEqual(queued_frame_action(frame, game, selected, 'retropie', '', 13.1), 'drop')
+        self.assertEqual(queued_frame_action(frame, ('stack_up', 'nes', '/roms/Stack-Up.zip'),
+                                             selected, 'retropie', '', 10.2), 'drop')
+
     def test_emulator_choice_writer_sets_pi_owner_on_update_and_repeat(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'emulators.cfg'

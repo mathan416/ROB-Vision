@@ -31,6 +31,22 @@ MIME = {".html": "text/html", ".js": "text/javascript", ".css": "text/css",
         ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".ttf": "font/ttf"}
 
 
+def router_lease_active():
+    """Older standalone installs have no lease; shared Router installs fail closed."""
+    path = ROOT / "data/controller-router-lease.json"
+    if not path.exists():
+        return True
+    try:
+        record = json.loads(path.read_text())
+        boot = Path("/proc/sys/kernel/random/boot_id")
+        boot_id = boot.read_text().strip() if boot.exists() else "development"
+        return (record.get("schema") == 1 and record.get("boot_id") == boot_id and
+                record.get("active") is True and
+                isinstance(record.get("until"), (int, float)) and monotonic() < record["until"])
+    except (OSError, ValueError, TypeError):
+        return False
+
+
 def game_from_launch(data):
     """Accept a known game asserted by a paired console's validated registry."""
     if data.get("event") != "start":
@@ -167,7 +183,7 @@ def controller_url_from_host(host):
     else:
         if not address.is_private or address.is_loopback or address.is_link_local:
             raise ValueError("Pairing requires this UNO Q's private LAN address.")
-    return "http://" + host
+    return "http://" + parsed.hostname + ":8766"
 
 
 def pair_retropie(host, code, fingerprint, token, console_id, port=8768, controller_url=None):
@@ -240,8 +256,14 @@ class Controller:
             if self.game == "gyromite":
                 for color in self.gyro.expire_assist():
                     self.event("assist", f"{color.title()} Gate Assist timed out; button released.")
+            active = router_lease_active()
+            robot = self.stack.snapshot() if self.game == "stack_up" else self.gyro.snapshot() if self.game == "gyromite" else None
+            if not active and self.game == "gyromite" and robot:
+                robot["pads"] = {"red": False, "blue": False}
             return {"schema": 1, "sequence": self.sequence, "game": self.game,
-                    "robot": self.stack.snapshot() if self.game == "stack_up" else self.gyro.snapshot() if self.game == "gyromite" else None,
+                    "live_game_active": bool(self.game and self.active_console_id),
+                    "controller_selected": active,
+                    "robot": robot,
                     "events": list(self.events),
                     "link": {"online": monotonic() - self.receiver_last_seen < 3.0,
                              "receiver": self.receiver_name,
@@ -278,6 +300,8 @@ class Controller:
 
     def emulator_command(self, game, pattern, sender_pid, frame_index, receiver="retropie", console_id=None):
         with self.lock:
+            if not router_lease_active():
+                raise ValueError("Select R.O.B. Vision in Controller Router before playing.")
             if self.active_console_id and console_id != self.active_console_id:
                 raise ValueError("Frame command came from another console.")
             if self.active_receiver and receiver != self.active_receiver:
@@ -318,6 +342,8 @@ class Controller:
 
     def command(self, command, source="manual"):
         with self.lock:
+            if not router_lease_active() and source != "demo":
+                raise ValueError("Select R.O.B. Vision in Controller Router before playing.")
             if self.game is None:
                 raise ValueError("Select a game before sending commands.")
             if self.game == "gyromite" and any(self.gyro.assisted_until.values()) and command != "READY":
@@ -343,6 +369,8 @@ class Controller:
 
     def gate_assist(self, color, pressed):
         with self.lock:
+            if not router_lease_active():
+                raise ValueError("Select R.O.B. Vision in Controller Router before using gates.")
             if self.game != "gyromite":
                 raise ValueError("Gate Assist is only available in Gyromite.")
             if color == "all" and pressed is False:

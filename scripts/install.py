@@ -171,7 +171,7 @@ def app_lab_status() -> tuple[str | None, bool]:
     listing = json.loads(result.stdout)
     apps = listing.get("apps", [])
     status = next((app.get("status") for app in apps if app.get("name") == "R.O.B. Vision"), None)
-    other_running = any(app.get("status") == "running" and app.get("name") != "R.O.B. Vision"
+    other_running = any(app.get("status") == "running" and app.get("name") not in ("R.O.B. Vision", "Controller Router")
                         for app in apps)
     return status, other_running
 
@@ -197,7 +197,7 @@ def wait_for_uno(seconds: float = 30) -> None:
 def uno_dashboard_urls(hostname: str, address_data: list[dict]) -> list[str]:
     """Return the mDNS URL and usable LAN IPv4 URLs for this UNO Q."""
     name = hostname.split(".", 1)[0].strip().lower()
-    urls = [f"http://{name}.local/dashboard/"] if re.fullmatch(r"[a-z0-9][a-z0-9-]*", name) else []
+    urls = [f"http://{name}.local:8101/dashboard/"] if re.fullmatch(r"[a-z0-9][a-z0-9-]*", name) else []
     for interface in address_data:
         device = interface.get("ifname", "")
         if device.startswith(("docker", "br-", "veth", "virbr", "tun", "tap", "wg", "tailscale", "podman", "cni")):
@@ -211,7 +211,7 @@ def uno_dashboard_urls(hostname: str, address_data: list[dict]) -> list[str]:
                 continue
             if ip.is_loopback or ip.is_link_local:
                 continue
-            url = f"http://{ip}/dashboard/"
+            url = f"http://{ip}:8101/dashboard/"
             if url not in urls:
                 urls.append(url)
     return urls
@@ -233,6 +233,7 @@ def print_uno_dashboard_urls() -> None:
     for url in urls:
         print(f"  Mission: {url}")
         print(f"  Setup:   {url}setup.html")
+        print(f"  Choose:  {url.split(':8101/', 1)[0]}/")
 
 
 def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
@@ -244,7 +245,9 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
         raise RuntimeError("ArduinoApps was not found. Install or enable UNO Q App Lab first.")
     if destination.is_symlink() or source.resolve() == destination.resolve():
         raise RuntimeError("Install from a separate checkout; the App Lab destination cannot be the source.")
-    required_files = ["app.yaml", "python/main.py", "sketch/sketch.ino", "dashboard/index.html"]
+    required_files = ["app.yaml", "python/main.py", "sketch/sketch.ino", "dashboard/index.html",
+                      "matrix/manifest.json", "controller_router_portal/install.py",
+                      "controller_router_portal/app/sketch/sketch.ino"]
     if (source / "app.yaml").is_file() and "local:avahi_resolver" in (source / "app.yaml").read_text():
         required_files.extend(("bricks/local/avahi_resolver/brick_config.yaml",
                                "bricks/local/avahi_resolver/brick_compose.yaml",
@@ -253,9 +256,12 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
         if not (source / required).is_file():
             raise RuntimeError(f"Incomplete checkout: missing {required}")
     status, other_running = app_lab_status()
-    if other_running:
-        raise RuntimeError("Stop the other running App Lab app before installing R.O.B. Vision.")
     was_running = status == "running"
+    runtime_was_running = subprocess.run(["docker", "ps", "--filter",
+                                         "label=com.docker.compose.project=rob-vision-runtime",
+                                         "--format", "{{.ID}}"],
+                                         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                         text=True, check=False).stdout.strip() != ""
     backup = destination.with_name("rob-vision.previous")
     if backup.exists():
         backup = destination.with_name(f"rob-vision.previous-{os.getpid()}-{secrets.token_hex(3)}")
@@ -264,6 +270,9 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
         if was_running:
             print("Stopping R.O.B. Vision in App Lab.", flush=True)
             app_lab_action("stop", destination)
+        if runtime_was_running:
+            subprocess.run([sys.executable, str(source / "controller_router_portal/host/products.py"),
+                            "stop", "rob-vision"], check=True)
         # Stage a private sibling while the app is stopped, preserving its token and App Lab files.
         with tempfile.TemporaryDirectory(prefix=".rob-vision-stage-", dir=destination.parent) as directory:
             staged = Path(directory) / "rob-vision"
@@ -271,7 +280,8 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
             shutil.copy2(source / "app.yaml", staged / "app.yaml")
             # Dashboard guides are already bundled under dashboard/guides.
             # Do not copy generated release archives into the running app.
-            for name in ("controller", "python", "dashboard", "config", "tools", "sketch", "bricks"):
+            for name in ("controller", "python", "dashboard", "config", "tools", "sketch", "bricks",
+                         "matrix", "controller_router_portal"):
                 if (source / name).exists():
                     shutil.copytree(source / name, staged / name,
                                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store", "._*"))
@@ -300,9 +310,8 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
                     os.replace(backup, destination)
                 raise
             replaced = True
-        print("Starting R.O.B. Vision in App Lab.", flush=True)
-        app_lab_action("start", destination)
-        wait_for_uno()
+        subprocess.run([sys.executable, str(source / "controller_router_portal/install.py")], check=True)
+        wait_for_uno(90)
     except Exception as error:
         if replaced and backup.exists():
             try:
@@ -312,7 +321,10 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
             failed = destination.with_name(f"rob-vision.failed-{os.getpid()}-{secrets.token_hex(3)}")
             os.replace(destination, failed)
             os.replace(backup, destination)
-            if was_running:
+            if runtime_was_running:
+                subprocess.run([sys.executable, str(source / "controller_router_portal/host/products.py"),
+                                "start", "rob-vision"], check=False)
+            elif was_running:
                 app_lab_action("start", destination)
                 wait_for_uno()
             raise RuntimeError(f"Installation failed; previous app restored. Candidate retained at {failed}.") from error
@@ -321,7 +333,7 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
                 app_lab_action("start", destination)
                 wait_for_uno()
         raise
-    print(f"UNO Q app installed and running at {destination}")
+    print(f"R.O.B. Vision service installed and running at {destination}; select it from Controller Router.")
     if backup.exists():
         print(f"Previous app retained at {backup}; remove it after checking the new app.")
     print_uno_dashboard_urls()
@@ -340,7 +352,7 @@ def installed_controller(path: Path = PI_CONFIG / "receiver.env") -> str | None:
         return None
     for line in path.read_text().splitlines():
         if line.startswith("ROB_VISION_URL=http://"):
-            return line[len("ROB_VISION_URL=http://"):]
+            return line[len("ROB_VISION_URL=http://"):].removesuffix(":8766").removesuffix(":8101")
     return None
 
 
@@ -424,7 +436,7 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
     PI_CONFIG.mkdir(mode=0o700, parents=True, exist_ok=True)
     PI_CONFIG.chmod(0o700)
     env = PI_CONFIG / "receiver.env"
-    write_file(env, f"ROB_VISION_URL=http://{controller}\n"
+    write_file(env, f"ROB_VISION_URL=http://{controller}:8766\n"
                     "ROB_VISION_TOKEN_FILE=/home/pi/.config/rob-vision/token\n", 0o600)
     pi_owned(PI_CONFIG)
     write_file(Path("/etc/modules-load.d/rob-vision.conf"), "uinput\n")

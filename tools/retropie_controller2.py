@@ -192,9 +192,20 @@ def send_frame_command(url, token, item, timeout, platform="retropie", console_i
         response.read()
 
 
+def queued_frame_action(item, active_game, state, platform, console_id, now):
+    """Keep the first flash while Router selects the game's controller."""
+    if now - item["created_at"] > 3.0 or (active_game and active_game[0] != item["game"]):
+        return "drop"
+    if not active_game:
+        return "wait"
+    if not source_selected(state, platform, console_id):
+        return "drop"
+    return "send"
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--url", default=os.environ.get("ROB_VISION_URL", "http://arduiain.local"))
+    parser.add_argument("--url", default=os.environ.get("ROB_VISION_URL", "http://arduiain.local:8766"))
     parser.add_argument("--token-file", type=Path,
                         default=Path(os.environ.get("ROB_VISION_TOKEN_FILE", "/home/pi/.config/rob-vision/token")))
     parser.add_argument("--interval", type=float, default=0.05)
@@ -287,11 +298,13 @@ def main():
             pending_frames.extend(hook.take_pending())
             while pending_frames:
                 item = pending_frames[0]
-                if (not active_game or active_game[0] != item["game"] or
-                        not source_selected(state, args.platform, console_id) or
-                        time.monotonic() - item["created_at"] > 1.0):
+                action = queued_frame_action(item, active_game, state, args.platform,
+                                             console_id, time.monotonic())
+                if action == "drop":
                     pending_frames.popleft()
                     continue
+                if action == "wait":
+                    break
                 if time.monotonic() < item.get("next_try", 0.0):
                     break
                 try:

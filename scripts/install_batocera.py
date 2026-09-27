@@ -138,7 +138,8 @@ def install(source=ROOT, destination=DEST, controller=None):
                   else source / "config/games.json")
     old_url = destination / "controller.url"
     if controller is None and old_url.is_file():
-        controller = old_url.read_text().strip().removeprefix("http://")
+        controller = (old_url.read_text().strip().removeprefix("http://")
+                      .removesuffix(":8766").removesuffix(":8101"))
     if not controller:
         raise ValueError("Provide --controller with the UNO Q hostname or IP.")
     valid_controller(controller)
@@ -157,7 +158,7 @@ def install(source=ROOT, destination=DEST, controller=None):
             for core in ("fceumm", "nestopia"):
                 if core not in libraries:
                     unlink_if_exists(destination / "build" / f"robvision_{core}_libretro.so")
-            write_file(old_url, f"http://{controller}\n", 0o600)
+            write_file(old_url, f"http://{controller}:8766\n", 0o600)
             copy_file(source / "deploy/batocera/ROBVision", SERVICES / "ROBVision", 0o755)
             copy_file(source / "deploy/batocera/zz-robvision-game", SCRIPTS / "zz-robvision-game", 0o755)
             copy_file(source / "deploy/batocera/retroarch-joypad.cfg",
