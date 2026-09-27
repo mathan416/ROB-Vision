@@ -25,11 +25,21 @@ def activate_receiver(platform):
         prefix = [] if os.geteuid() == 0 else ["sudo", "-n"]
         service = "rob-vision-controller2.service"
         commands = [prefix + ["systemctl", "enable", service],
-                    prefix + ["systemctl", "restart", service],
-                    prefix + ["/usr/bin/python3", "/home/pi/rob-vision/scripts/install.py", "player2"]]
+                    prefix + ["systemctl", "restart", service]]
     for command in commands:
         subprocess.run(command, check=True, timeout=30, stdout=subprocess.DEVNULL,
                        stderr=subprocess.DEVNULL)
+
+
+def activate_router(platform):
+    if platform == "retropie":
+        command = ([] if os.geteuid() == 0 else ["sudo", "-n"])
+        command += ["python3", "/home/pi/rob-vision/tools/controller_router_setup.py", "retropie"]
+    else:
+        command = ["python3", "/userdata/system/rob-vision/tools/controller_router_setup.py",
+                   "batocera"]
+    subprocess.run(command, check=True, timeout=30, stdout=subprocess.DEVNULL,
+                   stderr=subprocess.DEVNULL)
 
 
 def install_token(token, destination):
@@ -115,6 +125,7 @@ def apply_pairing(platform, token_file, console_id, token, controller_url):
         if target:
             restore_file(target, new_target.encode("utf-8"), previous[-1][2])
         activate_receiver(platform)
+        activate_router(platform)
     except Exception:
         for path, content, stat in previous:
             restore_file(path, content, stat)

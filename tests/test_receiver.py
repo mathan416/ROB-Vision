@@ -3,6 +3,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 
@@ -12,10 +13,24 @@ from identify_game import load_registry  # noqa: E402
 from retropie_controller2 import (controller_route_address, fetch_state, pads_from_state,
                                   running_game, source_selected, sync_game)  # noqa: E402
 from tools.retropie_frame_hook import FrameHookServer, sender_game  # noqa: E402
-from tools.install_retropie_frame_hook import install  # noqa: E402
+from tools.install_retropie_frame_hook import install, set_entry  # noqa: E402
 
 
 class ReceiverTests(unittest.TestCase):
+    def test_emulator_choice_writer_sets_pi_owner_on_update_and_repeat(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'emulators.cfg'
+            path.write_text('default = "lr-fceumm"\n')
+            pi = SimpleNamespace(pw_uid=1000, pw_gid=1000)
+            with patch('tools.install_retropie_frame_hook.os.geteuid', return_value=0), \
+                    patch('tools.install_retropie_frame_hook.os.chown') as chown:
+                set_entry(path, 'lr-robvision-fceumm', 'command', owner=pi)
+                set_entry(path, 'lr-robvision-fceumm', 'command', owner=pi)
+            backup = path.with_name(path.name + '.before-rob-vision-frame-hook')
+            self.assertEqual(chown.call_count, 4)
+            self.assertEqual({call.args for call in chown.call_args_list},
+                             {(path, 1000, 1000), (backup, 1000, 1000)})
+
     def test_receiver_advertises_the_private_route_address_to_its_controller(self):
         class Route:
             def __enter__(self): return self

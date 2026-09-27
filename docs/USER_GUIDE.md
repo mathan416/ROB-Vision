@@ -24,7 +24,7 @@ For automatic R.O.B. movement on RetroPie, select **lr-robvision-fceumm** or **l
 
 Open [Setup](../dashboard/setup.html) to check the console and game-frame status. Start Gyromite and watch Mission for **GAME FRAMES LINKED**. R.O.B. follows complete commands from the game. A spinning virtual gyro on a pad keeps its gate pressed while R.O.B. moves elsewhere; an unspun gyro can press one gate while held there. The UNO Q sends those pad states to the active console's virtual Controller 2.
 
-**Fast Gates** responds immediately while Gyromite is selected. Tap **Lower Blue** or **Lower Red** to press, tap again to release, or choose **Release Both**. Keyboard shortcuts are **2**, **1**, and **0**. Holds expire after 60 seconds; both buttons release on game exit or lost receiver data. If regular controls moved a gyro, use **Home** to restore its holder before Fast Gates. Watch the game screen to confirm the gate's response.
+**Fast Gates** responds immediately while Gyromite is selected. Tap **Lower Blue** or **Lower Red** to press, tap again to release, or choose **Release Both**. On Mission, **2** toggles blue, **1** toggles red, and **0** releases both while you are not typing in a field. Holds expire after 60 seconds; both buttons release on game exit or lost receiver data. Buddy's hands must be empty, the matching gyro must be on its holder, and the target pad must be free. Return the pieces with regular controls or choose **Home** to reset the gyros. Watch the game screen to confirm the gate's response.
 
 ## Play Stack-Up
 

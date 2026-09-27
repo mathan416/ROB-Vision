@@ -30,6 +30,7 @@ The Technical Reference is generated from one cohesive [technical source](TECHNI
 | Everyone | [Engineering journey](ENGINEERING_JOURNEY.md) | How camera testing led to the verified libretro frame link. |
 | Developer | [Configuration reference](CONFIGURATION_REFERENCE.md) | Code defaults, deployed settings, and calibration. |
 | Tester | [Verification plan](VERIFICATION_PLAN.md) | Evidence before claiming a connected game works. |
+| Everyone | [Controller Router](CONTROLLER_ROUTER.md) | Player assignments, input tests, and recovery. |
 | Everyone | [Troubleshooting](TROUBLESHOOTING.md) | Live and preview diagnostics. |
 
 ## Research and design references

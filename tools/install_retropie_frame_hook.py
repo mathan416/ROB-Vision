@@ -2,6 +2,8 @@
 """Register R.O.B. Vision frame proxies and retain each game's NES core choice."""
 
 import argparse
+import os
+import pwd
 import re
 import shutil
 import sys
@@ -28,7 +30,7 @@ def get_entry(path, key):
     return None
 
 
-def set_entry(path, key, value):
+def set_entry(path, key, value, owner=None):
     original = path.read_text() if path.exists() else ''
     lines = original.splitlines()
     entry = '{} = "{}"'.format(key, value)
@@ -47,6 +49,11 @@ def set_entry(path, key, value):
             shutil.copy2(path, backup)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(changed)
+    if owner is not None and os.geteuid() == 0:
+        os.chown(path, owner.pw_uid, owner.pw_gid)
+        backup = path.with_name(path.name + '.before-rob-vision-frame-hook')
+        if backup.exists():
+            os.chown(backup, owner.pw_uid, owner.pw_gid)
 
 
 def selected_core(value):
@@ -89,11 +96,12 @@ def install(root, proxy=None, real=None, choices=None, cores=None, registry_path
 
     emulators = root / 'nes' / 'emulators.cfg'
     overrides = root / 'all' / 'emulators.cfg'
+    owner = pwd.getpwnam('pi') if root.resolve() == Path('/opt/retropie/configs') else None
     default = selected_core(get_entry(emulators, 'default'))
     for core, core_proxy in available.items():
         command = ('/opt/retropie/emulators/retroarch/bin/retroarch -L {} '
                    '--config /opt/retropie/configs/nes/retroarch.cfg %ROM%').format(core_proxy)
-        set_entry(emulators, 'lr-robvision-' + core, command)
+        set_entry(emulators, 'lr-robvision-' + core, command, owner=owner)
     for key in rom_keys:
         previous = get_entry(overrides, key)
         wanted = choices.get(key) or selected_core(previous) or (default if previous is None else None)
@@ -103,7 +111,7 @@ def install(root, proxy=None, real=None, choices=None, cores=None, registry_path
             if key in choices:
                 raise FileNotFoundError('The {} frame proxy is not installed'.format(wanted))
             continue
-        set_entry(overrides, key, 'lr-robvision-' + wanted)
+        set_entry(overrides, key, 'lr-robvision-' + wanted, owner=owner)
 
 
 if __name__ == '__main__':

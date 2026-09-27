@@ -1,0 +1,19 @@
+[Unit]
+Description=Shared Controller Router for VirtualGlove and R.O.B. Vision
+After=systemd-udev-settle.service
+ConditionPathExists=/etc/virtualglove/controller-router.json
+
+[Service]
+Type=simple
+User=root
+RuntimeDirectory=virtualglove
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=yes
+Environment=CONTROLLER_ROUTER_SOURCES_FILE=/home/pi/rob-vision/config/router_sources.json
+ExecStart=/usr/bin/python3 -m router_shared.controller_router serve --platform retropie --config /etc/virtualglove/controller-router.json --socket /run/virtualglove/controller-router.sock
+WorkingDirectory=/home/pi/rob-vision
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

@@ -88,6 +88,17 @@
             $('registry-console').focus({ preventScroll: true });
           });
           meta.append(edit);
+          const route = document.createElement('button');
+          route.type = 'button';
+          route.className = 'console-edit';
+          route.textContent = 'CONTROLLERS';
+          route.setAttribute('aria-label', `Edit controller assignments on ${item.name}`);
+          route.addEventListener('click', () => {
+            if (!window.RobControllerRouter?.editConsole(item.id)) return;
+            $('router-heading').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            $('router-console').focus({ preventScroll: true });
+          });
+          meta.append(route);
         }
         const remove = document.createElement('button');
         remove.type = 'button';
@@ -108,6 +119,7 @@
     const consoles = snapshot.link?.consoles || [];
     renderConsoles(consoles);
     window.RobGamesRegistry?.setConsoles(consoles);
+    window.RobControllerRouter?.setConsoles(consoles);
     const onlineCount = consoles.filter(item => item.online).length;
     const receiverOnline = onlineCount > 0 || Boolean(snapshot.link?.online);
     message('pair-link', consoles.length > 1 ? `${onlineCount} OF ${consoles.length} LINKED` : status.receiver(snapshot));

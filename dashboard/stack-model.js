@@ -33,12 +33,16 @@
       next.height += 1;
     } else if (command === 'DOWN') {
       if (next.height === 1) return { ok: false, reason: 'Arms are already at the lowest level.' };
-      if (next.held.length && next.height - 1 <= tray.length) return { ok: false, reason: 'The carried blocks would collide with this tray stack.' };
+      if (next.height - 1 <= tray.length) {
+        if (next.held.length) return { ok: false, reason: 'The carried blocks would collide with this tray stack.' };
+        if (next.grip === 'closed') return { ok: false, reason: `Open the hands before lowering into Tray ${next.station}'s stack.` };
+      }
       next.height -= 1;
     } else if (command === 'LEFT' || command === 'RIGHT') {
       const target = next.station + (command === 'LEFT' ? -1 : 1);
       if (target < 1 || target > 5) return { ok: false, reason: 'There is no tray in that direction.' };
-      if (next.held.length && next.height <= next.trays[target - 1].length) return { ok: false, reason: 'Raise the carried blocks to clear the next tray.' };
+      const targetHeight = next.trays[target - 1].length;
+      if (next.height <= targetHeight) return { ok: false, reason: `Raise the hands to level ${targetHeight + 1} to clear Tray ${target}.` };
       next.station = target;
     } else if (command === 'CLOSE') {
       if (next.grip === 'closed') return { ok: false, reason: 'Hands are already closed.' };

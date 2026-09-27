@@ -97,6 +97,58 @@ def console_registry(pairings, console_id, action, document=None, revision=None)
     if len(answer) > 70000:
         raise ValueError("Console registry response is too large.")
     return json.loads(answer)
+
+
+def console_router(pairings, console_id, action, config=None, revision=None, watch_ms=0):
+    """Proxy Router controls through a saved console pairing."""
+    if action not in ("read", "inventory", "check", "save", "rollback"):
+        raise ValueError("Unknown Controller Router action.")
+    with pairings.lock:
+        record = dict(pairings.records.get(console_id, {})) if isinstance(console_id, str) else {}
+        observed = (pairings.last_address.get(console_id)
+                    if monotonic() - pairings.last_seen.get(console_id, 0) < 10 else None)
+    if not record:
+        raise ValueError("Choose a paired console from the list.")
+    host = record["host"]
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]{0,252}", host):
+        raise ValueError("The paired console address is invalid.")
+    payload = {"action": action, "revision": revision}
+    if action == "save":
+        payload["config"] = config
+    if action == "check":
+        payload["watch_ms"] = min(10000, max(0, int(watch_ms)))
+    body = json.dumps(payload).encode()
+    if len(body) > 262144:
+        raise ValueError("Controller assignments are too large.")
+    addresses = [observed] if observed else []
+    try:
+        resolved = resolve_ipv4(host)
+        if resolved not in addresses:
+            addresses.append(resolved)
+    except OSError:
+        if not addresses:
+            raise ValueError("The paired console name cannot be resolved from this UNO Q.") from None
+    opener = build_opener(ProxyHandler({}))
+    for address in addresses:
+        if not ipaddress.ip_address(address).is_private:
+            continue
+        request = Request(f"http://{address}:8769/router", data=body, method="POST",
+                          headers={"Authorization": "Bearer " + record["token"],
+                                   "Content-Type": "application/json"})
+        try:
+            with opener.open(request, timeout=14 if action == "check" else 4) as response:
+                answer = response.read(262145)
+            if len(answer) > 262144:
+                raise ValueError("Controller Router response is too large.")
+            return json.loads(answer)
+        except HTTPError as exc:
+            try:
+                raise ValueError(json.loads(exc.read(4096)).get("error", "Console rejected Controller Router request.")) from exc
+            except (json.JSONDecodeError, AttributeError):
+                raise ValueError("Console rejected Controller Router request.") from exc
+        except OSError:
+            continue
+    raise ValueError("The paired console's Controller Router is unavailable. Update its receiver and check the link.")
 def controller_url_from_host(host):
     """Use the address the browser used to reach this UNO Q for its console link."""
     if not isinstance(host, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.:-]{0,258}", host):
@@ -456,6 +508,10 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                 elif path == "/api/games":
                     result = console_registry(pairings, data.get("console_id"), data.get("action"),
                                               data.get("document"), data.get("revision"))
+                elif path == "/api/router":
+                    result = console_router(pairings, data.get("console_id"), data.get("action"),
+                                            data.get("config"), data.get("revision"),
+                                            data.get("watch_ms", 0))
                 elif path == "/api/matrix/pairing":
                     if not isinstance(data.get("active"), bool):
                         raise ValueError("Choose whether pairing is active.")

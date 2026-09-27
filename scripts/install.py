@@ -8,7 +8,6 @@ RetroPie: sudo python3 scripts/install.py retropie --controller robvision.local
 from __future__ import annotations
 
 import argparse
-import ctypes
 import ipaddress
 import json
 import os
@@ -28,6 +27,7 @@ from urllib.request import urlopen
 SOURCE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SOURCE))
 from tools.identify_game import load_registry
+from router_shared.retroarch_udev import retroarch_udev_event_nodes, retroarch_index_for_js
 BEGIN = "# BEGIN R.O.B. Vision (managed by installer)"
 END = "# END R.O.B. Vision (managed by installer)"
 UNO_DEST = Path("/home/arduino/ArduinoApps/rob-vision")
@@ -146,11 +146,14 @@ def update_managed(path: Path, body: str, shebang: str | None = None,
                            if not any(re.match(r"\s*" + key + r"\s*=", line) for key in keys))
     changed = managed_text(prepared, body, shebang, before_include)
     if changed != original:
+        previous_owner = path.stat() if path.exists() else None
         if original:
             backup = path.with_name(path.name + ".before-rob-vision")
             if not backup.exists():
                 shutil.copy2(path, backup)
         write_file(path, changed, mode)
+        if previous_owner is not None:
+            os.chown(path, previous_owner.st_uid, previous_owner.st_gid)
 
 
 def valid_controller(value: str) -> str:
@@ -266,7 +269,9 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
             staged = Path(directory) / "rob-vision"
             staged.mkdir()
             shutil.copy2(source / "app.yaml", staged / "app.yaml")
-            for name in ("controller", "python", "dashboard", "config", "tools", "sketch", "docs", "output", "bricks"):
+            # Dashboard guides are already bundled under dashboard/guides.
+            # Do not copy generated release archives into the running app.
+            for name in ("controller", "python", "dashboard", "config", "tools", "sketch", "bricks"):
                 if (source / name).exists():
                     shutil.copytree(source / name, staged / name,
                                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store", "._*"))
@@ -330,135 +335,6 @@ def pi_owned(path: Path, user: str = "pi") -> None:
             os.chown(os.path.join(root, name), account.pw_uid, account.pw_gid)
 
 
-def retroarch_udev_event_nodes() -> list[str]:
-    """List joypad event nodes in RetroArch's udev discovery order.
-
-    RetroArch's udev driver numbers event devices independently of Linux jsN.
-    In particular, another virtual pad can make those two indices differ.
-    """
-    try:
-        udev = ctypes.CDLL("libudev.so.1")
-    except OSError as exc:
-        raise RuntimeError("libudev is required to map RetroArch Controller 2.") from exc
-    signatures = {
-        "udev_new": (ctypes.c_void_p, []),
-        "udev_unref": (ctypes.c_void_p, [ctypes.c_void_p]),
-        "udev_enumerate_new": (ctypes.c_void_p, [ctypes.c_void_p]),
-        "udev_enumerate_unref": (ctypes.c_void_p, [ctypes.c_void_p]),
-        "udev_enumerate_add_match_property": (ctypes.c_int, [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]),
-        "udev_enumerate_add_match_subsystem": (ctypes.c_int, [ctypes.c_void_p, ctypes.c_char_p]),
-        "udev_enumerate_scan_devices": (ctypes.c_int, [ctypes.c_void_p]),
-        "udev_enumerate_get_list_entry": (ctypes.c_void_p, [ctypes.c_void_p]),
-        "udev_list_entry_get_name": (ctypes.c_char_p, [ctypes.c_void_p]),
-        "udev_list_entry_get_next": (ctypes.c_void_p, [ctypes.c_void_p]),
-        "udev_device_new_from_syspath": (ctypes.c_void_p, [ctypes.c_void_p, ctypes.c_char_p]),
-        "udev_device_get_devnode": (ctypes.c_char_p, [ctypes.c_void_p]),
-        "udev_device_unref": (ctypes.c_void_p, [ctypes.c_void_p]),
-    }
-    for name, (result, arguments) in signatures.items():
-        function = getattr(udev, name)
-        function.restype, function.argtypes = result, arguments
-    context = udev.udev_new()
-    if not context:
-        raise RuntimeError("Could not initialize udev for RetroArch controller mapping.")
-    enumeration = None
-    try:
-        enumeration = udev.udev_enumerate_new(context)
-        if not enumeration:
-            raise RuntimeError("Could not enumerate RetroArch controllers.")
-        udev.udev_enumerate_add_match_property(enumeration, b"ID_INPUT_JOYSTICK", b"1")
-        udev.udev_enumerate_add_match_subsystem(enumeration, b"input")
-        if udev.udev_enumerate_scan_devices(enumeration) < 0:
-            raise RuntimeError("Could not scan RetroArch controllers.")
-        nodes = []
-        item = udev.udev_enumerate_get_list_entry(enumeration)
-        while item:
-            path = udev.udev_list_entry_get_name(item)
-            device = udev.udev_device_new_from_syspath(context, path)
-            if device:
-                try:
-                    node = udev.udev_device_get_devnode(device)
-                    if node and re.fullmatch(rb"/dev/input/event\d+", node):
-                        nodes.append(node.decode())
-                finally:
-                    udev.udev_device_unref(device)
-            item = udev.udev_list_entry_get_next(item)
-        return nodes
-    finally:
-        if enumeration:
-            udev.udev_enumerate_unref(enumeration)
-        udev.udev_unref(context)
-
-
-def retroarch_index_for_js(js_index: int, sys_root: Path = Path("/sys/class/input"),
-                           event_nodes: list[str] | None = None) -> int:
-    """Find the RetroArch udev slot for the same input device as jsN."""
-    events = event_nodes if event_nodes is not None else retroarch_udev_event_nodes()
-    joystick = sys_root / f"js{js_index}" / "device"
-    for index, node in enumerate(events):
-        event_device = sys_root / Path(node).name / "device"
-        if event_device.exists() and joystick.samefile(event_device):
-            return index
-    raise RuntimeError("Player 2 pad was not found in RetroArch's udev controller list.")
-
-
-def retroarch_player2_name(router_config: Path = Path("/etc/virtualglove/controller-router.json")) -> str:
-    """Use the merged Player 2 pad when Controller Router includes R.O.B."""
-    try:
-        router = json.loads(router_config.read_text())
-    except (OSError, ValueError, TypeError):
-        return "R.O.B. Vision Controller 2"
-    if isinstance(router, dict):
-        for player in router.get("players", []):
-            if (isinstance(player, dict) and player.get("player") == 2 and
-                    isinstance(player.get("sources"), list) and
-                    any(isinstance(source, dict) and
-                        source.get("name") == "R.O.B. Vision Controller 2"
-                        for source in player["sources"])):
-                return "VirtualGlove Merged Player 2"
-    return "R.O.B. Vision Controller 2"
-
-
-def configure_player2(index: int | None = None, sys_root: Path = Path("/sys/class/input"),
-                      config: Path = NES_CONFIG, wait_seconds: float = 15.0,
-                      event_nodes: list[str] | None = None,
-                      router_config: Path = Path("/etc/virtualglove/controller-router.json")) -> int:
-    if index is None:
-        target_name = retroarch_player2_name(router_config)
-        deadline = time.monotonic() + wait_seconds
-        while True:
-            matches = []
-            for path in sys_root.glob("js*/device/name"):
-                try:
-                    if path.read_text().strip() == target_name:
-                        matches.append(int(path.parents[1].name[2:]))
-                except FileNotFoundError:
-                    continue  # A joystick may disappear during receiver restart.
-            if len(matches) == 1:
-                try:
-                    index = retroarch_index_for_js(matches[0], sys_root, event_nodes)
-                    break
-                except RuntimeError:
-                    # uinput creates jsN before udev marks its event node as
-                    # a joystick. Keep the pad alive while udev catches up.
-                    if time.monotonic() >= deadline:
-                        raise
-            if len(matches) > 1 or time.monotonic() >= deadline:
-                raise RuntimeError(f"Start the paired receiver, then retry; one {target_name} pad must be visible.")
-            time.sleep(0.1)
-    if not 0 <= index <= 15:
-        raise ValueError("Player 2 joystick index must be between 0 and 15.")
-    if not config.is_file():
-        raise RuntimeError(f"NES RetroArch configuration is missing: {config}")
-    update_managed(config, '\n'.join((
-        'input_libretro_device_p2 = "1"',
-        f'input_player2_joypad_index = "{index}"',
-        'input_player2_a_btn = "1"',
-        'input_player2_b_btn = "0"',
-    )), before_include=True, remove_player2=True)
-    return index
-
-
 def installed_controller(path: Path = PI_CONFIG / "receiver.env") -> str | None:
     if not path.is_file():
         return None
@@ -480,7 +356,7 @@ def validate_receiver_source(source: Path) -> None:
 
 
 def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
-                     controller: str | None = None, player2_index: int | None = None) -> None:
+                     controller: str | None = None) -> None:
     if sys.version_info < (3, 7):
         raise RuntimeError("Python 3.7 or newer is required by the RetroPie receiver.")
     if sys.platform != "linux" or os.geteuid() != 0:
@@ -498,6 +374,10 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
         raise RuntimeError("gcc, systemctl, modprobe, and openssl are required. Install missing tools and retry.")
     if not (source / "deploy/retropie/rob_vision_fceumm_proxy.c").is_file():
         raise RuntimeError("Incomplete checkout: frame proxy source is missing.")
+    if any(not (source / "deploy/retropie/router" /
+                f"VirtualGlove Merged Player {player}.cfg").is_file()
+           for player in range(1, 5)):
+        raise RuntimeError("Incomplete checkout: Controller Router profiles are missing.")
     cores = [name for name, path in CORE_PATHS.items() if path.is_file()]
     if not cores:
         raise RuntimeError("Install lr-fceumm or lr-nestopia through RetroPie-Setup first.")
@@ -522,7 +402,7 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
     if SERVICE.exists():
         run("systemctl", "stop", "rob-vision-controller2.service")
     destination.mkdir(parents=True, exist_ok=True)
-    for name in ("tools", "controller", "config", "scripts"):
+    for name in ("tools", "controller", "config", "scripts", "router_shared"):
         copy_tree_merge(source / name, destination / name, preserve_registry=(name == "config"))
     build = destination / "build"
     build.mkdir(exist_ok=True)
@@ -548,9 +428,21 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
                     "ROB_VISION_TOKEN_FILE=/home/pi/.config/rob-vision/token\n", 0o600)
     pi_owned(PI_CONFIG)
     write_file(Path("/etc/modules-load.d/rob-vision.conf"), "uinput\n")
+    Path("/etc/virtualglove").mkdir(mode=0o755, parents=True, exist_ok=True)
     copy_file(source / "deploy/retropie/rob-vision-controller2.service", SERVICE)
+    shared_unit = Path("/etc/systemd/system/virtualglove-controller-router.service")
+    if not shared_unit.exists():
+        copy_file(source / "deploy/retropie/virtualglove-controller-router.service", shared_unit)
+    override = Path("/etc/systemd/system/virtualglove-controller-router.service.d/rob-vision.conf")
+    copy_file(source / "deploy/retropie/rob-vision-router.conf", override)
     copy_file(source / "deploy/retropie/retroarch-joypad.cfg",
               Path("/opt/retropie/configs/all/retroarch/autoconfig/udev/R.O.B. Vision Controller 2.cfg"))
+    for profile in (source / "deploy/retropie/router").glob("VirtualGlove Merged Player *.cfg"):
+        target = Path("/opt/retropie/configs/all/retroarch/autoconfig/udev") / profile.name
+        if not target.exists():
+            copy_file(profile, target)
+            account = pwd.getpwnam("pi")
+            os.chown(target, account.pw_uid, account.pw_gid)
     # Older releases placed this profile where RetroArch's udev driver does
     # not search. Retire those project-owned copies during an upgrade.
     unlink_if_exists(Path("/opt/retropie/configs/all/retroarch-joypads/R.O.B. Vision Controller 2.cfg"))
@@ -569,16 +461,14 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
     # Reuse the existing selective installer: only the two registered games get wrappers.
     from tools.install_retropie_frame_hook import install
     install(Path("/opt/retropie/configs"), registry_path=destination / "config/games.json")
-    if player2_index is not None:
-        configure_player2(player2_index)
     run("systemctl", "daemon-reload")
     token = PI_CONFIG / "token"
     run("systemctl", "enable", "rob-vision-controller2.service")
     if token.exists():
         run("systemctl", "restart", "rob-vision-controller2.service")
-        if player2_index is None:
-            index = configure_player2(wait_seconds=15.0)
-            print(f"NES Controller 2 mapped to joystick {index}.")
+        from tools.controller_router_setup import activate
+        activate("retropie")
+        print("Controller Router assigns Buddy to Player 2.")
         print("Receiver restarted. Open Setup on the UNO Q and select Check Link.")
     else:
         print("Receiver installed and will start automatically when pairing completes.")
@@ -590,19 +480,12 @@ def main() -> int:
     sub.add_parser("uno-q", help="Install the UNO Q App Lab app as arduino")
     retro = sub.add_parser("retropie", help="Install the receiver and frame choices as root")
     retro.add_argument("--controller", help="UNO Q LAN hostname or IP; retained on upgrades")
-    retro.add_argument("--player2-index", type=int, help="RetroArch joystick index for virtual Controller 2")
-    sub.add_parser("player2", help="Detect the running virtual pad and configure NES Controller 2")
     args = parser.parse_args()
     try:
         if args.target == "uno-q":
             install_uno()
         elif args.target == "retropie":
-            install_retropie(controller=args.controller, player2_index=args.player2_index)
-        else:
-            if os.geteuid() != 0:
-                raise RuntimeError("Run this configuration step with sudo on RetroPie.")
-            index = configure_player2()
-            print(f"NES Controller 2 mapped to {retroarch_player2_name()} at RetroArch slot {index}. Restart the game to apply it.")
+            install_retropie(controller=args.controller)
         return 0
     except (OSError, RuntimeError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"Installation stopped: {exc}", file=sys.stderr)

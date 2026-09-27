@@ -33,15 +33,19 @@ class StackState:
         elif command == "DOWN":
             if height == 1:
                 return "Arms are already at the lowest level."
-            if held and height - 1 <= len(tray):
-                return "The carried blocks would collide with this tray stack."
+            if height - 1 <= len(tray):
+                if held:
+                    return "The carried blocks would collide with this tray stack."
+                if grip == "closed":
+                    return f"Open the hands before lowering into Tray {station}'s stack."
             height -= 1
         elif command in ("LEFT", "RIGHT"):
             target = station + (-1 if command == "LEFT" else 1)
             if not 1 <= target <= 5:
                 return "There is no tray in that direction."
-            if held and height <= len(trays[target - 1]):
-                return "Raise the carried blocks to clear the next tray."
+            target_height = len(trays[target - 1])
+            if height <= target_height:
+                return f"Raise the hands to level {target_height + 1} to clear Tray {target}."
             station = target
         elif command == "CLOSE":
             if grip == "closed":

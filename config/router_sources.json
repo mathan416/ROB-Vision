@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "sources": [
+    {
+      "name": "R.O.B. Vision Controller 2",
+      "vendor": "1209",
+      "product": "0001",
+      "mapping": [
+        {"name": "a", "type": "button", "code": 0, "value": 1, "evdev_code": 304},
+        {"name": "b", "type": "button", "code": 1, "value": 1, "evdev_code": 305}
+      ]
+    }
+  ]
+}

@@ -149,7 +149,7 @@ def install(source=ROOT, destination=DEST, controller=None):
             if (SERVICES / "ROBVision").is_file():
                 subprocess.run(["batocera-services", "stop", "ROBVision"], check=True)
             destination.mkdir(parents=True, exist_ok=True)
-            for folder in ("tools", "controller", "config"):
+            for folder in ("tools", "controller", "config", "router_shared"):
                 copy_tree_merge(source / folder, destination / folder,
                                 preserve_registry=(folder == "config"))
             for library in libraries.values():
@@ -166,6 +166,9 @@ def install(source=ROOT, destination=DEST, controller=None):
                                   registry_path=destination / "config/games.json")
             subprocess.run(["batocera-services", "enable", "ROBVision"], check=True)
             subprocess.run(["batocera-services", "restart", "ROBVision"], check=True)
+            if (destination / "token").is_file():
+                from tools.controller_router_setup import activate
+                activate("batocera")
         finally:
             if menu_suspended:
                 resume_menu()

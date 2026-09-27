@@ -70,7 +70,7 @@ class GameFlowTests(unittest.TestCase):
         for command in ['DOWN_STACK', 'CLOSE', 'UP_STACK', 'RIGHT'] + ['DOWN_STACK'] * 5 + ['OPEN']:
             game.send(command)
         self.assertEqual(game.state()['trays'][3], ['red'])
-        for command in ['UP_STACK', 'UP_STACK', 'LEFT', 'CLOSE', 'RIGHT', 'DOWN_STACK']:
+        for command in ['UP_STACK'] * 5 + ['LEFT'] + ['DOWN_STACK'] * 3 + ['CLOSE'] + ['UP_STACK'] * 3 + ['RIGHT'] + ['DOWN_STACK'] * 4:
             game.send(command)
         before = game.state()
         events = game.send('DOWN_STACK')
@@ -80,6 +80,20 @@ class GameFlowTests(unittest.TestCase):
         self.assertEqual(game.state()['trays'][3], ['red', 'blue', 'white'])
         self.assertEqual(game.state()['trays'][2], ['green', 'yellow'])
         self.assertEqual(sum(map(len, game.state()['trays'])) + len(game.state()['held']), 5)
+
+    def test_stack_up_blocked_turn_keeps_game_state_and_reports_reason(self):
+        game = FrameFlow('stack_up')
+        for command in ['DOWN_STACK', 'CLOSE', 'UP_STACK', 'RIGHT'] + ['DOWN_STACK'] * 5 + ['OPEN']:
+            game.send(command)
+        before = game.state()
+        events = game.send('LEFT')
+        self.assertEqual(game.state(), before)
+        self.assertTrue(any(event['kind'] == 'blocked' and 'Tray 3' in event['message']
+                            for event in events))
+        for _ in range(4):
+            game.send('UP_STACK')
+        game.send('LEFT')
+        self.assertEqual(game.state()['station'], 3)
 
     def test_game_specific_vertical_commands_never_cross_modes(self):
         gyro = FrameFlow('gyromite')

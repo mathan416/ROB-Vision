@@ -28,7 +28,7 @@ curl -fsSL https://github.com/mathan416/ROB-Vision/releases/latest/download/inst
   sh -s -- console your-uno-q.local
 ```
 
-Use this exact command again to upgrade or repair that console. It detects RetroPie or Batocera. On RetroPie it uses `sudo` for system changes and requires EmulationStation to be closed. On Batocera it runs under the root login and temporarily suspends and resumes its game menu while the virtual joystick is restarted. It installs the frame wrappers, receiver, game launch integration, and Gyromite's virtual Controller 2. For a first install it opens a five-minute pairing window and prints a six-digit code and SHA-256 certificate fingerprint. Enter the console's `.local` hostname or LAN IP address, code, and fingerprint under **Console Link** on the UNO Q Setup page. Keep the console command open until it reports **Pairing complete**. Successful pairing starts the receiver and maps the active console's Player 2 automatically. No second terminal command is required.
+Use this exact command again to upgrade or repair that console. It detects RetroPie or Batocera. On RetroPie it uses `sudo` for system changes and requires EmulationStation to be closed. On Batocera it runs under the root login and temporarily suspends and resumes its game menu while the virtual joystick is restarted. It installs the frame wrappers, receiver, game launch integration, and Controller Router with Buddy assigned to Player 2. For a first install it opens a five-minute pairing window and prints a six-digit code and SHA-256 certificate fingerprint. Enter the console's `.local` hostname or LAN IP address, code, and fingerprint under **Console Link** on the UNO Q Setup page. Keep the console command open until it reports **Pairing complete**. Successful pairing starts the receiver, installs or updates Controller Router, and assigns Buddy to Player 2. Existing physical-controller assignments remain in place. No second terminal command is required.
 
 <!-- pagebreak -->
 
@@ -37,6 +37,10 @@ Use this exact command again to upgrade or repair that console. It detects Retro
 An upgrade retains that console's credential and restarts its receiver. Rerun the command in **Install or upgrade a console** for a repair or upgrade. If you remove a console in Setup, rerun the console command with `--pair` added at the end to open a new pairing window; this is still one command on the console.
 
 The installer leaves ROM files and unrelated games alone. RetroPie registers `lr-robvision-fceumm` and `lr-robvision-nestopia` for the exact registered ROM names. Batocera selects its R.O.B. Vision FCEUmm wrapper for those names while retaining unrelated core choices. Plain NES cores still play games but do not send commands to R.O.B. Vision.
+
+## Review controller assignments
+
+On the UNO Q Setup page, choose **Controllers** beside a paired console. Buddy stays on Player 2. The list shows physical controllers configured in EmulationStation and their current player assignments. On a new Router installation, known controllers are seeded in Player 1-4 order. Change an assignment if needed, exit the running game, and choose **Save Assignments**. **Test Inputs** listens briefly for buttons and directions. **Restore Previous** returns to the last saved assignment. RetroPie requires EmulationStation closed during first pairing or Router installation because new virtual controllers can upset its input manager.
 
 ## Check the link and play
 

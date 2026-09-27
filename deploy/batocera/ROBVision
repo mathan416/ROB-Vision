@@ -3,6 +3,8 @@
 set -eu
 APP=/userdata/system/rob-vision
 RUN=/run/rob-vision
+ROUTER_CONFIG=/userdata/system/virtualglove/data/controller-router.json
+ROUTER_SOCKET=/run/virtualglove/merged-gamepad.sock
 
 mounted_at() { awk -v target="$1" '$2 == target { found=1 } END { exit !found }' /proc/mounts; }
 overlay() {
@@ -47,9 +49,21 @@ start() {
     python3 "$APP/tools/retropie_controller2.py" --platform batocera --swap-buttons \
         >>"$APP/receiver.log" 2>&1 &
     echo "$!" >"$RUN/receiver.pid"
-    python3 "$APP/tools/batocera.py" configure || echo "R.O.B. Vision: virtual Controller 2 override needs attention" >&2
+    if [ -f "$ROUTER_CONFIG" ] && [ ! -S "$ROUTER_SOCKET" ]; then
+        mkdir -p /run/virtualglove
+        cd "$APP"
+        export CONTROLLER_ROUTER_SOURCES_FILE="$APP/config/router_sources.json"
+        python3 -m router_shared.controller_router serve --platform batocera \
+            --config "$ROUTER_CONFIG" --socket "$ROUTER_SOCKET" \
+            >>"$APP/router.log" 2>&1 &
+        echo "$!" >"$RUN/router.pid"
+    fi
 }
 stop() {
+    if [ -f "$RUN/router.pid" ]; then
+        kill "$(cat "$RUN/router.pid")" 2>/dev/null || :
+        rm -f "$RUN/router.pid"
+    fi
     if [ -f "$RUN/receiver.pid" ]; then
         kill "$(cat "$RUN/receiver.pid")" 2>/dev/null || :
         rm -f "$RUN/receiver.pid"

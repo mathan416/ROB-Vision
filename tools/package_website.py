@@ -15,7 +15,8 @@ REQUIRED = {
 
 def main():
     files = sorted((SITE / name for name in REQUIRED), key=lambda path: path.name)
-    files += sorted((SITE / "assets").iterdir())
+    for directory in ("assets", "downloads"):
+        files += sorted(path for path in (SITE / directory).rglob("*") if path.is_file())
     for path in files:
         if not path.is_file() or path.is_symlink():
             raise SystemExit(f"Website file missing or unsupported: {path}")

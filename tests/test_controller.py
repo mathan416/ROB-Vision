@@ -1,6 +1,6 @@
 import unittest
 
-from controller.model import GyroState, StackState
+from controller.model import COLORS, GyroState, StackState
 from controller.optical import ALLOWED, PATTERNS, ExactFrameDecoder, FrameTestDetector
 from controller.service import Controller
 
@@ -113,6 +113,44 @@ class ModelTests(unittest.TestCase):
         before = state.snapshot()
         self.assertIsNotNone(state.apply('DOWN'))
         self.assertEqual(state.snapshot(), before)
+
+    def test_stack_sideways_clearance_with_open_closed_and_carried_hands(self):
+        for direction, target_index, target_station in (('LEFT', 1, 2), ('RIGHT', 3, 4)):
+            for stack_height in range(1, 6):
+                for grip in ('open', 'closed'):
+                    trays = [[], [], list(COLORS[stack_height:]), [], []]
+                    trays[target_index] = list(COLORS[:stack_height])
+                    state = StackState(trays=trays, station=3, height=stack_height, grip=grip)
+                    before = state.snapshot()
+                    self.assertEqual(state.apply(direction),
+                                     f'Raise the hands to level {stack_height + 1} to clear Tray {target_station}.')
+                    self.assertEqual(state.snapshot(), before)
+                    state.height += 1
+                    self.assertIsNone(state.apply(direction))
+                    self.assertEqual(state.station, target_station)
+                if stack_height < 5:
+                    trays = [[], [], list(COLORS[stack_height:-1]), [], []]
+                    trays[target_index] = list(COLORS[:stack_height])
+                    state = StackState(trays=trays, held=[COLORS[-1]], station=3,
+                                       height=stack_height, grip='closed')
+                    before = state.snapshot()
+                    self.assertIn(f'Tray {target_station}', state.apply(direction))
+                    self.assertEqual(state.snapshot(), before)
+                    state.height += 1
+                    self.assertIsNone(state.apply(direction))
+
+    def test_stack_closed_empty_hands_cannot_descend_into_blocks(self):
+        for stack_height in range(1, 6):
+            trays = [list(COLORS[stack_height:]), [], list(COLORS[:stack_height]), [], []]
+            closed = StackState(trays=trays, station=3, height=stack_height + 1, grip='closed')
+            before = closed.snapshot()
+            self.assertIn('Open the hands', closed.apply('DOWN'))
+            self.assertEqual(closed.snapshot(), before)
+            opened = StackState(trays=trays, station=3, height=stack_height + 1)
+            self.assertIsNone(opened.apply('DOWN'))
+            self.assertEqual(opened.height, stack_height)
+            self.assertIsNone(opened.apply('CLOSE'))
+            self.assertEqual(opened.held, [COLORS[stack_height - 1]])
 
     def test_gyro_bounds_and_ready(self):
         model = GyroState()

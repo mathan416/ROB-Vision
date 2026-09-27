@@ -41,6 +41,46 @@ test('carried blocks cannot descend into an occupied tray', () => {
   assert.deepEqual(stack.snapshot(state), before);
 });
 
+test('sideways moves clear destination stacks with open, closed, and carrying hands', () => {
+  for (const [command, targetIndex, targetStation] of [['LEFT', 1, 2], ['RIGHT', 3, 4]]) {
+    for (let stackHeight = 1; stackHeight <= 5; stackHeight += 1) {
+      for (const grip of ['open', 'closed']) {
+        const state = { trays: [[], [], stack.COLORS.slice(stackHeight), [], []], held: [],
+          station: 3, height: stackHeight, grip };
+        state.trays[targetIndex] = stack.COLORS.slice(0, stackHeight);
+        const before = stack.snapshot(state);
+        const result = stack.apply(state, command);
+        assert.equal(result.reason, `Raise the hands to level ${stackHeight + 1} to clear Tray ${targetStation}.`);
+        assert.deepEqual(stack.snapshot(state), before);
+        commands(state, 'UP', command);
+        assert.equal(state.station, targetStation);
+      }
+      if (stackHeight < 5) {
+        const state = { trays: [[], [], stack.COLORS.slice(stackHeight, -1), [], []],
+          held: [stack.COLORS.at(-1)], station: 3, height: stackHeight, grip: 'closed' };
+        state.trays[targetIndex] = stack.COLORS.slice(0, stackHeight);
+        const before = stack.snapshot(state);
+        assert.equal(stack.apply(state, command).ok, false);
+        assert.deepEqual(stack.snapshot(state), before);
+        commands(state, 'UP', command);
+      }
+    }
+  }
+});
+
+test('closed empty hands stop at a stack while open hands descend to pick a block', () => {
+  for (let stackHeight = 1; stackHeight <= 5; stackHeight += 1) {
+    const trays = [stack.COLORS.slice(stackHeight), [], stack.COLORS.slice(0, stackHeight), [], []];
+    const closed = { trays, held: [], station: 3, height: stackHeight + 1, grip: 'closed' };
+    const before = stack.snapshot(closed);
+    assert.match(stack.apply(closed, 'DOWN').reason, /Open the hands/);
+    assert.deepEqual(stack.snapshot(closed), before);
+    const open = { ...stack.snapshot(closed), grip: 'open' };
+    commands(open, 'DOWN', 'CLOSE');
+    assert.deepEqual(open.held, [stack.COLORS[stackHeight - 1]]);
+  }
+});
+
 test('station and height boundaries reject moves without changing state', () => {
   const state = stack.create();
   commands(state, 'LEFT', 'LEFT');

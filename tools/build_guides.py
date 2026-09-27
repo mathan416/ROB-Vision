@@ -512,7 +512,7 @@ if __name__ == "__main__":
     generated = [
         build_book("R.O.B.-Vision-User-Guide.pdf", "User Guide",
                    "Play, preview, setup, and problem solving",
-                   ["MEET_BUDDY.md", "USER_GUIDE.md", "GAMEPLAY_GUIDE.md", "SETUP_GUIDE.md", "INSTALLATION_GUIDE.md", "TROUBLESHOOTING.md"]),
+                   ["MEET_BUDDY.md", "USER_GUIDE.md", "GAMEPLAY_GUIDE.md", "SETUP_GUIDE.md", "CONTROLLER_ROUTER.md", "INSTALLATION_GUIDE.md", "TROUBLESHOOTING.md"]),
         build_book("R.O.B.-Vision-Technical-Reference.pdf", "Technical Reference",
                    "Architecture, frame protocol, virtual model, pairing, and verification",
                    ["TECHNICAL_ARCHITECTURE.md"],

@@ -21,7 +21,7 @@ from urllib.request import Request, urlopen
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from identify_game import identify, load_registry
-from tools.game_registry import RegistryStore, serve
+from tools.game_registry import RegistryStore, router_store_for, serve
 from tools.retropie_frame_hook import BATOCERA_CONFIG, BATOCERA_PROXY_CORES, FrameHookServer
 
 
@@ -225,7 +225,8 @@ def main():
     hook = FrameHookServer(registry, platform=args.platform)
     hook.start()
     try:
-        games_server = serve(RegistryStore(registry_path, args.platform), args.token_file)
+        games_server = serve(RegistryStore(registry_path, args.platform), args.token_file,
+                             router_store=router_store_for(args.platform))
     except OSError as exc:
         print(f"R.O.B. Vision registry editor unavailable: {exc}", file=sys.stderr)
         games_server = None

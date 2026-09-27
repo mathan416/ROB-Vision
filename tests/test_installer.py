@@ -1,16 +1,14 @@
 """Check installer edits without touching system services or game files."""
 
 import tempfile
-import threading
 import os
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from scripts.install import (app_lab_status, configure_player2, copy_tree_merge, hook_event, install_uno, installed_controller, managed_text,
+from scripts.install import (app_lab_status, copy_tree_merge, hook_event, install_uno, installed_controller, managed_text,
                              retroarch_index_for_js,
-                             retroarch_player2_name,
                              uno_dashboard_urls,
                              remove_legacy_hook, update_managed, valid_controller)
 from scripts.install import validate_receiver_source
@@ -71,18 +69,13 @@ class InstallerTests(unittest.TestCase):
             self.assertTrue((path.parent / "retroarch.cfg.before-rob-vision").exists())
             self.assertLess(first.index("#include"), first.index("input_player2_a_btn"))
 
-    def test_player2_migration_stays_above_retroarch_include(self):
+    def test_managed_config_update_preserves_existing_owner(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "retroarch.cfg"
-            path.write_text('input_player1_a_btn = "7"\ninput_player2_joypad_index = "1"\n'
-                            '#include "/opt/retropie/configs/all/retroarch.cfg"\n')
-            self.assertEqual(configure_player2(2, config=path), 2)
-            text = path.read_text()
-            self.assertEqual(text.count("input_player2_joypad_index"), 1)
-            self.assertLess(text.index('input_player2_joypad_index = "2"'), text.index("#include"))
-            self.assertIn('input_player1_a_btn = "7"', text)
-            configure_player2(2, config=path)
-            self.assertEqual(path.read_text(), text)
+            path.write_text('#include "all/retroarch.cfg"\n')
+            owner = (path.stat().st_uid, path.stat().st_gid)
+            update_managed(path, 'input_player2_a_btn = "1"', before_include=True)
+            self.assertEqual((path.stat().st_uid, path.stat().st_gid), owner)
 
     def test_damaged_section_and_bad_hostname_are_rejected(self):
         with self.assertRaises(ValueError):
@@ -96,86 +89,6 @@ class InstallerTests(unittest.TestCase):
             self.assertIsNone(installed_controller(env))
             env.write_text("ROB_VISION_URL=http://robvision.local\n")
             self.assertEqual(installed_controller(env), "robvision.local")
-
-    def test_detects_virtual_pad_and_only_changes_nes_player2(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            for index, name in ((0, "Player One"), (2, "R.O.B. Vision Controller 2")):
-                device = root / "sys" / f"js{index}" / "device"
-                device.mkdir(parents=True)
-                (device / "name").write_text(name)
-            config = root / "retroarch.cfg"
-            config.write_text('input_player1_a_btn = "7"\n')
-            event = root / "sys/event6/device"
-            event.parent.mkdir()
-            event.symlink_to(root / "sys/js2/device")
-            events = ["/dev/input/event0", "/dev/input/event4", "/dev/input/event6"]
-            self.assertEqual(configure_player2(sys_root=root / "sys", config=config,
-                                               event_nodes=events), 2)
-            self.assertIn('input_player1_a_btn = "7"', config.read_text())
-            self.assertIn('input_player2_joypad_index = "2"', config.read_text())
-
-    def test_player2_waits_for_receiver_restart(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            config = root / "retroarch.cfg"
-            config.write_text("#include all.cfg\n")
-            device = root / "sys/js1/device"
-            def appear():
-                device.mkdir(parents=True)
-                (device / "name").write_text("R.O.B. Vision Controller 2\n")
-                event = root / "sys/event6/device"
-                event.parent.mkdir()
-                event.symlink_to(device)
-            timer = threading.Timer(0.15, appear)
-            timer.start()
-            try:
-                self.assertEqual(configure_player2(sys_root=root / "sys", config=config,
-                                                   wait_seconds=1.0,
-                                                   event_nodes=["/dev/input/event0", "/dev/input/event6"]), 1)
-            finally:
-                timer.join()
-
-    def test_player2_waits_for_udev_event_after_joystick(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            config = root / "retroarch.cfg"
-            config.write_text("#include all.cfg\n")
-            device = root / "sys/js1/device"
-            device.mkdir(parents=True)
-            (device / "name").write_text("R.O.B. Vision Controller 2\n")
-            event = root / "sys/event6/device"
-            event.parent.mkdir()
-            timer = threading.Timer(0.15, lambda: event.symlink_to(device))
-            timer.start()
-            try:
-                self.assertEqual(configure_player2(sys_root=root / "sys", config=config,
-                                                   wait_seconds=1.0,
-                                                   event_nodes=["/dev/input/event0", "/dev/input/event6"]), 1)
-            finally:
-                timer.join()
-
-    def test_player2_uses_merged_pad_when_router_assigns_rob(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            router = root / "router.json"
-            router.write_text('{"players":[{"player":2,"sources":'
-                              '[{"name":"R.O.B. Vision Controller 2"}]}]}')
-            self.assertEqual(retroarch_player2_name(router), "VirtualGlove Merged Player 2")
-            for index, name in ((1, "R.O.B. Vision Controller 2"),
-                                (2, "VirtualGlove Merged Player 2")):
-                device = root / "sys" / f"js{index}" / "device"
-                device.mkdir(parents=True)
-                (device / "name").write_text(name)
-                event = root / "sys" / f"event{index + 5}" / "device"
-                event.parent.mkdir()
-                event.symlink_to(device)
-            config = root / "retroarch.cfg"
-            config.write_text("#include all.cfg\n")
-            self.assertEqual(configure_player2(sys_root=root / "sys", config=config,
-                                               router_config=router,
-                                               event_nodes=["/dev/input/event6", "/dev/input/event7"]), 1)
-            self.assertIn('input_player2_joypad_index = "1"', config.read_text())
 
     def test_retroarch_udev_index_can_differ_from_js_number(self):
         with tempfile.TemporaryDirectory() as directory:

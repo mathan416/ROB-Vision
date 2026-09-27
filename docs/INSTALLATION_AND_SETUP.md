@@ -36,9 +36,13 @@ For a first install, leave the terminal open. The installer prints a **six-digit
 
 ## 3. Pair in Setup
 
-On the UNO Q Setup page, open **Console Link**. Enter the console address, the six-digit code, and the fingerprint exactly as printed. Choose **Pair Console**. Wait until the console terminal says **Pairing complete**, then select **Check Link** in Setup. The receiver starts and Gyromite's virtual Player 2 is configured automatically.
+On the UNO Q Setup page, open **Console Link**. Enter the console address, the six-digit code, and the fingerprint exactly as printed. Choose **Pair Console**. Wait until the console terminal says **Pairing complete**, then select **Check Link** in Setup. The receiver and Controller Router start. Buddy is assigned to Player 2 automatically; existing physical-controller assignments stay in place.
 
 Use **Pair Another Console** for a second machine. Paired consoles appear as separate rows. **Edit ROMs** opens that console's own filename registry. **Receiver Waiting** means this UNO Q has not heard from the console's R.O.B. Vision receiver recently; it does not mean the machine is powered off. A console uses one UNO Q at a time. Pairing it to a different UNO Q switches its receiver address; the old UNO Q retains a waiting row until you remove it. **Remove** and **Confirm Remove** revoke one console without unpairing the others. To reconnect a removed console, rerun its one-command install with `--pair` appended.
+
+## Review controller assignments
+
+On the UNO Q Setup page, choose **Controllers** beside a paired console. Buddy stays on Player 2. The list shows physical controllers configured in EmulationStation and their current player assignments. On a new Router installation, known controllers are seeded in Player 1-4 order. Change an assignment if needed, exit the running game, and choose **Save Assignments**. **Test Inputs** listens briefly for buttons and directions. **Restore Previous** returns to the last saved assignment. RetroPie requires EmulationStation closed during first pairing or Router installation because new virtual controllers can upset its input manager.
 
 ## 4. Check a game
 

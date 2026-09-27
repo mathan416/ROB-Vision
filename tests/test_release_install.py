@@ -25,7 +25,7 @@ class ReleaseInstallTests(unittest.TestCase):
     def test_bootstrap_parses_as_posix_shell(self):
         subprocess.run(["sh", "-n", str(ROOT / "scripts/release-install.sh")], check=True)
 
-    def test_retropie_pairing_enables_receiver_and_maps_player_two(self):
+    def test_retropie_pairing_enables_receiver_without_editing_retroarch(self):
         with patch("tools.retropie_pair.os.geteuid", return_value=0), patch(
             "tools.retropie_pair.subprocess.run"
         ) as run:
@@ -33,8 +33,19 @@ class ReleaseInstallTests(unittest.TestCase):
         self.assertEqual([call.args[0] for call in run.call_args_list], [
             ["systemctl", "enable", "rob-vision-controller2.service"],
             ["systemctl", "restart", "rob-vision-controller2.service"],
-            ["/usr/bin/python3", "/home/pi/rob-vision/scripts/install.py", "player2"],
         ])
+
+    def test_retropie_runtime_does_not_edit_retroarch_config(self):
+        service = (ROOT / 'deploy/retropie/rob-vision-controller2.service').read_text()
+        launch = (ROOT / 'deploy/retropie/runcommand-onlaunch.sh').read_text()
+        self.assertNotIn('ExecStartPost=', service)
+        self.assertNotIn('install.py player2', launch)
+
+    def test_retropie_receiver_can_save_shared_router_config(self):
+        service = (ROOT / 'deploy/retropie/rob-vision-controller2.service').read_text()
+        paths = next(line for line in service.splitlines()
+                     if line.startswith('ReadWritePaths='))
+        self.assertIn('/etc/virtualglove', paths.split('=', 1)[1].split())
 
     def test_batocera_pairing_restarts_its_receiver(self):
         with patch("tools.retropie_pair.subprocess.run") as run:
@@ -49,13 +60,15 @@ class ReleaseInstallTests(unittest.TestCase):
             (root / 'console-id').write_text('a' * 32 + '\n')
             env = root / 'receiver.env'
             env.write_text('ROB_VISION_URL=http://arduiain.local\nROB_VISION_TOKEN_FILE=/some/token\n')
-            with patch('tools.retropie_pair.activate_receiver') as restart:
+            with patch('tools.retropie_pair.activate_receiver') as restart, \
+                    patch('tools.retropie_pair.activate_router') as router:
                 apply_pairing('retropie', token, 'b' * 32, 'new-token-123456789',
                               'http://virtualglove.local')
             self.assertIn('ROB_VISION_URL=http://virtualglove.local\n', env.read_text())
             self.assertIn('ROB_VISION_TOKEN_FILE=/some/token\n', env.read_text())
             self.assertEqual(token.read_text().strip(), 'new-token-123456789')
             restart.assert_called_once_with('retropie')
+            router.assert_called_once_with('retropie')
 
     def test_failed_repairing_restores_previous_batocera_link(self):
         with tempfile.TemporaryDirectory() as directory:

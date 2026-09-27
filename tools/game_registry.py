@@ -13,6 +13,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 from tools.identify_game import parse_registry
+from tools.controller_router_setup import paths as router_paths
+from router_shared.controller_router import RouterStore
 
 MAX_DOCUMENT = 65536
 PORT = 8769
@@ -98,7 +100,8 @@ class RegistryStore:
             return self.snapshot()
 
 
-def serve(store: RegistryStore, token_file: Path, host="0.0.0.0", port=PORT):
+def serve(store: RegistryStore, token_file: Path, host="0.0.0.0", port=PORT,
+          router_store: RouterStore | None = None):
     """Start a bounded token-protected endpoint on the paired console."""
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *_args):
@@ -109,7 +112,7 @@ def serve(store: RegistryStore, token_file: Path, host="0.0.0.0", port=PORT):
             self.connection.settimeout(3)
 
         def do_POST(self):
-            if self.path != "/registry" or self.headers.get("Origin"):
+            if self.path not in ("/registry", "/router") or self.headers.get("Origin"):
                 return self.reply(404, {"error": "Unknown endpoint."})
             try:
                 offered = self.headers.get("Authorization", "")
@@ -117,12 +120,36 @@ def serve(store: RegistryStore, token_file: Path, host="0.0.0.0", port=PORT):
                 if not expected or not secrets.compare_digest(offered, "Bearer " + expected):
                     return self.reply(403, {"error": "Console pairing is required."})
                 size = int(self.headers.get("Content-Length", "0"))
-                if size < 1 or size > MAX_DOCUMENT + 4096:
-                    raise ValueError("Registry request is too large.")
+                if size < 1 or size > 262144:
+                    raise ValueError("Console request is too large.")
                 payload = json.loads(self.rfile.read(size))
                 if not isinstance(payload, dict):
-                    raise ValueError("Registry request must be a JSON object.")
-                result = store.operate(payload.get("action"), payload)
+                    raise ValueError("Console request must be a JSON object.")
+                if self.path == "/router":
+                    if router_store is None:
+                        raise ValueError("Controller Router is not installed on this console.")
+                    if payload.get("action") == "save":
+                        current = router_store.read()["config"]
+                        buddy_ids = {source["id"] for entry in current["players"]
+                                     for source in entry["sources"]
+                                     if source["name"] == "R.O.B. Vision Controller 2"}
+                        proposed = payload.get("config")
+                        slots = proposed.get("players", []) if isinstance(proposed, dict) else []
+                        proposed_buddy = {identity for entry in slots if isinstance(entry, dict)
+                                          and entry.get("player") == 2
+                                          for identity in entry.get("sources", [])}
+                        if not buddy_ids or not buddy_ids <= proposed_buddy:
+                            raise ValueError("Buddy must remain assigned to Player 2.")
+                    if payload.get("action") == "rollback" and router_store.backup.exists():
+                        previous = json.loads(router_store.backup.read_text())
+                        if not any(entry.get("player") == 2 and any(
+                                source.get("name") == "R.O.B. Vision Controller 2"
+                                for source in entry.get("sources", []))
+                                for entry in previous.get("players", [])):
+                            raise ValueError("The previous snapshot predates Buddy. Save assignments instead.")
+                    result = router_store.operate(payload.get("action"), payload)
+                else:
+                    result = store.operate(payload.get("action"), payload)
                 self.reply(200, result)
             except (OSError, ValueError, TypeError, RuntimeError, UnicodeError, json.JSONDecodeError) as exc:
                 self.reply(400, {"error": str(exc)})
@@ -140,3 +167,8 @@ def serve(store: RegistryStore, token_file: Path, host="0.0.0.0", port=PORT):
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     return server
+
+
+def router_store_for(platform: str) -> RouterStore:
+    config, es_inputs = router_paths(platform)
+    return RouterStore(config, platform, es_inputs)

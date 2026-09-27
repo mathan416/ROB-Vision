@@ -7,7 +7,6 @@ Wants=network-online.target
 Type=simple
 EnvironmentFile=/home/pi/.config/rob-vision/receiver.env
 ExecStart=/usr/bin/python3 /home/pi/rob-vision/tools/retropie_controller2.py --swap-buttons
-ExecStartPost=/usr/bin/python3 /home/pi/rob-vision/scripts/install.py player2
 Restart=always
 RestartSec=2
 User=root
@@ -16,7 +15,7 @@ ProtectSystem=strict
 ProtectHome=read-only
 RuntimeDirectory=rob-vision
 RuntimeDirectoryMode=0755
-ReadWritePaths=/dev/uinput /run/rob-vision /home/pi/rob-vision/config /opt/retropie/configs/all /opt/retropie/configs/nes
+ReadWritePaths=/dev/uinput /run/rob-vision /home/pi/rob-vision/config /opt/retropie/configs/all /opt/retropie/configs/nes /etc/virtualglove
 
 [Install]
 WantedBy=multi-user.target

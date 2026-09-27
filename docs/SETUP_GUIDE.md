@@ -13,3 +13,5 @@ Open the Setup URL printed by the UNO Q installer: `http://<hostname>.local/dash
 A `file://` Setup page is only an offline preview. Use the UNO Q URL for live status. Mission keeps Fast Gates and the Game Table next to Pose Preview and System Vitals.
 
 To forget a console, select **Remove** in its row and then **Confirm Remove**. The UNO Q immediately revokes that console's credential; any other paired console remains connected. If the removed console was playing, its game session is cleared. The removed console retains its old local credential, but it can no longer authenticate; rerun the one console install command with `--pair` at the end to reconnect it. Only one console can be the active game source at a time.
+
+For physical gamepad assignments and Buddy's Player 2 route, see the [Controller Router Guide](CONTROLLER_ROUTER.md).

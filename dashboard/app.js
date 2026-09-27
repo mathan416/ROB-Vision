@@ -3,7 +3,7 @@
   const $ = (id) => document.getElementById(id);
   const StackModel = window.RobStackModel;
   let stackState = StackModel.create();
-  const state = { mode: 'gyro', live: false, liveHeight: null, liveHeldPiece: null, liveHeldScale: 1, head: 0, arms: 0, turn: 0, depth: 1, grip: false, manualActive: false, manualCommand: null, stopped: false, running: false, timer: null, recoveryTimer: null, recoveryQueue: [], recoveryCount: { a: 0, b: 0 }, cleanupStarted: false, sequence: null, step: -1, prop: { x: 225, y: 496, scale: 1 }, propFrame: null, secondProp: { x: 145, y: 469, scale: .85 }, secondPropFrame: null, motion: { turn: 0, arms: 0, grip: 0, head: 0, depth: 1, handOffset: 0, gyroOffset: 0 }, motionFrame: null };
+  const state = { mode: 'gyro', live: false, liveHeight: null, liveHeldPiece: null, liveHeldScale: 1, head: 0, arms: 0, turn: 0, depth: 1, grip: false, manualActive: false, manualCommand: null, stopped: false, running: false, timer: null, recoveryTimer: null, recoveryQueue: [], recoveryCount: { a: 0, b: 0 }, cleanupStarted: false, sequence: null, step: -1, prop: { x: 225, y: 496, scale: 1 }, propFrame: null, secondProp: { x: 145, y: 469, scale: .85 }, secondPropFrame: null, motion: { turn: 0, arms: 0, grip: 0, head: 0, depth: 1, handOffset: 0, gyroOffset: 0, stackOffset: -8 }, motionFrame: null };
   // Local demo timing is illustrative; live sessions use the UNO Q controller state.
   const GYRO_SPIN_MS = 55000;
   const gyros = { a: { startedAt: null, phase: 'idle' }, b: { startedAt: null, phase: 'idle' } };
@@ -190,6 +190,7 @@
     const handBaseY = state.mode === 'gyro' ? 465 : 453;
     const item = currentItem();
     const heldPiece = state.mode === 'gyro' ? state.live ? state.liveHeldPiece : item?.location === 'held' && grip ? item.piece || 'a' : null : null;
+    const heldBlocks = state.mode === 'stack' && stackState.held.length > 0;
     const heldSlot = heldPiece === 'b' ? 'secondProp' : 'prop';
     const heldElement = heldPiece === 'b' ? 'second-gyro-prop' : 'move-prop';
     if (heldPiece) {
@@ -202,8 +203,14 @@
     // Tray perspective changes the block height. Reach to its body center,
     // while the shoulder carriage remains on the robot's central column.
     const handOffset = state.mode === 'stack' ? stackBases[stackState.station - 1] - stackBases[2] + 7 - 2 * level : 0;
+    if (heldBlocks) {
+      if (state.propFrame) cancelAnimationFrame(state.propFrame);
+      state.propFrame = null;
+      start.stackOffset = state.prop.y - (handBaseY + start.arms + start.handOffset);
+    }
     const target = { turn, arms, grip: grip ? 1 : 0, head, depth, handOffset,
-      gyroOffset: heldPiece && item?.prop ? item.prop[1] - (handBaseY + arms) : start.gyroOffset };
+      gyroOffset: heldPiece && item?.prop ? item.prop[1] - (handBaseY + arms) : start.gyroOffset,
+      stackOffset: heldBlocks ? -8 : start.stackOffset };
     const started = performance.now();
     function frame(now) {
       const t = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : Math.min(1, (now - started) / 950);
@@ -239,6 +246,13 @@
           scale: state.live ? state.liveHeldScale : item.prop?.[2] ?? state[heldSlot].scale };
         state[heldSlot] = position;
         $(heldElement).setAttribute('transform', `translate(${position.x} ${position.y}) scale(${position.scale})`);
+      }
+      if (heldBlocks) {
+        const position = { x: center, y: handY + state.motion.arms + state.motion.stackOffset, scale: 1 };
+        state.prop = position;
+        const transform = `translate(${position.x} ${position.y}) scale(1)`;
+        $('move-prop').setAttribute('transform', transform);
+        $('disc-prop').setAttribute('transform', transform);
       }
       $('head').setAttribute('transform', `rotate(${state.motion.head} 325 265)`);
       state.motionFrame = t < 1 ? requestAnimationFrame(frame) : null;
@@ -340,7 +354,8 @@
     state.arms = 57 - (stackState.height - 1) * 14;
     state.grip = stackState.grip === 'closed';
     state.depth = 1;
-    moveProp(stackXs[index], stackBases[index] - (stackState.height - 1) * stackPitch, 1, immediate);
+    if (!stackState.held.length)
+      moveProp(stackXs[index], stackBases[index] - (stackState.height - 1) * stackPitch, 1, immediate);
   }
   function svgDisc(color, x, y, selected = false) {
     const ns = 'http://www.w3.org/2000/svg';

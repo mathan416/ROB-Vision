@@ -7,10 +7,11 @@
   <title>R.O.B. Vision // Setup</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css?v=setup-3">
-  <link rel="stylesheet" href="setup.css?v=consoles-3">
+  <link rel="stylesheet" href="setup.css?v=consoles-4">
   <script src="header-clock.js?v=1" defer></script>
   <script src="status.js?v=receiver-2" defer></script>
   <script src="games-registry.js?v=2" defer></script>
+  <script src="controller-router.js?v=1" defer></script>
   <script src="setup.js?v=consoles-6" defer></script>
 </head>
 <body>
@@ -23,7 +24,7 @@
     </header>
     <div class="setup-hero"><p class="eyebrow">READY THE MISSION / 00</p><h1>Connect. Link. Test.</h1><p>Pair your game console, check the game-frame link, and try each game control before playing.</p></div>
     <div class="setup-grid">
-      <section class="setup-card" aria-labelledby="pair-heading">
+      <section class="setup-card pair-card" aria-labelledby="pair-heading">
         <div class="section-head"><span>01 / CONSOLE LINK</span><span id="pair-link">CONSOLE UNKNOWN</span></div>
         <h2 id="pair-heading">Connect your console</h2>
         <div class="console-list-head"><span>PAIRED CONSOLES</span><span id="console-count">0 SAVED</span></div>
@@ -42,14 +43,24 @@
         </div>
         <p class="setup-feedback" id="pair-feedback" role="status">Install the receiver on your console before pairing.</p><a class="setup-help-link" href="help.html#pairing">NEED HELP PAIRING? ↗</a> <a class="setup-help-link" href="#registry-heading">EDIT GAME REGISTRY ↗</a>
       </section>
+      <section class="setup-card router-card" aria-labelledby="router-heading">
+        <div class="section-head"><span>02 / CONTROLLER ROUTER</span><span>PLAYERS 1–4</span></div>
+        <h2 id="router-heading">Controller Router</h2>
+        <p>Choose a paired console to review its game controllers. Buddy stays on Player 2. Assign physical controllers to the players you want, then save while no game is running.</p>
+        <label for="router-console">Paired console</label><select id="router-console"><option value="">Choose a console</option></select>
+        <div id="router-inventory" class="router-inventory" aria-live="polite"></div>
+        <div class="setup-row"><button id="router-save" type="button">SAVE ASSIGNMENTS</button><button id="router-check" type="button" class="quiet">TEST INPUTS</button><button id="router-reload" type="button" class="quiet">RELOAD</button><button id="router-rollback" type="button" class="quiet">RESTORE PREVIOUS</button></div>
+        <p class="setup-feedback" id="router-feedback" role="status">Pair a console to configure its controllers.</p>
+        <a class="setup-help-link" href="help.html#router">CONTROLLER ROUTER HELP ↗</a>
+      </section>
       <section class="setup-card" aria-labelledby="frames-heading">
-        <div class="section-head"><span>02 / GAME FRAMES</span><span id="frame-state">GAME FRAMES WAITING</span></div>
+        <div class="section-head"><span>03 / GAME FRAMES</span><span id="frame-state">GAME FRAMES WAITING</span></div>
         <h2 id="frames-heading">Check automatic movement</h2>
         <p>Launch Gyromite or Stack-Up using its R.O.B. Vision emulator choice. The game-frame link reads the rendered light commands directly and sends R.O.B.'s movements to the UNO Q.</p>
         <p class="setup-feedback" id="frame-feedback" role="status">Launch a supported game to check the frame link.</p><a class="setup-help-link" href="help.html#frames">GAME-FRAME HELP ↗</a>
       </section>
       <section class="setup-card" aria-labelledby="test-heading">
-        <div class="section-head"><span>03 / GAME SIGNAL</span><span id="test-state">WAITING</span></div>
+        <div class="section-head"><span>04 / GAME SIGNAL</span><span id="test-state">WAITING</span></div>
         <h2 id="test-heading">Game Test light</h2>
         <p>Open the game's Test mode while its game frames are linked. Gyromite shows sustained green; Stack-Up alternates green and white. R.O.B.'s red light blinks automatically when either signal is recognized. A decoded ready-light command lights it steadily for a moment. The light returns to normal after Test mode ends. Neither signal moves his arms.</p>
         <p>In Stack-Up, press Select at the ROBOT BLOCK screen to open the mode list, choose Test, then press Start. The Test signal appears over the ROBOT BLOCK artwork.</p>
@@ -58,7 +69,7 @@
         <p class="setup-feedback" id="test-feedback" role="status">Select a game and launch it through a R.O.B. Vision emulator choice.</p><a class="setup-help-link" href="help.html#status">UNDERSTAND THE SIGNALS ↗</a>
       </section>
       <section class="setup-card" aria-labelledby="buttons-heading">
-        <div class="section-head"><span>04 / MANUAL TEST</span><span id="buttons-mode">SELECT A GAME</span></div>
+        <div class="section-head"><span>05 / MANUAL TEST</span><span id="buttons-mode">SELECT A GAME</span></div>
         <h2 id="buttons-heading">Try the controls</h2>
         <p>These buttons change the virtual R.O.B. state. Gyromite gates also drive the playing console's Controller 2 when paired and the game is running.</p>
         <div id="setup-gates" hidden><p class="test-caption">GYROMITE / FAST GATES</p><div class="setup-row"><button data-setup-gate="red" type="button">LOWER RED</button><button data-setup-gate="blue" type="button">LOWER BLUE</button><button data-setup-gate="all" type="button" class="quiet">RELEASE BOTH</button></div></div>
@@ -66,7 +77,7 @@
         <p class="setup-feedback" id="buttons-feedback" role="status">Manual tests are available after selecting Gyromite or Stack-Up.</p><a class="setup-help-link" href="help.html#controls">CONTROL GUIDE ↗</a>
       </section>
       <section class="setup-card registry-card" aria-labelledby="registry-heading">
-        <div class="section-head"><span>05 / GAME REGISTRY</span><span>CONSOLE FILE</span></div>
+        <div class="section-head"><span>06 / GAME REGISTRY</span><span>CONSOLE FILE</span></div>
         <h2 id="registry-heading">Recognize your ROMs</h2>
         <p>Choose a paired console and map each exact NES filename to <code>gyromite</code> or <code>stack_up</code>. Saving updates that console's installed registry and emulator choices for the next launch. Exit the game before saving.</p>
         <label for="registry-console">Paired console</label><select id="registry-console"><option value="">Choose a console</option></select>
