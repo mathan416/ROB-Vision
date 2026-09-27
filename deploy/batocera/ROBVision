@@ -46,6 +46,7 @@ start() {
     modprobe uinput 2>/dev/null || :
     ROB_VISION_URL="$(cat "$APP/controller.url")" \
     ROB_VISION_TOKEN_FILE="$APP/token" \
+    CONTROLLER_ROUTER_SOURCES_FILE="$APP/config/router_sources.json" \
     python3 "$APP/tools/retropie_controller2.py" --platform batocera --swap-buttons \
         >>"$APP/receiver.log" 2>&1 &
     echo "$!" >"$RUN/receiver.pid"

@@ -6,6 +6,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 EnvironmentFile=/home/pi/.config/rob-vision/receiver.env
+Environment=CONTROLLER_ROUTER_SOURCES_FILE=/home/pi/rob-vision/config/router_sources.json
 ExecStart=/usr/bin/python3 /home/pi/rob-vision/tools/retropie_controller2.py --swap-buttons
 Restart=always
 RestartSec=2

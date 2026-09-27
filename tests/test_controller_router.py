@@ -29,6 +29,15 @@ class ControllerRouterTests(unittest.TestCase):
                           for item in sources],
                          [(BUDDY, "1209", "0001")])
 
+    def test_receiver_services_expose_buddy_to_setup_inventory(self):
+        root = Path(__file__).resolve().parents[1]
+        retropie = (root / "deploy/retropie/rob-vision-controller2.service").read_text()
+        batocera = (root / "deploy/batocera/ROBVision").read_text()
+        self.assertIn("Environment=CONTROLLER_ROUTER_SOURCES_FILE="
+                      "/home/pi/rob-vision/config/router_sources.json", retropie)
+        self.assertIn('CONTROLLER_ROUTER_SOURCES_FILE="$APP/config/router_sources.json" \\',
+                      batocera)
+
     def test_fresh_console_assigns_known_controllers_and_buddy(self):
         p1 = source("8BitDo", "a" * 16)
         p2 = source("Arcade Player 2", "b" * 16)
