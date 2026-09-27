@@ -247,7 +247,8 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
         raise RuntimeError("Install from a separate checkout; the App Lab destination cannot be the source.")
     required_files = ["app.yaml", "python/main.py", "sketch/sketch.ino", "dashboard/index.html",
                       "matrix/manifest.json", "controller_router_portal/install.py",
-                      "controller_router_portal/app/sketch/sketch.ino"]
+                      "controller_router_portal/app/sketch/sketch.ino",
+                      "controller_router_portal/app/sketch/sketch.yaml"]
     if (source / "app.yaml").is_file() and "local:avahi_resolver" in (source / "app.yaml").read_text():
         required_files.extend(("bricks/local/avahi_resolver/brick_config.yaml",
                                "bricks/local/avahi_resolver/brick_compose.yaml",
