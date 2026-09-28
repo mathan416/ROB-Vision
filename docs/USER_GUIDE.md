@@ -4,9 +4,9 @@ The UNO Q controls Buddy, the virtual robot shown in Mission. RetroPie or Batoce
 
 ## Open R.O.B. Vision
 
-Install version 0.1.7 with the two commands in the [installation guide](INSTALLATION_GUIDE.md): one on the UNO Q, one on the console. The console command prints first-time pairing details for Setup and configures its receiver automatically.
+Install R.O.B. Vision with the two commands in the [installation guide](INSTALLATION_GUIDE.md): one on the UNO Q, one on the console. The console command prints first-time pairing details for Setup and configures its receiver automatically.
 
-Start **R.O.B. Vision** in UNO Q App Lab, then open one of the Mission URLs printed by the installer on a laptop, phone, or tablet. The installer prints both the UNO Q's `.local` hostname and its LAN IP address. Stop another App Lab app first if one is running. A `file://` page is an offline preview.
+Open the UNO Q’s `.local` address or LAN IP in a browser on the same network. Controller Router opens the sole installed product, or shows a chooser when both VirtualGlove and R.O.B. Vision are installed. Mission is directly available on port **8101**; the installer prints both hostname and IP links. **Apps** returns to the chooser and appears only when both products are installed. Both services stay running. Finish any live game before changing apps manually. A registered game selects R.O.B. Vision automatically, even when no browser is open.
 
 Mission shows R.O.B., Accessory Bay, Game Table, Pose Preview, System Vitals, and Activity Feed. **GYROMITE / CONNECTED** means the browser reaches the UNO Q with Gyromite selected. **RETROPIE ONLINE** or **BATOCERA ONLINE** means that console's receiver has contacted the UNO Q recently. **GAME FRAMES LINKED** means the selected game is sending its rendered frames.
 

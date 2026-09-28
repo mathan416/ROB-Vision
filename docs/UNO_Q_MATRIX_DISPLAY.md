@@ -4,7 +4,7 @@ The UNO Q's blue LED matrix gives you a quick view of Buddy's state while the fu
 
 ## Starting and waiting
 
-When R.O.B. Vision starts or reconnects, an hourglass moves across the matrix. Once the controller is ready, Buddy's eyes appear. They glance around and blink while he waits for a game.
+Controller Router owns the Matrix. After boot, and whenever no product has an active display request, it shows its neutral animation. Starting a registered game selects R.O.B. Vision automatically. The app’s loading cue is an hourglass; during a game Buddy’s eyes glance and blink. Both product services remain running, but only the selected product can request a display.
 
 ![Three hourglass frames shown while R.O.B. Vision starts](images/matrix-startup.png)
 
@@ -23,7 +23,8 @@ Starting Gyromite briefly shows `GY`; starting Stack-Up briefly shows `SU`. Budd
 | You see | Meaning | What to do |
 | --- | --- | --- |
 | Moving hourglass | R.O.B. Vision is starting or reconnecting. | Wait for Buddy's eyes. If the hourglass stays, check that the App Lab app is running. |
-| Buddy's eyes | The controller is ready. | Open Mission for the selected game and console link. |
+| Router’s neutral animation | No product has an active display request. | Open the UNO Q address to choose an app, or start a registered game. |
+| Buddy's eyes | R.O.B. Vision is displaying its game cue. | Open Mission for the selected game and console link. |
 | `GY` or `SU` | Gyromite or Stack-Up was selected. | Watch Mission for the virtual game table and **GAME FRAMES LINKED**. |
 | Pulsing `T` | The game-frame link recognizes a game's Test signal. | Continue the game's Test check on Setup. A brief steady `T` can also follow a ready-light command. |
 | Pulsing `P` | Console pairing is in progress. | Enter the code and fingerprint printed by the console installer on the browser Setup page. |

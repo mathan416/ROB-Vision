@@ -126,3 +126,7 @@ Remaining evidence gaps are long unattended sessions with a measured missed-comm
 - [Nestopia isolated, live, and gate-return verification](NESTOPIA_FRAME_LINK_TEST_2026-09-25.md)
 - [Release candidate platform and input checks](RELEASE_VALIDATION_0.1.0.md)
 - [ROM command derivation and exact patterns](ROM_SIGNAL_ANALYSIS.md)
+
+## Subsequent shared Router validation
+
+The measurements and frame indices in this report belong to the dated optical and libretro experiments. Current installations add shared Matrix ownership and boot-bound input leases. The [verification plan](VERIFICATION_PLAN.md#shared-router-follow-up--27-september-2026) records later player-confirmed games, automated web/chooser checks, and the still-open wireless-controller hotplug defect. These follow-up checks do not revise the original optical measurements or establish new missed-command rates.

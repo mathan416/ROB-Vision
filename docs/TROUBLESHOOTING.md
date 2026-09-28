@@ -8,7 +8,7 @@ First check which page is open: use the UNO Q installer’s device-specific `.lo
 
 | Symptom | Check |
 | --- | --- |
-| App does not start, port 8766 in use | Stop VirtualGlove or the separate `rob-vision.service`; App Lab and that service cannot both bind the port. |
+| App does not start, port 8766 in use | Check for an older standalone `rob-vision.service` or duplicate R.O.B. Vision runtime using the port. VirtualGlove uses browser port 8100 and secure Setup 8443; it can remain running. Router owns port 80. |
 | `GYROMITE / CONNECTED` but no robot movement | Check the active console's **ONLINE** indicator and **GAME FRAMES LINKED** separately. If the latter is absent, restart the game with its R.O.B. Vision core. Check Mission's Activity Feed for decoded or blocked actions. |
 | Console is online but no game is selected | A receiver can be online with no active game. Launch a registered ROM; then reload Mission if needed. |
 | Test light never blinks | Enter the game's Test mode and confirm **GAME FRAMES LINKED** with the correct game selected. The light responds automatically to linked game frames. A red-light preview is only an animation demonstration. |

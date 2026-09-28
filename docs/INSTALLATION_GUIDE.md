@@ -1,4 +1,4 @@
-# R.O.B. Vision installation guide — 0.1.7
+# R.O.B. Vision installation guide
 
 R.O.B. Vision runs on an Arduino UNO Q and connects to either RetroPie or Batocera. Install the UNO Q first, then install each console. **Each device has one command for both installation and upgrades.** Rerun that device's command to get the latest release; there is no separate upgrade command. The release installer downloads and verifies the app before installing it.
 
@@ -19,6 +19,10 @@ curl -fsSL https://github.com/mathan416/ROB-Vision/releases/latest/download/inst
 
 Use this exact command again to upgrade or repair the UNO Q. It downloads and verifies the latest R.O.B. Vision release, installs its Linux service, and installs or upgrades Controller Router. Router owns the sole App Lab Matrix sketch; R.O.B. Vision does not flash its own sketch during normal installation. If VirtualGlove is installed, both services remain online. After reboot Router waits neutrally; starting a registered game selects its controller automatically. Pairing data stays in place through upgrades. At the end, the installer prints Mission and Setup links using the device's `.local` name and available LAN IPv4 addresses. Open either form in a browser on the same network when you want to see Buddy or change settings; a browser is not needed for game input. Port 80 is the Controller Router entry page; R.O.B. Vision’s Mission and Setup use port 8101. Existing console receiver traffic remains on port 8766.
 
+With both products installed, **Apps** returns to the chooser; with one installed, the link is hidden. The chooser opens services that are already running. Controller Router remains the startup app. Installing either product registers it with Router without replacing a newer Router version or clearing saved credentials, registries, or assignments. The first shared Matrix build can take several minutes; keep the installer open while App Lab prepares it.
+
+<!-- pagebreak -->
+
 ## Install or upgrade a console
 
 Run this one command **on RetroPie or Batocera**, replacing `your-uno-q.local` with your UNO Q's LAN hostname or IP address:
@@ -29,8 +33,6 @@ curl -fsSL https://github.com/mathan416/ROB-Vision/releases/latest/download/inst
 ```
 
 Use this exact command again to upgrade or repair that console. It detects RetroPie or Batocera. On RetroPie it uses `sudo` for system changes and requires EmulationStation to be closed. On Batocera it runs under the root login and temporarily suspends and resumes its game menu while the virtual joystick is restarted. It installs the frame wrappers, receiver, game launch integration, and Controller Router with Buddy assigned to Player 2. For a first install it opens a five-minute pairing window and prints a six-digit code and SHA-256 certificate fingerprint. Enter the console's `.local` hostname or LAN IP address, code, and fingerprint under **Console Link** on the UNO Q Setup page. Keep the console command open until it reports **Pairing complete**. Successful pairing starts the receiver, installs or updates Controller Router, and assigns Buddy to Player 2. Existing physical-controller assignments remain in place. No second terminal command is required.
-
-<!-- pagebreak -->
 
 ## Upgrades and re-pairing
 

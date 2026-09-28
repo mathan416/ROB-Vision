@@ -200,10 +200,10 @@ def system_responsibilities_diagram(width: float) -> Drawing:
     box(20, 125, 140, 42, ["Launch / exit hook"])
     box(20, 55, 140, 48, ["RetroArch + core", "FCEUmm / Nestopia wrapper"])
     box(190, 55, 140, 48, ["Frame receiver"])
-    box(190, 125, 140, 42, ["Virtual Controller 2", "Gyromite Player 2"])
+    box(190, 125, 140, 42, ["Raw Buddy pad + Router", "Merged Gyromite Player 2"])
     box(408, 87, 135, 70, ["Controller", "Virtual game model"],
         colors.HexColor("#E4F2F1"), TEAL)
-    box(570, 125, 155, 42, ["13 x 8 LED matrix"])
+    box(570, 125, 155, 42, ["Controller Router", "Shared 13 x 8 Matrix"])
     box(570, 47, 155, 42, ["Browser dashboard"])
 
     arrow([(160, 79), (190, 79)])

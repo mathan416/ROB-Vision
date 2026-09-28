@@ -10,15 +10,18 @@ flowchart LR
     HOOK["Launch / exit hook"]
     WRAPPER["RetroArch + FCEUmm / Nestopia<br/>frame wrapper"]
     RECEIVER["Frame receiver"]
-    PAD["Virtual Controller 2<br/>Gyromite Player 2"]
+    PAD["Raw Buddy pad + console Router<br/>Merged Gyromite Player 2"]
     WRAPPER -->|"frame class + index"| RECEIVER
     RECEIVER -->|"uinput"| PAD
   end
   subgraph UNO["Arduino UNO Q"]
-    MODEL["Controller + virtual model"]
-    MATRIX["13 × 8 LED matrix"]
-    WEB["Browser dashboard"]
-    MODEL --> MATRIX
+    MODEL["R.O.B. Vision<br/>Controller + virtual model"]
+    ROUTER["Controller Router<br/>selection + input lease"]
+    MATRIX["Shared App Lab Matrix service<br/>13 × 8 LED matrix"]
+    WEB["Browser dashboard · 8101"]
+    MODEL -->|"live session + animation request"| ROUTER
+    ROUTER -->|"input lease"| MODEL
+    ROUTER -->|"validated frames"| MATRIX
     MODEL -->|"state snapshot"| WEB
   end
   HOOK -->|"authenticated launch / exit"| MODEL
@@ -33,7 +36,8 @@ flowchart LR
 | Core wrapper | Classify each emulated NES video frame and pass the original video onward | `deploy/retropie/rob_vision_fceumm_proxy.c` |
 | Console receiver | Check sender, decode commands, report heartbeats, drive virtual Player 2 | `tools/retropie_frame_hook.py`, `tools/retropie_controller2.py` |
 | UNO Q controller | Game selection, virtual model, pairing, snapshot API | `controller/service.py`, `controller/model.py`, `controller/pairings.py` |
-| UNO Q presentation | Port-80 gateway, LED matrix, browser views | `python/main.py`, `controller/matrix.py`, `sketch/sketch.ino`, `dashboard/` |
+| UNO Q presentation | Browser views on 8101; named product display requests | `python/main.py`, `controller/matrix.py`, `matrix/manifest.json`, `dashboard/` |
+| Shared UNO Q Router | Entry page on 80, live-session selection, boot-bound input leases, sole Matrix sketch | `controller_router_portal/host/concurrent.py`, `host/display_runtime.py`, `app/sketch/sketch.ino` |
 
 The UNO Q is the source of truth for game, pose, pieces, and buttons. The browser polls and animates that state; it does not decode game frames. A directly opened `file://` dashboard is an independent scripted preview, not the live controller.
 
@@ -69,7 +73,7 @@ The inspected Gyromite image has SHA-256 `bf1b323ba39c84b964f93127598b267ff3f16c
 | Down | `0001011111011` | `0001010101110` | Gyromite: two levels; Stack-Up: one |
 | Ready light | `0001011101011` | Same | Brief status light; no movement |
 
-`ExactFrameDecoder` requires consecutive frame indices and a complete word allowed for the selected game. A gap, `N` in the candidate, wrong Up/Down code, or incomplete word does nothing. Separate identical complete words are valid. The receiver has a bounded pending queue and briefly retries HTTP delivery; it drops a pending item after one second or when the game/source changes. The UNO Q deduplicates retained retries by sender PID and ending frame index, keeping the last 128 keys. It also rechecks game, pattern, PID, index, and active console. This prevents an ordinary retry from repeating motion; it is not a durable exactly-once guarantee across restarts.
+`ExactFrameDecoder` requires consecutive frame indices and a complete word allowed for the selected game. A gap, `N` in the candidate, wrong Up/Down code, or incomplete word does nothing. Separate identical complete words are valid. The frame hook buffers up to 32 decoded commands before the receiver drains them into its delivery queue. The receiver retains a command for up to 12 seconds and retries failed HTTP delivery every 200 ms, preserving the first command while Router selects the game’s controller. It waits while process scanning has not yet identified the game, and drops commands when their wrapper process exits, the game changes, the active console differs, or the retention limit expires. The UNO Q deduplicates retained retries by sender PID and ending frame index, keeping the last 128 keys. It also rechecks game, pattern, PID, index, and active console. This prevents an ordinary retry from repeating motion; it is not a durable exactly-once guarantee across restarts.
 
 Test detection is separate from command decoding. At least 36 consecutive green frames or 12 alternating edges mark a Test field. A recent authenticated heartbeat pulses the Test light. A complete ready-light word lights it steadily for at most one second. Neither changes pose or pieces. The signal does not reveal the game's menu state through memory.
 
@@ -133,13 +137,13 @@ On first install, a temporary TLS pairing server on console port 8768 prints a s
 
 ## Matrix and browser
 
-The sketch owns the 13-by-8 LED framebuffer and starts an hourglass before the Linux bridge is ready. `controller/matrix.py` sends a mode and occasional action hint through Router Bridge. Priority is pairing, Test/ready, selected game, then idle eyes. Games show `GY` or `SU` followed by eyes; Test pulses `T`; pairing pulses `P`. A fresh movement briefly changes the eyes. Linux refreshes at least once per second. A bridge heartbeat gap of about 3.5 seconds returns the sketch to the hourglass. The sketch contains an `X` glyph, but the controller does not currently request its fault mode. The [Matrix Display Guide](UNO_Q_MATRIX_DISPLAY.md) explains the active cues to players.
+Controller Router owns the 13×8 framebuffer through its App Lab Matrix service. R.O.B. Vision supplies `matrix/manifest.json`; `controller/matrix.py` translates model state into named animation requests over the local Unix socket. Priority within the product is pairing, Test/ready, selected game, then clear. Games use `gyromite` and `stack_up`; Test uses `test` or `test_flash`; pairing uses the product’s `pairing` animation. Accepted movements request `hint_left`, `hint_right`, `hint_up`, `hint_down`, `hint_open`, or `hint_close`. Idle clears the product request, leaving Router’s neutral artwork. Only the selected product’s requests are accepted. R.O.B. Vision refreshes its request at least once per second. Router expires ordinary display requests after five seconds without refresh; the shared sketch returns to neutral when no frame arrives for 1.8 seconds. The separate legacy R.O.B. Vision sketch remains a standalone development fallback and is not flashed by the normal installer. The [Matrix Display Guide](UNO_Q_MATRIX_DISPLAY.md) explains the player-facing cues.
 
 Mission animates the model, accessory views, Game Table, Pose Preview, vitals, and recent activity from the same snapshot. Setup handles pairing, link checks, Test status, and manual game checks. A paired console may be online while no game is selected. Browser demo runs while paired and idle; a live game takes authority. The UI cannot establish Hector's location, Stack-Up scoring, or full-game completion.
 
 ## Installation and platform integration
 
-The versioned release installer downloads a source package, checks its embedded SHA-256 before extraction, then dispatches to UNO Q or console installation. Release assets also contain checksums and PDFs. The UNO Q installer stages the R.O.B. Vision Linux service and the versioned Controller Router package while preserving pairing data. Controller Router is the sole App Lab sketch and Matrix owner. Its host broker plays validated 13×8 grayscale frames from each product's animation manifest and grants a renewable input lease to one selected product. Both product web and Linux services remain online; port 80 selects the active controller, port 8100 serves VirtualGlove, and port 8101 serves R.O.B. Vision. The broker starts without a selection after reboot, displays neutral artwork, and blocks changing controllers during a live game. If Router or a product fails, its lease expires and input is released. The installer prints the device's `.local` and available LAN IPv4 dashboard URLs.
+The versioned release installer downloads a source package, checks its embedded SHA-256 before extraction, then dispatches to UNO Q or console installation. Release assets also contain checksums and PDFs. The UNO Q installer stages the R.O.B. Vision Linux service and the versioned Controller Router package while preserving pairing data. Controller Router is the sole App Lab sketch and Matrix owner. Its host broker plays validated 13×8 grayscale frames from each product's animation manifest and grants a renewable input lease to one selected product. Both product web and Linux services remain online; port 80 selects the active controller, port 8100 serves VirtualGlove, and port 8101 serves R.O.B. Vision. The broker starts without a selection after reboot and follows authenticated product game-session state. It grants a two-second, boot-bound lease, refreshed about every 250 ms, to one product. A registered game selects its product without a browser; exit returns a game-owned selection to neutral. Manual switches are blocked during play. If both products report a live game, Router revokes both leases until the conflict clears. The chooser opens already-running websites and does not issue App Lab start/stop commands. Its **Apps** link appears only when both products are installed. If Router or a product fails, its lease expires and input is released. The installer registers a newly added product even when it keeps a newer shared Router package; existing credentials, registries, and assignments stay in place. The installer prints the device's `.local` and available LAN IPv4 dashboard URLs.
 
 RetroPie installs launch/end hooks, a systemd receiver, a virtual-pad RetroArch profile, and FCEUmm/Nestopia wrapper launch choices. Its installer builds wrappers against installed cores and installs the shared Controller Router. First pairing assigns Buddy to Player 2. It retains an existing per-ROM supported core choice rather than forcing every host to FCEUmm. EmulationStation must be closed while the virtual input service is replaced.
 
@@ -156,7 +160,9 @@ Batocera selects a packaged wrapper for x86_64, 32-bit x86, AArch64, ARMv7, ARMv
 | No good receiver response for 750 ms | Both Gyromite buttons release |
 | No authenticated receiver poll for three seconds | Console status becomes offline |
 | No matching game frames for one second | `input.frame_hook` becomes false |
-| No matrix heartbeat for about 3.5 seconds | Sketch returns to hourglass |
+| Router-managed lease missing, invalid, expired, or from an earlier boot | Product input is denied; no standalone fallback |
+| No authenticated receiver check-in for ten seconds | R.O.B. Vision clears its live session |
+| No Matrix frame for 1.8 seconds | Shared sketch resumes Router’s neutral animation |
 
 ### Operational checks
 
@@ -167,7 +173,7 @@ Batocera selects a packaged wrapper for x86_64, 32-bit x86, AArch64, ARMv7, ARMv
 | Console online, game idle | Receiver polling works; no recognized active game | Check exact ROM basename and console launch hook |
 | Gyromite action visible in Mission, gate unchanged | Model changed, but the return path or game state may be wrong | Check Player 2 mapping, active RetroArch process, and independent blue/red holds |
 | Test light pulses, pose unchanged | Test field recognized as status | Leave Test mode and confirm the light clears before a Direct command |
-| Matrix hourglass while dashboard is reachable | Linux service may be up while Router Bridge or sketch heartbeat is unavailable | Read `/api/matrix/state` and check App Lab/sketch state |
+| Matrix stays neutral while a game is selected | Product may lack the lease or its Matrix requests may not be delivered | Check Router `/api/state`, the product `/api/matrix/state`, and the shared Matrix service |
 
 The checks support different claims: a recognized ROM proves selection; a fresh frame link proves source delivery; a `decoded` event proves a complete word; an `action` event proves the virtual model accepted it; a visible gate response proves Controller 2 returned input to Gyromite. Do not collapse these into one "connected" result.
 

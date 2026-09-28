@@ -16,6 +16,6 @@ The UNO Q controls Buddy's movement and game pieces. RetroPie or supported Batoc
 
 In Stack-Up, press Select on the ROBOT BLOCK screen, choose Test, then press Start. The artwork remains visible while the Test signal plays.
 
-Use the UNO Q installer's device-specific Mission and Setup links. Both `http://<hostname>.local/dashboard/` and `http://<LAN-IP>/dashboard/` open Mission; append `setup.html` for Setup. A local `file://` page is only the preview. The console frame link reads complete commands and Test signals at the game's own frame rate.
+Use the UNO Q installer's device-specific Mission and Setup links. Both `http://<hostname>.local:8101/dashboard/` and `http://<LAN-IP>:8101/dashboard/` open Mission; append `setup.html` for Setup. A local `file://` page is only the preview. The console frame link reads complete commands and Test signals at the game's own frame rate.
 
 The game launch hook identifies an exact ROM name. The receiver applies Gyromite virtual pad states as Controller 2 input and releases both on exit or stale network data. Stack-Up moves modeled blocks and has no gate-button return path. See the [user guide](USER_GUIDE.md) and [troubleshooting](TROUBLESHOOTING.md).

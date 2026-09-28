@@ -1,5 +1,7 @@
 # 0.1.0 release validation — 26 September 2026
 
+This is the historical 0.1.0 release validation record. For shared Controller Router installations and later checks, see the [current verification plan](VERIFICATION_PLAN.md).
+
 RC9 is a public prerelease. Its published installer and Batocera reboot checks passed with VirtualGlove and R.O.B. Vision both enabled.
 
 ## Published installation checks

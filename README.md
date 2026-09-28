@@ -10,11 +10,15 @@ The Buddy-led public website for `rob-vision.mathan.ca` is in [website](website/
 
 The app includes Mission and Setup pages, paired RetroPie and Batocera links, FCEUmm and Nestopia frame wrappers, Gyromite gate controls, Stack-Up blocks, UNO Q matrix animations, and demos that run while no game is active.
 
-Start **R.O.B. Vision** from UNO Q App Lab **My Apps**, then open `http://<your-uno-q-hostname>.local/dashboard/` or `http://<your-uno-q-LAN-IP>/dashboard/` on a laptop, phone, or tablet. The installer prints the actual Mission and Setup URLs for your UNO Q. Stop another App Lab app before starting R.O.B. Vision. Browser controls work on your trusted local network; keep the app off the public Internet.
+Controller Router is the UNO Q startup app and shared Matrix owner. R.O.B. Vision and VirtualGlove remain running together. Starting a registered game on the paired console selects its controller automatically; no browser is required for input. Open `http://<your-uno-q-hostname>.local/` or the UNO Q’s LAN IP to view the installed app or choose between both. Mission is also available directly at `http://<your-uno-q-hostname>.local:8101/dashboard/`. The installer prints hostname and IP links. Browser controls work on your trusted local network; keep the app off the public Internet.
 
 The [Setup page](dashboard/setup.html) pairs either console, shows receiver and game-frame status, acknowledges Test mode from the frame link, and offers Gyromite and Stack-Up manual checks. [Mission](dashboard/index.html) keeps R.O.B. and the Game Table as the main view. The [Help center](dashboard/help.html) covers play, controls, indicators, and troubleshooting.
 
-## Install version 0.1.7
+## Release channels
+
+The `dev` source includes the shared Router and current chooser/navigation behavior described above. Version 0.1.7 is the stable release; version 0.1.8-rc.1 is the published candidate and predates the latest chooser updates. A GitHub `releases/latest` command installs the stable release, not a prerelease. Use the exact candidate asset URL when testing a candidate.
+
+## Install stable version 0.1.7
 
 The public release provides one command for the UNO Q and the same console command for RetroPie or Batocera. Run the UNO Q command as `arduino`:
 

@@ -21,6 +21,8 @@ curl -fsSL https://github.com/mathan416/ROB-Vision/releases/latest/download/inst
 
 This is also the UNO Q upgrade command. Rerun it later to get the latest release; there is no separate upgrade command. The installer verifies the release package, installs or upgrades Controller Router's shared App Lab Matrix service, and starts the R.O.B. Vision Linux service. R.O.B. Vision does not flash its own Matrix sketch during normal installation. It preserves pairing data during upgrades. It prints Mission and Setup links for both the UNO Q's `.local` name and available LAN IPv4 addresses. Open the printed **Setup** link in a browser on your laptop, tablet, or phone. The UNO Q address without a port opens the Controller Router selection page when both controller apps are installed; it selects and opens R.O.B. Vision directly when it is the only one. R.O.B. Vision’s browser pages use port **8101**. Its console receiver continues using port **8766**. A downloaded `file://` copy of Setup is only a preview and cannot pair a live console.
 
+With both products installed, **Apps** returns to the chooser; with one installed, the link is hidden. The chooser opens services that are already running. Controller Router remains the startup app. Installing either product registers it with Router without replacing a newer Router version or clearing saved credentials, registries, or assignments. The first shared Matrix build can take several minutes; keep the installer open while App Lab prepares it.
+
 ## 2. Install or upgrade each console
 
 Run this command **on RetroPie or Batocera**, replacing `your-uno-q.local` with the UNO Q name or LAN IP printed by its installer:
