@@ -6,9 +6,17 @@ The UNO Q controls Buddy, the virtual robot shown in Mission. RetroPie or Batoce
 
 Install R.O.B. Vision with the two commands in the [installation guide](INSTALLATION_GUIDE.md): one on the UNO Q, one on the console. The console command prints first-time pairing details for Setup and configures its receiver automatically.
 
-Open the UNO Q’s `.local` address or LAN IP in a browser on the same network. Controller Router opens the sole installed product, or shows a chooser when both VirtualGlove and R.O.B. Vision are installed. Mission is directly available on port **8101**; the installer prints both hostname and IP links. **Apps** returns to the chooser and appears only when both products are installed. Both services stay running. Finish any live game before changing apps manually. A registered game selects R.O.B. Vision automatically, even when no browser is open.
+1. Open your UNO Q's `.local` address or LAN IP in a browser on the same network.
+2. If you see the app chooser, choose **R.O.B. Vision**.
+3. Open **Mission** to see Buddy, his accessories, and the Game Table.
 
-Mission shows R.O.B., Accessory Bay, Game Table, Pose Preview, System Vitals, and Activity Feed. **GYROMITE / CONNECTED** means the browser reaches the UNO Q with Gyromite selected. **RETROPIE ONLINE** or **BATOCERA ONLINE** means that console's receiver has contacted the UNO Q recently. **GAME FRAMES LINKED** means the selected game is sending its rendered frames.
+**Apps** returns to the chooser when both controller apps are installed. Finish a game before changing apps manually. Starting a registered game selects Buddy automatically; you do not need a browser open for game commands to reach him.
+
+| Status | What it tells you |
+| --- | --- |
+| **GYROMITE / CONNECTED** | Mission is connected to the UNO Q with Gyromite selected. |
+| **RETROPIE ONLINE** or **BATOCERA ONLINE** | Your console's receiver has checked in recently. |
+| **GAME FRAMES LINKED** | Signals from the selected game are reaching Buddy. |
 
 ![Mission preview showing Buddy and the Gyromite accessories](images/mission-model-screenshot.png)
 
@@ -18,11 +26,11 @@ When no supported game is running, select **Gyromite** or **Stack-Up** and **Run
 
 ## Choose an NES emulator
 
-For automatic R.O.B. movement on RetroPie, select **lr-robvision-fceumm** or **lr-robvision-nestopia** for the game. Each entry uses the corresponding installed core and forwards the game's rendered light cells to the UNO Q. On supported Batocera, the installer selects the R.O.B. Vision FCEUmm wrapper for registered games; Nestopia is available as a per-game choice. See the [RetroPie](../deploy/retropie/README.md) and [Batocera](../deploy/batocera/README.md) setup guides.
+For automatic R.O.B. movement on RetroPie, select **lr-robvision-fceumm** or **lr-robvision-nestopia** for the game. These choices let the game send Buddy its commands. On supported Batocera, the installer selects the R.O.B. Vision FCEUmm wrapper for registered games; Nestopia is available as a per-game choice. See the [RetroPie](../deploy/retropie/README.md) and [Batocera](../deploy/batocera/README.md) setup guides.
 
 ## Play Gyromite
 
-Open [Setup](../dashboard/setup.html) to check the console and game-frame status. Start Gyromite and watch Mission for **GAME FRAMES LINKED**. R.O.B. follows complete commands from the game. A spinning virtual gyro on a pad keeps its gate pressed while R.O.B. moves elsewhere; an unspun gyro can press one gate while held there. The UNO Q sends those pad states to the active console's virtual Controller 2.
+Open [Setup](../dashboard/setup.html) to check the console and game-frame status. Start Gyromite and watch Mission for **GAME FRAMES LINKED**. R.O.B. follows complete commands from the game. A spinning virtual gyro on a pad keeps its gate pressed while R.O.B. moves elsewhere; an unspun gyro can press one gate while held there. The matching gate on the game screen should move.
 
 **Fast Gates** responds immediately while Gyromite is selected. Tap **Lower Blue** or **Lower Red** to press, tap again to release, or choose **Release Both**. On Mission, **2** toggles blue, **1** toggles red, and **0** releases both while you are not typing in a field. Holds expire after 60 seconds; both buttons release on game exit or lost receiver data. Buddy's hands must be empty, the matching gyro must be on its holder, and the target pad must be free. Return the pieces with regular controls or choose **Home** to reset the gyros. Watch the game screen to confirm the gate's response.
 

@@ -105,7 +105,7 @@
         remove.className = 'console-remove';
         remove.textContent = 'REMOVE';
         remove.setAttribute('aria-label', `Remove ${item.name} pairing ${item.host || ''}`);
-        remove.addEventListener('click', () => { removingId = item.id; if (state) render(state); });
+        remove.addEventListener('click', () => { location.href = 'https://' + (location.hostname.includes(':') ? '[' + location.hostname + ']' : location.hostname) + ':8444/setup'; });
         meta.append(remove);
       }
       row.append(identity, meta);

@@ -1,57 +1,81 @@
-# R.O.B. Vision installation guide
+# Install and set up R.O.B. Vision
 
-R.O.B. Vision runs on an Arduino UNO Q and connects to either RetroPie or Batocera. Install the UNO Q first, then install each console. **Each device has one command for both installation and upgrades.** Rerun that device's command to get the latest release; there is no separate upgrade command. The release installer downloads and verifies the app before installing it.
+Install R.O.B. Vision on your UNO Q and console, pair them, then try your first game. **Installation and upgrades use the same command on each device.** Upgrades keep your saved pairing and game filenames.
 
 ## Before you begin
 
-- Connect the UNO Q and console to the same trusted network. Sign in to the UNO Q as `arduino`, to RetroPie as `pi`, or to Batocera as `root`.
-- Install UNO Q App Lab. Standard RetroPie needs Python 3.7+, `gcc`, `openssl`, `sudo`, systemd, `uinput`, and at least one installed NES core (`lr-fceumm` or `lr-nestopia`). The UNO Q needs Python 3.9+. Batocera needs Python 3.9+, its service manager, SDL2, and an installed FCEUmm or Nestopia core. The installer uses a matching packaged frame wrapper or compiles one when a native C compiler is available.
-- Exit any running game and EmulationStation on RetroPie. Restarting the virtual joystick while EmulationStation is open can crash its input manager. Finish any live game before installing or switching controller apps. Supply your own legally obtained Gyromite or Stack-Up ROM. After pairing, select **Edit ROMs** beside that console in Setup to add a different filename to its registry.
-- `curl`, `tar`, Python 3, and either `sha256sum` or `shasum` are needed to run the single-command download. The installer reports a missing prerequisite before installing.
+You need an Arduino UNO Q with App Lab, a RetroPie or Batocera console, a physical gamepad configured in EmulationStation, and your own Gyromite or Stack-Up game files. Put both devices on the same trusted network and connect them to the internet for installation.
 
-## Install or upgrade the UNO Q
+Exit any running game. On RetroPie, also exit EmulationStation to its terminal before installing: replacing virtual controllers while the game menu is open can make it crash.
 
-Run this one command in the UNO Q terminal as `arduino`:
+The installer checks the required tools and emulator support. If it reports a missing requirement, follow that message and rerun the same command. Detailed platform requirements are in the [Configuration Reference](CONFIGURATION_REFERENCE.md).
+
+## 1. Install or upgrade the UNO Q
+
+In the UNO Q terminal, signed in as `arduino`, install the app:
 
 ```sh
 curl -fsSL https://github.com/mathan416/ROB-Vision/releases/latest/download/install.sh | sh -s -- uno-q
 ```
 
-Use this exact command again to upgrade or repair the UNO Q. It downloads and verifies the latest R.O.B. Vision release, installs its Linux service, and installs or upgrades Controller Router. Router owns the sole App Lab Matrix sketch; R.O.B. Vision does not flash its own sketch during normal installation. If VirtualGlove is installed, both services remain online. After reboot Router waits neutrally; starting a registered game selects its controller automatically. Pairing data stays in place through upgrades. At the end, the installer prints Mission and Setup links using the device's `.local` name and available LAN IPv4 addresses. Open either form in a browser on the same network when you want to see Buddy or change settings; a browser is not needed for game input. Port 80 is the Controller Router entry page; R.O.B. Vision’s Mission and Setup use port 8101. Existing console receiver traffic remains on port 8766.
+Leave the terminal open until installation finishes. The first shared Matrix build may take several minutes.
 
-With both products installed, **Apps** returns to the chooser; with one installed, the link is hidden. The chooser opens services that are already running. Controller Router remains the startup app. Installing either product registers it with Router without replacing a newer Router version or clearing saved credentials, registries, or assignments. The first shared Matrix build can take several minutes; keep the installer open while App Lab prepares it.
+The installer prints links using both the UNO Q's `.local` name and LAN IP address. Open its **Setup** link on your computer, tablet, or phone.
 
-<!-- pagebreak -->
+Controller Router is included. Visiting the UNO Q address opens R.O.B. Vision when it is the only controller app installed, or shows the app chooser when VirtualGlove is installed too. **Apps** returns to the chooser. Both apps stay available; finish a game before changing apps manually.
 
-## Install or upgrade a console
+## 2. Install or upgrade the console
 
-Run this one command **on RetroPie or Batocera**, replacing `your-uno-q.local` with your UNO Q's LAN hostname or IP address:
+In the console terminal, signed in as `pi` on RetroPie or `root` on Batocera, install the console software:
 
 ```sh
 curl -fsSL https://github.com/mathan416/ROB-Vision/releases/latest/download/install.sh | \
   sh -s -- console your-uno-q.local
 ```
 
-Use this exact command again to upgrade or repair that console. It detects RetroPie or Batocera. On RetroPie it uses `sudo` for system changes and requires EmulationStation to be closed. On Batocera it runs under the root login and temporarily suspends and resumes its game menu while the virtual joystick is restarted. It installs the frame wrappers, receiver, game launch integration, and Controller Router with Buddy assigned to Player 2. For a first install it opens a five-minute pairing window and prints a six-digit code and SHA-256 certificate fingerprint. Enter the console's `.local` hostname or LAN IP address, code, and fingerprint under **Console Link** on the UNO Q Setup page. Keep the console command open until it reports **Pairing complete**. Successful pairing starts the receiver, installs or updates Controller Router, and assigns Buddy to Player 2. Existing physical-controller assignments remain in place. No second terminal command is required.
+Replace `your-uno-q.local` with the UNO Q name or IP address printed by its installer. The same command detects RetroPie or Batocera and includes Controller Router and the game integration.
 
-## Upgrades and re-pairing
+For a new pairing, the installer prints a single-use **CR1 connection code**. Use it within five minutes. An upgrade keeps the existing connection.
 
-An upgrade retains that console's credential and restarts its receiver. Rerun the command in **Install or upgrade a console** for a repair or upgrade. If you remove a console in Setup, rerun the console command with `--pair` added at the end to open a new pairing window; this is still one command on the console.
+## 3. Pair the console
 
-The installer leaves ROM files and unrelated games alone. RetroPie registers `lr-robvision-fceumm` and `lr-robvision-nestopia` for the exact registered ROM names. Batocera selects its R.O.B. Vision FCEUmm wrapper for those names while retaining unrelated core choices. Plain NES cores still play games but do not send commands to R.O.B. Vision.
+Pair once for the UNO Q and console. VirtualGlove and R.O.B. Vision receive their own private credentials automatically when installed on both devices. Installing the other app later adds its access without another pairing. No SSH username or password is required.
 
-## Review controller assignments
+Finish the game before pairing, changing app access, or removing a connection. Each console connects to one UNO Q at a time. Connecting it to another requires a new console code and Matrix confirmation.
 
-On the UNO Q Setup page, choose **Controllers** beside a paired console. Buddy stays on Player 2. The list shows physical controllers configured in EmulationStation and their current player assignments. On a new Router installation, known controllers are seeded in Player 1-4 order. Change an assignment if needed, exit the running game, and choose **Save Assignments**. **Test Inputs** listens briefly for buttons and directions. **Restore Previous** returns to the last saved assignment. RetroPie requires EmulationStation closed during first pairing or Router installation because new virtual controllers can upset its input manager.
+1. Open **Apps > Setup > Pair console**. Both product Setup pages have an **Open Pair console** link to this same page.
+2. Open the secure address printed by the UNO Q installer, using its `.local` name or LAN IP. Pairing uses HTTPS port **8444**.
+3. Before accepting the local certificate, compare the browser's SHA-256 fingerprint with the fingerprint printed by the UNO Q installer. During confirmation, its beginning also appears after **ID** on the Matrix. Stop if they differ.
+4. Enter the console hostname or IP address and paste its complete **CR1 connection code**. The console installer prints this single-use code; it lasts five minutes.
+5. Choose **Continue**, read the six Matrix digits after **PN**, and enter them within two minutes.
+6. Choose **Connect**. Wait for **Connected** and check each app's readiness below it.
 
-## Check the link and play
+Buddy is assigned to Player 2. Existing physical-controller assignments stay saved. No further terminal command is needed.
 
-On Setup, select **Check Link** after pairing. It should show the console online. Launch Gyromite or Stack-Up using a R.O.B. Vision core; Mission and Setup should show **GAME FRAMES LINKED**. In Gyromite Test mode the Test light blinks automatically. In Game A, test blue and red gates independently. Stack-Up Direct mode supplies Left, Right, Up, Down, Open, and Close. The virtual robot and game pieces appear in Mission on a laptop, phone, or tablet.
+## 4. Check players and game filenames
 
-If a game is already running during installation, the console installer stops before changing its configuration. Exit the game and run the same command again. On Batocera, missing NES cores or a usable native wrapper are reported before any changes. For a failed link, see [Troubleshooting](TROUBLESHOOTING.md) and the built-in Help page.
+1. Open **Setup** from the Controller Router page at the UNO Q address.
+2. Select your console and check **Players**. Keep your physical gamepad on Player 1; Buddy stays on Player 2.
+3. Under **Systems**, keep **Controller Router** enabled for NES. Other systems can use **My existing setup** if you prefer your normal controls.
+4. With the game closed, choose **Save assignments** if you changed anything.
+5. In R.O.B. Vision Setup, choose **Edit ROMs** beside the console if your filename differs from the supplied entries.
 
-## Supported releases and integrity
+The [Setup Guide](SETUP_GUIDE.md#register-your-game-filenames) explains how to add a filename. The [Controller Router Guide](CONTROLLER_ROUTER.md) explains pad tests and system choices.
 
-The Batocera installer checks installed NES cores and a loadable frame wrapper rather than a fixed board or version. The package includes FCEUmm and Nestopia wrappers for x86_64, 32-bit x86, AArch64, ARMv7, ARMv6, and RISC-V 64. If a packaged wrapper cannot load, a native C compiler can build one before installation changes the device. Live device testing covered Batocera 43.1 x86_64; other architectures receive the same preflight checks but have not all been tested on physical hardware. Release assets include the source package, installer, PDFs, and `SHA256SUMS`. The installer checks the source package's digest before installing it.
+## 5. Try your first game
 
-For advanced repair, see the [RetroPie](../deploy/retropie/README.md) and [Batocera](../deploy/batocera/README.md) guides.
+1. Launch Gyromite or Stack-Up. On RetroPie, use **lr-robvision-fceumm** or **lr-robvision-nestopia**. Batocera uses the installed R.O.B. Vision integration for registered games.
+2. Open Mission and look for the correct game and **GAME FRAMES LINKED**.
+3. Enter the game's **Test** mode. Buddy's red light should blink and the UNO Q should show **T**.
+4. Enter **Direct** mode and send a movement command. Watch Buddy respond.
+5. For Gyromite, enter **Game A** and try one colored gate with Setup's **Lower Blue** or **Lower Red**, then **Release Both**.
+
+Starting a registered game selects Buddy's controller automatically. A browser is optional for sending game commands, but keep Mission open to see Buddy's pieces and position.
+
+## Upgrade, repair, or pair again
+
+To upgrade or repair, close games and repeat the same installation command on each device. Keep the printed backup paths until you have checked a game. Upgrades keep your pairings, filenames, and player assignments.
+
+If you removed a console in Setup, add `--pair` to the end of its console command to open a new pairing window. Choose **Pair console** in Router Setup to add another machine. Each console connects to one UNO Q at a time.
+
+See the [Game Manual](GAME_MANUAL.md) for playing, or [Troubleshooting](TROUBLESHOOTING.md) if a check does not work.

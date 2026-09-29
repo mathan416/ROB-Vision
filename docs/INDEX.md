@@ -1,6 +1,6 @@
 # R.O.B. Vision documentation
 
-[Version 0.1.7 release notes](RELEASE_NOTES_0.1.7.md) describe the latest changes. The [0.1.6 notes](RELEASE_NOTES_0.1.6.md), [0.1.5 notes](RELEASE_NOTES_0.1.5.md), [0.1.4 notes](RELEASE_NOTES_0.1.4.md), [0.1.3 notes](RELEASE_NOTES_0.1.3.md), [0.1.2 notes](RELEASE_NOTES_0.1.2.md), [0.1.1 notes](RELEASE_NOTES_0.1.1.md), [0.1.0 notes](RELEASE_NOTES_0.1.0.md), and [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remain available.
+[Current release review](RELEASE_REVIEW_2026-09-28.md) records the development review and remaining release gates. [Version 0.1.7 release notes](RELEASE_NOTES_0.1.7.md) describe that published stable release. The [0.1.6 notes](RELEASE_NOTES_0.1.6.md), [0.1.5 notes](RELEASE_NOTES_0.1.5.md), [0.1.4 notes](RELEASE_NOTES_0.1.4.md), [0.1.3 notes](RELEASE_NOTES_0.1.3.md), [0.1.2 notes](RELEASE_NOTES_0.1.2.md), [0.1.1 notes](RELEASE_NOTES_0.1.1.md), [0.1.0 notes](RELEASE_NOTES_0.1.0.md), and [dated engineering review](RELEASE_REVIEW_2026-09-25.md) remain available.
 
 **Project scope:** a virtual R.O.B. driven by an Arduino UNO Q. The game runs on RetroPie or Batocera; its rendered NES frames carry complete R.O.B. commands to the UNO Q. A browser on a laptop, iPad, or phone shows R.O.B. and the pieces; Gyromite virtual button states return to the game host over LAN. Both games' six commands were decoded during live Direct play, and Gyromite's gate controls were tested in Game A.
 

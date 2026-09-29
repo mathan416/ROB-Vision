@@ -488,6 +488,22 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
 
         def do_POST(self):
             path = urlsplit(self.path).path
+            if path == '/api/router-pairing':
+                from router_shared.pairing_adapter import authorized, rob_operation
+                if not authorized(pairings.path.parent, self.headers):
+                    return self.respond(403, {'error': 'Private pairing adapter authorization required.'})
+                try:
+                    size = int(self.headers.get('Content-Length', '0'))
+                    if not 1 <= size <= 32768:
+                        raise ValueError('Invalid pairing adapter request.')
+                    data = json.loads(self.rfile.read(size))
+                    if not isinstance(data, dict):
+                        raise ValueError('Invalid pairing adapter request.')
+                    if controller.snapshot().get('live_game_active') and data.get('operation') not in ('export', 'status', 'restore'):
+                        raise ValueError('Finish the game before changing its connection.')
+                    return self.respond(200, rob_operation(pairings, data))
+                except (OSError, ValueError, TypeError, KeyError):
+                    return self.respond(400, {'error': 'The app could not update its connection.'})
             if not self.browser_request():
                 return
             if path in ("/api/launch", "/api/emulator/command") and not self.authorized():
@@ -524,6 +540,8 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                 elif path == "/api/gate-assist":
                     result = controller.gate_assist(data["color"], data["pressed"])
                 elif path == "/api/pair":
+                    if (pairings.path.parent / 'controller-router-required').exists():
+                        raise ValueError('Open Apps > Setup > Pair console to connect through Controller Router.')
                     if matrix is not None:
                         matrix.show_pairing()
                     try:
@@ -538,6 +556,8 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                         if matrix is not None:
                             matrix.clear_pairing()
                 elif path == "/api/consoles/remove":
+                    if (pairings.path.parent / 'controller-router-required').exists():
+                        raise ValueError('Manage console and app access in Apps > Setup > Pair console.')
                     console_id = data.get("id")
                     if not isinstance(console_id, str):
                         raise ValueError("Choose a console to remove.")

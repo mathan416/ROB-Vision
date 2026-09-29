@@ -282,7 +282,7 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
             # Dashboard guides are already bundled under dashboard/guides.
             # Do not copy generated release archives into the running app.
             for name in ("controller", "python", "dashboard", "config", "tools", "sketch", "bricks",
-                         "matrix", "controller_router_portal"):
+                         "matrix", "controller_router_portal", "router_shared"):
                 if (source / name).exists():
                     shutil.copytree(source / name, staged / name,
                                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store", "._*"))
@@ -353,7 +353,11 @@ def installed_controller(path: Path = PI_CONFIG / "receiver.env") -> str | None:
         return None
     for line in path.read_text().splitlines():
         if line.startswith("ROB_VISION_URL=http://"):
-            return line[len("ROB_VISION_URL=http://"):].removesuffix(":8766").removesuffix(":8101")
+            address = line[len("ROB_VISION_URL=http://"):]
+            for suffix in (":8766", ":8101"):
+                if address.endswith(suffix):
+                    address = address[:-len(suffix)]
+            return address
     return None
 
 
@@ -487,6 +491,13 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
         print("Receiver restarted. Open Setup on the UNO Q and select Check Link.")
     else:
         print("Receiver installed and will start automatically when pairing completes.")
+    from router_shared.pairing_install import install as install_link
+    install_link('rob_vision', {'kind': 'env', 'token_file': str(PI_CONFIG / 'token'),
+        'target_file': str(PI_CONFIG / 'receiver.env'), 'identity_file': str(PI_CONFIG / 'console-id'),
+        'restart': ['systemctl', 'restart', 'rob-vision-controller2.service'],
+        'setup': ['python3', str(destination / 'tools/controller_router_setup.py'), 'retropie', '--pair-only'],
+        'backup_files': ['/etc/virtualglove/controller-router.json', '/etc/virtualglove/controller-router.json.previous'],
+        'stop': ['systemctl', 'stop', 'rob-vision-controller2.service']})
 
 
 def main() -> int:

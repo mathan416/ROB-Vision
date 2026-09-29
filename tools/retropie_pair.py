@@ -149,6 +149,17 @@ def detect_platform():
 
 
 def main():
+    # Upgraded consoles use the shared service; retain the old implementation
+    # only to recover installations which predate Controller Router pairing.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from router_shared.pairing_console import default_root, open_window
+    if (default_root() / 'adapters.json').is_file():
+        root = default_root()
+        if os.geteuid() != 0:
+            subprocess.run(['sudo', '-n', str(root.parent / 'pair-console')], check=True)
+        else:
+            open_window(root)
+        return
     parser = argparse.ArgumentParser(description="Pair this console with R.O.B. Vision.")
     parser.add_argument("--port", type=int, default=8768)
     parser.add_argument("--platform", choices=("retropie", "batocera"),

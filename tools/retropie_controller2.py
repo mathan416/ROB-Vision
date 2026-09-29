@@ -22,7 +22,7 @@ from urllib.request import Request, urlopen
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from identify_game import identify, load_registry
 from tools.game_registry import RegistryStore, router_store_for, serve
-from tools.retropie_frame_hook import BATOCERA_CONFIG, BATOCERA_PROXY_CORES, FrameHookServer
+from tools.retropie_frame_hook import BATOCERA_CONFIG, BATOCERA_PROXY_CORES, FrameHookServer, has_launch_config
 
 
 def ioctl_write(number, size):
@@ -145,9 +145,9 @@ def running_game(registry, proc_root=Path("/proc"), platform="retropie"):
             continue
         if not arguments or Path(os.fsdecode(arguments[0])).name != "retroarch":
             continue
-        if platform == "retropie" and b"/dev/shm/retroarch.cfg" not in arguments:
+        if platform == "retropie" and not has_launch_config(arguments, b"/dev/shm/retroarch.cfg"):
             continue
-        if platform == "batocera" and BATOCERA_CONFIG not in arguments:
+        if platform == "batocera" and not has_launch_config(arguments, BATOCERA_CONFIG):
             continue
         if platform == "batocera" and not any(arguments[i] == b"-L" and
                 arguments[i + 1] in BATOCERA_PROXY_CORES

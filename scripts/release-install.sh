@@ -57,17 +57,17 @@ if [ -f /userdata/system/batocera.conf ] && [ -d /usr/lib/libretro ]; then
     platform=batocera
     as_root python3 "$source/scripts/install_batocera.py" --controller "$2"
     token=/userdata/system/rob-vision/token
-    pair=/userdata/system/rob-vision/tools/retropie_pair.py
+    pair=/userdata/system/controller-router/pair-console
 else
     [ -d /opt/retropie/configs ] || fail "This console is neither a supported RetroPie nor Batocera installation"
     platform=retropie
     as_root python3 "$source/scripts/install.py" retropie --controller "$2"
     token=/home/pi/.config/rob-vision/token
-    pair=/home/pi/rob-vision/tools/retropie_pair.py
+    pair=/var/lib/controller-router/pair-console
 fi
 if as_root test -s "$token" && [ "${3:-}" != --pair ]; then
     echo "R.O.B. Vision $VERSION installed; existing pairing retained."
 else
     echo "Installation is complete. Enter the following pairing details on the Uno Q Setup page."
-    as_root python3 "$pair" --platform "$platform" --token-file "$token"
+    as_root sh "$pair"
 fi

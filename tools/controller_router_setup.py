@@ -249,11 +249,17 @@ def main() -> int:
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("platform", choices=("retropie", "batocera"))
+    parser.add_argument('--pair-only', action='store_true', help='Add Buddy without migrating saved emulator configuration')
     args = parser.parse_args()
     try:
         before, _ = paths(args.platform)
         previous = before.read_text() if before.exists() else None
-        activate(args.platform)
+        if args.pair_only:
+            ensure(args.platform)
+            if args.platform == 'retropie':
+                subprocess.run(['systemctl', 'enable', '--now', 'virtualglove-controller-router.service'], check=True)
+        else:
+            activate(args.platform)
         changed = previous != (before.read_text() if before.exists() else None)
         print("Buddy added to Player 2." if changed else "Buddy is already assigned to Player 2.")
         return 0

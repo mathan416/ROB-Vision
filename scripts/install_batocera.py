@@ -176,9 +176,16 @@ def install(source=ROOT, destination=DEST, controller=None):
             if menu_suspended:
                 resume_menu()
     print("Installed R.O.B. Vision for:", ", ".join(chosen) or "no registered ROMs present")
-    if not (destination / "token").is_file():
-        print("Pair on the UNO Q Setup page using:")
-        print("  python3 /userdata/system/rob-vision/tools/retropie_pair.py --platform batocera")
+    from router_shared.pairing_install import install as install_link
+    install_link('rob_vision', {'kind': 'text', 'token_file': str(destination / 'token'),
+        'target_file': str(destination / 'controller.url'), 'identity_file': str(destination / 'console-id'),
+        'restart': ['batocera-services', 'restart', 'ROBVision'],
+        'setup': ['python3', str(destination / 'tools/controller_router_setup.py'), 'batocera', '--pair-only'],
+        'backup_files': ['/userdata/system/virtualglove/data/controller-router.json',
+                         '/userdata/system/virtualglove/data/controller-router.json.previous',
+                         '/userdata/system/configs/emulationstation/es_input.cfg'],
+        'stop': ['batocera-services', 'stop', 'ROBVision']})
+    print("Pair once in Controller Router > Setup > Pair console.")
 
 
 def main():

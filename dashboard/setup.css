@@ -16,8 +16,8 @@
 .registry-card textarea{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;tab-size:2;min-height:190px}
 .setup-row{display:flex;gap:8px;align-items:stretch;margin-top:15px;flex-wrap:wrap}
 .setup-row>input{flex:1;margin:0}
-.setup-card button{border:1px solid #de866d;background:#b95b48;color:#fff;min-height:40px;padding:9px 13px;font:800 10px 'DM Sans',sans-serif;letter-spacing:.08em;cursor:pointer}
-.setup-card button:hover{background:#d97758}
+.setup-card button,.setup-card .setup-button{border:1px solid #de866d;background:#b95b48;color:#fff;min-height:40px;padding:9px 13px;font:800 10px 'DM Sans',sans-serif;letter-spacing:.08em;cursor:pointer}
+.setup-card button:hover,.setup-card .setup-button:hover{background:#d97758}
 .setup-card button.quiet{background:#17374a;border-color:#588397;color:#d6f2f4}
 .setup-card button.quiet:hover{background:#25566a}
 .setup-card button:disabled{opacity:.5;cursor:not-allowed}
@@ -65,3 +65,6 @@
 .router-source select{margin:0}
 @media(max-width:530px){.router-source{grid-template-columns:1fr}}
 @media(max-width:530px){.console-item{align-items:flex-start;flex-direction:column}.console-meta{justify-content:flex-start}}
+
+.setup-card .setup-button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;box-sizing:border-box}
+@media(max-width:530px){.console-link-actions>.setup-button{flex:1}}

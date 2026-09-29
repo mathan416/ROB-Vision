@@ -1,81 +1,107 @@
-# Controller Router
+# Controller Router: get your controllers ready to play
 
-## Choose a controller app on the UNO Q
+Controller Router lets you choose which gamepad controls each player, and which systems use those choices. It also gives VirtualGlove and Buddy a shared home on your UNO Q.
 
-Starting a registered game selects its app automatically: Gyromite and Stack-Up select R.O.B. Vision, while VirtualGlove's registered games select VirtualGlove. Both Linux services remain available. Only the selected app owns input and the Matrix; ending the game releases its lease and restores Router's neutral animation. No browser visit is needed to play.
+Already happy with your controls? Keep your saved choices. You only need this guide when you want to change a player, choose a system, or troubleshoot a pad.
 
-Open the UNO Q's `.local` address or LAN IP to view or manually select an app. With one installed app, Router opens it directly; with both, it shows a chooser. **Apps** returns to that chooser and appears only when both are installed. Direct visits also select an app while idle. Finish the game before switching manually. Selection opens an already running service.
+## Open Setup
 
-Router owns the Matrix firmware. Reboot starts neutral. If Router stops or the UNO Q restarts, input pauses until the console reports the live game again. Pairing and manual controller changes are blocked during play.
+1. In your browser, open your UNO Q's address, such as `http://your-uno-q.local/`.
+2. Choose **Setup** on the Controller Router page.
+3. Select your paired console under **Console connection**.
 
-R.O.B. Vision's browser uses port **8101**. Its console receiver continues on port **8766**. This UNO Q app chooser is separate from the console player assignments described below.
+You will see **Players** first, then **Systems**. Each console keeps its own settings. If no console appears, choose **Pair console** in Controller Router Setup first.
 
-Controller Router decides which game controller supplies each player in RetroArch. R.O.B. Vision installs it on RetroPie and Batocera so Buddy's virtual buttons and your physical gamepads can coexist. Your console still uses its original controllers in EmulationStation; Router takes over their game input only while a Libretro game is running.
+## Choose who plays
 
-## What goes to each player
+Before assigning a gamepad, configure its buttons in EmulationStation, your console's game menu.
 
-| Source | Usual assignment | What it does |
-| --- | --- | --- |
-| Your physical gamepad | Player 1 | Moves Hector, selects a mode, starts the game, and provides the console's normal menu and exit controls. |
-| Buddy (R.O.B. Vision Controller 2) | Player 2 | Presses Gyromite's red and blue gates when a gyro rests on a pad or you use Fast Gates. Buddy's visible Stack-Up movements come from decoded game frames. |
-| Another physical gamepad | Any chosen player | Can share a player with another pad or control a different player if the game supports it. |
+1. Exit any running game.
+2. In Router **Setup > Players**, find your gamepad by name.
+3. Choose **Player 1**, **Player 2**, **Player 3**, or **Player 4**. Choose **Unassigned** if you do not want that pad to join a Router player.
+4. If VirtualGlove is installed, choose its gesture player under **VirtualGlove player**, or leave it **Unassigned**.
+5. Choose **Save assignments**.
+6. Launch a game to try the new choices.
 
-**Buddy stays on Player 2.** On a new Router installation, gamepads already configured in EmulationStation are suggested in Player 1–4 order. If Router was already installed with VirtualGlove, R.O.B. Vision keeps its saved assignments and adds Buddy to Player 2. A controller's Linux `jsN` number and RetroArch pad number can change after reboot; use the named assignments in Setup instead of editing those numbers.
+Keep a physical gamepad assigned to **Player 1** for the usual menu and exit controls. Several pads can share one player; a pad can belong to only one player. Buddy stays on **Player 2** for Gyromite's red and blue gates.
 
-Router assigns controller *sources* to player slots. It does not alter an NES game's player count, the ROM registry, the game-frame link, or the buttons you mapped in EmulationStation. A physical controller may share Buddy's Player 2 slot, but it will then send Player 2 input during Libretro play.
+A game must support additional players for Player 3 or Player 4 to do anything. Assigning four pads does not turn a two-player game into a four-player game.
 
-## Review or change assignments
+## Choose which systems use Router
 
-1. Open the live UNO Q **Setup** page and find **Console Link**.
-2. Choose **Controllers** beside the console you are playing. The Controller Router card selects that console and shows its saved assignments.
-3. Check which physical gamepad is Player 1. If you use more than one console, review each separately; each console saves its own Router settings.
-4. Choose **Test Inputs**, then press a direction or button on each connected gamepad during the five-second test. The result tells you which controls were seen. A pad can be connected yet show no activity if you did not press it during the test.
-5. To change an assignment, exit the RetroArch game, choose the desired player beside that physical gamepad, then select **Save Assignments**. Relaunch the game to use the new routing.
+Want Router for NES but your normal controls for Mega Drive / Genesis? You can choose each system separately.
 
-**Reload** fetches the current console assignments and discards unsaved choices on the page. **Restore Previous** returns to the last saved assignment; it is available only when a previous save exists. Buddy's Player 2 choice cannot be changed in R.O.B. Vision Setup.
+1. With the game closed, open **Setup > Systems**.
+2. Under **Routing selection**, choose **Choose systems individually**.
+3. For each listed system, choose one of the following options.
+4. Choose **Save assignments**, then launch your next game.
 
-## What the status means
+| Choose | What happens in a game |
+| --- | --- |
+| **Controller Router** | The system uses the player assignments you saved in **Players**, with the buttons you configured in EmulationStation. |
+| **My existing setup** | The system uses its normal controller setup. Router adds no player-routing changes for that game. |
 
-- **Connected:** Router can see that configured physical controller now.
-- **Unavailable:** A saved controller is not present or its identity no longer matches. Reconnect the same pad. If you replaced it, configure the replacement in EmulationStation, then assign it in Router.
-- **Mapping updated:** EmulationStation has a newer valid button map for the same controller. Router keeps its player assignment and uses the refreshed map at the next game launch.
-- **No input detected:** No button or direction was pressed during the test. Try again while moving the pad; this result alone does not prove the pad is broken.
+**Buddy's games and VirtualGlove require Controller Router enabled for NES.** You can still choose **My existing setup** for NES when you want to use your own controls instead.
 
-The merged Player 1–4 devices stay neutral in EmulationStation. Test the original gamepad there, then test its merged player inside a Libretro game.
+New Router setups start with **NES only**. Upgrades keep your choices. **All Libretro systems, including newly added systems** applies Router to every supported RetroArch system. In individual mode, a newly discovered system starts with **My existing setup**.
 
-## When a controller seems wrong
+The list covers systems that offer supported RetroArch emulators. Separate emulators, such as a standalone Amiga emulator, keep their own controls. Your choice also stays saved if a system is temporarily unavailable.
 
-**My gamepad works in EmulationStation but not in the game.** Try another connected gamepad first. The one in your hands may be Player 2 while another is Player 1. Review the names and assignments in Setup, use **Test Inputs**, and correct the slot with the game closed.
+## Check a gamepad
 
-**Hector moves but Gyromite's gates do not.** Player 1 working does not prove Buddy's Player 2 path. Check that Buddy appears on Player 2, the console link is online, and Gyromite is running through a R.O.B. Vision FCEUmm or Nestopia choice. On the game screen, test one gate at a time with **Lower Blue** or **Lower Red** in Setup, then choose **Release Both**.
+1. In Router Setup, choose **Test inputs**.
+2. Press a direction or button on the pad during the next five seconds.
+3. Read the result, then repeat for another pad if needed.
 
-**Buddy moves on Mission but a physical pad does nothing.** Confirm that the pad is assigned to the player you intend, then check its activity. If it was remapped in EmulationStation, close and relaunch the game. Do not change RetroArch's generated joypad index to chase a changing device number.
+**No button presses detected** can simply mean you did not press anything during the test. Try again before changing settings.
 
-**A controller disappeared after it was unplugged.** Reconnect the saved pad and reload the card. Router releases held input from a disconnected source. If the old pad is gone permanently, assign its replacement and save while no game is running.
+| Status | What to do |
+| --- | --- |
+| Connected | The pad is available. Try **Test inputs** to identify it. |
+| Unavailable | Turn on or reconnect the saved pad. If you replaced it, configure and assign the new one. |
+| Mapping refreshed or updated | Router found your newer EmulationStation button setup. Exit and relaunch the game to use it. |
 
-For installation and pairing, see [Installation and Setup](INSTALLATION_AND_SETUP.md). For game-specific checks, see the [Game Manual](GAME_MANUAL.md) and [Troubleshooting](TROUBLESHOOTING.md).
+**Reload** brings back the saved choices and discards unsaved edits. **Restore previous** restores the preceding saved setup. Exit the game before saving or restoring.
 
+## Start a game or choose an app
 
-## Sleep, wake, and RetroArch versions
+Launch a registered game on your paired console. Router selects VirtualGlove or R.O.B. Vision automatically, so you do not need a browser open for the controller to join the game. Only that app supplies game input and display cues. When the game ends, the UNO Q returns to its neutral display.
 
-Merged player devices remain connected when physical pads sleep, wake, or
-reconnect. Router restores each source to its saved player. The launch adapter
-resolves device identities before starting each Libretro game, including PSP.
-RetroArch 1.19.1 uses temporary indexes; supported newer builds use strict
-native reservations. Neither mode writes saved RetroArch settings during play.
+To open an app yourself, visit the UNO Q address. With one app installed, it opens directly. With both installed, choose VirtualGlove or R.O.B. Vision. **Apps** in either app returns to the chooser; it appears only when both are installed. Finish a game before changing apps manually. Both apps stay available in the background.
 
-If Router itself restarts or its outputs disappear, exit the game and relaunch
-once the service is ready. The running game cannot safely recover destroyed
-virtual devices. Player assignment changes also take effect on the next launch.
+After a reboot, the UNO Q waits for a game or your choice. You do not need to reinstall or pair again.
 
-## Choose systems
+## Get back to your game
 
-1. Open **Setup** at the UNO Q address and choose the paired console.
-2. Under **Systems**, choose **Controller Router** or **My existing setup** beside each system. Mega Drive / Genesis, PSP, and other systems can use different choices. These choices apply to Libretro emulators.
-3. Exit the running game, then choose **Save assignments**. The selection applies to the next launch.
+**My pad works in the game menu but not in the game.** Try another connected pad: yours may be assigned to Player 2. Exit the game, check **Players**, and use **Test inputs** to identify the pad you want on Player 1. Save and relaunch.
 
-Buddy's games and VirtualGlove require Controller Router enabled for NES. NES can also use **My existing setup** when you want your own controls.
+**A wireless pad went to sleep.** Wake it or reconnect it. Router keeps its player controllers connected and returns the pad to its saved player. If the Router service itself restarted, exit and relaunch the game once it is ready.
 
-Fresh installations enable NES only. Upgrades retain existing selections. In individual selection mode, a newly added system uses **My existing setup**. **All Libretro systems** includes newly added systems too.
+**My buttons changed after I remapped them.** Exit the game, confirm the new buttons in EmulationStation, and relaunch. Your player assignment stays saved.
 
-Router uses EmulationStation button mappings for enabled systems. **My existing setup** preserves the original launch arguments and adds no Router routing overrides. Router does not rewrite saved RetroArch configuration files when you save or start a game. Player assignments are shared across enabled systems.
+**I cannot save.** Finish the running game first. If another page changed the settings, choose **Reload**, make your choices again, and save.
+
+**The UNO Q is showing the wrong app.** Check that the game is registered in the right app and that the console is paired with this UNO Q. Exit the game before making changes.
+
+## Check Buddy’s gates
+
+1. Launch Gyromite in **Game A** and stop where a colored gate is visible.
+2. In R.O.B. Vision **Setup**, choose **Lower Blue** or **Lower Red** for that gate.
+3. Watch the game screen, then choose **Release Both**.
+
+Your physical Player 1 pad controls Hector. Buddy’s Player 2 input controls the gates. Stack-Up uses game commands to move Buddy and the blocks; it has no gate buttons.
+
+The **Controllers** button beside a paired console in R.O.B. Vision Setup opens that console’s assignment editor. For pieces and movement, see the [Game Manual](GAME_MANUAL.md). For connection problems, see [Troubleshooting](TROUBLESHOOTING.md).
+
+## One shared console connection
+
+Pair once for the UNO Q and console. VirtualGlove and R.O.B. Vision receive their own private credentials automatically when installed on both devices. Installing the other app later adds its access without another pairing. No SSH username or password is required.
+
+Finish the game before pairing, changing app access, or removing a connection. Each console connects to one UNO Q at a time. Connecting it to another requires a new console code and Matrix confirmation.
+
+1. Open **Apps > Setup > Pair console**. Both product Setup pages have an **Open Pair console** link to this same page.
+2. Open the secure address printed by the UNO Q installer, using its `.local` name or LAN IP. Pairing uses HTTPS port **8444**.
+3. Before accepting the local certificate, compare the browser's SHA-256 fingerprint with the fingerprint printed by the UNO Q installer. During confirmation, its beginning also appears after **ID** on the Matrix. Stop if they differ.
+4. Enter the console hostname or IP address and paste its complete **CR1 connection code**. The console installer prints this single-use code; it lasts five minutes.
+5. Choose **Continue**, read the six Matrix digits after **PN**, and enter them within two minutes.
+6. Choose **Connect**. Wait for **Connected** and check each app's readiness below it.

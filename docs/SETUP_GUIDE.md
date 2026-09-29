@@ -1,17 +1,81 @@
-# R.O.B. Vision Setup
+# Get Buddy ready to play
 
-Install the [current release](INSTALLATION_GUIDE.md) with one command on the UNO Q and one on RetroPie or Batocera. The console command detects its platform and opens first-time pairing automatically. The Batocera installer checks for an installed FCEUmm or Nestopia core and a usable native frame wrapper before changing files.
+Use R.O.B. Vision **Setup** to pair a console, register your game filenames, and check Buddy's controls. Open R.O.B. Vision at your UNO Q address, then choose **Setup**.
 
-Open the Setup URL printed by the UNO Q installer: `http://<hostname>.local:8101/dashboard/setup.html` or `http://<LAN-IP>:8101/dashboard/setup.html`. Console Link lists each paired RetroPie or Batocera console with its address and live status. Then make these five checks:
+Installing for the first time? Start with [Installation and Setup](INSTALLATION_AND_SETUP.md).
 
-1. **Pair the console.** Keep the console installer running while it displays a six-digit code and certificate fingerprint for five minutes. Enter its hostname, code, and fingerprint on Setup, then select **Pair Console**. The console command starts the receiver and configures Gyromite's virtual Controller 2 when pairing completes. Use **Pair Another Console** to add another. Each appears under **Paired Consoles**; **Check Link** refreshes the receiver link. **Receiver Waiting** means this UNO Q has not received a recent authenticated check-in. It does not say whether the console is powered on or whether its `.local` name resolves. Existing pairings remain saved when the UNO Q app is upgraded. A console uses one UNO Q at a time; pairing it with another updates the receiver address, while the old UNO Q retains a waiting row until you remove it.
-2. **Register your ROM filenames.** Select **Edit ROMs** beside the paired console. This opens that console's **Game Registry** editor farther down Setup. The common World filenames are provided. For another filename, add its exact basename and extension under `games` with the value `gyromite` or `stack_up`, select **Validate**, then **Save to Console**. Exit any running game before saving. Each console has its own registry, retained through upgrades.
-3. **Check game frames.** On RetroPie, select `lr-robvision-fceumm` or `lr-robvision-nestopia`. On Batocera, launch an exact registered ROM; its R.O.B. Vision FCEUmm wrapper is selected automatically. Setup should show **GAME FRAMES LINKED**. That means the game is sending frames R.O.B. Vision can use for movement and Test signals.
-4. **Check Test mode.** Enter the game's Test mode. R.O.B.'s red light should blink automatically on Mission and Setup, and the UNO Q matrix should show a pulsing **T**. A separate ready-light command makes the light steady briefly. **Preview Red Light** demonstrates the animation when no Test signal is present. If the light stays off, check **GAME FRAMES LINKED** and confirm the game is in Test mode. In Stack-Up, press Select at the ROBOT BLOCK artwork to show the mode list, choose Test, then press Start.
-5. **Try the controls.** For Gyromite, **Lower Red** and **Lower Blue** press matching virtual pads immediately; press again to release or choose **Release Both**. Each hold expires after 60 seconds. For Stack-Up, **Left, Right, Up, Down, Open, Close** send one command to the virtual model. Watch Mission's Live Model and Game Table for movement.
+## Pair a console
 
-A `file://` Setup page is only an offline preview. Use the UNO Q URL for live status. Mission keeps Fast Gates and the Game Table next to Pose Preview and System Vitals.
+Pair once for the UNO Q and console. VirtualGlove and R.O.B. Vision receive their own private credentials automatically when installed on both devices. Installing the other app later adds its access without another pairing. No SSH username or password is required.
 
-To forget a console, select **Remove** in its row and then **Confirm Remove**. The UNO Q immediately revokes that console's credential; any other paired console remains connected. If the removed console was playing, its game session is cleared. The removed console retains its old local credential, but it can no longer authenticate; rerun the one console install command with `--pair` at the end to reconnect it. Only one console can be the active game source at a time.
+Finish the game before pairing, changing app access, or removing a connection. Each console connects to one UNO Q at a time. Connecting it to another requires a new console code and Matrix confirmation.
 
-For physical gamepad assignments and Buddy's Player 2 route, see the [Controller Router Guide](CONTROLLER_ROUTER.md).
+1. Open **Apps > Setup > Pair console**. Both product Setup pages have an **Open Pair console** link to this same page.
+2. Open the secure address printed by the UNO Q installer, using its `.local` name or LAN IP. Pairing uses HTTPS port **8444**.
+3. Before accepting the local certificate, compare the browser's SHA-256 fingerprint with the fingerprint printed by the UNO Q installer. During confirmation, its beginning also appears after **ID** on the Matrix. Stop if they differ.
+4. Enter the console hostname or IP address and paste its complete **CR1 connection code**. The console installer prints this single-use code; it lasts five minutes.
+5. Choose **Continue**, read the six Matrix digits after **PN**, and enter them within two minutes.
+6. Choose **Connect**. Wait for **Connected** and check each app's readiness below it.
+
+### Check or repair a connection
+
+Open **Pair console > Your consoles**. **Connected** means Router has verified the console connection. **Unavailable** means it could not reach the console. **Needs attention** means the certificate, identity, or app setup needs review. App readiness is shown separately.
+
+Choose **Check and repair connections** after reconnecting a device or installing another app. Use **Disable** beside an app to remove only its access, or **Remove console** to remove the whole connection. Finish any game first. A certificate change requires a fresh pairing; do not ignore the mismatch.
+
+For another code, rerun the console installer or its pairing command. Existing game filenames and player assignments remain saved. Incorrect, expired, or already-used codes require a new window; five incorrect Matrix confirmations lock the current window.
+
+## Register your game filenames
+
+If your game has a different filename from the supplied entries, add it to that console's registry.
+
+1. Exit the game.
+2. In **Console Link**, choose **Edit ROMs** beside the console.
+3. In the **Game Registry** editor, find the `games` section.
+4. Add the game's exact filename, including its extension, with `gyromite` or `stack_up` as its value.
+5. Choose **Validate**, then **Save to Console**.
+6. Launch the game again.
+
+For example, an entry for your own Gyromite ZIP can look like this:
+
+```json
+"My Gyromite.zip": "gyromite"
+```
+
+Add the entry inside the existing `games` object and keep the other entries. Each console has its own registry. Changes and upgrades keep your saved filenames.
+
+## Check the game connection
+
+1. On RetroPie, launch the game with **lr-robvision-fceumm** or **lr-robvision-nestopia**. On Batocera, launch the registered game with its installed R.O.B. Vision emulator integration.
+2. In Setup, check that the correct game is shown.
+3. Look for **GAME FRAMES LINKED**.
+4. Send one movement command from the game and watch Buddy on Mission.
+
+**GAME FRAMES LINKED** means game signals are reaching R.O.B. Vision. A blocked movement is explained in Mission's **Activity Feed**.
+
+## Try the game's Test mode
+
+1. Enter **Test** in the game. In Stack-Up, press Select on the ROBOT BLOCK screen, choose Test, then press Start.
+2. Watch Buddy's red light on Mission or Setup. It should blink automatically.
+3. Check the UNO Q display for a pulsing **T**.
+
+Test checks the connection without moving Buddy. A brief steady red light acknowledges the game's ready signal. **Preview Red Light** lets you try the animation yourself; it does not check the game connection.
+
+## Check Gyromite's gates
+
+1. Enter Gyromite **Game A** and leave a colored gate visible.
+2. In Setup, choose **Lower Blue** or **Lower Red** for that gate.
+3. Watch the game screen for the gate to move.
+4. Choose **Release Both** when finished.
+
+Choose a color again to release it. A hold also releases after 60 seconds. If a gyro is already in use, return it with the normal controls or choose **Home** to reset the pieces before using Fast Gates.
+
+## Check Stack-Up movement
+
+In Setup, try **Left**, **Right**, **Up**, **Down**, **Open**, or **Close** one at a time. Watch Mission's Live Model and Game Table. Raise Buddy's hands before moving sideways past a stack. A blocked move keeps the pieces intact; read the Activity Feed, raise the hands, and try again.
+
+## Remove a console
+
+Open **Apps > Setup > Pair console**, find the console under **Your consoles**, and choose **Remove console**. Removing it revokes both apps’ access. To remove only Buddy’s access, choose **Disable R.O.B. Vision** instead.
+
+For physical gamepads and Buddy's Player 2 controls, see the [Controller Router Guide](CONTROLLER_ROUTER.md). For game rules and pieces, see the [Game Manual](GAME_MANUAL.md).

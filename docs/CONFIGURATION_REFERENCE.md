@@ -39,3 +39,25 @@ python3 tools/identify_game.py end
 ```
 
 The optional standalone `deploy/rob-vision.service` must stay disabled while App Lab owns port 8766. Controller Router owns the sole App Lab Matrix sketch; both product Linux services run continuously in separate Compose projects. The repository includes UNO Q shutdown, early-start, and network-status host units; App Lab does not install them. Existing Avahi provides the UNO Q hostname as a `.local` address. See [UNO Q host helpers](../deploy/uno-q/README.md).
+
+## Installer prerequisites and architecture support
+
+The release bootstrap requires `curl`, `tar`, Python 3 and `sha256sum` or `shasum`. UNO Q installation expects App Lab, the `arduino` account, Docker Compose and Python 3.9 or newer. Standard RetroPie needs Python 3.7+, `gcc`, `openssl`, `sudo`, systemd, `uinput` and an installed NES core (`lr-fceumm` or `lr-nestopia`). Batocera needs Python 3.9+, its service manager, SDL2 and an installed FCEUmm or Nestopia core.
+
+Batocera support is checked by capability, not a board/version allowlist. Packaged wrappers cover x86_64, x86, AArch64, ARMv7, ARMv6 and RISC-V 64. The installer tests whether a matching wrapper loads and can compile one when a native compiler is available. Architecture coverage is distinct from live validation; the dated release and frame-link reports record tested hardware.
+
+RetroPie installer migrations may remove a recognized old Router index block and register the launch adapter in `emulators.cfg`. Saved `retroarch.cfg` files are not changed at receiver startup or game launch. Installer-owned RetroPie configuration writes preserve `pi:pi` ownership.
+
+## Shared device pairing
+
+Controller Router is the connection authority. The UNO Q host broker runs secure Setup on TCP **8444** and stores schema-1 connections under `/home/arduino/.local/state/controller-router/connections.json`. The persistent console TLS service listens on TCP **55359**. Router has a management credential; VirtualGlove and R.O.B. Vision have distinct, independently revocable credentials. Browser responses contain only public connection and readiness fields.
+
+`router_shared.pairing.Peer` checks the console certificate before sending a code or credential. The CR1 code contains a 100-bit certificate fingerprint prefix and a 60-bit authorization value. Console windows last 300 seconds, accept one successful transaction, and lock after five incorrect codes. Physical Matrix confirmation lasts 120 seconds and allows five attempts. Requests are bounded; servers allow at most 16 concurrent workers and require TLS 1.2 or later. Secure browser writes require matching HTTPS Origin, a fixed action header, and JSON content.
+
+Provisioning uses prepare, commit, and finalize. Private journals retain the previous Router registry and app configuration; interrupted or failed transactions restore those snapshots. Successful changes keep private before-connection backups. Legacy migration verifies an HMAC over a fresh nonce, canonical console ID, and observed TLS certificate; adoption signs the new connection transcript. Hostnames alone never authorize consolidation. Conflicting records remain unchanged for an explicit re-pairing choice.
+
+Products expose `/api/router-pairing` only to a capability-bearing local host request. Capability files are named `data/router-pairing-adapter-token` and must not be exposed to browsers. Adapters import app credentials into live caches without replacing ROM registries, calibration, or player settings. Router polls for newly installed console and UNO adapters and provisions them using its pinned management connection. Disabled app access stays disabled.
+
+The console helper has `/identity`, `/pair`, `/legacy-proof`, `/adopt`, `/manage`, and `/router` interfaces. `/manage` uses Router's credential for inspection, provisioning, and removal. `/router` uses the same credential with `RouterStore` revision checks for assignments and system policy. It never writes saved RetroArch configurations. Buddy's first-pair adapter adds only its Player 2 source to Router configuration; emulator configuration migration remains installation-only.
+
+Back up the UNO Q connection registry, its `tls` directory, and the private before-connection backups. On RetroPie, also back up `/var/lib/controller-router/link/{console-id,adapters.json,connection.json,certificate.pem,private-key.pem}` and each product's credential files. Restore requires the separately installed shared link service. Keep backups private; never include credentials in diagnostics or support reports. Do not snapshot a provisioning transaction in progress.

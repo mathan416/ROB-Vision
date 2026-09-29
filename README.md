@@ -1,5 +1,7 @@
 # R.O.B. Vision
 
+This checkout documents the current development version. The stable installer downloads the latest published final release; prerelease testing uses an explicit release tag.
+
 R.O.B. Vision plays Gyromite and Stack-Up with a **virtual robot companion**. The Arduino UNO Q owns the companion's pose and game pieces. RetroPie or Batocera sends game light commands from rendered NES frames to the UNO Q over Wi-Fi or Ethernet. A browser on a laptop, iPad, or phone animates the robot, gyros, spinner, pads, trays, and blocks. Gyromite's virtual Controller 2 buttons return to the game console over the network.
 
 **Meet Buddy:** a little robot follows the game's light signals beyond the emulator. His first blink appears on the UNO Q; his movements appear in the browser. Read [Buddy's story](docs/MEET_BUDDY.md).

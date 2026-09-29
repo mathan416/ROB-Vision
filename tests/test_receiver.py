@@ -157,6 +157,28 @@ class ReceiverTests(unittest.TestCase):
             (process / 'cmdline').write_bytes(b'\0'.join(a.encode() for a in args) + b'\0')
             self.assertEqual(sender_game(123, registry, proc), 'stack_up')
 
+    def test_router_appended_configuration_identifies_both_games_and_cores(self):
+        registry = load_registry()
+        with tempfile.TemporaryDirectory() as directory:
+            proc = Path(directory)
+            (proc / '123').mkdir()
+            for game, filename in [('gyromite', 'Gyromite'), ('stack_up', 'Stack-Up')]:
+                for core in ['fceumm', 'nestopia']:
+                    rom = '/home/pi/RetroPie/roms/nes/' + filename + ' (World).7z'
+                    args = ['/opt/retropie/emulators/retroarch/bin/retroarch', '-L',
+                            '/home/pi/rob-vision/build/rob_vision_' + core + '_libretro.so',
+                            rom, '--appendconfig',
+                            '/dev/shm/retroarch.cfg|/tmp/controller-router-session-example/routing.cfg']
+                    def write():
+                        (proc / '123/cmdline').write_bytes(b'\0'.join(a.encode() for a in args) + b'\0')
+                    write()
+                    self.assertEqual(sender_game(123, registry, proc), game)
+                    self.assertEqual(running_game(registry, proc), (game, 'nes', rom))
+                    args[-1] = '/dev/shm/retroarch.cfg.fake|/tmp/routing.cfg'
+                    write()
+                    self.assertIsNone(sender_game(123, registry, proc))
+                    self.assertIsNone(running_game(registry, proc))
+
     def test_frame_hook_queues_only_complete_exact_command(self):
         with tempfile.TemporaryDirectory() as directory:
             hook = FrameHookServer(load_registry(), Path(directory) / 'unused.sock')

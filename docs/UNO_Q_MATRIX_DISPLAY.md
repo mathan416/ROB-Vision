@@ -4,7 +4,7 @@ The UNO Q's blue LED matrix gives you a quick view of Buddy's state while the fu
 
 ## Starting and waiting
 
-Controller Router owns the Matrix. After boot, and whenever no product has an active display request, it shows its neutral animation. Starting a registered game selects R.O.B. Vision automatically. The app’s loading cue is an hourglass; during a game Buddy’s eyes glance and blink. Both product services remain running, but only the selected product can request a display.
+After boot, the display shows Router’s neutral animation. Start a registered Gyromite or Stack-Up game and it changes to Buddy’s cues automatically. An hourglass means he is loading or reconnecting; during play his eyes glance and blink. When the game ends, the display returns to neutral.
 
 ![Three hourglass frames shown while R.O.B. Vision starts](images/matrix-startup.png)
 
@@ -22,13 +22,15 @@ Starting Gyromite briefly shows `GY`; starting Stack-Up briefly shows `SU`. Budd
 
 | You see | Meaning | What to do |
 | --- | --- | --- |
-| Moving hourglass | R.O.B. Vision is starting or reconnecting. | Wait for Buddy's eyes. If the hourglass stays, check that the App Lab app is running. |
+| Moving hourglass | R.O.B. Vision is starting or reconnecting. | Wait for Buddy's eyes. If the hourglass stays, open the UNO Q’s Apps page and check whether R.O.B. Vision is ready. |
 | Router’s neutral animation | No product has an active display request. | Open the UNO Q address to choose an app, or start a registered game. |
 | Buddy's eyes | R.O.B. Vision is displaying its game cue. | Open Mission for the selected game and console link. |
 | `GY` or `SU` | Gyromite or Stack-Up was selected. | Watch Mission for the virtual game table and **GAME FRAMES LINKED**. |
 | Pulsing `T` | The game-frame link recognizes a game's Test signal. | Continue the game's Test check on Setup. A brief steady `T` can also follow a ready-light command. |
-| Pulsing `P` | Console pairing is in progress. | Enter the code and fingerprint printed by the console installer on the browser Setup page. |
+| `ID`, certificate characters, `PN`, and digits | Controller Router is confirming device pairing. | Compare the certificate identity, then enter the six-digit Matrix PIN in Router’s secure Pair console page. |
 
 ![The `T` display for a game's Test signal and ready-light command](images/matrix-test.png)
 
 The matrix returns to the game eyes after a Test or ready signal ends. Its small game accents are decoration; use Mission and the game screen to check piece positions and gate responses.
+
+During pairing, read the seven-character ID in groups of three, three, and one. After **PN**, join the two groups of three digits, including leading zeroes. The sequence repeats until confirmation or expiry. The page reports whether the connection succeeded.

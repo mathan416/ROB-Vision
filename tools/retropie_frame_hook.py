@@ -24,6 +24,19 @@ BATOCERA_CONFIG = b"/userdata/system/configs/retroarch/retroarchcustom.cfg"
 SOCKET_PATH = Path("/run/rob-vision/frames.sock")
 
 
+def has_launch_config(args, path):
+    """Match an exact config path in RetroArch's pipe-separated config list."""
+    for index, arg in enumerate(args):
+        value = None
+        if arg in (b'--config', b'-c', b'--appendconfig') and index + 1 < len(args):
+            value = args[index + 1]
+        elif arg.startswith((b'--config=', b'--appendconfig=')):
+            value = arg.split(b'=', 1)[1]
+        if value is not None and path in value.split(b'|'):
+            return True
+    return False
+
+
 def sender_game(pid, registry, proc_root=Path("/proc"), platform="retropie"):
     """Trust only an active game process running our proxy for a known ROM."""
     if type(pid) is not int or pid < 1:
@@ -34,9 +47,9 @@ def sender_game(pid, registry, proc_root=Path("/proc"), platform="retropie"):
         return None
     if not args or Path(os.fsdecode(args[0])).name != "retroarch":
         return None
-    if platform == "retropie" and b"/dev/shm/retroarch.cfg" not in args:
+    if platform == "retropie" and not has_launch_config(args, b"/dev/shm/retroarch.cfg"):
         return None
-    if platform == "batocera" and BATOCERA_CONFIG not in args:
+    if platform == "batocera" and not has_launch_config(args, BATOCERA_CONFIG):
         return None
     cores = BATOCERA_PROXY_CORES if platform == "batocera" else PROXY_CORES
     if not any(args[i] == b"-L" and args[i + 1] in cores

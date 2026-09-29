@@ -1,25 +1,75 @@
-# R.O.B. Vision troubleshooting
+# Get back to playing with Buddy
 
-If RetroPie's EmulationStation exits with an InputManager joystick assertion, return to its shell and rerun the console installer with EmulationStation closed. The installer checks module compatibility before restarting the virtual controller.
+Start with the symptom you can see. Try one check, then test the game again.
 
-For installation failures, check the prerequisite or unsupported-device message from the single release command, then rerun that same command. The archive checksum must pass before the installer changes the device. After removing a console in Setup, rerun its command with `--pair`.
+## The website will not open
 
-First check which page is open: use the UNO Q installer’s device-specific `.local` or LAN IP dashboard link for live state. A `file://` page or a simple static web server shows the independent preview. If `.local` does not resolve on a device, use the printed IP link on the same LAN and check Avahi on the UNO Q.
+1. Open your UNO Q's `.local` address on the same network.
+2. If the name does not work, try the LAN IP link printed by its installer.
+3. Choose R.O.B. Vision if the Apps page offers both controllers.
 
-| Symptom | Check |
-| --- | --- |
-| App does not start, port 8766 in use | Check for an older standalone `rob-vision.service` or duplicate R.O.B. Vision runtime using the port. VirtualGlove uses browser port 8100 and secure Setup 8443; it can remain running. Router owns port 80. |
-| `GYROMITE / CONNECTED` but no robot movement | Check the active console's **ONLINE** indicator and **GAME FRAMES LINKED** separately. If the latter is absent, restart the game with its R.O.B. Vision core. Check Mission's Activity Feed for decoded or blocked actions. |
-| Console is online but no game is selected | A receiver can be online with no active game. Launch a registered ROM; then reload Mission if needed. |
-| Test light never blinks | Enter the game's Test mode and confirm **GAME FRAMES LINKED** with the correct game selected. The light responds automatically to linked game frames. A red-light preview is only an animation demonstration. |
-| Movement command is missed | Confirm **GAME FRAMES LINKED** and the correct game is selected. On RetroPie, choose `lr-robvision-fceumm` or `lr-robvision-nestopia`; on Batocera, launch the registered ROM with its installed R.O.B. Vision wrapper. Check the Activity Feed for a decoded command or a model move blocked by height, grip, or station. |
-| Red/blue gate does not move | Confirm Gyromite is the active RetroArch game, Setup **Check Link** is online, and RetroArch port 2 is configured. Inspect the game screen during an isolated color hold. |
-| A physical gamepad does not control the game | Try another connected gamepad. The one in your hands may be assigned to Player 2 while another is Player 1. In Setup > Controller Router, check the assignments, move the intended pad to the right player if needed, and relaunch the game. |
-| A wireless controller falls asleep or wakes during a game | Router keeps its merged outputs alive and reconnects the physical pad to its saved player. Launch routing uses device identity rather than a saved slot number. If Router itself restarts or its merged outputs disappear, exit the game, wait for Router to become ready, then relaunch. Assignment changes apply on the next launch. |
-| Fast Gates vanished | They show only in live Gyromite. |
-| Gate remains down | Select **Release Both**; a hold also expires at 60 seconds. The receiver releases on game exit or stale network data. |
-| Stack-Up block does not move | Review current station, height, gripper, carried group, and destination capacity; invalid moves leave the stack intact and appear in activity. |
-| Demo does not start | Exit the running game first. Demo mode works when paired and idle; **Home** resets it. |
-| Browser shows stale scene | Reload for a fresh `/api/state` snapshot. A local preview cannot show UNO Q state. |
+If neither address works, check the UNO Q's power and network connection. If an installation failed, keep its printed error and rerun the same installation command after fixing the reported problem.
 
-On RetroPie, check `rob-vision-controller2.service`, runcommand, and the ROM basename. On Batocera, check `ROBVision`, the per-ROM core, and the ROM basename. Linux `/dev/input/jsN` may differ from RetroArch's pad index. Check Setup > Controller Router for the saved player assignment; Router resolves the active pad indexes. Exclude credentials and ROM files from bug reports.
+## The console says Receiver Waiting
+
+1. Turn on the console and check that it is connected to the same network.
+2. In R.O.B. Vision Setup, choose **Check Link** beside that console.
+3. Confirm the console is paired with this UNO Q.
+
+A console connects to one UNO Q at a time. If you paired it with another, use that UNO Q or pair it here again. **Receiver Waiting** means there has been no recent receiver check-in; it does not prove the console is off.
+
+## The game is running but Buddy does not move
+
+1. Check that Setup shows the right game.
+2. Look for **GAME FRAMES LINKED**.
+3. On RetroPie, confirm the game uses **lr-robvision-fceumm** or **lr-robvision-nestopia**. On Batocera, use its installed R.O.B. Vision integration.
+4. Send one command in the game's **Direct** mode.
+5. Read Mission's **Activity Feed**.
+
+A blocked command can mean Buddy needs to raise his hands or move to the correct holder or tray. Follow the message and try again. If no game is selected, check its filename with **Edit ROMs** in Setup, then relaunch.
+
+## Gyromite's gate does not move
+
+1. Enter **Game A** and leave the matching colored gate visible.
+2. In Setup, choose **Lower Blue** or **Lower Red**.
+3. Watch the game screen, then choose **Release Both**.
+4. If it stays still, exit the game and open Router **Setup > Players**. Check your physical pad is Player 1 and Buddy is Player 2.
+5. Under **Systems**, check NES uses **Controller Router**, then relaunch.
+
+If Fast Gates reports that a piece is busy, return it with the normal controls or choose **Home** to reset the gyros. Fast Gates appears on Mission only during live Gyromite play.
+
+## A gate stays down
+
+Choose **Release Both**. Fast Gates also releases after 60 seconds. A gyro resting on a pad can keep the gate pressed during normal play; lift that gyro to release it.
+
+## A Stack-Up move is blocked
+
+Read the **Activity Feed**. Raise Buddy's hands above the destination stack before moving sideways. Open hands can lower around the current stack to select a block; closed hands cannot lower into it.
+
+A blocked command leaves the blocks intact. Raise the hands and try again. Choose **Home** only when you want to restore the starting stack.
+
+## My gamepad works in the menu but not in the game
+
+Try another connected pad first: the one you are holding may be Player 2. Exit the game and check the named pads in Router **Setup > Players**. Choose **Test inputs**, press a button, then correct the assignment if needed. Save and relaunch.
+
+If one game still picks the wrong player, check whether you saved different controller choices in that game's RetroArch settings. Those can take priority over Router. Keep unrelated game settings. The [Technical Reference](TECHNICAL_ARCHITECTURE.md#session-routing-across-retroarch-versions) explains how these settings interact.
+
+## A wireless pad fell asleep or woke during play
+
+Wake or reconnect it. Router keeps its player controllers connected and returns your pad to its saved player. If the Router service itself restarted, exit the game and relaunch once it is ready.
+
+## Test mode does not blink the red light
+
+Check the correct game and **GAME FRAMES LINKED**, then enter the game's **Test** mode. **Preview Red Light** only demonstrates the animation; it does not test the game connection.
+
+## The demo will not start
+
+Exit the running game first. Demos work while the console is paired and idle. Choose Gyromite or Stack-Up on Mission, then **Run Demo Sequence**. **Home** restores the starting pieces.
+
+## RetroPie's game menu crashed during installation
+
+Return to the console terminal and rerun the installer with EmulationStation closed. Keep it closed until installation finishes, then reopen it.
+
+## Ask for help
+
+Include the game, console platform, emulator choice, visible status, and the Activity Feed message. Describe what you tried and what happened. Keep pairing codes, tokens, private backups, and ROM files out of your report.

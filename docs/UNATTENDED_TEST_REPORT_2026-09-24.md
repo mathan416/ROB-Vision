@@ -1,5 +1,7 @@
 # Unattended two-game test report — 24 September 2026
 
+This is a dated historical record. For the current design, see the [Technical Reference](TECHNICAL_ARCHITECTURE.md) and [Controller Router guide](CONTROLLER_ROUTER.md).
+
 These checks used the supplied Gyromite and Stack-Up ROM archives on RetroPie and the running R.O.B. Vision controller on the UNO Q. No ROM data was added to this repository. The existing Gyromite session on RetroPie was left running.
 
 | Area | Gyromite | Stack-Up |

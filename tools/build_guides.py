@@ -466,9 +466,9 @@ def build_book(filename: str, title: str, subtitle: str, chapter_files: list[str
         st["body"].spaceAfter = 4
         st["h2"].spaceBefore = 10
     elif title == "Game Manual":
-        st["body"].leading = 12.2
+        st["body"].leading = 11.8
         st["body"].spaceAfter = 5
-        st["h2"].spaceBefore = 12
+        st["h2"].spaceBefore = 9
         st["h2"].spaceAfter = 6
     available_width = page_size[0] - 96
     story = [Spacer(1, page_size[1] - 130)]

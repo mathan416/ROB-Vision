@@ -7,7 +7,7 @@
   <title>R.O.B. Vision // Setup</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css?v=setup-3">
-  <link rel="stylesheet" href="setup.css?v=consoles-4">
+  <link rel="stylesheet" href="setup.css?v=consoles-5">
   <script src="header-clock.js?v=1" defer></script>
   <script src="status.js?v=receiver-2" defer></script>
   <script src="games-registry.js?v=2" defer></script>
@@ -26,14 +26,16 @@
     <div class="setup-grid">
       <section class="setup-card pair-card" aria-labelledby="pair-heading">
         <div class="section-head"><span>01 / CONSOLE LINK</span><span id="pair-link">CONSOLE UNKNOWN</span></div>
-        <h2 id="pair-heading">Connect your console</h2>
+        <h2 id="pair-heading">Connect your console</h2><p>Pair once through Controller Router. Both apps use the connection automatically.</p><style>#pair-details,#pair-change,#pair-button{display:none!important}</style>
         <div class="console-list-head"><span>PAIRED CONSOLES</span><span id="console-count">0 SAVED</span></div>
         <div id="console-list" class="console-list" aria-live="polite"><p>No consoles paired yet.</p></div>
         <div id="pair-connected" hidden>
           <p class="pair-success">Console receiver is linked. Continue to the game-frame check.</p>
           <p class="console-list-note">Each console links to one UNO Q at a time. Choose <strong>Edit ROMs</strong> to change its game filenames.</p>
-          <div class="setup-row"><button id="pair-change" type="button" class="quiet">PAIR ANOTHER CONSOLE</button><button id="pair-refresh" type="button" class="quiet">CHECK LINK</button></div>
+          <button id="pair-change" type="button" class="quiet">PAIR ANOTHER CONSOLE</button>
         </div>
+        <div class="setup-row console-link-actions"><a class="setup-button" id="shared-pair-console" href="#">PAIR CONSOLE</a><button id="pair-refresh" type="button" class="quiet">CHECK LINK</button></div>
+        <script>document.getElementById('shared-pair-console').href='http://'+(location.hostname.includes(':')?'['+location.hostname+']':location.hostname)+'/pair';</script>
         <div id="pair-details" hidden>
           <p>Run the pairing command on your console: RetroPie <code>python3 /home/pi/rob-vision/tools/retropie_pair.py</code>, or Batocera <code>python3 /userdata/system/rob-vision/tools/retropie_pair.py</code>. The helper detects the platform. Compare its six-digit code and SHA-256 fingerprint here.</p>
           <label>Console address<input id="pair-host" autocomplete="off" placeholder="retropie.local or batocera.local"></label>
