@@ -189,3 +189,28 @@ The checks support different claims: a recognized ROM proves selection; a fresh 
 A valid frame link alone does not imply model success: an accepted command can be blocked at a boundary. The browser does not know Hector's position or the Stack-Up goal. The matrix's active modes are implemented, while complete direct visual checks remain open.
 
 The [verification plan](VERIFICATION_PLAN.md) tracks open checks. The [FCEUmm report](FRAME_LINK_TEST_2026-09-25.md) and [Nestopia report](NESTOPIA_FRAME_LINK_TEST_2026-09-25.md) preserve dated evidence. The [engineering journey](ENGINEERING_JOURNEY.md) explains how camera testing led to the frame link. Earlier [camera row tests](KIYO_PRO_ROW_TEST_2026-09-25.md) and [optical field notes](LIVE_OPTICAL_TEST_2026-09-25.md) are historical research and do not describe the current input path.
+
+
+## Session routing across RetroArch versions
+
+Controller Router resolves its merged pads by unique name and vendor/product
+identity before RetroArch executes. RetroPie 1.19.1 uses a temporary appended
+configuration with current udev indexes. Supported newer executables use strict
+native reservations; unknown builds use the legacy path. Native mode seeds a
+complete initial index permutation to avoid the RetroArch 1.20 reservation
+allocator's duplicate-index crash.
+
+Runtime routing does not edit saved RetroArch configuration. Installers register
+the shared adapter in RetroPie's `emulators.cfg`, retaining `pi:pi` ownership and
+existing environment, arguments, native hand input, and cabinet hooks. Batocera
+uses a narrow Libretro generator overlay that inserts the adapter after config
+generation. Existing appended settings remain ahead of the temporary routing
+file. Automatic configuration save on exit is disabled for routed sessions so
+transient indexes cannot become saved settings.
+
+Physical sources reconnect to their saved players without destroying merged
+outputs. Changing assignments applies on the next launch. If Router fails during
+play, the adapter reports the loss and Router refuses to rebuild outputs until
+the game ends; recovery requires relaunch. Logs include mode, name, VID/PID,
+event node, and launch slot. See Controller Router's `ROUTING_VALIDATION.md` for
+the dated tests and their scope.

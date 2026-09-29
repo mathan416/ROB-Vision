@@ -8,12 +8,7 @@ case "${1:-}" in
     gameStop) action=end ;;
     *) exit 0 ;;
 esac
-if [ "$action" = start ] && [ -f /userdata/system/virtualglove/data/controller-router.json ] && \
-   [ ! -f /userdata/system/scripts/virtualglove-game ]; then
-    (cd "$APP" && CONTROLLER_ROUTER_SOURCES_FILE="$APP/config/router_sources.json" python3 -m router_shared.controller_router apply --platform batocera \
-        --config /userdata/system/virtualglove/data/controller-router.json) \
-        >/dev/null 2>&1 || echo "R.O.B. Vision: Controller Router could not apply this game's ports" >&2
-fi
+# Routing is resolved by the shared execution adapter after configgen.
 ROB_VISION_URL="$(cat "$APP/controller.url")" \
 ROB_VISION_TOKEN_FILE="$APP/token" \
 ROB_VISION_RECEIVER=batocera \

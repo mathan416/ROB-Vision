@@ -79,6 +79,24 @@ class ControllerRouterTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "Exit EmulationStation"):
                 activate("retropie")
 
+    def test_repairing_configured_console_keeps_router_and_configs_unchanged(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory) / 'controller-router.json'
+            config.write_text(json.dumps(proposed_config(
+                None, 'retropie', [source(BUDDY, 'c' * 16)])))
+            before = config.read_bytes()
+            with patch('tools.controller_router_setup.paths', return_value=(config, config)), \
+                    patch('tools.controller_router_setup.subprocess.run') as run, \
+                    patch('tools.controller_router_setup.ensure') as ensure_config, \
+                    patch('tools.controller_router_setup.retire_legacy_nes_override') as migrate:
+                run.return_value.returncode = 0
+                activate('retropie')
+                ensure_config.assert_not_called()
+                migrate.assert_not_called()
+                self.assertEqual(run.call_args.args[0], ['systemctl', 'is-active', '--quiet',
+                                                       'virtualglove-controller-router.service'])
+            self.assertEqual(config.read_bytes(), before)
+
     def test_existing_batocera_router_can_discover_buddy_from_frontend_map(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'es_input.cfg'

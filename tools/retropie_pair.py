@@ -38,8 +38,11 @@ def activate_router(platform):
     else:
         command = ["python3", "/userdata/system/rob-vision/tools/controller_router_setup.py",
                    "batocera"]
-    subprocess.run(command, check=True, timeout=30, stdout=subprocess.DEVNULL,
-                   stderr=subprocess.DEVNULL)
+    result = subprocess.run(command, timeout=30, stdout=subprocess.DEVNULL,
+                            stderr=subprocess.PIPE, text=True)
+    if result.returncode:
+        detail = (result.stderr or "").strip()
+        raise ValueError(detail or "Controller Router setup failed. Check the console service log.")
 
 
 def install_token(token, destination):

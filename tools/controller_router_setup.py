@@ -50,7 +50,7 @@ def proposed_config(current: dict | None, platform: str, candidates: list[dict])
             players.append({"player": number, "sources": [router._saved_source(item)]})
         current = {"format": router.FORMAT, "platform": platform,
                    "players": players, "virtualglove_player": None,
-                   "physical_scope": "all"}
+                   "physical_scope": "nes"}
     else:
         current = copy.deepcopy(current)
     buddy = [item for item in candidates if item["name"] == BUDDY]
@@ -195,12 +195,23 @@ def retire_batocera_pad_overrides(
 
 
 def activate(platform: str) -> None:
+    config, _ = paths(platform)
+    # Re-pairing an already configured console needs no Router restart or
+    # migration. Keep its merged pads stable while EmulationStation is open.
+    if platform == "retropie" and config.exists():
+        current = router.load_config(config)
+        buddy_players = [entry["player"] for entry in current["players"]
+                         for source in entry["sources"] if source["name"] == BUDDY]
+        if buddy_players == [2] and subprocess.run(
+                ["systemctl", "is-active", "--quiet",
+                 "virtualglove-controller-router.service"],
+                stdout=subprocess.DEVNULL).returncode == 0:
+            return
     if platform == "retropie" and any(
             subprocess.run(["pgrep", "-x", name],
                            stdout=subprocess.DEVNULL).returncode == 0
             for name in ("emulationstation", "emulationstatio")):
         raise RuntimeError("Exit EmulationStation before pairing or upgrading Controller Router.")
-    config, _ = paths(platform)
     previous = config.read_text() if config.exists() else None
     changed = ensure(platform)
     try:

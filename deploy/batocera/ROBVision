@@ -31,6 +31,9 @@ wait_for_virtualglove_core() {
 }
 start() {
     mkdir -p "$RUN"
+    if [ -f /userdata/system/controller-router/generator-path ]; then
+        PYTHONPATH=/userdata/system/controller-router/lib python3 -c 'from router_shared.launch_install import activate_batocera; activate_batocera()'
+    fi
     wait_for_virtualglove_core
     overlay /usr/lib/libretro core
     overlay /usr/share/libretro/info info

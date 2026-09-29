@@ -59,3 +59,15 @@ If the link is online but no game is selected, check the exact ROM filename and 
 Rerun that device's command from steps 1 or 2 to upgrade or repair it. The UNO Q app restarts while preserving pairing data; the console retains its credential and restarts its receiver. Exit an active RetroPie game and EmulationStation before reinstalling. The installer verifies the downloaded source package before changing installed files. Release packages also publish `SHA256SUMS`.
 
 For advanced configuration and platform-specific service details, see the [Technical Reference](TECHNICAL_ARCHITECTURE.md), [RetroPie deployment](../deploy/retropie/README.md), and [Batocera deployment](../deploy/batocera/README.md).
+
+## Choose systems
+
+1. Open **Setup** at the UNO Q address and choose the paired console.
+2. Under **Systems**, choose **Controller Router** or **My existing setup** beside each system. Mega Drive / Genesis, PSP, and other systems can use different choices. These choices apply to Libretro emulators.
+3. Exit the running game, then choose **Save assignments**. The selection applies to the next launch.
+
+Buddy's games and VirtualGlove require Controller Router enabled for NES. NES can also use **My existing setup** when you want your own controls.
+
+Fresh installations enable NES only. Upgrades retain existing selections. In individual selection mode, a newly added system uses **My existing setup**. **All Libretro systems** includes newly added systems too.
+
+Router uses EmulationStation button mappings for enabled systems. **My existing setup** preserves the original launch arguments and adds no Router routing overrides. Router does not rewrite saved RetroArch configuration files when you save or start a game. Player assignments are shared across enabled systems.

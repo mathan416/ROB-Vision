@@ -2,11 +2,11 @@
 
 ## Choose a controller app on the UNO Q
 
-Start a registered game on the paired console and Controller Router selects its app automatically. Gyromite and Stack-Up select R.O.B. Vision; games registered with VirtualGlove select VirtualGlove. You do not need to open either website to play. Both websites and Linux services stay running, but only the game's app controls input and the UNO Q Matrix. Router releases that control and shows its neutral animation when the game ends.
+Starting a registered game selects its app automatically: Gyromite and Stack-Up select R.O.B. Vision, while VirtualGlove's registered games select VirtualGlove. Both Linux services remain available. Only the selected app owns input and the Matrix; ending the game releases its lease and restores Router's neutral animation. No browser visit is needed to play.
 
-Open the UNO Q's `.local` address or LAN IP address without a port when you want to view or manually select an app. If only one app is installed, the page opens it directly; if both are installed, it shows a chooser. **Apps** in either app returns to the chooser. Opening a product's direct browser address selects it when no game is active. Finish a live game before changing apps manually. **Apps** appears only when both products are installed. The chooser opens the selected product’s already-running website; it does not start or stop either product.
+Open the UNO Q's `.local` address or LAN IP to view or manually select an app. With one installed app, Router opens it directly; with both, it shows a chooser. **Apps** returns to that chooser and appears only when both are installed. Direct visits also select an app while idle. Finish the game before switching manually. Selection opens an already running service.
 
-Controller Router owns the UNO Q Matrix firmware. At startup, neither app is selected and the Matrix shows Router's neutral animation. A registered game selects its app and displays that app's cues. If Router stops or the UNO Q restarts, input stops until the running game's console session is reported again. Pairing and manual controller changes are blocked during a live game.
+Router owns the Matrix firmware. Reboot starts neutral. If Router stops or the UNO Q restarts, input pauses until the console reports the live game again. Pairing and manual controller changes are blocked during play.
 
 R.O.B. Vision's browser uses port **8101**. Its console receiver continues on port **8766**. This UNO Q app chooser is separate from the console player assignments described below.
 
@@ -54,3 +54,28 @@ The merged Player 1–4 devices stay neutral in EmulationStation. Test the origi
 **A controller disappeared after it was unplugged.** Reconnect the saved pad and reload the card. Router releases held input from a disconnected source. If the old pad is gone permanently, assign its replacement and save while no game is running.
 
 For installation and pairing, see [Installation and Setup](INSTALLATION_AND_SETUP.md). For game-specific checks, see the [Game Manual](GAME_MANUAL.md) and [Troubleshooting](TROUBLESHOOTING.md).
+
+
+## Sleep, wake, and RetroArch versions
+
+Merged player devices remain connected when physical pads sleep, wake, or
+reconnect. Router restores each source to its saved player. The launch adapter
+resolves device identities before starting each Libretro game, including PSP.
+RetroArch 1.19.1 uses temporary indexes; supported newer builds use strict
+native reservations. Neither mode writes saved RetroArch settings during play.
+
+If Router itself restarts or its outputs disappear, exit the game and relaunch
+once the service is ready. The running game cannot safely recover destroyed
+virtual devices. Player assignment changes also take effect on the next launch.
+
+## Choose systems
+
+1. Open **Setup** at the UNO Q address and choose the paired console.
+2. Under **Systems**, choose **Controller Router** or **My existing setup** beside each system. Mega Drive / Genesis, PSP, and other systems can use different choices. These choices apply to Libretro emulators.
+3. Exit the running game, then choose **Save assignments**. The selection applies to the next launch.
+
+Buddy's games and VirtualGlove require Controller Router enabled for NES. NES can also use **My existing setup** when you want your own controls.
+
+Fresh installations enable NES only. Upgrades retain existing selections. In individual selection mode, a newly added system uses **My existing setup**. **All Libretro systems** includes newly added systems too.
+
+Router uses EmulationStation button mappings for enabled systems. **My existing setup** preserves the original launch arguments and adds no Router routing overrides. Router does not rewrite saved RetroArch configuration files when you save or start a game. Player assignments are shared across enabled systems.

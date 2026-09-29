@@ -165,6 +165,8 @@ def install(source=ROOT, destination=DEST, controller=None):
                       Path("/userdata/system/configs/retroarch/inputs/R.O.B. Vision Controller 2.cfg"))
             chosen = select_games(CONFIG, Path("/userdata/roms/nes"), available=cores,
                                   registry_path=destination / "config/games.json")
+            from router_shared.launch_install import install_batocera as install_session_routing
+            install_session_routing()
             subprocess.run(["batocera-services", "enable", "ROBVision"], check=True)
             subprocess.run(["batocera-services", "restart", "ROBVision"], check=True)
             if (destination / "token").is_file():

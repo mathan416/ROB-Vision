@@ -474,6 +474,8 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
     # Reuse the existing selective installer: only the two registered games get wrappers.
     from tools.install_retropie_frame_hook import install
     install(Path("/opt/retropie/configs"), registry_path=destination / "config/games.json")
+    from router_shared.launch_install import install_retropie as install_session_routing
+    install_session_routing()
     run("systemctl", "daemon-reload")
     token = PI_CONFIG / "token"
     run("systemctl", "enable", "rob-vision-controller2.service")

@@ -10,12 +10,19 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from tools.retropie_pair import activate_receiver, apply_pairing, detect_platform
+from tools.retropie_pair import activate_receiver, activate_router, apply_pairing, detect_platform
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class ReleaseInstallTests(unittest.TestCase):
+    def test_router_failure_reports_actionable_setup_error(self):
+        with patch('tools.retropie_pair.subprocess.run') as run:
+            run.return_value.returncode = 1
+            run.return_value.stderr = 'Controller Router setup stopped: Exit EmulationStation before pairing.\n'
+            with self.assertRaisesRegex(ValueError, 'Exit EmulationStation'):
+                activate_router('retropie')
+
     def test_pairing_helper_detects_batocera_before_selecting_service_manager(self):
         with patch("tools.retropie_pair.Path.is_file", return_value=True), patch(
             "tools.retropie_pair.Path.is_dir", return_value=True

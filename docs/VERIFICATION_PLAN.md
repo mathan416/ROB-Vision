@@ -27,3 +27,19 @@ The dated optical and frame-link reports above remain evidence for those test co
 | Wireless-controller hotplug | Sleeping or waking during a game can shift RetroArch’s device slots. The workaround is documented in both products’ Help. | Open routing defect; do not mark it resolved. |
 
 For the next candidate, retain the clean-install and repeat-upgrade checks in both product orders, pairing/settings preservation, reboot recovery, simultaneous-session rejection, and visual Matrix checks. Complete VirtualGlove pairing from arduiain.local to retropie.local separately. No additional live test is claimed by this documentation update.
+
+## Session routing follow-up — 28 September 2026
+
+The shared session adapter now resolves named merged outputs before launch and
+does not rewrite saved RetroArch settings at runtime. Live uinput source
+disconnect/reconnect traces passed on installed RetroArch 1.19.1 and a separate
+upstream 1.20.0 test build, including Players 1/2, keyboard Start, and exit
+hotkeys. Five bounded core boots passed on RetroPie and Batocera 43.1; both
+consoles recovered their routing after reboot. The Batocera reboot exposed and
+verified the fix for duplicate Router startup.
+
+The shared repository's `docs/ROUTING_VALIDATION.md` records exact scope.
+Physical wireless sleep/wake during visible gameplay, fresh installation in both
+product orders, and longer unattended checks remain release gates. These results
+supersede the automated routing defect status recorded on 27 September without
+claiming complete physical-controller verification.
