@@ -11,13 +11,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def valid_release_tag(tag: str) -> bool:
+    return re.fullmatch(r"v\d+\.\d+\.\d+(?:-rc\.\d+)?", tag) is not None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("version", help="Release tag, e.g. v0.1.1 or v0.1.1-rc.1")
+    parser.add_argument("version", help="Release tag, e.g. v0.2.0 or v0.2.0-rc.1")
     parser.add_argument("--ref", default="HEAD", help="Committed Git revision to package")
     args = parser.parse_args()
-    if not re.fullmatch(r"v0\.1\.\d+(?:-rc\.\d+)?", args.version):
-        parser.error("Expected a 0.1.x release tag")
+    if not valid_release_tag(args.version):
+        parser.error("Expected a semantic release tag such as v0.2.0-rc.1")
     output = ROOT / "output" / "release" / args.version
     output.mkdir(parents=True, exist_ok=True)
     archive = output / f"rob-vision-{args.version}.tar.gz"

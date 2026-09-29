@@ -11,11 +11,18 @@ from pathlib import Path
 from unittest.mock import patch
 
 from tools.retropie_pair import activate_receiver, activate_router, apply_pairing, detect_platform
+from scripts.package_release import valid_release_tag
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class ReleaseInstallTests(unittest.TestCase):
+    def test_release_packager_accepts_next_minor_candidate(self):
+        self.assertTrue(valid_release_tag('v0.2.0-rc.1'))
+        self.assertTrue(valid_release_tag('v0.2.0'))
+        self.assertFalse(valid_release_tag('v0.2.0-rc.1/extra'))
+        self.assertFalse(valid_release_tag('v0.2.0-beta.1'))
+
     def test_router_failure_reports_actionable_setup_error(self):
         with patch('tools.retropie_pair.subprocess.run') as run:
             run.return_value.returncode = 1
