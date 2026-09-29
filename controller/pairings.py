@@ -9,7 +9,7 @@ import threading
 from pathlib import Path
 from time import monotonic
 
-PLATFORMS = {"retropie": "RetroPie", "batocera": "Batocera"}
+PLATFORMS = {"retropie": "RetroPie", "batocera": "Batocera", "recalbox": "Recalbox"}
 
 
 class PairingStore:

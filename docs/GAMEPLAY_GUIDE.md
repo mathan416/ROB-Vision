@@ -1,6 +1,6 @@
 # R.O.B. Vision gameplay guide
 
-The UNO Q updates Buddy and the game pieces shown in your browser. A paired RetroPie or supported Batocera console sends movement commands from the game; Gyromite's virtual pad states return to that console's Controller 2.
+The UNO Q updates Buddy and the game pieces shown in your browser. A paired RetroPie, Batocera, or Recalbox console sends movement commands from the game; Gyromite's virtual pad states return to that console's Controller 2.
 
 ## Gyromite
 

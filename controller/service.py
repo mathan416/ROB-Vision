@@ -459,7 +459,8 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                         receiver = identity["platform"]
                         pairings.seen(identity["id"],
                                       self.headers.get("X-ROB-Console-Address") or self.client_address[0])
-                        controller.receiver_seen("RetroPie" if receiver == "retropie" else "Batocera",
+                        controller.receiver_seen({"retropie": "RetroPie", "batocera": "Batocera",
+                                                  "recalbox": "Recalbox"}.get(receiver, receiver),
                                                  self.headers.get("X-ROB-Frame-Hook"),
                                                  self.headers.get("X-ROB-Test-Signal"), identity["id"])
                     return self.respond(200, controller.snapshot())
@@ -528,7 +529,8 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                     with controller.lock:
                         controller.active_receiver = receiver if game else None
                         controller.active_console_id = console_id if game else None
-                        controller.receiver_name = "RetroPie" if receiver == "retropie" else "Batocera"
+                        controller.receiver_name = {"retropie": "RetroPie", "batocera": "Batocera",
+                                                    "recalbox": "Recalbox"}.get(receiver, receiver)
                         controller.receiver_last_seen = 0.0
                         controller.session_started_at = monotonic() if game else 0.0
                 elif path == "/api/command":

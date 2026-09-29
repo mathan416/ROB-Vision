@@ -46,7 +46,7 @@ Add the entry inside the existing `games` object and keep the other entries. Eac
 
 ## Check the game connection
 
-1. On RetroPie, launch the game with **lr-robvision-fceumm** or **lr-robvision-nestopia**. On Batocera, launch the registered game with its installed R.O.B. Vision emulator integration.
+1. On RetroPie, launch the game with **lr-robvision-fceumm** or **lr-robvision-nestopia**. On Batocera or Recalbox, launch the registered game; the installer selects its R.O.B. Vision core.
 2. In Setup, check that the correct game is shown.
 3. Look for **GAME FRAMES LINKED**.
 4. Send one movement command from the game and watch Buddy on Mission.

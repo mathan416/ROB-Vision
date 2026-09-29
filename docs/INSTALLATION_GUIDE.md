@@ -4,7 +4,7 @@ Install R.O.B. Vision on your UNO Q and console, pair them, then try your first 
 
 ## Before you begin
 
-You need an Arduino UNO Q with App Lab, a RetroPie or Batocera console, a physical gamepad configured in EmulationStation, and your own Gyromite or Stack-Up game files. Put both devices on the same trusted network and connect them to the internet for installation.
+You need an Arduino UNO Q with App Lab, a RetroPie, Batocera, or Recalbox console, a physical gamepad configured in EmulationStation, and your own Gyromite or Stack-Up game files. Put both devices on the same trusted network and connect them to the internet for installation.
 
 Exit any running game. On RetroPie, also exit EmulationStation to its terminal before installing: replacing virtual controllers while the game menu is open can make it crash.
 
@@ -26,14 +26,14 @@ Controller Router is included. Visiting the UNO Q address opens R.O.B. Vision wh
 
 ## 2. Install or upgrade the console
 
-In the console terminal, signed in as `pi` on RetroPie or `root` on Batocera, install the console software:
+In the console terminal, signed in as `pi` on RetroPie or `root` on Batocera or Recalbox, install the console software:
 
 ```sh
 curl -fsSL https://github.com/mathan416/ROB-Vision/releases/latest/download/install.sh | \
   sh -s -- console your-uno-q.local
 ```
 
-Replace `your-uno-q.local` with the UNO Q name or IP address printed by its installer. The same command detects RetroPie or Batocera and includes Controller Router and the game integration.
+Replace `your-uno-q.local` with the UNO Q name or IP address printed by its installer. The same command detects RetroPie, Batocera, or Recalbox and includes Controller Router and the game integration. The currently tested Recalbox combination is 10.1.1 on the `rpizero2` target; another target needs its matching packaged frame wrapper.
 
 For a new pairing, the installer prints a single-use **CR1 connection code**. Use it within five minutes. An upgrade keeps the existing connection.
 
@@ -64,7 +64,7 @@ The [Setup Guide](SETUP_GUIDE.md#register-your-game-filenames) explains how to a
 
 ## 5. Try your first game
 
-1. Launch Gyromite or Stack-Up. On RetroPie, use **lr-robvision-fceumm** or **lr-robvision-nestopia**. Batocera uses the installed R.O.B. Vision integration for registered games.
+1. Launch Gyromite or Stack-Up. On RetroPie, use **lr-robvision-fceumm** or **lr-robvision-nestopia**. Batocera and Recalbox select the installed R.O.B. Vision core for registered games.
 2. Open Mission and look for the correct game and **GAME FRAMES LINKED**.
 3. Enter the game's **Test** mode. Buddy's red light should blink and the UNO Q should show **T**.
 4. Enter **Direct** mode and send a movement command. Watch Buddy respond.

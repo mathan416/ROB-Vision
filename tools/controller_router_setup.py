@@ -27,7 +27,10 @@ def paths(platform: str):
     if platform == "batocera":
         return (Path("/userdata/system/virtualglove/data/controller-router.json"),
                 Path("/userdata/system/configs/emulationstation/es_input.cfg"))
-    raise ValueError("Controller Router supports RetroPie and Batocera here.")
+    if platform == "recalbox":
+        return (Path("/recalbox/share/system/virtualglove/data/controller-router.json"),
+                Path("/recalbox/share/system/.emulationstation/es_input.cfg"))
+    raise ValueError("Unsupported Controller Router console.")
 
 
 def source_file(platform: str) -> Path:
@@ -35,7 +38,9 @@ def source_file(platform: str) -> Path:
         return Path("/home/pi/rob-vision/config/router_sources.json")
     if platform == "batocera":
         return Path("/userdata/system/rob-vision/config/router_sources.json")
-    raise ValueError("Controller Router supports RetroPie and Batocera here.")
+    if platform == "recalbox":
+        return Path("/recalbox/share/system/rob-vision/config/router_sources.json")
+    raise ValueError("Unsupported Controller Router console.")
 
 
 def proposed_config(current: dict | None, platform: str, candidates: list[dict]) -> dict:
@@ -231,8 +236,12 @@ def activate(platform: str) -> None:
         else:
             # Batocera's service manager has no systemd unit. The R.O.B.
             # service starts the shared Router when VirtualGlove has not.
-            retire_batocera_pad_overrides()
-            subprocess.run(["batocera-services", "restart", "ROBVision"], check=True)
+            if platform == "batocera":
+                retire_batocera_pad_overrides()
+                subprocess.run(["batocera-services", "restart", "ROBVision"], check=True)
+            else:
+                subprocess.run(["sh", "/recalbox/share/system/rob-vision/deploy/recalbox/rob-vision-service",
+                                "restart"], check=True)
     except Exception:
         if changed:
             if previous is None:
@@ -248,7 +257,7 @@ def activate(platform: str) -> None:
 def main() -> int:
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("platform", choices=("retropie", "batocera"))
+    parser.add_argument("platform", choices=("retropie", "batocera", "recalbox"))
     parser.add_argument('--pair-only', action='store_true', help='Add Buddy without migrating saved emulator configuration')
     args = parser.parse_args()
     try:

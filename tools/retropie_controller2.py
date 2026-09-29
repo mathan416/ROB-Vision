@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from identify_game import identify, load_registry
 from tools.game_registry import RegistryStore, router_store_for, serve
 from tools.retropie_frame_hook import BATOCERA_CONFIG, BATOCERA_PROXY_CORES, FrameHookServer, has_launch_config
+from tools.mdns import resolved_url, resolve_host
 
 
 def ioctl_write(number, size):
@@ -87,7 +88,7 @@ def controller_route_address(url):
         if not host:
             return ""
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as connection:
-            connection.connect((host, 9))
+            connection.connect((resolve_host(host), 9))
             address = connection.getsockname()[0]
         parsed = ipaddress.IPv4Address(address)
         return address if parsed.is_private and not (parsed.is_loopback or parsed.is_link_local) else ""
@@ -108,6 +109,7 @@ def fetch_state(url, token, timeout, frame_hook_game=None, test_signal_game=None
         headers["X-ROB-Test-Signal"] = test_signal_game
     request = Request(url.rstrip("/") + "/api/state",
                       headers=headers)
+    request.full_url = resolved_url(request.full_url)
     with urlopen(request, timeout=timeout) as response:
         state = json.load(response)
     if not isinstance(state, dict):
@@ -149,13 +151,14 @@ def running_game(registry, proc_root=Path("/proc"), platform="retropie"):
             continue
         if platform == "batocera" and not has_launch_config(arguments, BATOCERA_CONFIG):
             continue
-        if platform == "batocera" and not any(arguments[i] == b"-L" and
+        if platform in ("batocera", "recalbox") and not any(arguments[i] == b"-L" and
                 arguments[i + 1] in BATOCERA_PROXY_CORES
                 for i in range(len(arguments) - 1)):
             continue
         for argument in arguments[1:]:
             rom = os.fsdecode(argument)
-            root = "/userdata/roms/" if platform == "batocera" else "/home/pi/retropie/roms/"
+            root = {"batocera": "/userdata/roms/", "recalbox": "/recalbox/share/roms/"}.get(
+                platform, "/home/pi/retropie/roms/")
             if not rom.casefold().startswith(root):
                 continue
             system = Path(rom).parent.name
@@ -165,15 +168,17 @@ def running_game(registry, proc_root=Path("/proc"), platform="retropie"):
     return None
 
 
-def sync_game(url, token, system, rom, timeout, platform="retropie", console_id="", game=None):
+def sync_game(url, token, system, rom, timeout, platform="retropie", console_id="", game=None,
+              event="start"):
     """Replay a known launch after the UNO Q restarts mid-game."""
-    payload = json.dumps({"event": "start", "system": system, "rom": Path(rom).name,
+    payload = json.dumps({"event": event, "system": system, "rom": Path(rom).name,
                           **({"game": game} if game else {})}).encode()
     headers = {"Content-Type": "application/json", "Authorization": "Bearer " + token,
                "X-ROB-Receiver": platform}
     if console_id:
         headers["X-ROB-Console-ID"] = console_id
     request = Request(url.rstrip("/") + "/api/launch", data=payload, headers=headers, method="POST")
+    request.full_url = resolved_url(request.full_url)
     with urlopen(request, timeout=timeout) as response:
         response.read()
 
@@ -188,6 +193,7 @@ def send_frame_command(url, token, item, timeout, platform="retropie", console_i
     request = Request(url.rstrip("/") + "/api/emulator/command", data=payload,
                       headers=headers,
                       method="POST")
+    request.full_url = resolved_url(request.full_url)
     with urlopen(request, timeout=timeout) as response:
         response.read()
 
@@ -215,7 +221,7 @@ def main():
     parser.add_argument("--timeout", type=float, default=0.25)
     parser.add_argument("--stale-after", type=float, default=0.75)
     parser.add_argument("--swap-buttons", action="store_true")
-    parser.add_argument("--platform", choices=("retropie", "batocera"), default="retropie")
+    parser.add_argument("--platform", choices=("retropie", "batocera", "recalbox"), default="retropie")
     args = parser.parse_args()
     if args.interval <= 0 or args.timeout <= 0 or args.stale_after <= args.timeout:
         parser.error("interval/timeout must be positive and stale-after must exceed timeout")
@@ -247,6 +253,7 @@ def main():
     desired = (False, False)
     last_good = 0.0
     active_game = None
+    reported_game = None
     next_process_check = 0.0
     next_address_check = 0.0
     console_address = ""
@@ -273,10 +280,20 @@ def main():
             if started >= next_process_check:
                 active_game = running_game(registry, platform=args.platform)
                 next_process_check = started + .25
+                if args.platform == "recalbox" and reported_game and not active_game:
+                    try:
+                        sync_game(args.url, token, reported_game[1], reported_game[2], args.timeout,
+                                  args.platform, console_id, event="end")
+                        reported_game = None
+                    except (OSError, ValueError):
+                        pass
             try:
                 hook_game = hook.recent_game()
+                frame_game = (hook_game if active_game and hook_game == active_game[0]
+                              else active_game[0] if args.platform == "recalbox" and active_game
+                              else None)
                 state = fetch_state(args.url, token, args.timeout,
-                                    hook_game if active_game and hook_game == active_game[0] else None,
+                                    frame_game,
                                     hook.recent_test_game(), platform=args.platform, console_id=console_id,
                                     console_address=console_address)
                 selected_here = source_selected(state, args.platform, console_id)
@@ -291,6 +308,8 @@ def main():
                     try:
                         sync_game(args.url, token, active_game[1], active_game[2], args.timeout,
                                   args.platform, console_id, game=active_game[0])
+                        if args.platform == "recalbox":
+                            reported_game = active_game
                     except (OSError, ValueError):
                         pass
             except (OSError, ValueError, json.JSONDecodeError):

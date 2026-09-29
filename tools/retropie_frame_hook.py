@@ -20,6 +20,7 @@ BATOCERA_PROXY_CORES = frozenset((
     b"/usr/lib/libretro/robvision_fceumm_libretro.so",
     b"/usr/lib/libretro/robvision_nestopia_libretro.so",
 ))
+RECALBOX_PROXY_CORES = BATOCERA_PROXY_CORES
 BATOCERA_CONFIG = b"/userdata/system/configs/retroarch/retroarchcustom.cfg"
 SOCKET_PATH = Path("/run/rob-vision/frames.sock")
 
@@ -51,13 +52,16 @@ def sender_game(pid, registry, proc_root=Path("/proc"), platform="retropie"):
         return None
     if platform == "batocera" and not has_launch_config(args, BATOCERA_CONFIG):
         return None
-    cores = BATOCERA_PROXY_CORES if platform == "batocera" else PROXY_CORES
+    cores = (BATOCERA_PROXY_CORES if platform == "batocera" else
+             RECALBOX_PROXY_CORES if platform == "recalbox" else PROXY_CORES)
     if not any(args[i] == b"-L" and args[i + 1] in cores
                for i in range(len(args) - 1)):
         return None
     for arg in args[1:]:
         rom = os.fsdecode(arg)
-        root = "/userdata/roms/nes/" if platform == "batocera" else "/home/pi/retropie/roms/nes/"
+        root = ({"batocera": "/userdata/roms/nes/",
+                 "recalbox": "/recalbox/share/roms/nes/"}
+                .get(platform, "/home/pi/retropie/roms/nes/"))
         if rom.casefold().startswith(root):
             return identify("nes", rom, registry)
     return None

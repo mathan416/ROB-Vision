@@ -10,6 +10,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 from identify_game import event, load_registry
+from mdns import resolved_url
 
 
 def main():
@@ -42,7 +43,7 @@ def main():
                    "X-ROB-Receiver": os.environ.get("ROB_VISION_RECEIVER", "retropie")}
         if console_id:
             headers["X-ROB-Console-ID"] = console_id
-        request = Request(args.url.rstrip("/") + "/api/launch", data=json.dumps(payload).encode(),
+        request = Request(resolved_url(args.url).rstrip("/") + "/api/launch", data=json.dumps(payload).encode(),
                           headers=headers, method="POST")
         for attempt in range(args.attempts):
             try:

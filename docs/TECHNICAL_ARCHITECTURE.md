@@ -1,6 +1,6 @@
 # R.O.B. Vision technical reference
 
-This is the implementation reference for the 0.1.x system. The Arduino UNO Q owns Buddy's virtual pose and pieces. RetroPie or supported Batocera runs Gyromite or Stack-Up. A browser on a laptop, tablet, or phone renders the controller's state. Automatic commands come from emulator-rendered NES frames; the current application has no camera input path.
+This is the implementation reference for the current system. The Arduino UNO Q owns Buddy's virtual pose and pieces. RetroPie, Batocera, or Recalbox runs Gyromite or Stack-Up. A browser on a laptop, tablet, or phone renders the controller's state. Automatic commands come from emulator-rendered NES frames; the current application has no camera input path.
 
 ## Find an interface
 
@@ -21,7 +21,7 @@ The following sections distinguish the observed signal, the accepted model actio
 
 ```mermaid
 flowchart LR
-  subgraph HOST["Game host · RetroPie or Batocera"]
+  subgraph HOST["Game host · RetroPie, Batocera, or Recalbox"]
     HOOK["Launch / exit hook"]
     WRAPPER["RetroArch + FCEUmm / Nestopia<br/>frame wrapper"]
     RECEIVER["Frame receiver"]
@@ -47,7 +47,7 @@ flowchart LR
 | Component | Responsibility | Source |
 | --- | --- | --- |
 | Game registry | Exact supported ROM basenames and game IDs | `config/games.json`, `tools/identify_game.py` |
-| Console launch hook | Start/end events; never robot motion | RetroPie runcommand hooks or Batocera `zz-robvision-game`; `tools/notify_game.py` |
+| Console launch hook | Start/end events; never robot motion | RetroPie runcommand hooks, Batocera `zz-robvision-game`, or Recalbox process monitoring; `tools/notify_game.py` |
 | Core wrapper | Classify each emulated NES video frame and pass the original video onward | `deploy/retropie/rob_vision_fceumm_proxy.c` |
 | Console receiver | Check sender, decode commands, report heartbeats, drive virtual Player 2 | `tools/retropie_frame_hook.py`, `tools/retropie_controller2.py` |
 | UNO Q controller | Game selection, virtual model, pairing, snapshot API | `controller/service.py`, `controller/model.py`, `controller/pairings.py` |
@@ -206,7 +206,9 @@ The installer prints `.local` and LAN IPv4 links. The product **Apps** link is s
 
 RetroPie installs launch/end hooks, a systemd receiver, a virtual-pad RetroArch profile, and FCEUmm/Nestopia wrapper launch choices. Its installer builds wrappers against installed cores and installs the shared Controller Router. First pairing assigns Buddy to Player 2. It retains an existing per-ROM supported core choice rather than forcing every host to FCEUmm. EmulationStation must be closed while the virtual input service is replaced.
 
-Batocera selects a packaged wrapper for x86_64, 32-bit x86, AArch64, ARMv7, ARMv6, or RISC-V 64, or compiles one locally for an unmatched ABI when a C compiler is available. It then installs a separate `ROBVision` service and game hook, runtime core overlay, and persistent per-ROM overrides. The installer preserves an existing supported Nestopia choice; otherwise it selects an available FCEUmm or Nestopia wrapper for registered ROMs. The installer checks for the required NES core, libretro info, and loadable native wrapper before writes. It suspends and resumes EmulationStation around receiver restart. When VirtualGlove is installed and enabled, `ROBVision` waits for its core overlay before adding its own wrappers; it does not stop or disable VirtualGlove. The [installation guide](INSTALLATION_GUIDE.md) has the supported command and prerequisites; the [configuration reference](CONFIGURATION_REFERENCE.md) lists tunable defaults.
+Batocera selects a packaged wrapper for x86_64, 32-bit x86, AArch64, ARMv7, ARMv6, or RISC-V 64, or compiles one locally for an unmatched ABI when a C compiler is available. It then installs a separate `ROBVision` service and game hook, runtime core overlay, and persistent per-ROM overrides. The installer preserves an existing supported Nestopia choice; otherwise it selects an available FCEUmm or Nestopia wrapper for registered ROMs. The installer checks for the required NES core, libretro info, and loadable native wrapper before writes. It suspends and resumes EmulationStation around receiver restart. When VirtualGlove is installed and enabled, `ROBVision` waits for its core overlay before adding its own wrappers; it does not stop or disable VirtualGlove.
+
+Recalbox 10.x installs its receiver and frame wrappers in the persistent share. At boot, a narrow overlay exposes the FCEUmm and Nestopia wrappers and registers them in the NES system list. Exact registered ROM filenames receive `.recalbox.conf` sidecars, preserving unrelated ROM choices. Controller Router mounts a patched Libretro generator for the current boot and adds temporary, identity-based routing settings only for enabled systems. The receiver identifies the active game process and reports start and end to the UNO Q. The pairing helper uses Recalbox’s Avahi socket when NSS `.local` lookup is unavailable. Recalbox 10.1.1 on the `rpizero2` target passed bounded Gyromite and Stack-Up launches, paired UNO Q game selection, and reboot recovery. A direct Gyromite receiver trace confirmed the wrapper delivered a neutral frame packet from the identified RetroArch process; movement from a human-played command remains to be verified on this host. The [installation guide](INSTALLATION_GUIDE.md) has the supported command and prerequisites; the [configuration reference](CONFIGURATION_REFERENCE.md) lists tunable defaults.
 
 ## Recovery and verification boundary
 

@@ -55,7 +55,9 @@ class ReceiverTests(unittest.TestCase):
             def connect(self, target): self.target = target
             def getsockname(self): return ('10.0.2.26', 12345)
         route = Route()
-        with patch('retropie_controller2.socket.socket', return_value=route):
+        with patch('retropie_controller2.socket.socket', return_value=route), patch(
+            'retropie_controller2.resolve_host', return_value='arduiain.local'
+        ):
             self.assertEqual(controller_route_address('http://arduiain.local'), '10.0.2.26')
         self.assertEqual(route.target, ('arduiain.local', 9))
 
@@ -63,7 +65,9 @@ class ReceiverTests(unittest.TestCase):
             def __enter__(self): return self
             def __exit__(self, *_args): return False
             def read(self): return b'{"schema":1}'
-        with patch('retropie_controller2.urlopen', return_value=Response()) as open_url:
+        with patch('retropie_controller2.resolved_url', side_effect=lambda url: url), patch(
+            'retropie_controller2.urlopen', return_value=Response()
+        ) as open_url:
             fetch_state('http://arduiain.local', 'secret', .25,
                         console_id='a' * 32, console_address='10.0.2.26')
         request = open_url.call_args.args[0]
@@ -235,7 +239,9 @@ class ReceiverTests(unittest.TestCase):
             def read(self):
                 return b'{}'
 
-        with patch('retropie_controller2.urlopen', return_value=Response()) as urlopen:
+        with patch('retropie_controller2.resolved_url', side_effect=lambda url: url), patch(
+            'retropie_controller2.urlopen', return_value=Response()
+        ) as urlopen:
             sync_game('http://arduiain.local', 'secret-token', 'nes',
                       '/home/pi/RetroPie/roms/nes/Stack-Up (World).zip', .25)
         request = urlopen.call_args.args[0]

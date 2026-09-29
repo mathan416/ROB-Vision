@@ -22,7 +22,7 @@ A console connects to one UNO Q at a time. If you paired it with another, use th
 
 1. Check that Setup shows the right game.
 2. Look for **GAME FRAMES LINKED**.
-3. On RetroPie, confirm the game uses **lr-robvision-fceumm** or **lr-robvision-nestopia**. On Batocera, use its installed R.O.B. Vision integration.
+3. On RetroPie, confirm the game uses **lr-robvision-fceumm** or **lr-robvision-nestopia**. On Batocera or Recalbox, launch the registered ROM; its per-game selection should use a R.O.B. Vision core.
 4. Send one command in the game's **Direct** mode.
 5. Read Mission's **Activity Feed**.
 

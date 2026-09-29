@@ -42,7 +42,7 @@ The optional standalone `deploy/rob-vision.service` must stay disabled while App
 
 ## Installer prerequisites and architecture support
 
-The release bootstrap requires `curl`, `tar`, Python 3 and `sha256sum` or `shasum`. UNO Q installation expects App Lab, the `arduino` account, Docker Compose and Python 3.9 or newer. Standard RetroPie needs Python 3.7+, `gcc`, `openssl`, `sudo`, systemd, `uinput` and an installed NES core (`lr-fceumm` or `lr-nestopia`). Batocera needs Python 3.9+, its service manager, SDL2 and an installed FCEUmm or Nestopia core.
+The release bootstrap requires `curl`, `tar`, Python 3 and `sha256sum` or `shasum`. UNO Q installation expects App Lab, the `arduino` account, Docker Compose and Python 3.9 or newer. Standard RetroPie needs Python 3.7+, `gcc`, `openssl`, `sudo`, systemd, `uinput` and an installed NES core (`lr-fceumm` or `lr-nestopia`). Batocera needs Python 3.9+, its service manager, SDL2 and an installed FCEUmm or Nestopia core. Recalbox 10.x needs Python 3, `/dev/uinput`, and an installed FCEUmm or Nestopia Libretro core. The installer load-tests its packaged wrapper for the device. Recalbox 10.1.1 on the `rpizero2` target passed bounded game launches; other targets need matching wrapper and device validation.
 
 Batocera support is checked by capability, not a board/version allowlist. Packaged wrappers cover x86_64, x86, AArch64, ARMv7, ARMv6 and RISC-V 64. The installer tests whether a matching wrapper loads and can compile one when a native compiler is available. Architecture coverage is distinct from live validation; the dated release and frame-link reports record tested hardware.
 

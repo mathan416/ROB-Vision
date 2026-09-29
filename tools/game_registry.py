@@ -57,7 +57,10 @@ class RegistryStore:
                 "has_backup": self.backup.is_file()}
 
     def _apply(self):
-        if self.platform == "batocera":
+        if self.platform == "recalbox":
+            from tools.recalbox import select_games
+            select_games(registry_path=self.path)
+        elif self.platform == "batocera":
             from tools.batocera import select_games
             root = self.path.parents[1]
             available = [core for core in ("fceumm", "nestopia")

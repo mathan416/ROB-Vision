@@ -1,0 +1,78 @@
+#!/bin/sh
+set -eu
+APP=/recalbox/share/system/rob-vision
+RUN=/run/rob-vision
+ROUTER_CONFIG=/recalbox/share/system/virtualglove/data/controller-router.json
+ROUTER_SOCKET=/run/virtualglove/merged-gamepad.sock
+CORE=/usr/lib/libretro
+SYSTEM=/recalbox/share_init/system/.emulationstation/systemlist.xml
+STATE=/run/rob-vision-core
+[ -d /run/virtualglove-core/core-upper ] && STATE=/run/virtualglove-core
+
+mounted_at() { awk -v target="$1" '$2 == target { found=1 } END { exit !found }' /proc/mounts; }
+
+start() {
+    mkdir -p "$RUN" "$STATE/core-upper" "$STATE/core-work" "$STATE/core-merged"
+    PYTHONPATH="$APP" python3 -c 'from router_shared.launch_install import activate_recalbox; activate_recalbox()'
+    for name in fceumm nestopia; do
+        [ -f "$APP/build/robvision_${name}_libretro.so" ] || continue
+        cp "$APP/build/robvision_${name}_libretro.so" "$STATE/core-upper/robvision_${name}_libretro.so"
+    done
+    if ! mounted_at "$CORE"; then
+        mounted_at "$STATE/core-merged" || mount -t overlay rob-vision-core \
+            -o "lowerdir=$CORE,upperdir=$STATE/core-upper,workdir=$STATE/core-work" \
+            "$STATE/core-merged"
+        mount --bind "$STATE/core-merged" "$CORE"
+    fi
+    PYTHONPATH="$APP" python3 - "$SYSTEM" "$STATE/systemlist.xml" <<'PY'
+import sys
+from pathlib import Path
+from tools.recalbox import systemlist_text, write_atomic
+write_atomic(Path(sys.argv[2]), systemlist_text(Path(sys.argv[1]).read_text()))
+PY
+    if ! cmp -s "$STATE/systemlist.xml" "$SYSTEM"; then
+        mounted_at "$SYSTEM" && umount "$SYSTEM"
+        mount --bind "$STATE/systemlist.xml" "$SYSTEM"
+        if pidof emulationstation >/dev/null 2>&1; then
+            /etc/init.d/S31emulationstation restart >/dev/null 2>&1 || :
+        fi
+    fi
+    [ -s "$APP/token" ] || return 0
+    if [ ! -S /run/virtualglove/merged-gamepad.sock ] && [ -f /recalbox/share/system/virtualglove/recalbox/virtualglove-service ]; then
+        sh /recalbox/share/system/virtualglove/recalbox/virtualglove-service start
+    fi
+    if [ -f "$ROUTER_CONFIG" ] && [ ! -S "$ROUTER_SOCKET" ]; then
+        mkdir -p /run/virtualglove
+        cd "$APP"
+        start-stop-daemon -S -b -m -p "$RUN/router.pid" -x /usr/bin/python3 -- \
+            -m router_shared.controller_router serve --platform recalbox \
+            --config "$ROUTER_CONFIG" --socket "$ROUTER_SOCKET" \
+            >>"$APP/router.log" 2>&1
+    fi
+    [ -f "$RUN/receiver.pid" ] && kill -0 "$(cat "$RUN/receiver.pid")" 2>/dev/null && return 0
+    cd "$APP"
+    ROB_VISION_URL="$(cat "$APP/controller.url")" ROB_VISION_TOKEN_FILE="$APP/token" \
+    CONTROLLER_ROUTER_SOURCES_FILE="$APP/config/router_sources.json" \
+        start-stop-daemon -S -b -m -p "$RUN/receiver.pid" -x /usr/bin/python3 -- \
+            "$APP/tools/retropie_controller2.py" --platform recalbox --swap-buttons \
+            >>"$APP/receiver.log" 2>&1
+}
+
+stop() {
+    if [ -f "$RUN/router.pid" ]; then
+        kill "$(cat "$RUN/router.pid")" 2>/dev/null || :
+        rm -f "$RUN/router.pid"
+    fi
+    if [ -f "$RUN/receiver.pid" ]; then
+        kill "$(cat "$RUN/receiver.pid")" 2>/dev/null || :
+        rm -f "$RUN/receiver.pid"
+    fi
+}
+
+case "${1:-}" in
+    start) start ;;
+    stop) stop ;;
+    restart) stop; start ;;
+    status) [ -f "$RUN/receiver.pid" ] && kill -0 "$(cat "$RUN/receiver.pid")" 2>/dev/null ;;
+    *) echo "Usage: $0 {start|stop|restart|status}" >&2; exit 2 ;;
+esac

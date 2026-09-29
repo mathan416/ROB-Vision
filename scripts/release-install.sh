@@ -58,8 +58,13 @@ if [ -f /userdata/system/batocera.conf ] && [ -d /usr/lib/libretro ]; then
     as_root python3 "$source/scripts/install_batocera.py" --controller "$2"
     token=/userdata/system/rob-vision/token
     pair=/userdata/system/controller-router/pair-console
+elif [ -f /recalbox/recalbox.version ] && [ -d /usr/lib/libretro ]; then
+    platform=recalbox
+    as_root python3 "$source/scripts/install_recalbox.py" --controller "$2"
+    token=/recalbox/share/system/rob-vision/token
+    pair=/recalbox/share/system/controller-router/pair-console
 else
-    [ -d /opt/retropie/configs ] || fail "This console is neither a supported RetroPie nor Batocera installation"
+    [ -d /opt/retropie/configs ] || fail "This console is not a supported RetroPie, Batocera, or Recalbox installation"
     platform=retropie
     as_root python3 "$source/scripts/install.py" retropie --controller "$2"
     token=/home/pi/.config/rob-vision/token
