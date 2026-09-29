@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from router_shared.controller_router import merge_retropie_indexes, output_indexes, validate_config
+from router_shared.controller_router import output_indexes, validate_config
 from router_shared.virtual_sources import configured_sources
 from tools.controller_router_setup import (BUDDY, ensure, ensure_buddy_frontend_mapping,
                                            activate, proposed_config, retire_legacy_nes_override,
@@ -22,6 +22,13 @@ def source(name, identity):
 
 
 class ControllerRouterTests(unittest.TestCase):
+    def test_retired_merged_commands_cannot_write_saved_config(self):
+        from router_shared import merged_gamepad
+        self.assertFalse(hasattr(merged_gamepad, 'install_retroarch_assignment'))
+        self.assertFalse(hasattr(merged_gamepad, 'MergedGamepadDevice'))
+        with self.assertRaisesRegex(SystemExit, 'serve and sync-index commands are retired'):
+            merged_gamepad.main()
+
     def test_buddy_mapping_is_project_supplied(self):
         sources = configured_sources(Path(__file__).resolve().parents[1] /
                                      "config/router_sources.json")
@@ -107,19 +114,6 @@ class ControllerRouterTests(unittest.TestCase):
             self.assertIn('code="304"', path.read_text())
             self.assertTrue(path.with_name('es_input.cfg.before-rob-vision-router').exists())
 
-    def test_router_replaces_only_its_nes_index_block(self):
-        config = proposed_config(None, "retropie", [source(BUDDY, "c" * 16)])
-        before = ('input_player1_a_btn = "7"\n'
-                  '# VirtualGlove Controller Router\n'
-                  'input_player1_joypad_index = "3"\n'
-                  '# End VirtualGlove Controller Router\n'
-                  '#include "../all/retroarch.cfg"\n')
-        after = merge_retropie_indexes(before, config, {2: 5})
-        self.assertIn('input_player1_a_btn = "7"', after)
-        self.assertIn('input_player2_joypad_index = "5"', after)
-        self.assertNotIn('input_player1_joypad_index = "3"', after)
-        self.assertLess(after.index('input_player2_joypad_index'), after.index('#include'))
-        self.assertEqual(merge_retropie_indexes(after, config, {2: 5}), after)
 
     def test_router_waits_for_udev_registration_after_joystick_appears(self):
         with tempfile.TemporaryDirectory() as directory:
