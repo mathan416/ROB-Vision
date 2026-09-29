@@ -17,3 +17,15 @@ Reviewed 29 September 2026 against `dev` for the next minor release. This review
 4. Confirm the UNO Q Help and downloadable PDFs correspond to the candidate before final `0.2.0` publication.
 
 Earlier live gate and block tests remain dated evidence for their builds; they do not automatically certify this candidate.
+
+## Recalbox development validation — 29 September 2026
+
+Recalbox 10.1.1 on the `rpizero2` target paired with arduiain.local. Gyromite
+and Stack-Up launched through the installed frame wrappers, selected R.O.B.
+Vision, and cleared their sessions on exit. The player then confirmed a
+Stack-Up Direct-mode command moved Buddy on Mission. Super Glove Ball selected
+VirtualGlove and responded to input. Controller Router's Recalbox launch adapter
+now maps the merged controller's Hotkey + Start to exit; the player confirmed
+PlayStation Home + Start exited a fresh Super Glove Ball session. A visible
+Gyromite blue/red gate test remains for candidate acceptance. These checks used
+development installations, not downloaded candidate packages.
