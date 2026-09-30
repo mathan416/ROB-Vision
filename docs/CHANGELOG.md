@@ -1,5 +1,12 @@
 # R.O.B. Vision changelog
 
+## 0.2.0 shared controller connection
+
+- Added secure shared pairing, automatic game selection, one active input lease, and Controller Router ownership of the Matrix display.
+- Added per-system player routing and Recalbox console support alongside RetroPie and Batocera.
+- Retired launch-time writes to saved RetroArch configuration and the old early-start Matrix service.
+- Updated built-in Help, guides, and the console list for the shared connection flow.
+
 ## 0.1.7 console registry and Buddy episodes
 
 - Added per-console ROM registry editing, `.local` pairing resolution, and target updates when a console is re-paired to another UNO Q.

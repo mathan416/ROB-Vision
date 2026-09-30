@@ -1,6 +1,6 @@
 # R.O.B. Vision user guide
 
-The UNO Q controls Buddy, the virtual robot shown in Mission. RetroPie or Batocera sends Gyromite and Stack-Up commands through the game-frame link. His movements and game pieces appear in your browser.
+The UNO Q controls Buddy, the virtual robot shown in Mission. RetroPie, Batocera, or Recalbox sends Gyromite and Stack-Up commands through the game-frame link. His movements and game pieces appear in your browser.
 
 ## Open R.O.B. Vision
 
@@ -15,7 +15,7 @@ Install R.O.B. Vision with the two commands in the [installation guide](INSTALLA
 | Status | What it tells you |
 | --- | --- |
 | **GYROMITE / CONNECTED** | Mission is connected to the UNO Q with Gyromite selected. |
-| **RETROPIE ONLINE** or **BATOCERA ONLINE** | Your console's receiver has checked in recently. |
+| **RETROPIE ONLINE**, **BATOCERA ONLINE**, or **RECALBOX ONLINE** | Your console's receiver has checked in recently. |
 | **GAME FRAMES LINKED** | Signals from the selected game are reaching Buddy. |
 
 ![Mission preview showing Buddy and the Gyromite accessories](images/mission-model-screenshot.png)
