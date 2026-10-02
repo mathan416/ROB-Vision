@@ -6,7 +6,7 @@ R.O.B. Vision selects Gyromite or Stack-Up from the exact filename launched by a
 
 The [registry](../config/games.json) lists accepted case-insensitive ROM basenames, including configured `.nes`, `.zip`, and `.7z` names. The resolver accepts NES/Famicom launch metadata, while the installed emulator frame integration and ROM directories are for NES. A renamed archive needs an explicit registry entry. After pairing, select **Edit ROMs** beside that console in Setup, add the exact launched filename with the value `gyromite` or `stack_up`, validate, and save. Exit a running game before saving; launch it again to use the new mapping. Each paired console has its own file, and upgrades keep its edits. ROM files and extracted game graphics are never installed with R.O.B. Vision.
 
-RetroPie uses runcommand launch/end hooks. The installer preserves existing hook behavior and adds the R.O.B. Vision notifier and receiver. Supported Batocera uses its separate `zz-robvision-game` launch hook. The notifier sends a paired, authenticated game event to the UNO Q; the frame receiver also checks the exact ROM identity before forwarding a decoded command. A launch event alone never moves Buddy.
+RetroPie uses runcommand launch/end hooks. The installer preserves existing hook behaviour and adds the R.O.B. Vision notifier and receiver. Supported Batocera uses its separate `zz-robvision-game` launch hook. The notifier sends a paired, authenticated game event to the UNO Q; the frame receiver also checks the exact ROM identity before forwarding a decoded command. A launch event alone never moves Buddy.
 
 ```mermaid
 flowchart LR

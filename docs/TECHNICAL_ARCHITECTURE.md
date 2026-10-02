@@ -64,7 +64,7 @@ The registry matches exact, case-insensitive `Gyromite (World)` and `Stack-Up (W
 2. The selected R.O.B. Vision wrapper delegates libretro calls to the installed original FCEUmm or Nestopia core and observes video frames. A plain core can play the game but does not provide the frame link.
 3. The receiver accepts frames only from an approved wrapper running a registered ROM. It decodes a complete command before posting it to the UNO Q. A launch event alone never moves Buddy.
 4. The receiver polls the UNO Q and drives its virtual Controller 2 only while Gyromite is the active RetroArch process. Stack-Up has no controller-return buttons.
-5. An end event clears the selected game. The receiver releases the pad. Its RetroArch scan can replay a recognized launch after a UNO Q restart, with retries throttled to two seconds.
+5. An end event clears the selected game. The receiver releases the pad. Its RetroArch scan can replay a recognised launch after a UNO Q restart, with retries throttled to two seconds.
 
 The latest authenticated console launch selects the active game and console. While that ownership remains, a different console's frame command is rejected. A manual browser game selection clears console ownership and remains unowned until another authenticated launch. Removing the active console's pairing clears its session. When idle, an online receiver label may refer to either paired console; it is not evidence of a running game.
 
@@ -98,7 +98,7 @@ Test detection is separate from command decoding. At least 36 consecutive green 
 
 ### Gyromite
 
-The model tracks two gyros, six height levels, grip, held gyro, spin deadlines, and manual Gate Assist deadlines across five ordered stations: holder B, holder A, red pad, blue pad, spinner. Home is level 6. Gyromite Up/Down moves two levels, so game commands reach levels 6, 4, and 2; all five accessories meet the hands at level 2 in the virtual model. The original manual's positions 1–5 are horizontal base slots, not vertical levels. Their different screen heights are perspective. A carried gyro must rise to at least level 4 before turning; level 6 remains available for greater clearance. This is a virtual collision rule rather than a numbered rule from the original manual. Stack-Up Up/Down moves one level and uses all six positions. Placing a gyro on the spinner starts an illustrative 55-second spin clock. A spinning gyro resting on a colored pad presses its button. A held gyro at a colored pad at level 2 may press it without spinning; lifting it releases the button. The controller does not measure physical spin or inspect gate pixels.
+The model tracks two gyros, six height levels, grip, held gyro, spin deadlines, and manual Gate Assist deadlines across five ordered stations: holder B, holder A, red pad, blue pad, spinner. Home is level 6. Gyromite Up/Down moves two levels, so game commands reach levels 6, 4, and 2; all five accessories meet the hands at level 2 in the virtual model. The original manual's positions 1–5 are horizontal base slots, not vertical levels. Their different screen heights are perspective. A carried gyro must rise to at least level 4 before turning; level 6 remains available for greater clearance. This is a virtual collision rule rather than a numbered rule from the original manual. Stack-Up Up/Down moves one level and uses all six positions. Placing a gyro on the spinner starts an illustrative 55-second spin clock. A spinning gyro resting on a coloured pad presses its button. A held gyro at a coloured pad at level 2 may press it without spinning; lifting it releases the button. The controller does not measure physical spin or inspect gate pixels.
 
 Fast Gates is a manual browser control. It temporarily puts an available gyro on a pad and holds that button for at most 60 seconds, then returns the gyro to its holder on release or timeout. Game-frame movement is rejected while Gate Assist is held. Red and blue are independent. Selecting a game or Home rebuilds the pieces; Emergency Stop selects no game.
 
@@ -212,7 +212,7 @@ Recalbox 10.x installs its receiver and frame wrappers in the persistent share. 
 
 ## Recovery and verification boundary
 
-| Condition | Behavior |
+| Condition | Behaviour |
 | --- | --- |
 | Browser refresh | Reads UNO Q snapshot without resetting |
 | Unknown title or game exit | Clears selected game; virtual buttons release |
@@ -231,12 +231,12 @@ Recalbox 10.x installs its receiver and frame wrappers in the persistent share. 
 | --- | --- | --- |
 | Game selected, frames waiting | Launch hook reached UNO Q; the approved wrapper has not produced fresh matching frames | Confirm the registered ROM launched with the R.O.B. Vision FCEUmm or Nestopia choice |
 | Game frames linked, no movement | Fresh frames arrived; no valid command may have completed, or the model may have blocked one | Send a Direct-mode command and read the latest `decoded`, `action`, or `blocked` event |
-| Console online, game idle | Receiver polling works; no recognized active game | Check exact ROM basename and console launch hook |
+| Console online, game idle | Receiver polling works; no recognised active game | Check exact ROM basename and console launch hook |
 | Gyromite action visible in Mission, gate unchanged | Model changed, but the return path or game state may be wrong | Check Player 2 mapping, active RetroArch process, and independent blue/red holds |
-| Test light pulses, pose unchanged | Test field recognized as status | Leave Test mode and confirm the light clears before a Direct command |
+| Test light pulses, pose unchanged | Test field recognised as status | Leave Test mode and confirm the light clears before a Direct command |
 | Matrix stays neutral while a game is selected | Product may lack the lease or its Matrix requests may not be delivered | Check Router `/api/state`, the product `/api/matrix/state`, and the shared Matrix service |
 
-The checks support different claims: a recognized ROM proves selection; a fresh frame link proves source delivery; a `decoded` event proves a complete word; an `action` event proves the virtual model accepted it; a visible gate response proves Controller 2 returned input to Gyromite. Do not collapse these into one "connected" result.
+The checks support different claims: a recognised ROM proves selection; a fresh frame link proves source delivery; a `decoded` event proves a complete word; an `action` event proves the virtual model accepted it; a visible gate response proves Controller 2 returned input to Gyromite. Do not collapse these into one "connected" result.
 
 | Verified on supported test hosts | Still outside the demonstrated claim |
 | --- | --- |
@@ -245,7 +245,7 @@ The checks support different claims: a recognized ROM proves selection; a fresh 
 | Movement commands under Nestopia for both games | Full six-command Nestopia sessions under every game mode |
 | Gyromite blue-gate response and return under both cores | Full-game gate automation and game outcomes |
 | Batocera 43.1 x86_64 reboot with VirtualGlove coexistence | Other Batocera board/version combinations |
-| Automated model, decoder, installer, and pairing tests | Stack-Up Memory/Bingo behavior and complete matrix visual checks |
+| Automated model, decoder, installer, and pairing tests | Stack-Up Memory/Bingo behaviour and complete matrix visual checks |
 
 A valid frame link alone does not imply model success: an accepted command can be blocked at a boundary. The browser does not know Hector's position or the Stack-Up goal. The matrix's active modes are implemented, while complete direct visual checks remain open.
 

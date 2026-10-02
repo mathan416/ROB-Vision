@@ -18,7 +18,7 @@ One day a new light appeared there: a little grid on a maker's desk. The lights 
 
 He lifted a block. It landed exactly where he meant it to. For the first time, the world on the other side had room for him.
 
-The story's emotional center is that moment of mutual recognition. The player gives Buddy a place to appear; Buddy makes the old game's commands visible, playful, and personal.
+The story's emotional centre is that moment of mutual recognition. The player gives Buddy a place to appear; Buddy makes the old game's commands visible, playful, and personal.
 
 ## Buddy
 
@@ -57,7 +57,7 @@ Use these as optional flavor lines, not replacements for status or error message
 
 ## Visual direction
 
-Buddy should earn his own silhouette, face, color language, motion, and personality. The expressive eyes and carefully connected arm movement are strong foundations. For a public release, commission or design a distinct body and accessories rather than relying on a close reconstruction of Nintendo's robot. The game pieces shown in a compatibility mode can be described functionally; promotional art should foreground Buddy and the original interface.
+Buddy should earn his own silhouette, face, colour language, motion, and personality. The expressive eyes and carefully connected arm movement are strong foundations. For a public release, commission or design a distinct body and accessories rather than relying on a close reconstruction of Nintendo's robot. The game pieces shown in a compatibility mode can be described functionally; promotional art should foreground Buddy and the original interface.
 
 ![First Buddy character concept: oval face, cyan eyes, compact body, two hands carrying a glowing block, and pixels at the base](images/buddy-concept-v1.png)
 

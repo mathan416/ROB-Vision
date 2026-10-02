@@ -35,7 +35,7 @@ Check **Players and Systems** after pairing. Buddy belongs on Player 2; keep a p
 
 Launch a registered game using its R.O.B. Vision emulator choice. On RetroPie these are `lr-robvision-fceumm` and `lr-robvision-nestopia`; ordinary `lr-fceumm` and `lr-nestopia` do not send Buddy's movement frames. The [Setup page](dashboard/setup.html) shows console and frame-link status, tests the controls, and lets you edit filenames. [Mission](dashboard/index.html) shows Buddy in motion, and [Help](dashboard/help.html) gives task-based play and recovery steps. The current app site uses port **8101**; the console receiver uses **8766**.
 
-In Gyromite, a gyro placed on a colored pad or a **Fast Gates** hold sends the matching button to Player 2. In Stack-Up, the game-frame link drives Buddy's movement and block handling. The Test signal lights his status indicator without moving him. When no game is active, a demo can run even while a console remains paired.
+In Gyromite, a gyro placed on a coloured pad or a **Fast Gates** hold sends the matching button to Player 2. In Stack-Up, the game-frame link drives Buddy's movement and block handling. The Test signal lights his status indicator without moving him. When no game is active, a demo can run even while a console remains paired.
 
 ## Guides and source
 

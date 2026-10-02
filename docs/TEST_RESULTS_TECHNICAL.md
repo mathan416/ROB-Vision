@@ -36,7 +36,7 @@ A separate 900-transmission 30/60 fps study used a different seed and decoder re
 
 ## Live Kiyo Pro and LCD: status works, motion is intermittent
 
-The Kiyo Pro was attached to the UNO Q and aimed at the modern display while RetroPie ran FCEUmm. With HDR temporarily disabled, 640-by-480 MJPEG and manual exposure 10 (1 ms) delivered about **59.8-60.2 fps** during the cited live traces. Camera crops changed as the user recentered and moved the camera; normalized regions such as `0.4,0.54,0.055,0.06`, later `0.4,0.30,0.055,0.06`, and eventually `0.205,0.15,0.04,0.05` are evidence of those particular physical placements, not portable settings.
+The Kiyo Pro was attached to the UNO Q and aimed at the modern display while RetroPie ran FCEUmm. With HDR temporarily disabled, 640-by-480 MJPEG and manual exposure 10 (1 ms) delivered about **59.8-60.2 fps** during the cited live traces. Camera crops changed as the user re-centred and moved the camera; normalized regions such as `0.4,0.54,0.055,0.06`, later `0.4,0.30,0.055,0.06`, and eventually `0.205,0.15,0.04,0.05` are evidence of those particular physical placements, not portable settings.
 
 | Live check | Observation | What it establishes |
 | --- | --- | --- |
@@ -67,7 +67,7 @@ The ninth cell was **not always missing**. UP_STACK and RIGHT can differ at one 
 
 The camera enumerated MJPEG, YUYV, NV12, and H264 up to 1920-by-1080 at 60 fps on a 5 Gbit/s USB 3 link. At 1280-by-720 YUYV, delivered capture was about 60 fps, yet a recorded UP/LEFT/UP sequence decoded LEFT and missed both UP words. A standalone 1920-by-1080 raw NV12 benchmark captured 660 frames in 11.9 seconds (**55.5 fps computed from those recorded numbers**); the archived note calls it “around 60 fps.” Full BGR conversion was about 36 fps in that comparison. Uncompressed pixels and faster processing alone did not establish exact command recovery.
 
-The aligned 1080p study disabled OpenCV color conversion and sampled luma plus NV12 V chroma from **three 55-pixel strips × 24 horizontal bands = 72 regions**. Each of two runs captured 1,800 camera frames near 60 fps while RetroArch independently recorded four complete source commands. Each region was allowed a start shift of up to three captured frames for an **offline exact-match** comparison; the fifth key press near shutdown was excluded. Normal framing sampled the upper 510 rows. Digital zoom `180` and upward tilt `36000` expanded the game image to about 900 rows for the second run.
+The aligned 1080p study disabled OpenCV colour conversion and sampled luma plus NV12 V chroma from **three 55-pixel strips × 24 horizontal bands = 72 regions**. Each of two runs captured 1,800 camera frames near 60 fps while RetroArch independently recorded four complete source commands. Each region was allowed a start shift of up to three captured frames for an **offline exact-match** comparison; the fifth key press near shutdown was excluded. Normal framing sampled the upper 510 rows. Digital zoom `180` and upward tilt `36000` expanded the game image to about 900 rows for the second run.
 
 | Framing | Source move | Whole-frame average | Exact regions / 72 |
 | --- | --- | --- | ---: |
@@ -113,7 +113,7 @@ The pixel ranges refer to the cited screenshot or NES recording geometry; they a
 
 ## Evidence boundary and open work
 
-The measured camera/LCD path recognized Test fields and occasionally complete movement words, but repeatedly missed commands after recentering, wider sampling, uncompressed capture, row analysis, and zoom. These tests do **not** prove that no camera could ever read the original signal. They establish that the tested Kiyo Pro, display, modes, and 60 fps timing did not support dependable autonomous play. The frame link removed that sampling boundary and delivered complete Direct-mode words from both games under FCEUmm; Nestopia delivered movement in both games and a verified Gyromite blue-gate return.
+The measured camera/LCD path recognised Test fields and occasionally complete movement words, but repeatedly missed commands after re-centring, wider sampling, uncompressed capture, row analysis, and zoom. These tests do **not** prove that no camera could ever read the original signal. They establish that the tested Kiyo Pro, display, modes, and 60 fps timing did not support dependable autonomous play. The frame link removed that sampling boundary and delivered complete Direct-mode words from both games under FCEUmm; Nestopia delivered movement in both games and a verified Gyromite blue-gate return.
 
 Remaining evidence gaps are long unattended sessions with a measured missed-command rate, full six-command Nestopia runs in every game mode, Stack-Up Memory and Bingo cadence and starting layouts, alternate video filters/palettes, full-game outcomes, other Batocera hardware, and complete direct visual checks of every UNO Q matrix animation. A selected game, fresh frame link, decoded word, accepted model action, and visible in-game gate response should continue to be reported as **separate milestones**.
 

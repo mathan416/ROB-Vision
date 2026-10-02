@@ -10,7 +10,7 @@ Could uncompressed 1080p camera frames reveal enough subframe scan timing to rec
 
 - The actual Kiyo Pro on the UNO Q was connected at USB 3 SuperSpeed. HDR was off; manual exposure was 1 ms. RetroPie ran Stack-Up Direct mode with FCEUmm on the intended LCD.
 - A temporary root uinput **keyboard** on RetroPie pressed the mapped Player 1 arrow keys. This moved Hector on the visible board without altering the user's controller mapping. RetroArch simultaneously recorded its rendered game output. The camera diagnostic had no path to move virtual R.O.B.
-- The UNO Q captured raw NV12 at 1920×1080, with OpenCV color conversion disabled. It sampled three 55-pixel-wide strips, 24 horizontal bands in each, recording luma and the NV12 V chroma component. A chroma value below 0.35 was classified as green for this offline comparison.
+- The UNO Q captured raw NV12 at 1920×1080, with OpenCV colour conversion disabled. It sampled three 55-pixel-wide strips, 24 horizontal bands in each, recording luma and the NV12 V chroma component. A chroma value below 0.35 was classified as green for this offline comparison.
 - The first aligned run used the normal camera framing and bands across the upper 510 image rows. A second run used the camera's volatile zoom (`180`) and upward digital tilt (`36000`) to make the game image occupy about 900 of 1080 rows. The diagnostic then sampled bands across those 900 rows.
 - The RetroArch source patterns are compared with only the four commands fully present in each source recording. The fifth key press in each run happened near recording shutdown and is excluded from the source-aligned score.
 
@@ -39,7 +39,7 @@ The separate `/dev/video3` UVC metadata node streamed concurrently with the rest
 
 ## Engineering conclusion
 
-Uncompressed NV12 and direct chroma sampling let the UNO Q process full-resolution Kiyo Pro frames near 60 fps. Digital zoom and tilt improve framing but did not improve command recovery in the tested LCD setup. Sampling rows separately did not recover any rejected source-aligned command. The existing strict decoder and non-motion diagnostic bands remain the appropriate live behavior.
+Uncompressed NV12 and direct chroma sampling let the UNO Q process full-resolution Kiyo Pro frames near 60 fps. Digital zoom and tilt improve framing but did not improve command recovery in the tested LCD setup. Sampling rows separately did not recover any rejected source-aligned command. The existing strict decoder and non-motion diagnostic bands remain the appropriate live behaviour.
 
 The remaining timing limit is the free-running 60 fps camera observing roughly 60 Hz one-frame game cells through the display pipeline. A future experiment should first establish whether a different physical camera position or display mode produces genuine within-frame transitions; this result gives no evidence for changing the live decoder. For dependable RetroPie play, a frame-level emulator output hook remains the measured fallback; the camera can still be used for camera placement, Test-mode light, and original-hardware trials.
 

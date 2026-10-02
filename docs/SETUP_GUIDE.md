@@ -63,12 +63,12 @@ Test checks the connection without moving Buddy. A brief steady red light acknow
 
 ## Check Gyromite's gates
 
-1. Enter Gyromite **Game A** and leave a colored gate visible.
+1. Enter Gyromite **Game A** and leave a coloured gate visible.
 2. In Setup, choose **Lower Blue** or **Lower Red** for that gate.
 3. Watch the game screen for the gate to move.
 4. Choose **Release Both** when finished.
 
-Choose a color again to release it. A hold also releases after 60 seconds. If a gyro is already in use, return it with the normal controls or choose **Home** to reset the pieces before using Fast Gates.
+Choose a colour again to release it. A hold also releases after 60 seconds. If a gyro is already in use, return it with the normal controls or choose **Home** to reset the pieces before using Fast Gates.
 
 ## Check Stack-Up movement
 

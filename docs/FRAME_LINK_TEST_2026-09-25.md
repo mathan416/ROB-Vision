@@ -1,6 +1,6 @@
 # RetroPie game-frame link verification, 25 September 2026
 
-This is a dated engineering record. References below to camera preview or concurrent camera decoding describe the earlier test build. The current release uses emulator frames and has no camera input path; the current behavior is specified in the [technical reference](TECHNICAL_ARCHITECTURE.md).
+This is a dated engineering record. References below to camera preview or concurrent camera decoding describe the earlier test build. The current release uses emulator frames and has no camera input path; the current behaviour is specified in the [technical reference](TECHNICAL_ARCHITECTURE.md).
 
 ## Purpose
 
@@ -29,7 +29,7 @@ The first Stack-Up trial used an overly strict whole-frame green classifier. Tes
 - The UNO Q's camera preview was restored after its controller restart. The new input path did not require camera capture to be running.
 - RetroPie continued to launch and exit games through the existing runcommand hooks. The per-ROM core selection worked for `.7z` archives.
 - Temporary RetroArch network commands and per-frame journal tracing were removed from the running configuration. The live Stack-Up game was left running for the player.
-- The local test suite passed 48 tests, including complete-pattern decoding, sender/ROM checks, retry idempotency, and per-ROM installation behavior.
+- The local test suite passed 48 tests, including complete-pattern decoding, sender/ROM checks, retry idempotency, and per-ROM installation behaviour.
 
 ## Limits and next verification
 

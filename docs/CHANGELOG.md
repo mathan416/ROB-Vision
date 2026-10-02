@@ -32,7 +32,7 @@
 
 ## 0.1.3 documentation consistency
 
-- Aligned current Help and manuals with paired RetroPie and Batocera behavior, Test indication, and console-neutral status.
+- Aligned current Help and manuals with paired RetroPie and Batocera behaviour, Test indication, and console-neutral status.
 - Rebuilt all four PDF manuals from the corrected sources.
 
 ## 0.1.2 documentation update
@@ -65,7 +65,7 @@
 - Made each virtual block one visible hand level tall in the Live Model, with a glow on the block R.O.B. can grip.
 - Drew the blocks in front of the arm linkage and put the two hands at the sides of a carried or placed stack.
 - Matched hand height to each tray's perspective, so the gripped block sits in the middle of both hands throughout a carry.
-- Updated the Game Table and Accessory Bay block stacks to match, and made the Game Piece card show the selected or carried colors as they change.
+- Updated the Game Table and Accessory Bay block stacks to match, and made the Game Piece card show the selected or carried colours as they change.
 - Clarified that the UNO Q installer includes the matrix display sketch and App Lab compiles and uploads it on start.
 
 ## Development installers — 25 September 2026
@@ -150,7 +150,7 @@
 
 - Added a Setup page with certificate-pinned one-time RetroPie pairing, receiver status, camera alignment preview, game Test mode ready-light acknowledgement, Gyromite Fast Gates, and six Stack-Up command checks.
 - Moved the Game Table beside Pose Preview and System Vitals, and removed the secondary camera tile from Mission Control.
-- Verified both Gyromite gate colors during live Game A play. UNO Q camera capture remains unverified until a camera is attached.
+- Verified both Gyromite gate colours during live Game A play. UNO Q camera capture remains unverified until a camera is attached.
 
 ## Local controller and camera path — 24 September 2026
 
@@ -186,7 +186,7 @@
 - Made a head camera watching Gyromite and Stack-Up flashes on a modern LCD/OLED the primary game input; emulator hooks remain optional.
 - Defined sensor-confirmed tray feedback to a RetroPie virtual second controller.
 - Added design-stage user, gameplay, installation, hardware, technical, configuration, troubleshooting, verification, safety, rights, and quick-reference guides.
-- Incorporated the original R.O.B. instruction manual as a cited historical reference for optical test/ready/busy behavior, setup hazards, and modern display acceptance tests.
+- Incorporated the original R.O.B. instruction manual as a cited historical reference for optical test/ready/busy behaviour, setup hazards, and modern display acceptance tests.
 - Incorporated the Gyromite instruction booklet as a cited reference for Direct/Game A/Game B flow, two-gyro play, fixture roles, and tray/button mapping tests.
 - Incorporated the Stack-Up instruction booklet scan as a cited reference for five numbered trays, ring-shaped pieces, Direct/Memory/Bingo modes, Memory timing, and Bingo's ambiguous simultaneous-command case.
 - Added a local, exact-filename Gyromite/Stack-Up launch resolver and registry for the supplied `.zip`, `.7z`, and `.nes` names, plus tests and a planned RetroPie start/end notification contract. No hook or network receiver is installed.

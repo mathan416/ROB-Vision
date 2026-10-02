@@ -10,9 +10,9 @@ The UNO Q App Lab app serves the dashboard, owns virtual game state, receives au
 
 Gyromite has two virtual gyros, holders, a spinner, and red/blue pads. A spinning gyro on a pad presses its gate; R.O.B. can also hold an unspun gyro on a pad. Moving, lifting, or spin expiry releases that pad. Each gyro has an illustrative 55-second spin clock. Fast Gates gives an immediate, 60-second maximum manual hold. The UNO Q's pad state is polled over LAN by the active console and applied to Controller 2. The browser does not decide button state independently.
 
-Stack-Up has five colored blocks, five trays, six height levels, an arm station, and a shared grip. All five start on Tray 3 in the current live model. A lower grip carries the contacted block and all blocks above it as one ordered segment. Invalid moves are rejected without changing the stack. The original game's Direct, Memory, and Bingo modes send the same six movement commands; R.O.B. Vision does not yet initialize their different historical starting layouts or report scoring. Stack-Up does not use the Gyromite Controller 2 gate path.
+Stack-Up has five coloured blocks, five trays, six height levels, an arm station, and a shared grip. All five start on Tray 3 in the current live model. A lower grip carries the contacted block and all blocks above it as one ordered segment. Invalid moves are rejected without changing the stack. The original game's Direct, Memory, and Bingo modes send the same six movement commands; R.O.B. Vision does not yet initialize their different historical starting layouts or report scoring. Stack-Up does not use the Gyromite Controller 2 gate path.
 
-## Browser behavior
+## Browser behaviour
 
 Mission shows the animated robot, accessory views, Game Table, Pose Preview, System Vitals, and activity. Setup has pairing, frame-link status, Test-mode light acknowledgement, and manual game checks. A `file://` page is a local preview; use `http://arduiain.local/dashboard/` for UNO Q state. The static demo may run when a console is paired but no game is active. A live game stops the demo and takes authority.
 

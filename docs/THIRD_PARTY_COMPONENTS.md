@@ -10,7 +10,7 @@ The project includes an App Lab Python service and matrix sketch, original dashb
 | VirtualGlove host-helper patterns | R.O.B. Vision versions of shutdown, early start, and network status | Adapted from the user's MIT-licensed VirtualGlove project; see `deploy/uno-q/README.md`. |
 | Nintendo R.O.B., Gyromite, Stack-Up | Historical inspiration and compatibility targets | Nintendo marks and assets remain with their owner. |
 | Atari HQ and Digital Press manuals | Paraphrased research references | Linked in the manual-notes guides; text and scans are not bundled. |
-| Aluminite Robert simulator | Behavioral research only | No GPL-3.0 code or assets imported. |
+| Aluminite Robert simulator | Behavioural research only | No GPL-3.0 code or assets imported. |
 | User-supplied ROMs | Analysis and play on the user's machines | Remain outside this repository and release bundle. |
 
 Release review found no tracked ROMs, private keys, or console token files. The MIT license covers this project’s original code and documentation; bundled font licenses remain separate. Check any newly added assets and dependencies before later releases.

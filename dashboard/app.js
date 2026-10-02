@@ -74,7 +74,7 @@
       { title: 'Second gyro relay', piece: 'b', caption: 'Bringing Gyro B forward to the blue pad.', action: 'CARRYING', location: 'held', spin: true, head: 5, arms: -9, turn: 45, grip: true, prop: [370, 445, 1.12], event: 'Front blue pad targeted.' },
       { title: 'Second gyro relay', piece: 'b', caption: 'Lowering Gyro B onto the blue pad.', action: 'LOWERING', location: 'held', spin: true, head: 5, arms: 55, turn: 45, grip: true, prop: [370, 514.5, 1.12], event: 'Gyro B lowering onto blue pad.' },
       { title: 'Second gyro relay', piece: 'b', caption: 'Gyro B settles on blue; Gyro A remains on red.', action: 'PLACING', location: 'blueTray', spin: true, head: 5, arms: 55, turn: 45, grip: false, prop: [370, 514.5, 1.12], event: 'Gyro B released on blue pad.' },
-      { title: 'Dual gyro relay complete!', piece: 'b', caption: 'Two matching gyros spin on the red and blue pads.', action: 'COMPLETE', location: 'blueTray', spin: true, head: 0, arms: 0, turn: 0, grip: false, prop: [370, 514.5, 1.12], event: 'Both colored pads hold spinning gyros.' }
+      { title: 'Dual gyro relay complete!', piece: 'b', caption: 'Two matching gyros spin on the red and blue pads.', action: 'COMPLETE', location: 'blueTray', spin: true, head: 0, arms: 0, turn: 0, grip: false, prop: [370, 514.5, 1.12], event: 'Both coloured pads hold spinning gyros.' }
     ],
     stack: [],
     free: [
@@ -86,7 +86,7 @@
   };
   function buildStackDemo() {
     const preview = StackModel.create();
-    const steps = [{ title: 'Stack-Up / five blocks', action: 'READY', caption: 'All five blocks begin on Tray 3. R.O.B. starts centered, high, and open.', event: 'Stack-Up virtual setup ready.' }];
+    const steps = [{ title: 'Stack-Up / five blocks', action: 'READY', caption: 'All five blocks begin on Tray 3. R.O.B. starts centred, high, and open.', event: 'Stack-Up virtual setup ready.' }];
     const add = (command, title) => {
       const before = StackModel.snapshot(preview);
       const result = StackModel.apply(preview, command);
