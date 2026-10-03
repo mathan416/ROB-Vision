@@ -14,9 +14,10 @@ Install R.O.B. Vision with the two commands in the [installation guide](INSTALLA
 
 | Status | What it tells you |
 | --- | --- |
-| **GYROMITE / CONNECTED** | Mission is connected to the UNO Q with Gyromite selected. |
-| **RETROPIE ONLINE**, **BATOCERA ONLINE**, or **RECALBOX ONLINE** | Your console's receiver has checked in recently. |
-| **GAME FRAMES LINKED** | Signals from the selected game are reaching Buddy. |
+| **GYROMITE / CONNECTED**, **STACK-UP / CONNECTED**, or **NO GAME / CONNECTED** | The browser reaches R.O.B. Vision. The first part names the selected game, if any. It does not say whether a console or game frames are linked. |
+| **RETROPIE / LINKED**, **BATOCERA / LINKED**, or **RECALBOX / LINKED** | That console's receiver checked in recently. **WAITING** means it has not checked in recently; neither label confirms console power. During a game, the status refers to its active console. |
+| **NO CONSOLE PAIRED** or **0 OF 2 RECEIVERS LINKED** | No console is saved, or several are saved but none has checked in. The count changes as receivers check in. |
+| **GAME FRAMES IDLE**, **GAME FRAMES WAITING**, or **GAME FRAMES LINKED** | No game is selected; a game is selected but its frames are not arriving; or signals from that game are reaching Buddy. |
 
 ![Mission preview showing Buddy and the Gyromite accessories](images/mission-model-screenshot.png)
 

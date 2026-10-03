@@ -23,25 +23,26 @@ The following sections distinguish the observed signal, the accepted model actio
 flowchart LR
   subgraph HOST["Game host · RetroPie, Batocera, or Recalbox"]
     HOOK["Launch / exit hook"]
-    WRAPPER["RetroArch + FCEUmm / Nestopia<br/>frame wrapper"]
+    CORE["RetroArch + wrapped<br/>FCEUmm / Nestopia core"]
     RECEIVER["Frame receiver"]
-    PAD["Raw Buddy pad + console Router<br/>Merged Gyromite Player 2"]
-    WRAPPER -->|"frame class + index"| RECEIVER
-    RECEIVER -->|"uinput"| PAD
+    PAD["Buddy virtual pad<br/>Gyromite Player 2"]
   end
-  subgraph UNO["Arduino UNO Q"]
-    MODEL["R.O.B. Vision<br/>Controller + virtual model"]
+  subgraph CONTROLLER["Controller · Arduino UNO Q"]
+    MODEL["R.O.B. Vision<br/>virtual game model"]
     ROUTER["Controller Router<br/>selection + input lease"]
-    MATRIX["Shared App Lab Matrix service<br/>13 × 8 LED matrix"]
+    MATRIX["Shared 13 × 8<br/>Matrix display"]
     WEB["Browser dashboard · 8101"]
-    MODEL -->|"live session + animation request"| ROUTER
-    ROUTER -->|"input lease"| MODEL
-    ROUTER -->|"validated frames"| MATRIX
-    MODEL -->|"state snapshot"| WEB
   end
+  CORE -->|"frame class + index"| RECEIVER
   HOOK -->|"authenticated launch / exit"| MODEL
   RECEIVER -->|"authenticated command"| MODEL
+  MODEL -->|"state snapshot"| WEB
+  MODEL -->|"session + display cue"| ROUTER
+  ROUTER -->|"validated frames"| MATRIX
+  ROUTER -->|"input lease"| MODEL
   MODEL -->|"Gyromite pad state"| RECEIVER
+  RECEIVER -->|"uinput"| PAD
+  PAD -->|"Player 2 input"| CORE
 ```
 
 | Component | Responsibility | Source |

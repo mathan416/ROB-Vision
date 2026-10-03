@@ -690,7 +690,9 @@
       $('tracking-label').textContent = status.testSignal(snapshot) ? status.test(snapshot) : status.frames(snapshot);
       $('frame-link-value').textContent = status.frames(snapshot);
       $('connection').textContent = status.connection(snapshot);
-      document.querySelector('.gyro-vitals-note').textContent = snapshot.link?.online ? `Virtual pad states sent to ${snapshot.link.receiver || 'console'} Controller 2` : 'Virtual spin and button states; game link offline';
+      document.querySelector('.gyro-vitals-note').textContent = status.receiverOnline(snapshot) ?
+        `Virtual pad states sent to ${status.activeConsole(snapshot)?.name || snapshot.link?.receiver || 'console'} Controller 2` :
+        'Virtual spin and button states; game link waiting';
       $('controls-context').textContent = 'LIVE CONTROLLER / GAME FRAMES OR MANUAL';
       document.querySelector('.vitals-card .live-text').textContent = '● CONTROLLER';
       document.querySelector('.stage-panel .chip').textContent = 'LIVE VIRTUAL MOTION';
