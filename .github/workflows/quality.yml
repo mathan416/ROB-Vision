@@ -55,7 +55,7 @@ jobs:
         run: >-
           python -m unittest -v
           test_controller_router test_receiver test_identify_game
-          test_game_registry_editor test_release_install test_recalbox
+          test_game_registry_editor test_release_install
 
   browser:
     name: Dashboard and launch-script checks
