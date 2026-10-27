@@ -85,7 +85,7 @@ After a reboot, the UNO Q waits for a game or your choice. You do not need to re
 
 ## Check Buddy’s gates
 
-1. Launch Gyromite in **Game A** and stop where a colored gate is visible.
+1. Launch Gyromite in **Game A** and stop where a coloured gate is visible.
 2. In R.O.B. Vision **Setup**, choose **Lower Blue** or **Lower Red** for that gate.
 3. Watch the game screen, then choose **Release Both**.
 

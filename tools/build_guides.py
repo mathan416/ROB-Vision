@@ -194,31 +194,35 @@ def system_responsibilities_diagram(width: float) -> Drawing:
                   fillColor=colors.HexColor("#EFF5F7"), strokeColor=RULE, strokeWidth=1))
     add(Rect(392, 16, 354, 188, 14, 14,
                   fillColor=colors.HexColor("#EFF5F7"), strokeColor=RULE, strokeWidth=1))
-    label(177, 191, "GAME HOST / RETROPIE OR BATOCERA", 8.6, True, TEAL)
-    label(569, 191, "ARDUINO UNO Q", 8.6, True, TEAL)
+    label(177, 191, "GAME CONSOLE · RETROPIE / BATOCERA / RECALBOX", 8.2, True, TEAL)
+    label(569, 191, "CONTROLLER · ARDUINO UNO Q", 8.6, True, TEAL)
 
-    box(20, 125, 140, 42, ["Launch / exit hook"])
-    box(20, 55, 140, 48, ["RetroArch + core", "FCEUmm / Nestopia wrapper"])
-    box(190, 55, 140, 48, ["Frame receiver"])
-    box(190, 125, 140, 42, ["Raw Buddy pad + Router", "Merged Gyromite Player 2"])
-    box(408, 87, 135, 70, ["Controller", "Virtual game model"],
+    box(20, 139, 140, 38, ["Launch / exit hook"])
+    box(20, 57, 140, 45, ["RetroArch + core", "FCEUmm / Nestopia wrapper"])
+    box(190, 57, 140, 45, ["Frame receiver"])
+    box(190, 132, 140, 45, ["Buddy virtual pad", "Gyromite Player 2"])
+    box(408, 75, 138, 102, ["R.O.B. Vision", "Virtual game model"],
         colors.HexColor("#E4F2F1"), TEAL)
-    box(570, 125, 155, 42, ["Controller Router", "Shared 13 x 8 Matrix"])
-    box(570, 47, 155, 42, ["Browser dashboard"])
+    box(573, 139, 150, 38, ["Controller Router", "Selection + input lease"])
+    box(573, 86, 150, 38, ["Shared Matrix display", "13 × 8 LEDs"])
+    box(573, 33, 150, 38, ["Browser dashboard"])
 
-    arrow([(160, 79), (190, 79)])
+    # Session and frame commands enter the model on separate, uncrossed paths.
+    arrow([(160, 158), (174, 158), (174, 182), (380, 182), (380, 163), (408, 163)])
+    arrow([(160, 80), (190, 80)])
     label(175, 89, "frames", 6.6)
-    arrow([(260, 103), (260, 125)])
-    label(291, 112, "uinput", 6.6)
-    arrow([(330, 78), (372, 78), (372, 121), (408, 121)])
-    label(369, 66, "authenticated command", 6.6)
-    arrow([(408, 101), (330, 101)], ORANGE)
-    label(369, 107, "pad state", 6.6, color=ORANGE)
-    arrow([(160, 146), (176, 146), (176, 174), (380, 174), (380, 146), (408, 146)])
-    label(278, 179, "authenticated launch / exit", 6.6)
-    arrow([(543, 145), (570, 145)])
-    arrow([(543, 100), (555, 100), (555, 68), (570, 68)])
-    label(616, 99, "state snapshot", 6.6)
+    arrow([(330, 91), (408, 91)])
+    label(369, 101, "authenticated command", 6.5)
+
+    # Gyromite alone has a return path to Player 2.
+    arrow([(408, 78), (330, 78)], ORANGE)
+    label(369, 66, "Gyromite pad state", 6.5, color=ORANGE)
+    arrow([(260, 102), (260, 132)], ORANGE)
+    label(291, 115, "uinput", 6.6, color=ORANGE)
+    arrow([(546, 159), (573, 159)])
+    arrow([(573, 145), (546, 145)])
+    arrow([(648, 139), (648, 124)])
+    arrow([(546, 91), (558, 91), (558, 52), (573, 52)])
     return diagram
 
 
@@ -356,7 +360,7 @@ def markdown_story(path: Path, usable_width: float, st: dict[str, ParagraphStyle
                 source = "\n".join(mermaid)
                 if path.name == "TECHNICAL_ARCHITECTURE.md" and all(
                         f"{node}[" in source
-                        for node in ("HOOK", "WRAPPER", "RECEIVER", "PAD", "MODEL", "MATRIX", "WEB")):
+                        for node in ("HOOK", "CORE", "RECEIVER", "PAD", "MODEL", "MATRIX", "WEB")):
                     picture = system_responsibilities_diagram(usable_width)
                 elif path.name == "ENGINEERING_JOURNEY.md":
                     mermaid_count += 1

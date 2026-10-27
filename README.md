@@ -35,7 +35,7 @@ Check **Players and Systems** after pairing. Buddy belongs on Player 2; keep a p
 
 Launch a registered game using its R.O.B. Vision emulator choice. On RetroPie these are `lr-robvision-fceumm` and `lr-robvision-nestopia`; ordinary `lr-fceumm` and `lr-nestopia` do not send Buddy's movement frames. The [Setup page](dashboard/setup.html) shows console and frame-link status, tests the controls, and lets you edit filenames. [Mission](dashboard/index.html) shows Buddy in motion, and [Help](dashboard/help.html) gives task-based play and recovery steps. The current app site uses port **8101**; the console receiver uses **8766**.
 
-In Gyromite, a gyro placed on a colored pad or a **Fast Gates** hold sends the matching button to Player 2. In Stack-Up, the game-frame link drives Buddy's movement and block handling. The Test signal lights his status indicator without moving him. When no game is active, a demo can run even while a console remains paired.
+In Gyromite, a gyro placed on a coloured pad or a **Fast Gates** hold sends the matching button to Player 2. In Stack-Up, the game-frame link drives Buddy's movement and block handling. The Test signal lights his status indicator without moving him. When no game is active, a demo can run even while a console remains paired.
 
 ## Guides and source
 
@@ -45,3 +45,9 @@ In Gyromite, a gyro placed on a colored pad or a **Fast Gates** hold sends the m
 - [Buddy & the Big Wide Window](docs/BUDDY_ADVENTURE.md) tells Buddy's story.
 
 Printable guides are in [output/pdf](output/pdf/). The dashboard serves its own Help and guide downloads. R.O.B. Vision includes no ROMs or pairing credentials in this repository. It is an independent maker project and is not affiliated with Nintendo; see the [license](LICENSE) and [third-party components](docs/THIRD_PARTY_COMPONENTS.md).
+
+## Continuous integration
+
+Pushes to `dev`/`main` and pull requests run the full Python suite on the controller's Python 3.9 minimum and Python 3.12. A separate Python 3.7 job tests the RetroPie receiver, shared Router, pairing and configuration-preservation contracts. Dashboard tests run with Node.js 22, alongside shell entrypoint syntax checks. These jobs run for Router changes as well as application changes; the existing optional emulator-wrapper build remains separate.
+
+Run the full suite locally with `python3 -m unittest discover -s tests -v` and `node --test tests/*.test.js`. Tests use temporary configuration and mocked devices; CI does not connect to or deploy onto a console.

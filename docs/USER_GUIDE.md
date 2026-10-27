@@ -14,9 +14,10 @@ Install R.O.B. Vision with the two commands in the [installation guide](INSTALLA
 
 | Status | What it tells you |
 | --- | --- |
-| **GYROMITE / CONNECTED** | Mission is connected to the UNO Q with Gyromite selected. |
-| **RETROPIE ONLINE**, **BATOCERA ONLINE**, or **RECALBOX ONLINE** | Your console's receiver has checked in recently. |
-| **GAME FRAMES LINKED** | Signals from the selected game are reaching Buddy. |
+| **GYROMITE / CONNECTED**, **STACK-UP / CONNECTED**, or **NO GAME / CONNECTED** | The browser reaches R.O.B. Vision. The first part names the selected game, if any. It does not say whether a console or game frames are linked. |
+| **RETROPIE / LINKED**, **BATOCERA / LINKED**, or **RECALBOX / LINKED** | That console's receiver checked in recently. **WAITING** means it has not checked in recently; neither label confirms console power. During a game, the status refers to its active console. |
+| **NO CONSOLE PAIRED** or **0 OF 2 RECEIVERS LINKED** | No console is saved, or several are saved but none has checked in. The count changes as receivers check in. |
+| **GAME FRAMES IDLE**, **GAME FRAMES WAITING**, or **GAME FRAMES LINKED** | No game is selected; a game is selected but its frames are not arriving; or signals from that game are reaching Buddy. |
 
 ![Mission preview showing Buddy and the Gyromite accessories](images/mission-model-screenshot.png)
 
@@ -36,7 +37,7 @@ Open [Setup](../dashboard/setup.html) to check the console and game-frame status
 
 ## Play Stack-Up
 
-The live model begins with five colored blocks on Tray 3. In Direct mode, jumping Hector onto a command tile sends **Left, Right, Up, Down, Open,** or **Close** through the frame link. Manual controls use the same virtual model. A lower grip carries the contacted block and all blocks above it. Impossible moves are rejected and leave pieces in place. **Home** restores the initial stack.
+The live model begins with five coloured blocks on Tray 3. In Direct mode, jumping Hector onto a command tile sends **Left, Right, Up, Down, Open,** or **Close** through the frame link. Manual controls use the same virtual model. A lower grip carries the contacted block and all blocks above it. Impossible moves are rejected and leave pieces in place. **Home** restores the initial stack.
 
 ## Current game limits
 
@@ -44,6 +45,6 @@ Stack-Up's virtual arrangement does not score a round or initialize Bingo's dist
 
 ## Test mode and reset
 
-Launch the game through its R.O.B. Vision emulator choice and enter Test mode. The game-frame link makes R.O.B.'s red light blink automatically on Mission and Setup when it recognizes the Test signal. A separate ready-light command makes the light steady briefly. Exiting Test mode returns the UNO Q matrix to the game's eyes. Neither signal moves R.O.B. **Preview Red Light** on Setup demonstrates the animation without claiming a game signal.
+Launch the game through its R.O.B. Vision emulator choice and enter Test mode. The game-frame link makes R.O.B.'s red light blink automatically on Mission and Setup when it recognises the Test signal. A separate ready-light command makes the light steady briefly. Exiting Test mode returns the UNO Q matrix to the game's eyes. Neither signal moves R.O.B. **Preview Red Light** on Setup demonstrates the animation without claiming a game signal.
 
 **Home** resets the selected virtual game. Live **Emergency Stop** clears the game selection; in the offline preview it cancels the script until reset. A browser reload restores the UNO Q's current snapshot. See [Setup](SETUP_GUIDE.md), [gameplay](GAMEPLAY_GUIDE.md), and [troubleshooting](TROUBLESHOOTING.md).

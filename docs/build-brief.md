@@ -8,12 +8,12 @@ The UNO Q App Lab app, dashboard, matrix sketch, virtual models, ROM-derived dec
 
 ## Player experience
 
-The main view animates R.O.B.'s connected arms, shared hands, moving head, gyros, and five colored Stack-Up blocks. Mission shows the Game Table beside Pose Preview and System Vitals. Setup provides pairing, frame-link status, Test-mode light acknowledgement, and manual controls. Scripted demos remain available while paired but no game is active; a game launch selects the live scene.
+The main view animates R.O.B.'s connected arms, shared hands, moving head, gyros, and five coloured Stack-Up blocks. Mission shows the Game Table beside Pose Preview and System Vitals. Setup provides pairing, frame-link status, Test-mode light acknowledgement, and manual controls. Scripted demos remain available while paired but no game is active; a game launch selects the live scene.
 
 ## Remaining milestones
 
 1. Run longer interactive sessions through the console frame link and measure missed and false commands, including Stack-Up Memory and Bingo.
 2. Repeat Test-mode indication checks in each game with FCEUmm and Nestopia.
-3. Verify multi-device dashboard behavior and each matrix indication visually on the UNO Q.
+3. Verify multi-device dashboard behaviour and each matrix indication visually on the UNO Q.
 
 The [technical architecture](TECHNICAL_ARCHITECTURE.md), [configuration reference](CONFIGURATION_REFERENCE.md), and [verification plan](VERIFICATION_PLAN.md) describe the code and evidence.

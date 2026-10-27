@@ -4,19 +4,19 @@
 
 ## Virtual set and starting layouts
 
-The booklet shows five colored ring-shaped pieces—red, white, blue, yellow, and green—on five numbered trays around R.O.B. Tray 3 is directly in front. Direct and Memory begin with all five on Tray 3, top to bottom red, white, blue, yellow, green. One-player Bingo also begins with five on Tray 3, in any color order. Two-player Bingo begins with three on Tray 3 and one each on Trays 2 and 4. The current UNO Q model initializes the Direct/Memory Tray 3 stack for every Stack-Up session. Bingo-specific starting layouts are historical requirements, not implemented profiles. At the start of a virtual session, the pose is centered over Tray 3, at the highest level, with hands open.
+The booklet shows five coloured ring-shaped pieces—red, white, blue, yellow, and green—on five numbered trays around R.O.B. Tray 3 is directly in front. Direct and Memory begin with all five on Tray 3, top to bottom red, white, blue, yellow, green. One-player Bingo also begins with five on Tray 3, in any colour order. Two-player Bingo begins with three on Tray 3 and one each on Trays 2 and 4. The current UNO Q model initializes the Direct/Memory Tray 3 stack for every Stack-Up session. Bingo-specific starting layouts are historical requirements, not implemented profiles. At the start of a virtual session, the pose is centred over Tray 3, at the highest level, with hands open.
 
-## Command and stack behavior
+## Command and stack behaviour
 
-The game sends one of six movement commands—left, right, up, down, open, close—per completed signal. The original robot has five tray stations and six height levels; Stack-Up up/down moves one level, unlike Gyromite's two-level movement. Closing at a lower block can lift that block and every block stacked above it together. The virtual controller therefore carries an ordered **stack segment**, not just one block. Opening places that segment, preserving color order; all five blocks remain accounted for. The game does not send a block ID, destination tray, target pattern, or confirmation that the player's arrangement is correct. Those are inferred from our virtual pose and stack state or seen by the player on the game screen.
+The game sends one of six movement commands—left, right, up, down, open, close—per completed signal. The original robot has five tray stations and six height levels; Stack-Up up/down moves one level, unlike Gyromite's two-level movement. Closing at a lower block can lift that block and every block stacked above it together. The virtual controller therefore carries an ordered **stack segment**, not just one block. Opening places that segment, preserving colour order; all five blocks remain accounted for. The game does not send a block ID, destination tray, target pattern, or confirmation that the player's arrangement is correct. Those are inferred from our virtual pose and stack state or seen by the player on the game screen.
 
 The current scripted preview applies one virtual command per step. It first moves red alone from Tray 3 to Tray 4, then closes around blue at level 3 and carries blue plus white to Tray 2. The blocks keep their bottom-to-top order, and all five remain accounted for. Local command buttons use the same virtual stack model. This is not evidence that a game-frame command was received; live play must animate each received primitive independently, including repeated commands and Memory playback.
 
 ## Modes
 
-| Mode | Booklet behavior | Virtual design implication |
+| Mode | Booklet behaviour | Virtual design implication |
 | --- | --- | --- |
-| Test | Optical aiming signal over the ROBOT BLOCK artwork | Press Select to open the mode list, select Test, then Start. The frame link recognizes alternating light frames and blinks the virtual red head light without moving R.O.B. |
+| Test | Optical aiming signal over the ROBOT BLOCK artwork | Press Select to open the mode list, select Test, then Start. The frame link recognises alternating light frames and blinks the virtual red head light without moving R.O.B. |
 | Direct | Professor lands on six command keys | Decode and display left, right, up, down, open, or close. Player scores/advances with Start after arrangement. |
 | Memory | Up to 100 programmed commands at selected speed, then `END` | Measure cadence; the current model applies commands immediately and has no bounded queue. Report misses during sustained frame-link validation. `END` is a programming marker, not a robot movement flash. |
 | Bingo, one player | Row or column completion sends a command | Apply only a complete validated optical command. |

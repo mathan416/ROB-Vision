@@ -46,7 +46,7 @@ The release bootstrap requires `curl`, `tar`, Python 3 and `sha256sum` or `shasu
 
 Batocera support is checked by capability, not a board/version allowlist. Packaged wrappers cover x86_64, x86, AArch64, ARMv7, ARMv6 and RISC-V 64. The installer tests whether a matching wrapper loads and can compile one when a native compiler is available. Architecture coverage is distinct from live validation; the dated release and frame-link reports record tested hardware.
 
-RetroPie installer migrations may remove a recognized old Router index block and register the launch adapter in `emulators.cfg`. Saved `retroarch.cfg` files are not changed at receiver startup or game launch. Installer-owned RetroPie configuration writes preserve `pi:pi` ownership.
+RetroPie installer migrations may remove a recognised old Router index block and register the launch adapter in `emulators.cfg`. Saved `retroarch.cfg` files are not changed at receiver startup or game launch. Installer-owned RetroPie configuration writes preserve `pi:pi` ownership.
 
 ## Shared device pairing
 

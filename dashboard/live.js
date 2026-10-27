@@ -32,7 +32,7 @@
       if (liveGame) window.RobDashboard.leaveLive();
       $('connection').textContent = status.connection(snapshot);
       $('connection').closest('.top-status').dataset.connection = 'connected';
-      $('controller-status').textContent = `NO GAME SELECTED · ${status.frames(snapshot)} · ${status.receiver(snapshot)}`;
+      $('controller-status').textContent = status.controllerDetail(snapshot);
       liveGame = null;
       lastSequence = snapshot.sequence;
       lastFrameLink = Boolean(snapshot.input?.frame_hook);

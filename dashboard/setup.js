@@ -51,7 +51,7 @@
       meta.className = 'console-meta';
       const badge = document.createElement('span');
       badge.className = `console-state${item.online ? ' online' : ''}`;
-      badge.textContent = item.active ? 'PLAYING' : item.online ? 'RECEIVER LINKED' : 'RECEIVER WAITING';
+      badge.textContent = `${item.active ? 'PLAYING · ' : ''}RECEIVER ${item.online ? 'LINKED' : 'WAITING'}`;
       badge.title = item.online ? 'This console’s R.O.B. Vision receiver recently checked in.' :
         'Pairing is saved, but this UNO Q has not heard from the console receiver recently.';
       meta.append(badge);
@@ -120,16 +120,17 @@
     renderConsoles(consoles);
     window.RobGamesRegistry?.setConsoles(consoles);
     window.RobControllerRouter?.setConsoles(consoles);
-    const onlineCount = consoles.filter(item => item.online).length;
-    const receiverOnline = onlineCount > 0 || Boolean(snapshot.link?.online);
-    message('pair-link', consoles.length > 1 ? `${onlineCount} OF ${consoles.length} LINKED` : status.receiver(snapshot));
+    const receiverOnline = status.receiverOnline(snapshot);
+    message('pair-link', status.receiver(snapshot));
     $('pair-link').dataset.state = receiverOnline ? 'online' : 'offline';
     $('pair-connected').hidden = !receiverOnline || pairExpanded;
     $('pair-details').hidden = receiverOnline && !pairExpanded;
     $('pair-cancel').hidden = !receiverOnline;
     if (receiverOnline !== lastReceiverOnline) {
-      message('pair-feedback', receiverOnline ? '' :
-        'Pairings are saved. Waiting for a receiver to connect to this UNO Q; console power alone does not establish the link.');
+      message('pair-feedback', receiverOnline ? '' : !consoles.length ?
+        'No console is paired. Choose Pair Console to connect one.' : status.activeConsole(snapshot) ?
+          'Waiting for this game’s console receiver to check in. Another paired console may still be linked.' :
+          'Pairings are saved. Waiting for a receiver to check in; console power alone does not establish the link.');
       lastReceiverOnline = receiverOnline;
     }
     message('frame-state', status.frames(snapshot));

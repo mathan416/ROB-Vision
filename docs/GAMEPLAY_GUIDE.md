@@ -8,7 +8,7 @@ The [original Gyromite booklet](https://www.digitpress.com/library/manuals/nes/g
 
 The manual explicitly says a gyro **does not need to spin to operate only one gate**. R.O.B. can hold an unspun gyro on the virtual pad, then lift it to release that pad. If both gates must be controlled, spinning one gyro lets it stay upright on one pad while R.O.B. uses his hands to put the other on the other pad. A gyro that is no longer needed belongs on its holder. The spinner is a means to free R.O.B.'s hands, not an obligatory step for every pad press.
 
-Buddy starts at **Home**, level 6. Send **Down** twice to reach level 2, where his hands meet either holder, the spinner, and the colored pads. **Close** picks up the gyro. Raise it once to level 4 before moving left or right, then lower it to level 2 at its destination.
+Buddy starts at **Home**, level 6. Send **Down** twice to reach level 2, where his hands meet either holder, the spinner, and the coloured pads. **Close** picks up the gyro. Raise it once to level 4 before moving left or right, then lower it to level 2 at its destination.
 
 The table is shown in perspective, so accessories may look higher or lower even though they use the same working level.
 
@@ -22,7 +22,7 @@ The table is shown in perspective, so accessories may look higher or lower even 
 
 ## Stack-Up
 
-The [Stack-Up booklet](https://www.digitpress.com/library/manuals/nes/Stack-up.pdf) describes Direct, Memory, and Bingo. Buddy's Game Table has five trays and five colored blocks. Direct and Memory start with all five on Tray 3, top to bottom **red, white, blue, yellow, green**. In Direct mode, move Professor Hector onto the **left, right, up, down, open,** or **close** command keys. Memory plays a programmed command series; Bingo sends a command when one row or column completes. Buddy can carry a block with all the blocks above it.
+The [Stack-Up booklet](https://www.digitpress.com/library/manuals/nes/Stack-up.pdf) describes Direct, Memory, and Bingo. Buddy's Game Table has five trays and five coloured blocks. Direct and Memory start with all five on Tray 3, top to bottom **red, white, blue, yellow, green**. In Direct mode, move Professor Hector onto the **left, right, up, down, open,** or **close** command keys. Memory plays a programmed command series; Bingo sends a command when one row or column completes. Buddy can carry a block with all the blocks above it.
 
 ![Stack-Up Game Table with five trays and the starting stack on Tray 3](images/stack-up-game-table.png)
 

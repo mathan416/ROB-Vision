@@ -68,7 +68,7 @@ The [Setup Guide](SETUP_GUIDE.md#register-your-game-filenames) explains how to a
 2. Open Mission and look for the correct game and **GAME FRAMES LINKED**.
 3. Enter the game's **Test** mode. Buddy's red light should blink and the UNO Q should show **T**.
 4. Enter **Direct** mode and send a movement command. Watch Buddy respond.
-5. For Gyromite, enter **Game A** and try one colored gate with Setup's **Lower Blue** or **Lower Red**, then **Release Both**.
+5. For Gyromite, enter **Game A** and try one coloured gate with Setup's **Lower Blue** or **Lower Red**, then **Release Both**.
 
 Starting a registered game selects Buddy's controller automatically. A browser is optional for sending game commands, but keep Mission open to see Buddy's pieces and position.
 

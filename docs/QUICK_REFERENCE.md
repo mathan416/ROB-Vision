@@ -8,7 +8,7 @@ The UNO Q controls Buddy's movement and game pieces. RetroPie or supported Batoc
 | Mission | Run Demo Sequence | Finite animation; available while paired and idle. |
 | Mission | Home | Reset selected virtual game and pieces. |
 | Mission | Emergency Stop | Live: clear game and release pads. Preview: cancel local script. |
-| Mission | Fast Gates during live Gyromite | Blue `2`, red `1`, Release Both `0`; press again to release a color. Auto-release after 60 seconds. |
+| Mission | Fast Gates during live Gyromite | Blue `2`, red `1`, Release Both `0`; press again to release a colour. Auto-release after 60 seconds. |
 | Setup | Pair Console / Check Link | Pair a console or refresh its authenticated online status. |
 | Game Test mode | Automatic red light | Blink R.O.B.'s red light when linked game frames carry the Test signal; no movement. |
 | Setup | Gyromite / Stack-Up checks | Send manual pad or movement commands to the live model. |

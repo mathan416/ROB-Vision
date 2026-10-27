@@ -26,7 +26,7 @@ Starting Gyromite briefly shows `GY`; starting Stack-Up briefly shows `SU`. Budd
 | Router’s neutral animation | No product has an active display request. | Open the UNO Q address to choose an app, or start a registered game. |
 | Buddy's eyes | R.O.B. Vision is displaying its game cue. | Open Mission for the selected game and console link. |
 | `GY` or `SU` | Gyromite or Stack-Up was selected. | Watch Mission for the virtual game table and **GAME FRAMES LINKED**. |
-| Pulsing `T` | The game-frame link recognizes a game's Test signal. | Continue the game's Test check on Setup. A brief steady `T` can also follow a ready-light command. |
+| Pulsing `T` | The game-frame link recognises a game's Test signal. | Continue the game's Test check on Setup. A brief steady `T` can also follow a ready-light command. |
 | `ID`, certificate characters, `PN`, and digits | Controller Router is confirming device pairing. | Compare the certificate identity, then enter the six-digit Matrix PIN in Router’s secure Pair console page. |
 
 ![The `T` display for a game's Test signal and ready-light command](images/matrix-test.png)

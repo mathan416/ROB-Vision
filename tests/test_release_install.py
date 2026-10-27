@@ -44,7 +44,7 @@ class ReleaseInstallTests(unittest.TestCase):
             "tools.retropie_pair.subprocess.run"
         ) as run:
             activate_receiver("retropie")
-        self.assertEqual([call.args[0] for call in run.call_args_list], [
+        self.assertEqual([call[0][0] for call in run.call_args_list], [
             ["systemctl", "enable", "rob-vision-controller2.service"],
             ["systemctl", "restart", "rob-vision-controller2.service"],
         ])
@@ -64,7 +64,7 @@ class ReleaseInstallTests(unittest.TestCase):
     def test_batocera_pairing_restarts_its_receiver(self):
         with patch("tools.retropie_pair.subprocess.run") as run:
             activate_receiver("batocera")
-        self.assertEqual(run.call_args.args[0], ["batocera-services", "restart", "ROBVision"])
+        self.assertEqual(run.call_args[0][0], ["batocera-services", "restart", "ROBVision"])
 
     def test_repairing_retropie_changes_receiver_destination(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -30,7 +30,7 @@ A blocked command can mean Buddy needs to raise his hands or move to the correct
 
 ## Gyromite's gate does not move
 
-1. Enter **Game A** and leave the matching colored gate visible.
+1. Enter **Game A** and leave the matching coloured gate visible.
 2. In Setup, choose **Lower Blue** or **Lower Red**.
 3. Watch the game screen, then choose **Release Both**.
 4. If it stays still, exit the game and open Router **Setup > Players**. Check your physical pad is Player 1 and Buddy is Player 2.

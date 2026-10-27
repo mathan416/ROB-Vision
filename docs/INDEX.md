@@ -12,7 +12,7 @@ The Technical Reference is generated from one cohesive [technical source](TECHNI
 
 | Reader | Guide | What it covers |
 | --- | --- | --- |
-| Everyone | [Built-in Help center](../dashboard/help.html) | Searchable setup, play, controls, indicators, and troubleshooting inside the dashboard. |
+| Everyone | [Built-in Help centre](../dashboard/help.html) | Searchable setup, play, controls, indicators, and troubleshooting inside the dashboard. |
 | Everyone | [Project README](../README.md) | Scope, preview, and document links. |
 | Everyone | [Meet Buddy](MEET_BUDDY.md) | Illustrated story chapter used in the printable User Guide. |
 | Everyone | [Buddy & the Big Wide Window](BUDDY_ADVENTURE.md) | Three full-page newspaper episodes and printable PDFs. |
@@ -42,7 +42,7 @@ The Technical Reference is generated from one cohesive [technical source](TECHNI
 - [Game identification](GAME_IDENTIFICATION.md): RetroPie launch-hook research and exact ROM-name matching.
 - [Technical architecture](TECHNICAL_ARCHITECTURE.md): network pairing, console identity, and virtual Controller 2 return path.
 - [Dashboard design](DASHBOARD_DESIGN.md): robot art, accessory layout, and live state.
-- [Gyromite manual notes](GYROMITE_MANUAL_NOTES.md), [Stack-Up manual notes](STACK_UP_MANUAL_NOTES.md), and [historical manual notes](HISTORICAL_MANUAL_NOTES.md): original behavior and game modes.
+- [Gyromite manual notes](GYROMITE_MANUAL_NOTES.md), [Stack-Up manual notes](STACK_UP_MANUAL_NOTES.md), and [historical manual notes](HISTORICAL_MANUAL_NOTES.md): original behaviour and game modes.
 - [UNO Q hardware setup](HARDWARE_BUILD_GUIDE.md): required devices, power, and network connection.
 - [UNO Q host helpers](../deploy/uno-q/README.md), [RetroPie deployment](../deploy/retropie/README.md), and [Batocera deployment](../deploy/batocera/README.md): installed and optional system services.
 - [Unattended engineering test report](UNATTENDED_TEST_REPORT_2026-09-24.md): synthetic optical and model evidence.
