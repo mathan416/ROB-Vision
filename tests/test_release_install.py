@@ -18,6 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class ReleaseInstallTests(unittest.TestCase):
     def test_release_packager_accepts_next_minor_candidate(self):
+        self.assertTrue(valid_release_tag('v0.3.0-rc.1'))
+        self.assertTrue(valid_release_tag('v0.3.0'))
         self.assertTrue(valid_release_tag('v0.2.0-rc.1'))
         self.assertTrue(valid_release_tag('v0.2.0'))
         self.assertFalse(valid_release_tag('v0.2.0-rc.1/extra'))

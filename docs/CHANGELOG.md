@@ -1,5 +1,11 @@
 # R.O.B. Vision changelog
 
+## 0.3.0 - In preparation
+
+- Bundle Controller Router 0.3.0 and UNO Q runtime 0.3.2, including registered native RetroPie routing, shared Setup and entry-page recovery.
+- Clarify active-console receiver and idle frame status; add supported-runtime CI and refreshed shared guides.
+- Candidate package acceptance remains pending. See [0.3.0 release preparation](RELEASE_NOTES_0.3.0.md).
+
 ## 0.2.0 shared controller connection
 
 - Added secure shared pairing, automatic game selection, one active input lease, and Controller Router ownership of the Matrix display.

@@ -4,6 +4,8 @@ R.O.B. Vision brings Buddy, a virtual robot companion, into Gyromite and Stack-U
 
 [Meet Buddy](docs/MEET_BUDDY.md), [see the Mission page](dashboard/index.html), or [print a desk-sized Buddy](models/buddy/README.md). The companion [public website](website/README.md) is a separate static site for manual publishing.
 
+R.O.B. Vision **0.3.0 is in release preparation** and has not been published. See [prepared release notes](docs/RELEASE_NOTES_0.3.0.md). The published stable release remains 0.2.0.
+
 This README describes the current development checkout. The published stable installer may contain an earlier version of Controller Router and its pairing interface. Use the installation guide distributed with the release you install; GitHub's `releases/latest` URL does not select prereleases.
 
 ## Install or upgrade
