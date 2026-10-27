@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 from time import monotonic
+from typing import Optional
 
 COLORS = ("green", "yellow", "blue", "white", "red")
 COMMANDS = {"LEFT", "RIGHT", "UP", "DOWN", "OPEN", "CLOSE"}
@@ -93,7 +94,7 @@ class GyroState:
     station: int = 2
     height: int = 6
     grip: str = "open"
-    held: str | None = None
+    held: Optional[str] = None
     pieces: dict = field(default_factory=lambda: {"a": "holder_a", "b": "holder_b"})
     spinning_until: dict = field(default_factory=lambda: {"a": 0.0, "b": 0.0})
     assisted_until: dict = field(default_factory=lambda: {"red": 0.0, "blue": 0.0})

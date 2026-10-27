@@ -45,3 +45,9 @@ In Gyromite, a gyro placed on a coloured pad or a **Fast Gates** hold sends the 
 - [Buddy & the Big Wide Window](docs/BUDDY_ADVENTURE.md) tells Buddy's story.
 
 Printable guides are in [output/pdf](output/pdf/). The dashboard serves its own Help and guide downloads. R.O.B. Vision includes no ROMs or pairing credentials in this repository. It is an independent maker project and is not affiliated with Nintendo; see the [license](LICENSE) and [third-party components](docs/THIRD_PARTY_COMPONENTS.md).
+
+## Continuous integration
+
+Pushes to `dev`/`main` and pull requests run the full Python suite on the controller's Python 3.9 minimum and Python 3.12. A separate Python 3.7 job tests the RetroPie receiver, shared Router, pairing and configuration-preservation contracts. Dashboard tests run with Node.js 22, alongside shell entrypoint syntax checks. These jobs run for Router changes as well as application changes; the existing optional emulator-wrapper build remains separate.
+
+Run the full suite locally with `python3 -m unittest discover -s tests -v` and `node --test tests/*.test.js`. Tests use temporary configuration and mocked devices; CI does not connect to or deploy onto a console.

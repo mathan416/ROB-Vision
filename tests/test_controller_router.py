@@ -100,7 +100,7 @@ class ControllerRouterTests(unittest.TestCase):
                 activate('retropie')
                 ensure_config.assert_not_called()
                 migrate.assert_not_called()
-                self.assertEqual(run.call_args.args[0], ['systemctl', 'is-active', '--quiet',
+                self.assertEqual(run.call_args[0][0], ['systemctl', 'is-active', '--quiet',
                                                        'virtualglove-controller-router.service'])
             self.assertEqual(config.read_bytes(), before)
 

@@ -1,0 +1,78 @@
+name: Router and application tests
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: application-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Python ${{ matrix.python }} application tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.9', '3.12']
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Check Python syntax
+        run: python -m compileall -q controller tools scripts router_shared controller_router_portal tests
+      - name: Run all application and Router integration tests
+        run: python -m unittest discover -s tests -v
+
+  retropie:
+    name: Python 3.7 RetroPie receiver and Router
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.7'
+      - name: Check receiver and shared Router syntax
+        run: python -m compileall -q router_shared tools
+      # The UNO Q application requires Python 3.9; this job exercises the
+      # separately supported Python 3.7 console receiver and configuration API.
+      - name: Test RetroPie receiver, pairing, configuration preservation and Router
+        env:
+          PYTHONPATH: tests
+        run: >-
+          python -m unittest -v
+          test_controller_router test_receiver test_identify_game
+          test_game_registry_editor test_release_install test_recalbox
+
+  browser:
+    name: Dashboard and launch-script checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Run dashboard tests
+        run: node --test tests/*.test.js
+      - name: Check shell entrypoints
+        run: |
+          sh -n scripts/release-install.sh
+          sh -n deploy/retropie/runcommand-onlaunch.sh
+          sh -n deploy/retropie/runcommand-onend.sh

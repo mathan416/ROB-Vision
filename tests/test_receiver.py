@@ -45,7 +45,7 @@ class ReceiverTests(unittest.TestCase):
                 set_entry(path, 'lr-robvision-fceumm', 'command', owner=pi)
             backup = path.with_name(path.name + '.before-rob-vision-frame-hook')
             self.assertEqual(chown.call_count, 4)
-            self.assertEqual({call.args for call in chown.call_args_list},
+            self.assertEqual({call[0] for call in chown.call_args_list},
                              {(path, 1000, 1000), (backup, 1000, 1000)})
 
     def test_receiver_advertises_the_private_route_address_to_its_controller(self):
@@ -70,7 +70,7 @@ class ReceiverTests(unittest.TestCase):
         ) as open_url:
             fetch_state('http://arduiain.local', 'secret', .25,
                         console_id='a' * 32, console_address='10.0.2.26')
-        request = open_url.call_args.args[0]
+        request = open_url.call_args[0][0]
         self.assertEqual(request.get_header('X-rob-console-address'), '10.0.2.26')
 
     def test_two_consoles_on_same_platform_follow_only_the_active_identity(self):
@@ -244,7 +244,7 @@ class ReceiverTests(unittest.TestCase):
         ) as urlopen:
             sync_game('http://arduiain.local', 'secret-token', 'nes',
                       '/home/pi/RetroPie/roms/nes/Stack-Up (World).zip', .25)
-        request = urlopen.call_args.args[0]
+        request = urlopen.call_args[0][0]
         self.assertEqual(request.full_url, 'http://arduiain.local/api/launch')
         self.assertEqual(request.get_header('Authorization'), 'Bearer secret-token')
         self.assertEqual(json.loads(request.data),
