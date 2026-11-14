@@ -248,7 +248,8 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
     required_files = ["app.yaml", "python/main.py", "sketch/sketch.ino", "dashboard/index.html",
                       "matrix/manifest.json", "controller_router_portal/install.py",
                       "controller_router_portal/app/sketch/sketch.ino",
-                      "controller_router_portal/app/sketch/sketch.yaml"]
+                      "controller_router_portal/app/sketch/sketch.yaml",
+                      "router_shared/uno_boot_order.py"]
     if (source / "app.yaml").is_file() and "local:avahi_resolver" in (source / "app.yaml").read_text():
         required_files.extend(("bricks/local/avahi_resolver/brick_config.yaml",
                                "bricks/local/avahi_resolver/brick_compose.yaml",
@@ -335,6 +336,8 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
                 wait_for_uno()
         raise
     print(f"R.O.B. Vision service installed and running at {destination}; select it from Controller Router.")
+    print("NEXT  To protect UNO Q first-boot MCU upload ordering, run: sudo /usr/bin/python3 "
+          + str(destination / "router_shared/uno_boot_order.py"))
     if backup.exists():
         print(f"Previous app retained at {backup}; remove it after checking the new app.")
     print_uno_dashboard_urls()

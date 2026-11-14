@@ -127,6 +127,8 @@ class InstallerTests(unittest.TestCase):
             destination = root / "ArduinoApps" / "rob-vision"
             for name in ("python", "sketch", "dashboard", "matrix", "controller_router_portal/app/sketch"):
                 (source / name).mkdir(parents=True)
+            (source / "router_shared").mkdir(parents=True, exist_ok=True)
+            (source / "router_shared/uno_boot_order.py").write_text("# boot order helper\n")
             (source / "controller_router_portal/install.py").write_text("pass\n")
             (source / "controller_router_portal/client.py").write_text("# Router client\n")
             (source / "controller_router_portal/app/sketch/sketch.ino").write_text("// router\n")
@@ -150,6 +152,9 @@ class InstallerTests(unittest.TestCase):
                 token = (destination / "data/controller-token").read_text()
                 paired = '{"schema":1,"consoles":[{"id":"saved-console"}]}'
                 (destination / "data/paired-consoles.json").write_text(paired)
+                saved_skin = destination / "data/skins/1234567890abcdef"
+                saved_skin.mkdir(parents=True)
+                (saved_skin / "skin.json").write_text('{"schema":1,"name":"Saved Buddy"}')
                 (destination / ".deps").mkdir()
                 (destination / ".deps/bridge.txt").write_text("installed")
                 (destination / ".cache").mkdir()
@@ -159,6 +164,8 @@ class InstallerTests(unittest.TestCase):
                 install_uno(source, destination)
             self.assertEqual((destination / "data/controller-token").read_text(), token)
             self.assertEqual((destination / "data/paired-consoles.json").read_text(), paired)
+            self.assertEqual((destination / "data/skins/1234567890abcdef/skin.json").read_text(),
+                             '{"schema":1,"name":"Saved Buddy"}')
             self.assertEqual((destination / "dashboard/index.html").read_text(), "<main>two</main>\n")
             self.assertTrue((destination / "controller_router_portal/client.py").is_file())
             self.assertEqual((root / "ArduinoApps/rob-vision.previous/dashboard/index.html").read_text(),
@@ -182,6 +189,8 @@ class InstallerTests(unittest.TestCase):
             destination = root / "ArduinoApps/rob-vision"
             for name in ("python", "sketch", "dashboard", "matrix", "controller_router_portal/app/sketch"):
                 (source / name).mkdir(parents=True)
+            (source / "router_shared").mkdir(parents=True, exist_ok=True)
+            (source / "router_shared/uno_boot_order.py").write_text("# boot order helper\n")
             (source / "controller_router_portal/install.py").write_text("pass\n")
             (source / "controller_router_portal/app/sketch/sketch.ino").write_text("// router\n")
             (source / "controller_router_portal/app/sketch/sketch.yaml").write_text("profiles: {}\n")
@@ -196,11 +205,12 @@ class InstallerTests(unittest.TestCase):
             actions = []
             def action(name, _path):
                 actions.append(name)
-            real_run = subprocess.run
             def run(command, *args, **kwargs):
+                if isinstance(command, list) and command[:2] == ["docker", "ps"]:
+                    return SimpleNamespace(stdout="", returncode=0)
                 if isinstance(command, list) and command and str(command[-1]).endswith("controller_router_portal/install.py"):
                     raise RuntimeError("simulated shared Router startup failure")
-                return real_run(command, *args, **kwargs)
+                raise AssertionError(f"Unexpected subprocess in installer test: {command!r}")
             with patch("scripts.install.sys.platform", "linux"), \
                  patch("scripts.install.os.geteuid", return_value=1000), \
                  patch("scripts.install.pwd.getpwuid", return_value=SimpleNamespace(pw_name="arduino")), \
