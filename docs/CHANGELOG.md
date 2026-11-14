@@ -2,7 +2,8 @@
 
 ## 0.3.0 - In preparation
 
-- Bundle Controller Router 0.3.0 and UNO Q runtime 0.3.2, including registered native RetroPie routing, shared Setup and entry-page recovery.
+- Bundle Controller Router 0.3.0 and UNO Q runtime 0.3.3, including registered native RetroPie routing, shared Setup and entry-page recovery.
+- Add optional Buddy skins, an in-browser editor and preview, a starter ZIP, and an artist guide. Game pieces retain their original artwork.
 - Clarify active-console receiver and idle frame status; add supported-runtime CI and refreshed shared guides.
 - Candidate package acceptance remains pending. See [0.3.0 release preparation](RELEASE_NOTES_0.3.0.md).
 
