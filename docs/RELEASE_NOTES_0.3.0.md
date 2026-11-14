@@ -7,6 +7,7 @@ Release preparation: this version has not been published. The latest published s
 - Bundle Controller Router library 0.3.0 and independent UNO Q runtime 0.3.3, matching VirtualGlove's shared Router source. The runtime version prevents older 0.3.2 product bundles from replacing the prepared shared service.
 - Include explicitly registered native RetroPie host adapters, merged input and Daphne exit handling in the shared build. Buddy's own game integration still requires its registered NES launch and frame-link paths.
 - Expand Players and Systems to supported RetroArch and registered native adapters while preserving existing assignments, emulator commands and saved controls.
+- Preserve saved game registrations and Router source choices byte for byte during UNO Q and console upgrades.
 - Recover the UNO Q entry page without restarting Docker, either product service or the Matrix app. Healthy entry containers remain running.
 - Report the active console's receiver status instead of implying that another console's check-in connects the selected game. Idle frame status is distinct from an active game link.
 - Add optional Buddy skins with bounded PNG and SVG artwork packs, preview, import/export, and a starter pack and artist guide. Gyromite gyros and Stack-Up blocks retain their original game art.

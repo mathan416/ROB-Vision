@@ -138,6 +138,9 @@ class InstallerTests(unittest.TestCase):
             (source / "python/main.py").write_text("pass\n")
             (source / "sketch/sketch.ino").write_text("// sketch\n")
             (source / "dashboard/index.html").write_text("<main>one</main>\n")
+            (source / "config").mkdir()
+            (source / "config/games.json").write_text('{"schema":1,"games":{"Default.nes":"gyromite"}}\n')
+            (source / "config/router_sources.json").write_text('{"schema":1,"sources":{}}\n')
             destination.parent.mkdir()
             actions = []
             with patch("scripts.install.sys.platform", "linux"), \
@@ -159,6 +162,12 @@ class InstallerTests(unittest.TestCase):
                 (destination / ".deps/bridge.txt").write_text("installed")
                 (destination / ".cache").mkdir()
                 (destination / ".cache/app-compose.yaml").write_text("generated")
+                saved_games = '{ "schema": 1, "games": {"My Game.nes": "stack_up"} }\n'
+                saved_sources = '{ "schema": 1, "sources": {"player1": "my-pad"} }\n'
+                (destination / "config/games.json").write_text(saved_games)
+                (destination / "config/router_sources.json").write_text(saved_sources)
+                (destination / "config/games.json").chmod(0o640)
+                (destination / "config/router_sources.json").chmod(0o600)
                 (source / "dashboard/index.html").write_text("<main>two</main>\n")
                 os.mkfifo(destination / "data/.avahi-resolver.sock")
                 install_uno(source, destination)
@@ -167,6 +176,10 @@ class InstallerTests(unittest.TestCase):
             self.assertEqual((destination / "data/skins/1234567890abcdef/skin.json").read_text(),
                              '{"schema":1,"name":"Saved Buddy"}')
             self.assertEqual((destination / "dashboard/index.html").read_text(), "<main>two</main>\n")
+            self.assertEqual((destination / "config/games.json").read_text(), saved_games)
+            self.assertEqual((destination / "config/router_sources.json").read_text(), saved_sources)
+            self.assertEqual((destination / "config/games.json").stat().st_mode & 0o777, 0o640)
+            self.assertEqual((destination / "config/router_sources.json").stat().st_mode & 0o777, 0o600)
             self.assertTrue((destination / "controller_router_portal/client.py").is_file())
             self.assertEqual((root / "ArduinoApps/rob-vision.previous/dashboard/index.html").read_text(),
                              "<main>one</main>\n")

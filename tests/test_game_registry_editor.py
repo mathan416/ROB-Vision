@@ -51,8 +51,14 @@ class GameRegistryEditorTests(unittest.TestCase):
             source.mkdir(); installed.mkdir()
             (source / 'games.json').write_text('{"schema":1,"games":{"Default.nes":"gyromite"}}')
             (installed / 'games.json').write_text('{"schema":1,"games":{"Mine.nes":"stack_up"}}')
+            (source / 'router_sources.json').write_text('{"schema":1,"sources":{}}')
+            saved_sources = '{ "schema": 1, "sources": {"player1": "my-pad"} }'
+            (installed / 'router_sources.json').write_text(saved_sources)
+            (installed / 'router_sources.json').chmod(0o600)
             copy_tree_merge(source, installed, preserve_registry=True)
             self.assertEqual(load_registry(installed / 'games.json'), {'mine.nes': 'stack_up'})
+            self.assertEqual((installed / 'router_sources.json').read_text(), saved_sources)
+            self.assertEqual((installed / 'router_sources.json').stat().st_mode & 0o777, 0o600)
 
     def test_revision_backup_and_running_game_guard(self):
         with tempfile.TemporaryDirectory() as directory:

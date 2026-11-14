@@ -61,7 +61,7 @@ def copy_tree_merge(source: Path, destination: Path, preserve_registry: bool = F
         for name in files:
             if name.startswith("._") or name == ".DS_Store" or name.endswith((".pyc", ".pyo")):
                 continue
-            if preserve_registry and name == "games.json" and (target / name).is_file():
+            if preserve_registry and name in ("games.json", "router_sources.json") and (target / name).is_file():
                 continue
             copy_file(Path(root) / name, target / name)
 
@@ -287,6 +287,16 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
                 if (source / name).exists():
                     shutil.copytree(source / name, staged / name,
                                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store", "._*"))
+            # These JSON files are player/game selections, not release assets.
+            # Keep their exact bytes and modes across an application upgrade.
+            for name in ("games.json", "router_sources.json"):
+                saved = destination / "config" / name
+                if saved.is_symlink():
+                    raise RuntimeError(f"Saved R.O.B. Vision configuration is a symlink: {saved}")
+                if saved.is_file():
+                    target = staged / "config" / name
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(saved, target)
             if (source / "scripts/avahi-resolver-service.py").is_file():
                 (staged / "scripts").mkdir(exist_ok=True)
                 shutil.copy2(source / "scripts/avahi-resolver-service.py",
