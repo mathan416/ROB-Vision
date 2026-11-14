@@ -20,6 +20,8 @@ curl -fsSL https://github.com/mathan416/ROB-Vision/releases/latest/download/inst
 
 Leave the terminal open until installation finishes. The first shared Matrix build may take several minutes.
 
+On the UNO Q, follow the `NEXT` command printed by the installer. It runs the bundled boot-order helper with `sudo`; enter your password on that device. This step protects a R.O.B. Vision-only installation and is safe to repeat on upgrades. If the helper says the ordering drop-in is already installed and effective, continue. It does not start a disabled bootloader writer.
+
 The installer prints links using both the UNO Q's `.local` name and LAN IP address. Open its **Setup** link on your computer, tablet, or phone.
 
 Controller Router is included. Visiting the UNO Q address opens R.O.B. Vision when it is the only controller app installed, or shows the app chooser when VirtualGlove is installed too. **Apps** returns to the chooser. Both apps stay available; finish a game before changing apps manually.
@@ -50,7 +52,7 @@ Finish the game before pairing, changing app access, or removing a connection. E
 5. Choose **Continue**, read the six Matrix digits after **PN**, and enter them within two minutes.
 6. Choose **Connect**. Wait for **Connected** and check each app's readiness below it.
 
-Buddy is assigned to Player 2. Existing physical-controller assignments stay saved. No further terminal command is needed.
+Buddy is assigned to Player 2. Existing physical-controller assignments stay saved. After the printed UNO Q `NEXT` command is complete, pairing continues in the browser.
 
 ## 4. Check players and game filenames
 

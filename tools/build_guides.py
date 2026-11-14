@@ -532,7 +532,7 @@ if __name__ == "__main__":
                    "How camera experiments led to the libretro frame link",
                    ["ENGINEERING_JOURNEY.md"]),
         build_book("R.O.B.-Vision-Installation-and-Setup.pdf", "Installation & Setup",
-                   "One command per device, pairing, and first game check",
+                   "UNO Q, console, pairing, and first game check",
                    ["INSTALLATION_AND_SETUP.md"]),
         build_book("R.O.B.-Vision-Game-Manual.pdf", "Game Manual",
                    "Play Gyromite and Stack-Up with Buddy",
