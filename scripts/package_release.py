@@ -47,6 +47,7 @@ def main():
         "Buddy-Big-Wide-Window-Episode-2.pdf",
         "Buddy-Big-Wide-Window-Episode-3.pdf",
         "R.O.B.-Vision-Engineering-Journey.pdf",
+        "R.O.B.-Vision-Buddy-Skin-Artist-Guide.pdf",
         "R.O.B.-Vision-Game-Manual.pdf",
         "R.O.B.-Vision-Installation-and-Setup.pdf",
         "R.O.B.-Vision-Matrix-Display-Guide.pdf",

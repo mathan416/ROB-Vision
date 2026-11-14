@@ -8,8 +8,13 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "website"
 OUTPUT = ROOT / "output/site/rob-vision-website.zip"
 REQUIRED = {
-    "index.html", "install.html", "engineering.html", "about.html",
+    "index.html", "install.html", "engineering.html", "about.html", "create.html",
     "site.css", "site.js", "robots.txt", "sitemap.xml",
+}
+REQUIRED_DOWNLOADS = {
+    "downloads/Buddy-Skin-Starter.zip",
+    "downloads/R.O.B.-Vision-Buddy-Skin-Artist-Guide.pdf",
+    "assets/skin-placement-guide.png",
 }
 
 
@@ -17,6 +22,7 @@ def main():
     files = sorted((SITE / name for name in REQUIRED), key=lambda path: path.name)
     for directory in ("assets", "downloads"):
         files += sorted(path for path in (SITE / directory).rglob("*") if path.is_file())
+    files += sorted(SITE / name for name in REQUIRED_DOWNLOADS if SITE / name not in files)
     for path in files:
         if not path.is_file() or path.is_symlink():
             raise SystemExit(f"Website file missing or unsupported: {path}")

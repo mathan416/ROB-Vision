@@ -1,6 +1,6 @@
 # R.O.B. Vision website
 
-This directory is the static public website for `https://rob-vision.mathan.ca/`. `index.html`, `install.html`, `engineering.html`, and `about.html` share `site.css`, `site.js`, and the local `assets/` folder. The `downloads/` folder contains the four- and six-color Buddy 3MF files and a single-color STL. No build tool or external font service is required.
+This directory is the static public website for `https://rob-vision.mathan.ca/`. `index.html`, `install.html`, `engineering.html`, `about.html`, and `create.html` share `site.css`, `site.js`, and the local `assets/` folder. The `downloads/` folder contains printable Buddy models, the digital skin starter ZIP, and the artist guide PDF. No external font service is required.
 
 Run a local preview from the repository root with `python3 -m http.server 8767 --directory website`, then open `http://127.0.0.1:8767/`.
 

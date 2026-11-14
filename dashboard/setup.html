@@ -6,13 +6,14 @@
   <meta name="theme-color" content="#080f1d">
   <title>R.O.B. Vision // Setup</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=setup-3">
-  <link rel="stylesheet" href="setup.css?v=consoles-5">
+  <link rel="stylesheet" href="style.css?v=skin-refresh-1">
+  <link rel="stylesheet" href="setup.css?v=skin-refresh-1">
   <script src="header-clock.js?v=1" defer></script>
   <script src="status.js?v=receiver-3" defer></script>
   <script src="games-registry.js?v=2" defer></script>
   <script src="controller-router.js?v=1" defer></script>
   <script src="setup.js?v=status-1" defer></script>
+  <script src="skins-setup.js?v=2" defer></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -86,6 +87,35 @@
         <label for="registry-json">Game mappings JSON</label><textarea id="registry-json" rows="12" spellcheck="false" aria-describedby="registry-feedback" placeholder="Select a paired console to load its registry"></textarea>
         <div class="setup-row"><button id="registry-validate" type="button" class="quiet">VALIDATE</button><button id="registry-format" type="button" class="quiet">FORMAT</button><button id="registry-save" type="button">SAVE TO CONSOLE</button><button id="registry-reload" type="button" class="quiet">RELOAD</button><button id="registry-restore" type="button" class="quiet">RESTORE PREVIOUS</button><button id="registry-download" type="button" class="quiet">DOWNLOAD BACKUP</button></div>
         <p class="setup-feedback" id="registry-feedback" role="status">Pair a console to edit its game mappings.</p><a class="setup-help-link" href="help.html#game-registry">GAME REGISTRY HELP ↗</a>
+      </section>
+      <section class="setup-card skin-card" id="skins" aria-labelledby="skins-heading">
+        <div class="section-head"><span>07 / CREATIVE STUDIO</span><span>LIVE MODEL ARTWORK</span></div>
+        <h2 id="skins-heading">Make Buddy your own</h2>
+        <p>Change Buddy and the fixed stage with PNG or SVG artwork; parts you leave blank keep their original look. Moving gyros and Stack-Up blocks always use the original game art. The selected skin appears when a browser opens this UNO Q; an already open Mission page can use Refresh Buddy to see a change.</p>
+        <div class="skin-editor-grid">
+          <div>
+            <label for="skin-library">Saved skins</label><select id="skin-library"></select>
+            <div class="setup-row"><button id="skin-refresh-list" class="quiet" type="button">REFRESH SKINS &amp; PREVIEW</button></div>
+            <div class="setup-row"><button id="skin-activate" type="button">USE THIS SKIN</button><button id="skin-export" class="quiet" type="button">EXPORT ZIP</button><button id="skin-delete" class="quiet" type="button">REMOVE SKIN</button></div>
+            <label for="skin-name">New skin name</label><input id="skin-name" maxlength="80" placeholder="My Buddy">
+            <label for="skin-artist">Artist name</label><input id="skin-artist" maxlength="80" placeholder="Your name">
+            <div class="setup-row"><button id="skin-create" type="button">CREATE SKIN</button></div>
+            <label for="skin-slot">Part to change</label><select id="skin-slot"></select>
+            <label for="skin-file">Transparent PNG or SVG artwork</label><input id="skin-file" type="file" accept=".png,.svg,image/png,image/svg+xml">
+            <div class="setup-row"><button id="skin-upload" type="button">ADD THIS PART</button><button id="skin-remove-part" class="quiet" type="button">USE ORIGINAL PART</button></div>
+            <label for="skin-pack">Or import a shared skin ZIP</label><input id="skin-pack" type="file" accept=".zip,application/zip">
+            <div class="setup-row"><button id="skin-import" type="button">IMPORT SKIN PACK</button></div>
+            <p class="setup-feedback" id="skin-feedback" role="status">Choose a saved skin or create a new one to begin.</p>
+            <a class="setup-help-link" href="guides/R.O.B.-Vision-Buddy-Skin-Artist-Guide.pdf">ARTIST GUIDE PDF ↗</a>
+            <a class="setup-help-link" href="downloads/Buddy-Skin-Starter.zip">STARTER PACK ZIP ↗</a>
+          </div>
+          <div>
+            <div class="skin-preview-controls"><label for="skin-mode">Preview game<select id="skin-mode"><option value="gyro">Gyromite</option><option value="stack">Stack-Up</option><option value="free">No game</option></select></label><label for="skin-pose">Pose<select id="skin-pose"><option value="home">Home</option><option value="turn">Turn</option><option value="lift">Lift</option><option value="grip">Grip</option></select></label></div>
+            <label class="skin-guide-toggle" for="skin-guide-toggle"><input id="skin-guide-toggle" type="checkbox"> Show joint and game-piece guides</label>
+            <div class="skin-preview-frame"><iframe id="skin-preview" title="Buddy skin preview" loading="lazy"></iframe><svg id="skin-placement-guide" viewBox="0 0 650 590" aria-label="Placement guide for Buddy's joints and game-piece stations" hidden><g fill="none" stroke="#ffcf63" stroke-width="2"><circle cx="325" cy="265" r="11"/><circle cx="285" cy="317" r="9"/><circle cx="365" cy="317" r="9"/><circle cx="245" cy="381" r="8"/><circle cx="405" cy="381" r="8"/><circle cx="279" cy="465" r="8"/><circle cx="371" cy="465" r="8"/><circle cx="145" cy="469" r="8"/><circle cx="225" cy="496" r="8"/><circle cx="445" cy="477" r="8"/><circle cx="285" cy="514" r="8"/><circle cx="370" cy="514" r="8"/></g><g fill="#ffdc83" font-family="Arial,sans-serif" font-size="11" font-weight="bold"><text x="338" y="259">HEAD PIVOT</text><text x="282" y="302">SHOULDERS</text><text x="265" y="373">ELBOW</text><text x="217" y="459">GAME STATIONS</text></g></svg></div>
+            <p>Preview before selecting <strong>Use this skin</strong>. Yellow guides mark moving joints and game-piece destinations; the artist guide explains how to align your art.</p>
+          </div>
+        </div>
       </section>
     </div>
     <footer><span>R.O.B. VISION <b>·</b> SETUP</span><span>PAIR / GAME FRAMES / SIGNAL / CONTROLS</span></footer>

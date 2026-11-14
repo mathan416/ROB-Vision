@@ -22,6 +22,7 @@ from .model import GyroState, StackState
 from .optical import ALLOWED, PATTERNS
 from .pairings import PairingStore, PLATFORMS
 from .resolver import resolve_ipv4
+from .skins import SkinStore, MAX_ASSET, MAX_PACK, SLOTS
 from tools.identify_game import SUPPORTED_EXTENSIONS, SUPPORTED_GAMES, SUPPORTED_SYSTEMS, identify, load_registry
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -403,6 +404,7 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
     if host not in ("127.0.0.1", "localhost", "::1") and not token:
         raise ValueError("A bearer token is required when serving over the network.")
     pairings = PairingStore(pairing_path or ROOT / "data/paired-consoles.json", token or "")
+    skins = SkinStore(pairings.path.parent / "skins")
     controller = Controller(pairings)
     matrix_stop = threading.Event()
     matrix_thread = None
@@ -425,6 +427,17 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
             self.end_headers()
             self.wfile.write(body)
 
+        def send_blob(self, body, content_type, filename=None):
+            self.send_response(200)
+            self.send_header("Content-Type", content_type)
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Cache-Control", "no-store")
+            if filename:
+                self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
         def authorized(self):
             self.console_identity = (pairings.verify(self.headers) if token else
                                      {"id": "legacy:retropie", "platform": "retropie", "host": ""})
@@ -433,8 +446,8 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
                 return False
             return True
 
-        def browser_request(self):
-            if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json":
+        def browser_request(self, content_types=("application/json",)):
+            if self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() not in content_types:
                 self.respond(415, {"error": "JSON requests are required."})
                 return False
             if self.headers.get("Sec-Fetch-Site", "same-origin") not in ("same-origin", "none"):
@@ -452,6 +465,21 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
 
         def do_GET(self):
             path = urlsplit(self.path).path
+            if path == "/api/skins":
+                return self.respond(200, skins.listing())
+            match = re.fullmatch(r"/api/skins/([0-9a-f]{16})/asset/([a-z_]+)", path)
+            if match:
+                try:
+                    body, content_type = skins.asset(*match.groups())
+                    return self.send_blob(body, content_type)
+                except (ValueError, OSError):
+                    return self.respond(404, {"error": "Artwork part not found."})
+            match = re.fullmatch(r"/api/skins/([0-9a-f]{16})/export", path)
+            if match:
+                try:
+                    return self.send_blob(skins.export(match.group(1)), "application/zip", "buddy-skin.zip")
+                except (ValueError, OSError):
+                    return self.respond(404, {"error": "Skin not found."})
             if path.startswith("/api/"):
                 if path == "/api/state":
                     identity = pairings.verify(self.headers) if token else None
@@ -489,6 +517,44 @@ def serve(host="127.0.0.1", port=8766, token=None, matrix=None, pairing_path=Non
 
         def do_POST(self):
             path = urlsplit(self.path).path
+            if path.startswith("/api/skins/"):
+                asset_match = re.fullmatch(r"/api/skins/([0-9a-f]{16})/asset/([a-z_]+)", path)
+                action_match = re.fullmatch(r"/api/skins/(built-in|[0-9a-f]{16})/(activate|delete|remove-asset)/?([a-z_]*)", path)
+                binary = path == "/api/skins/import" or asset_match is not None
+                if not self.browser_request(("application/zip", "image/png", "image/svg+xml") if binary else ("application/json",)):
+                    return
+                try:
+                    size = int(self.headers.get("Content-Length", "0"))
+                    maximum = MAX_PACK if path == "/api/skins/import" else MAX_ASSET if asset_match else 4096
+                    if not 0 < size <= maximum:
+                        raise ValueError("Skin request is too large or empty.")
+                    body = self.rfile.read(size)
+                    if path == "/api/skins/import":
+                        if self.headers.get("Content-Type", "").split(";", 1)[0].lower() != "application/zip":
+                            raise ValueError("Choose a ZIP skin pack.")
+                        result = {"id": skins.import_pack(body)}
+                    elif path == "/api/skins/create":
+                        data = json.loads(body)
+                        result = {"id": skins.create(data.get("name"), data.get("artist"))}
+                    elif asset_match:
+                        kind = self.headers.get("Content-Type", "").split(";", 1)[0].lower()
+                        if kind not in ("image/png", "image/svg+xml"):
+                            raise ValueError("Artwork must be PNG or SVG.")
+                        suffix = ".png" if kind == "image/png" else ".svg"
+                        skins.put_asset(*asset_match.groups(), suffix, body)
+                        result = skins.listing()
+                    elif action_match and action_match.group(2) == "activate" and not action_match.group(3):
+                        result = skins.activate(action_match.group(1))
+                    elif action_match and action_match.group(2) == "delete" and not action_match.group(3):
+                        result = skins.delete(action_match.group(1))
+                    elif action_match and action_match.group(2) == "remove-asset" and action_match.group(3) in SLOTS:
+                        skins.remove_asset(action_match.group(1), action_match.group(3))
+                        result = skins.listing()
+                    else:
+                        return self.respond(404, {"error": "Unknown skin action."})
+                    return self.respond(200, result)
+                except (ValueError, KeyError, TypeError, OSError, json.JSONDecodeError) as exc:
+                    return self.respond(400, {"error": str(exc)})
             if path == '/api/router-pairing':
                 from router_shared.pairing_adapter import authorized, rob_operation
                 if not authorized(pairings.path.parent, self.headers):

@@ -3,7 +3,9 @@
   const $ = (id) => document.getElementById(id);
   const StackModel = window.RobStackModel;
   let stackState = StackModel.create();
-  const state = { mode: 'gyro', live: false, liveHeight: null, liveHeldPiece: null, liveHeldScale: 1, head: 0, arms: 0, turn: 0, depth: 1, grip: false, manualActive: false, manualCommand: null, stopped: false, running: false, timer: null, recoveryTimer: null, recoveryQueue: [], recoveryCount: { a: 0, b: 0 }, cleanupStarted: false, sequence: null, step: -1, prop: { x: 225, y: 496, scale: 1 }, propFrame: null, secondProp: { x: 145, y: 469, scale: .85 }, secondPropFrame: null, motion: { turn: 0, arms: 0, grip: 0, head: 0, depth: 1, handOffset: 0, gyroOffset: 0, stackOffset: -8 }, motionFrame: null };
+  const skinParams = new URLSearchParams(location.search);
+  const previewMode = skinParams.get('skinPreview') && skinParams.get('skinMode');
+  const state = { mode: ['gyro', 'stack', 'free'].includes(previewMode) ? previewMode : 'gyro', live: false, liveHeight: null, liveHeldPiece: null, liveHeldScale: 1, head: 0, arms: 0, turn: 0, depth: 1, grip: false, manualActive: false, manualCommand: null, stopped: false, running: false, timer: null, recoveryTimer: null, recoveryQueue: [], recoveryCount: { a: 0, b: 0 }, cleanupStarted: false, sequence: null, step: -1, prop: { x: 225, y: 496, scale: 1 }, propFrame: null, secondProp: { x: 145, y: 469, scale: .85 }, secondPropFrame: null, motion: { turn: 0, arms: 0, grip: 0, head: 0, depth: 1, handOffset: 0, gyroOffset: 0, stackOffset: -8 }, motionFrame: null };
   // Local demo timing is illustrative; live sessions use the UNO Q controller state.
   const GYRO_SPIN_MS = 55000;
   const gyros = { a: { startedAt: null, phase: 'idle' }, b: { startedAt: null, phase: 'idle' } };
@@ -231,16 +233,28 @@
       const handY = handBaseY + state.motion.handOffset;
       const leftPath = `M285 318 L${leftElbow} ${elbowY} L${leftX} ${handY - 4}`;
       const rightPath = `M365 318 L${rightElbow} ${elbowY} L${rightX} ${handY - 4}`;
-      $('left-arm-body').setAttribute('d', leftPath);
-      $('left-arm-glint').setAttribute('d', leftPath);
-      $('right-arm-body').setAttribute('d', rightPath);
-      $('right-arm-glint').setAttribute('d', rightPath);
+      const armPath = (side, complete, shoulderX, elbowX, handX) => {
+        const upper = window.RobSkins?.has(`${side}_upper_arm`);
+        const lower = window.RobSkins?.has(`${side}_forearm`);
+        if (!upper && !lower) return complete;
+        return `${upper ? '' : `M${shoulderX} 318 L${elbowX} ${elbowY}`}${lower ? '' : ` M${elbowX} ${elbowY} L${handX} ${handY - 4}`}`;
+      };
+      const leftVisible = armPath('left', leftPath, 285, leftElbow, leftX);
+      const rightVisible = armPath('right', rightPath, 365, rightElbow, rightX);
+      $('left-arm-body').setAttribute('d', leftVisible);
+      $('left-arm-glint').setAttribute('d', leftVisible);
+      $('right-arm-body').setAttribute('d', rightVisible);
+      $('right-arm-glint').setAttribute('d', rightVisible);
       $('left-elbow').setAttribute('cx', leftElbow);
       $('right-elbow').setAttribute('cx', rightElbow);
       $('left-elbow').setAttribute('cy', elbowY);
       $('right-elbow').setAttribute('cy', elbowY);
       $('left-hand').setAttribute('transform', `translate(${leftX} ${handY}) scale(${state.motion.depth})`);
       $('right-hand').setAttribute('transform', `translate(${rightX} ${handY}) scale(${-state.motion.depth} ${state.motion.depth})`);
+      window.RobSkins?.updateArms({
+        leftShoulder: [285, 318], leftElbow: [leftElbow, elbowY], leftHand: [leftX, handY - 4],
+        rightShoulder: [365, 318], rightElbow: [rightElbow, elbowY], rightHand: [rightX, handY - 4]
+      });
       if (heldPiece) {
         const position = { x: center, y: handY + state.motion.arms + state.motion.gyroOffset,
           scale: state.live ? state.liveHeldScale : item.prop?.[2] ?? state[heldSlot].scale };
@@ -620,6 +634,7 @@
     log(`Manual pose preview: ${button.textContent.trim().toLowerCase()}.`); render();
   }));
   window.RobDashboard = {
+    refreshSkin() { moveMechanism(state.turn, state.arms, state.grip, state.head, state.depth); render(false); },
     applyLive(snapshot) {
       cancelDemo();
       state.live = true;
@@ -703,5 +718,12 @@
     leaveLive() { state.live = false; state.liveHeight = null; state.liveHeldPiece = null; $('stage').classList.remove('test-flashing', 'test-ready'); home(); document.querySelectorAll('[data-mode]').forEach((tab) => { tab.disabled = false; }); $('connection').textContent = window.RobStatus.preview; $('connection').closest('.top-status').dataset.connection = 'preview'; document.querySelector('.vitals-card .live-text').textContent = '● SIMULATION'; document.querySelector('.stage-panel .chip').textContent = 'SIMULATED MOTION'; document.querySelector('.gyro-vitals-note').textContent = 'Virtual spin and button states; no game link'; }
   };
   $('event-list').querySelector('time').textContent = time();
+  if (skinParams.get('skinPreview')) {
+    const pose = skinParams.get('skinPose');
+    if (pose === 'turn') { state.turn = -75; state.head = -12; state.arms = 15; }
+    if (pose === 'lift') { state.arms = -12; state.head = 7; }
+    if (pose === 'grip') { state.grip = true; state.arms = 28; }
+    if (state.mode === 'stack') stackPose(true);
+  }
   render();
 })();

@@ -34,6 +34,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 OUTPUT = ROOT / "output" / "pdf"
 WEB_GUIDES = ROOT / "dashboard" / "guides"
+SITE_DOWNLOADS = ROOT / "website" / "downloads"
 FONTS = ROOT / "dashboard" / "fonts"
 BUDDY_ART = DOCS / "images" / "buddy-concept-v1.png"
 
@@ -429,7 +430,7 @@ def cover(canvas, doc, title: str, subtitle: str, landscape_page: bool = False):
     canvas.drawString(55, 126, subtitle)
     canvas.setStrokeColor(ORANGE); canvas.setLineWidth(3); canvas.line(55, 109, 216, 109)
     canvas.setFillColor(colors.HexColor("#8BA9B8")); canvas.setFont("DM-Bold", 8)
-    canvas.drawString(55, 67, "VERSION 0.1.7")
+    canvas.drawString(55, 67, "R.O.B. VISION GUIDES")
     canvas.drawString(55, 52, "UNO Q · RETROPIE · BATOCERA")
     canvas.restoreState()
 
@@ -479,10 +480,12 @@ def build_book(filename: str, title: str, subtitle: str, chapter_files: list[str
     for n, name in enumerate(chapter_files, 1):
         chapter_starts_page = (n == 1 or page_size[1] > page_size[0]
                                or name in {"TROUBLESHOOTING.md", "DASHBOARD_DESIGN.md", "UNO_Q_MATRIX_DISPLAY.md"})
-        image_height = (300 if name == "MEET_BUDDY.md"
+        image_height = (255 if title == "Buddy Skin Artist Guide"
+                        else 300 if name == "MEET_BUDDY.md"
                         else 135 if name == "UNO_Q_MATRIX_DISPLAY.md"
                         else 430 if page_size[1] > page_size[0] else 285)
         chapter_label = ("STORY" if name == "MEET_BUDDY.md"
+                         else "BUDDY SKIN ARTIST GUIDE" if title == "Buddy Skin Artist Guide"
                          else "TECHNICAL REFERENCE" if title == "Technical Reference"
                          else "TECHNICAL TEST RESULTS" if title == "Technical Test Results"
                          else "ENGINEERING JOURNEY" if title == "Engineering Journey"
@@ -537,9 +540,14 @@ if __name__ == "__main__":
         build_book("R.O.B.-Vision-Matrix-Display-Guide.pdf", "Matrix Display Guide",
                    "UNO Q status animations and display states",
                    ["UNO_Q_MATRIX_DISPLAY.md"], page_size=landscape(A4)),
+        build_book("R.O.B.-Vision-Buddy-Skin-Artist-Guide.pdf", "Buddy Skin Artist Guide",
+                   "Draw, preview, and share your own virtual Buddy",
+                   ["BUDDY_SKIN_ARTIST_GUIDE.md"]),
         build_quick(),
     ]
     WEB_GUIDES.mkdir(parents=True, exist_ok=True)
+    SITE_DOWNLOADS.mkdir(parents=True, exist_ok=True)
     for path in generated:
         shutil.copy2(path, WEB_GUIDES / path.name)
+        shutil.copy2(path, SITE_DOWNLOADS / path.name)
         print(path)

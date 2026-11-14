@@ -112,6 +112,8 @@
     stop() { act('/api/game', { game: null }); },
     disconnect() { suspended = true; $('gate-assist').hidden = true; if (latest) act('/api/game', { game: null }); window.RobDashboard.leaveLive(); }
   };
-  poll();
-  setInterval(poll, 500);
+  if (!new URLSearchParams(location.search).has('skinPreview')) {
+    poll();
+    setInterval(poll, 500);
+  }
 })();
