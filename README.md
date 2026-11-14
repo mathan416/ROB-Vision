@@ -1,12 +1,19 @@
 # R.O.B. Vision
 
-R.O.B. Vision brings Buddy, a virtual robot companion, into Gyromite and Stack-Up. A supported RetroPie, Batocera, or Recalbox console sends the games' rendered light commands through an FCEUmm or Nestopia frame wrapper. The controller turns those commands into Buddy's movements; Mission shows him and the game pieces in a browser. Gyromite's red and blue gate buttons return to the console as Player 2 input. No camera or physical robot is needed.
+R.O.B. Vision is a frame-driven virtual robot companion for Gyromite and Stack-Up. A supported console wrapper reads the games' rendered light commands from FCEUmm or Nestopia frames and sends them to an Arduino UNO Q controller. The controller updates Buddy's virtual movements and game pieces on the Mission page. Gyromite gate actions return to the console as Player 2 input. The system does not require a camera or physical robot.
+
+| Component | Runs on | Function |
+| --- | --- | --- |
+| Frame wrapper and receiver | RetroPie, Batocera, or Recalbox | Decode game frames, authenticate the link, and provide game and controller state |
+| R.O.B. Vision service | UNO Q | Interpret commands, maintain Buddy's state, and serve Mission and Setup |
+| Controller Router | UNO Q and console | Pair the console, reserve Player 2, arbitrate input, and own the shared Matrix display |
+| Buddy skin | Browser | Render the selected visual skin without changing game or input state |
 
 [Meet Buddy](docs/MEET_BUDDY.md), [see the Mission page](dashboard/index.html), or [print a desk-sized Buddy](models/buddy/README.md). The companion [public website](website/README.md) is a separate static site for manual publishing.
 
-R.O.B. Vision **0.3.0 is in release preparation** and has not been published. See [prepared release notes](docs/RELEASE_NOTES_0.3.0.md). The published stable release remains 0.2.0.
+The stable release is **v0.3.0**. See the [release notes](docs/RELEASE_NOTES_0.3.0.md) for changes and qualification scope.
 
-This README describes the current development checkout. The published stable installer may contain an earlier version of Controller Router and its pairing interface. Use the installation guide distributed with the release you install; GitHub's `releases/latest` URL does not select prereleases.
+The release bundles Controller Router 0.3.0 and its independently versioned UNO Q portal 0.3.3. Use the installation guide packaged with the version you install; GitHub's `releases/latest` URL selects a stable release, not a prerelease.
 
 ## Install or upgrade
 
@@ -25,11 +32,11 @@ curl -fsSL https://github.com/mathan416/ROB-Vision/releases/latest/download/inst
   sh -s -- console your-controller.local
 ```
 
-These commands install the **latest published stable release**. For this development checkout or a release candidate, follow that candidate's versioned installation instructions. See [Install and set up R.O.B. Vision](docs/INSTALLATION_AND_SETUP.md) for current-source requirements, platform checks, repair, and first-game verification.
+These commands install the **latest published stable release**. A prerelease requires its versioned installer. On the UNO Q, follow the installer's printed `NEXT` command for the privileged boot-order helper; an existing rule is checked without changing it. See [Install and set up R.O.B. Vision](docs/INSTALLATION_AND_SETUP.md) for platform checks, repair, and first-game verification.
 
 ## Connect and play
 
-In the current development version, Controller Router is included with R.O.B. Vision and owns the shared Matrix display. Its port-80 page opens R.O.B. Vision directly if it is the sole installed app, or shows **Apps** when VirtualGlove is installed too. Both app services remain available. A registered game selects its app automatically; keeping a browser open is optional for input.
+Controller Router is included with R.O.B. Vision and owns the shared Matrix display. Its port-80 page opens R.O.B. Vision directly if it is the sole installed app, or shows **Apps** when VirtualGlove is installed too. Both app services remain available. A registered game selects its app automatically; keeping a browser open is optional for input.
 
 Pair the console once by choosing **Pair console** from Apps. The console installer opens a short connection window and prints a one-time code. The secure pairing page checks the console identity and asks for confirmation from the controller's Matrix display. Router provisions separate credentials for each installed app. The [Controller Router Pairing Guide](controller_router_portal/python/guides/Controller-Router-Pairing-Guide.pdf) explains the steps.
 
@@ -47,6 +54,10 @@ In Gyromite, a gyro placed on a coloured pad or a **Fast Gates** hold sends the 
 - [Buddy & the Big Wide Window](docs/BUDDY_ADVENTURE.md) tells Buddy's story.
 
 Printable guides are in [output/pdf](output/pdf/). The dashboard serves its own Help and guide downloads. R.O.B. Vision includes no ROMs or pairing credentials in this repository. It is an independent maker project and is not affiliated with Nintendo; see the [license](LICENSE) and [third-party components](docs/THIRD_PARTY_COMPONENTS.md).
+
+## Validate a deployment
+
+After installation, check that the console is paired, the frame-link status is ready, and Buddy responds in Mission while a registered game is running. Confirm that the physical Player 1 pad still works, Gyromite gate actions reach Player 2, and exit controls release both inputs. Keep the installer's recovery backup until those checks pass. A package or CI pass does not establish the behavior of every emulator build and physical setup.
 
 ## Continuous integration
 

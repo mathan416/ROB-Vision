@@ -1,11 +1,11 @@
 # R.O.B. Vision changelog
 
-## 0.3.0 - In preparation
+## 0.3.0 - 2026-11-14
 
 - Bundle Controller Router 0.3.0 and UNO Q runtime 0.3.3, including registered native RetroPie routing, shared Setup and entry-page recovery.
 - Add optional Buddy skins, an in-browser editor and preview, a starter ZIP, and an artist guide. Game pieces retain their original artwork.
 - Clarify active-console receiver and idle frame status; add supported-runtime CI and refreshed shared guides.
-- Candidate package acceptance remains pending. See [0.3.0 release preparation](RELEASE_NOTES_0.3.0.md).
+- The cabinet and two UNO Qs passed the scoped installation, reboot and protected-state checks in the [0.3.0 release notes](RELEASE_NOTES_0.3.0.md).
 
 ## 0.2.0 shared controller connection
 

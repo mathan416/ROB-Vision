@@ -1,10 +1,10 @@
 # R.O.B. Vision 0.3.0
 
-Release preparation: this version has not been published. The latest published stable release remains 0.2.0.
+Stable release: 14 November 2026. The preceding stable release was 0.2.0.
 
 ## Changes
 
-- Bundle Controller Router library 0.3.0 and independent UNO Q runtime 0.3.3, matching VirtualGlove's shared Router source. The runtime version prevents older 0.3.2 product bundles from replacing the prepared shared service.
+- Bundle Controller Router library 0.3.0 and independent UNO Q runtime 0.3.3, matching VirtualGlove's shared Router source. The runtime version prevents older 0.3.2 product bundles from replacing the shared service.
 - Include explicitly registered native RetroPie host adapters, merged input and Daphne exit handling in the shared build. Buddy's own game integration still requires its registered NES launch and frame-link paths.
 - Expand Players and Systems to supported RetroArch and registered native adapters while preserving existing assignments, emulator commands and saved controls.
 - Preserve saved game registrations and Router source choices byte for byte during UNO Q and console upgrades.
@@ -15,8 +15,8 @@ Release preparation: this version has not been published. The latest published s
 
 ## Validation and remaining acceptance
 
-The promoted development revision passed all 11 CI jobs across the three projects. The current RetroPie merged input paths and UNO Q entry-page recovery have scoped development evidence; automatic entry recovery completed in 15.7 seconds without restarting product or Matrix services. These checks do not certify the final release packages or every supported platform.
+The final source passed 121 Python tests, 10 dashboard tests, package checks, and CI on both `dev` and `main`. The installer archive, guides, and attached assets were checksum-verified. The release-candidate runtime was installed on the paired and separate test UNO Qs and the RetroPie cabinet. Both UNO Qs passed post-upgrade reboot checks with Router, Matrix and both products healthy, and 15 selected protected files preserved on each; the cabinet retained 13 selected protected files and its emulator configuration. The owner reported that the requested cabinet control and exit checks, including a R.O.B. Vision game, passed.
 
-Build the final source archive, installer, manuals and checksums from a clean committed release revision. Qualify candidate installation, upgrade, rollback and both product installation orders on staging hardware. Briefly check Buddy input, exit, reconnect, app selection and skin selection through the candidate's actual console/core. Preserve pairings, registered game names, player assignments, settings and controls. The independent Matrix firmware remains 0.2.0.
+The independent Matrix firmware remains 0.2.0. New pairing, reconnect, a fresh installation in both product orders, full UNO Q rollback, live skin import, and hardware acceptance on console platforms beyond the tested cabinet were not established by these checks. Installers retain recovery backups and protect saved game registrations and Router source settings.
 
-The release contains no ROMs. The skin feature has local tests and guide checks; its live hardware acceptance remains pending. Existing stable installation links continue to select 0.2.0 until a new release is published.
+The release contains no ROMs. Skin import/export has automated and guide checks; use the Setup preview to confirm an artwork pack on the target display.
