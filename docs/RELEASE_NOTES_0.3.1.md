@@ -1,6 +1,6 @@
 # R.O.B. Vision 0.3.1
 
-Release candidate 2: 17 November 2026. The preceding stable release was 0.3.0.
+Release candidate 3: 17 November 2026. The preceding stable release was 0.3.0.
 
 ## Changes
 
@@ -11,6 +11,7 @@ Release candidate 2: 17 November 2026. The preceding stable release was 0.3.0.
 - Restore the previous console connection once after a failed change, without blocking pairing for two minutes.
 - Keep Setup and Players and Systems responsive while the UNO Q checks an unavailable console, and give a full ten-second controller test time to finish.
 - The console Router no longer keeps a CPU core busy checking for a running game. It checks once a second and rescans processes only when one starts or exits; on the tested RetroPie console this fell from about 73% to 6% of one core. (RC2)
+- The console Router's idle work no longer re-reads every input device each second; it checks only when controllers or their settings change. Measured idle load on the tested console fell from about 19% to 5% of one core (RC3).
 - RetroPie, Batocera and Recalbox installers register the console adapter's variable name and UNO Q port explicitly. Existing registrations keep working.
 
 ## Validation and remaining acceptance
