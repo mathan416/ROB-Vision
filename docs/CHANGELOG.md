@@ -1,5 +1,12 @@
 # R.O.B. Vision changelog
 
+## 0.3.1 - release candidate, 2026-11-17
+
+- Bundle Controller Router 0.3.1 and UNO Q runtime 0.3.4 with console pairing security fixes.
+- Require the UNO Q Matrix code before Setup removes a console or changes an app's access.
+- Keep Buddy on Player 2 for rollbacks as well as saves; keep Setup responsive while a console is unavailable.
+- Register the console adapter's variable name and UNO Q port explicitly. See the [0.3.1 release notes](RELEASE_NOTES_0.3.1.md).
+
 ## 0.3.0 - 2026-11-14
 
 - Bundle Controller Router 0.3.0 and UNO Q runtime 0.3.3, including registered native RetroPie routing, shared Setup and entry-page recovery.
