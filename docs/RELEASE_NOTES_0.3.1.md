@@ -1,6 +1,6 @@
 # R.O.B. Vision 0.3.1
 
-Release candidate 3: 17 November 2026. The preceding stable release was 0.3.0.
+Stable release: 17 November 2026. The preceding stable release was 0.3.0.
 
 ## Changes
 
@@ -10,12 +10,12 @@ Release candidate 3: 17 November 2026. The preceding stable release was 0.3.0.
 - Saving or rolling back console assignments keeps Buddy on Player 2.
 - Restore the previous console connection once after a failed change, without blocking pairing for two minutes.
 - Keep Setup and Players and Systems responsive while the UNO Q checks an unavailable console, and give a full ten-second controller test time to finish.
-- The console Router no longer keeps a CPU core busy checking for a running game. It checks once a second and rescans processes only when one starts or exits; on the tested RetroPie console this fell from about 73% to 6% of one core. (RC2)
-- The console Router's idle work no longer re-reads every input device each second; it checks only when controllers or their settings change. Measured idle load on the tested console fell from about 19% to 5% of one core (RC3).
+- The console Router no longer keeps a CPU core busy checking for a running game. It checks once a second and rescans processes only when one starts or exits; on the tested RetroPie console this fell from about 73% to 6% of one core.
+- The console Router's idle work no longer re-reads every input device each second; it checks only when controllers or their settings change. Measured idle load on the tested console fell from about 19% to 5% of one core.
 - RetroPie, Batocera and Recalbox installers register the console adapter's variable name and UNO Q port explicitly. Existing registrations keep working.
 
 ## Validation and remaining acceptance
 
 The source passed the R.O.B. Vision suite and the shared Router suite with bundled code synchronized. Before these version changes, the same source was installed on the paired UNO Q and the RetroPie cabinet. Every installer check passed, the console link service and receiver restarted, and the UNO Q reported the console connected with both apps ready after the cabinet rebooted.
 
-Matrix-confirmed pairing changes on the hardware and gameplay with Buddy had not yet been checked when this candidate was prepared; they are required before the stable release. The Matrix firmware remains 0.2.0.
+RC3 was installed from its published assets on both devices with every installer check passing, and the console Router measured 3.8% of one core while idle. The owner then reported that the requested hardware checks passed on the installed RC3: turning an app's access off and on in secure Setup with the Matrix code, a VirtualGlove game and a R.O.B. Vision game, and unplugging and replugging a controller and launching a game. These are owner-reported results for one RetroPie console and one UNO Q; fresh installation in both product orders, full UNO Q rollback, new pairing, and other console platforms were not exercised with the final packages. The Matrix firmware remains 0.2.0.
