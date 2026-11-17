@@ -1,6 +1,6 @@
 # R.O.B. Vision 0.3.1
 
-Release candidate: 17 November 2026. The preceding stable release was 0.3.0.
+Release candidate 2: 17 November 2026. The preceding stable release was 0.3.0.
 
 ## Changes
 
@@ -10,6 +10,7 @@ Release candidate: 17 November 2026. The preceding stable release was 0.3.0.
 - Saving or rolling back console assignments keeps Buddy on Player 2.
 - Restore the previous console connection once after a failed change, without blocking pairing for two minutes.
 - Keep Setup and Players and Systems responsive while the UNO Q checks an unavailable console, and give a full ten-second controller test time to finish.
+- The console Router no longer keeps a CPU core busy checking for a running game. It checks once a second and rescans processes only when one starts or exits; on the tested RetroPie console this fell from about 73% to 6% of one core. (RC2)
 - RetroPie, Batocera and Recalbox installers register the console adapter's variable name and UNO Q port explicitly. Existing registrations keep working.
 
 ## Validation and remaining acceptance
