@@ -109,7 +109,7 @@ def install(controller, source=ROOT, destination=DEST):
         chosen = select_games(registry_path=destination / 'config/games.json', available=tuple(libraries))
         subprocess.run(['sh', str(service), 'start'], check=True)
         from router_shared.pairing_install import install as install_link
-        install_link('rob_vision', {'kind': 'text', 'token_file': str(token),
+        install_link('rob_vision', {'kind': 'text', 'port': 8766, 'token_file': str(token),
             'target_file': str(destination / 'controller.url'),
             'identity_file': str(destination / 'console-id'),
             'restart': ['sh', str(service), 'restart'],

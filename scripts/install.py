@@ -505,7 +505,7 @@ def install_retropie(source: Path = SOURCE, destination: Path = PI_DEST,
     else:
         print("Receiver installed and will start automatically when pairing completes.")
     from router_shared.pairing_install import install as install_link
-    install_link('rob_vision', {'kind': 'env', 'token_file': str(PI_CONFIG / 'token'),
+    install_link('rob_vision', {'kind': 'env', 'target_key': 'ROB_VISION_URL', 'port': 8766, 'token_file': str(PI_CONFIG / 'token'),
         'target_file': str(PI_CONFIG / 'receiver.env'), 'identity_file': str(PI_CONFIG / 'console-id'),
         'restart': ['systemctl', 'restart', 'rob-vision-controller2.service'],
         'setup': ['python3', str(destination / 'tools/controller_router_setup.py'), 'retropie', '--pair-only'],

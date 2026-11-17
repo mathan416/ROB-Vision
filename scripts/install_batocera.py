@@ -177,7 +177,7 @@ def install(source=ROOT, destination=DEST, controller=None):
                 resume_menu()
     print("Installed R.O.B. Vision for:", ", ".join(chosen) or "no registered ROMs present")
     from router_shared.pairing_install import install as install_link
-    install_link('rob_vision', {'kind': 'text', 'token_file': str(destination / 'token'),
+    install_link('rob_vision', {'kind': 'text', 'port': 8766, 'token_file': str(destination / 'token'),
         'target_file': str(destination / 'controller.url'), 'identity_file': str(destination / 'console-id'),
         'restart': ['batocera-services', 'restart', 'ROBVision'],
         'setup': ['python3', str(destination / 'tools/controller_router_setup.py'), 'batocera', '--pair-only'],
