@@ -1,5 +1,9 @@
 # R.O.B. Vision changelog
 
+## 0.3.2 - 2026-11-17
+
+- Bundle Controller Router 0.3.2 and UNO Q runtime 0.3.5. Reinstalling a product on the UNO Q no longer leaves a lasting "No such file or directory" error on the Apps page; input leases are rewritten on the next check. See the [0.3.2 release notes](RELEASE_NOTES_0.3.2.md).
+
 ## 0.3.1 - 2026-11-17
 
 - Bundle Controller Router 0.3.1 and UNO Q runtime 0.3.4 with console pairing security fixes.
