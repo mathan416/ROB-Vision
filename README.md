@@ -11,7 +11,7 @@ R.O.B. Vision is a frame-driven virtual robot companion for Gyromite and Stack-U
 
 [Meet Buddy](docs/MEET_BUDDY.md), [see the Mission page](dashboard/index.html), or [print a desk-sized Buddy](models/buddy/README.md). The companion [public website](website/README.md) is a separate static site for manual publishing.
 
-The stable release is **v0.3.2**. See the [release notes](docs/RELEASE_NOTES_0.3.2.md) for changes and qualification scope.
+The stable release is **v0.3.2**. See the [release notes](docs/RELEASE_NOTES_0.3.2.md) for changes and qualification scope. Release candidate **v0.4.0-rc.1** can halt the controller when a RetroPie console shuts down; see the [0.4.0 notes](docs/RELEASE_NOTES_0.4.0.md).
 
 The release bundles Controller Router 0.3.0 and its independently versioned UNO Q portal 0.3.3. Use the installation guide packaged with the version you install; GitHub's `releases/latest` URL selects a stable release, not a prerelease.
 
