@@ -1,6 +1,6 @@
 # R.O.B. Vision 0.4.0
 
-Release candidate 1: 18 November 2026. The preceding stable release was 0.3.2.
+Stable release: 17 November 2026. The preceding stable release was 0.3.2.
 
 ## Changes
 
@@ -10,6 +10,6 @@ Release candidate 1: 18 November 2026. The preceding stable release was 0.3.2.
 - The console installer adds the EmulationStation shutdown hook and a bounded, root-only notifier. If the controller cannot be reached, the console shuts down normally.
 - Every UNO Q portal page links to **Console setup**.
 
-## Validation and remaining acceptance
+## Validation
 
-The source passed the R.O.B. Vision suite and the shared Router suite with bundled code synchronized. A development build of this source was installed on the paired UNO Q and a RetroPie console, the halt helper was installed with the administrator command, and choosing **Shutdown System** halted the UNO Q cleanly. With the setting off, the request was refused and the UNO Q kept running. Batocera and Recalbox consoles do not send the request yet.
+The source passed the R.O.B. Vision suite and the shared Router suite with bundled code synchronized. A development build of this source was installed on the paired UNO Q and a RetroPie console, the halt helper was installed with the administrator command, and choosing **Shutdown System** halted the UNO Q cleanly. With the setting off, the request was refused and the UNO Q kept running. Release candidate 1 was then installed from its published assets on both devices with every installer check passing; the UNO Q reported the console connected with both apps ready, and halting stayed on with the helper and EmulationStation hook in place. These are owner-run results for one RetroPie console and one UNO Q. Batocera and Recalbox consoles do not send the request yet.

@@ -1,6 +1,6 @@
 # R.O.B. Vision changelog
 
-## 0.4.0 - release candidate, 2026-11-18
+## 0.4.0 - 2026-11-17
 
 - Bundle Controller Router 0.4.0 and UNO Q runtime 0.4.0. A paired RetroPie console can halt the controller when you choose Shutdown System in EmulationStation, if you turn that on for the console in secure Setup.
 - The UNO Q installer's administrator command now also installs the controller halt helper. Every portal page links to Console setup. See the [0.4.0 release notes](RELEASE_NOTES_0.4.0.md).
