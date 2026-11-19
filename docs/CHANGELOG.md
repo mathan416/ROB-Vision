@@ -1,5 +1,9 @@
 # R.O.B. Vision changelog
 
+## 0.4.1 - 2026-11-19
+
+- The installer checks which device it is on before downloading. The console command on an UNO Q now stops straight away and shows the `uno-q` command instead of downloading the release and reporting an unsupported console. See the [0.4.1 release notes](RELEASE_NOTES_0.4.1.md).
+
 ## 0.4.0 - 2026-11-17
 
 - Bundle Controller Router 0.4.0 and UNO Q runtime 0.4.0. A paired RetroPie console can halt the controller when you choose Shutdown System in EmulationStation, if you turn that on for the console in secure Setup.
