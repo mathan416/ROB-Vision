@@ -105,6 +105,34 @@ class ReleaseInstallTests(unittest.TestCase):
             self.assertEqual(target.read_text(), 'http://arduiain.local\n')
             self.assertEqual(restart.call_count, 2)
 
+    def test_console_target_on_uno_q_names_uno_q_command_before_download(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            rendered = root / "install.sh"
+            rendered.write_text((ROOT / "scripts/release-install.sh").read_text()
+                                .replace("@VERSION@", "v0.1.0").replace("@SHA256@", "0" * 64))
+            binaries = root / "bin"
+            binaries.mkdir()
+            marker = root / "downloaded"
+            (binaries / "curl").write_text('#!/bin/sh\nprintf x > "$ROB_TEST_MARKER"\n')
+            (binaries / "arduino-app-cli").write_text('#!/bin/sh\n')
+            for path in binaries.iterdir():
+                path.chmod(0o755)
+            env = dict(os.environ, PATH=str(binaries) + ":" + os.environ["PATH"],
+                       ROB_TEST_MARKER=str(marker))
+            result = subprocess.run(["sh", str(rendered), "console", "virtualglove.local"],
+                                    env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn(b"This is an Uno Q", result.stderr)
+            self.assertIn(b"sh -s -- uno-q", result.stderr)
+            self.assertFalse(marker.exists())
+            (binaries / "arduino-app-cli").unlink()
+            result = subprocess.run(["sh", str(rendered), "console", "virtualglove.local"],
+                                    env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn(b"not a supported RetroPie", result.stderr)
+            self.assertFalse(marker.exists())
+
     def test_bootstrap_checks_archive_before_invoking_uno_installer(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -14,6 +14,25 @@ case "$target" in
     console) [ "$#" -eq 2 ] || { [ "$#" -eq 3 ] && [ "$3" = --pair ]; } || fail "Console needs the Uno Q hostname; optional --pair renews pairing" ;;
     *) fail "Unknown target: $target" ;;
 esac
+LATEST="https://github.com/mathan416/ROB-Vision/releases/latest/download/install.sh"
+is_uno_q() {
+    command -v arduino-app-cli >/dev/null 2>&1 ||
+        grep -qa "Arduino UnoQ" /proc/device-tree/model 2>/dev/null
+}
+# Choose the target's platform before downloading the release archive.
+if [ "$target" = console ]; then
+    if [ -f /userdata/system/batocera.conf ] && [ -d /usr/lib/libretro ]; then
+        platform=batocera
+    elif [ -f /recalbox/recalbox.version ] && [ -d /usr/lib/libretro ]; then
+        platform=recalbox
+    elif [ -d /opt/retropie/configs ]; then
+        platform=retropie
+    elif is_uno_q; then
+        fail "This is an Uno Q. Install it with: curl -fsSL $LATEST | sh -s -- uno-q"
+    else
+        fail "This console is not a supported RetroPie, Batocera, or Recalbox installation"
+    fi
+fi
 command -v curl >/dev/null || fail "curl is required"
 command -v tar >/dev/null || fail "tar is required"
 command -v python3 >/dev/null || fail "Python 3 is required"
@@ -53,23 +72,20 @@ else
     command -v sudo >/dev/null || fail "Run as root or install sudo"
     as_root() { sudo env PYTHONDONTWRITEBYTECODE=1 "$@"; }
 fi
-if [ -f /userdata/system/batocera.conf ] && [ -d /usr/lib/libretro ]; then
-    platform=batocera
-    as_root python3 "$source/scripts/install_batocera.py" --controller "$2"
-    token=/userdata/system/rob-vision/token
-    pair=/userdata/system/controller-router/pair-console
-elif [ -f /recalbox/recalbox.version ] && [ -d /usr/lib/libretro ]; then
-    platform=recalbox
-    as_root python3 "$source/scripts/install_recalbox.py" --controller "$2"
-    token=/recalbox/share/system/rob-vision/token
-    pair=/recalbox/share/system/controller-router/pair-console
-else
-    [ -d /opt/retropie/configs ] || fail "This console is not a supported RetroPie, Batocera, or Recalbox installation"
-    platform=retropie
-    as_root python3 "$source/scripts/install.py" retropie --controller "$2"
-    token=/home/pi/.config/rob-vision/token
-    pair=/var/lib/controller-router/pair-console
-fi
+case "$platform" in
+    batocera)
+        as_root python3 "$source/scripts/install_batocera.py" --controller "$2"
+        token=/userdata/system/rob-vision/token
+        pair=/userdata/system/controller-router/pair-console ;;
+    recalbox)
+        as_root python3 "$source/scripts/install_recalbox.py" --controller "$2"
+        token=/recalbox/share/system/rob-vision/token
+        pair=/recalbox/share/system/controller-router/pair-console ;;
+    *)
+        as_root python3 "$source/scripts/install.py" retropie --controller "$2"
+        token=/home/pi/.config/rob-vision/token
+        pair=/var/lib/controller-router/pair-console ;;
+esac
 if as_root test -s "$token" && [ "${3:-}" != --pair ]; then
     echo "R.O.B. Vision $VERSION installed; existing pairing retained."
 else
