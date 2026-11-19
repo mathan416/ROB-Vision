@@ -1,5 +1,9 @@
 # R.O.B. Vision changelog
 
+## 0.4.2 - 2026-11-19
+
+- Upgrading on the UNO Q keeps a single `rob-vision.previous` backup and removes older numbered copies, which previously built up on every upgrade. See the [0.4.2 release notes](RELEASE_NOTES_0.4.2.md).
+
 ## 0.4.1 - 2026-11-19
 
 - The installer checks which device it is on before downloading. The console command on an UNO Q now stops straight away and shows the `uno-q` command instead of downloading the release and reporting an unsupported console. See the [0.4.1 release notes](RELEASE_NOTES_0.4.1.md).
