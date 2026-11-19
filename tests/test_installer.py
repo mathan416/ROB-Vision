@@ -147,7 +147,7 @@ class InstallerTests(unittest.TestCase):
             with patch("scripts.install.sys.platform", "linux"), \
                  patch("scripts.install.os.geteuid", return_value=1000), \
                  patch("scripts.install.pwd.getpwuid", return_value=SimpleNamespace(pw_name="arduino")), \
-                 patch("scripts.install.app_lab_status", side_effect=[(None, False), ("running", False)]), \
+                 patch("scripts.install.app_lab_status", side_effect=[(None, False), ("running", False), ("running", False)]), \
                  patch("scripts.install.app_lab_action", side_effect=lambda action, _path: actions.append(action)), \
                  patch("scripts.install.wait_for_uno"), \
                  patch("scripts.install.print_uno_dashboard_urls"), \
@@ -190,6 +190,27 @@ class InstallerTests(unittest.TestCase):
             self.assertEqual((destination / ".deps/bridge.txt").read_text(), "installed")
             self.assertEqual((destination / ".cache/app-compose.yaml").read_text(), "generated")
             self.assertEqual(actions, ["stop"])
+
+            # A later upgrade keeps one backup: the version it replaced.
+            apps = root / "ArduinoApps"
+            for name in ("rob-vision.previous-11-aaaaaa", "rob-vision.previous-22-bbbbbb",
+                         "rob-vision.failed-33-cccccc"):
+                (apps / name).mkdir()
+            (source / "dashboard/index.html").write_text("<main>three</main>\n")
+            with patch("scripts.install.sys.platform", "linux"), \
+                 patch("scripts.install.os.geteuid", return_value=1000), \
+                 patch("scripts.install.pwd.getpwuid", return_value=SimpleNamespace(pw_name="arduino")), \
+                 patch("scripts.install.app_lab_status", return_value=("running", False)), \
+                 patch("scripts.install.app_lab_action"), \
+                 patch("scripts.install.wait_for_uno"), \
+                 patch("scripts.install.print_uno_dashboard_urls"), \
+                 patch("scripts.install.subprocess.run"):
+                install_uno(source, destination)
+            self.assertEqual((destination / "dashboard/index.html").read_text(), "<main>three</main>\n")
+            self.assertEqual((apps / "rob-vision.previous/dashboard/index.html").read_text(),
+                             "<main>two</main>\n")
+            self.assertEqual(sorted(path.name for path in apps.iterdir() if path.name.startswith("rob-vision")),
+                             ["rob-vision", "rob-vision.failed-33-cccccc", "rob-vision.previous"])
 
     def test_running_app_is_detected_from_app_lab(self):
         sample = '{"apps":[{"name":"R.O.B. Vision","status":"running"}]}'

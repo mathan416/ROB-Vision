@@ -236,6 +236,27 @@ def print_uno_dashboard_urls() -> None:
         print(f"  Choose:  {url.split(':8101/', 1)[0]}/")
 
 
+def keep_one_backup(destination: Path, backup: Path) -> None:
+    """After a successful upgrade, keep only this run's backup as rob-vision.previous.
+
+    Each upgrade used to add a uniquely named copy when rob-vision.previous already
+    existed, and nothing removed the older ones. Failed candidates (rob-vision.failed-*)
+    are left for inspection. Cleanup problems are reported but never fail the install.
+    """
+    keep = destination.with_name("rob-vision.previous")
+    stale = [path for path in destination.parent.glob("rob-vision.previous-*")
+             if path != backup and path.is_dir() and not path.is_symlink()]
+    try:
+        if backup != keep and backup.is_dir() and not backup.is_symlink():
+            if keep.is_dir() and not keep.is_symlink():
+                shutil.rmtree(keep)
+            os.replace(backup, keep)
+        for path in stale:
+            shutil.rmtree(path)
+    except OSError as error:
+        print(f"NOTE  Older R.O.B. Vision backups could not all be removed: {error}", flush=True)
+
+
 def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
     if sys.version_info < (3, 9):
         raise RuntimeError("Python 3.9 or newer is required by the UNO Q controller.")
@@ -345,6 +366,7 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
                 app_lab_action("start", destination)
                 wait_for_uno()
         raise
+    keep_one_backup(destination, backup)
     print(f"R.O.B. Vision service installed and running at {destination}; select it from Controller Router.")
     print("NEXT  To protect UNO Q first-boot MCU upload ordering and let a paired console halt this "
           "controller when it shuts down, run: sudo sh -c '/usr/bin/python3 "
