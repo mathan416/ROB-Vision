@@ -16,6 +16,19 @@ from scripts.install import validate_receiver_source
 
 
 class InstallerTests(unittest.TestCase):
+    def test_bricks_use_the_controller_router_base_image(self):
+        # Each extra python-apps-base tag costs about 900 MB on the UNO Q.
+        import re
+        root = Path(__file__).resolve().parents[1]
+        products = (root / 'controller_router_portal/host/products.py').read_text()
+        image = re.search(r'^IMAGE = "([^"]+)"$', products, re.M).group(1)
+        composes = sorted((root / 'bricks').rglob('brick_compose.yaml'))
+        self.assertTrue(composes)
+        for compose in composes:
+            with self.subTest(compose=compose.relative_to(root)):
+                images = set(re.findall(r'^\s*image:\s*(\S+)\s*$', compose.read_text(), re.M))
+                self.assertEqual(images, {image})
+
     def test_uno_urls_show_mdns_and_lan_addresses_without_container_bridges(self):
         interfaces = [
             {"ifname": "eth0", "addr_info": [{"family": "inet", "local": "10.0.2.84"}]},
