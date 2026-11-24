@@ -3,6 +3,7 @@
 ## 0.4.2 - 2026-11-19
 
 - Upgrading on the UNO Q keeps a single `rob-vision.previous` backup and removes older numbered copies, which previously built up on every upgrade. See the [0.4.2 release notes](RELEASE_NOTES_0.4.2.md).
+- Updated 2026-11-24: installing on the UNO Q no longer stops when flashing the Controller Router Matrix sketch to the board fails once ("Upload port detection failed"). The installer now tries the flash up to three times. Upgrades keep App Lab's sketch build folder, so a changed Matrix sketch recompiles only what changed, and a rerun after a failed first install reuses that attempt's build.
 
 ## 0.4.1 - 2026-11-19
 
