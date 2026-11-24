@@ -1,5 +1,10 @@
 # R.O.B. Vision changelog
 
+## 0.4.3 - Unreleased
+
+- Bundle Controller Router 0.4.1. The UNO Q runs R.O.B. Vision, VirtualGlove and the Controller Router page on the App Lab base image that App Lab itself uses (python-apps-base 0.13.2 today). Older copies of that image are removed when the services start, which frees about 900 MB on the UNO Q's system disk.
+- The Controller Router page warns when the UNO Q's system disk has less than 1 GB free, and its Help explains how to free space.
+
 ## 0.4.2 - 2026-11-19
 
 - Upgrading on the UNO Q keeps a single `rob-vision.previous` backup and removes older numbered copies, which previously built up on every upgrade. See the [0.4.2 release notes](RELEASE_NOTES_0.4.2.md).
