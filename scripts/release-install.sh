@@ -43,7 +43,13 @@ elif command -v shasum >/dev/null; then
 else
     fail "sha256sum or shasum is required"
 fi
-work="$(mktemp -d)" || fail "Could not create temporary directory"
+# On the Uno Q, /tmp is a RAM disk and the system disk is small; download and
+# unpack under the arduino home on /home, beside the installed app.
+if [ "$target" = uno-q ]; then
+    work="$(mktemp -d "${HOME:?}/.rob-vision-install.XXXXXX")" || fail "Could not create a working directory in $HOME"
+else
+    work="$(mktemp -d)" || fail "Could not create temporary directory"
+fi
 cleanup() {
     if [ "$target" = console ] && [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null; then
         sudo -n rm -rf "$work" 2>/dev/null || rm -rf "$work"

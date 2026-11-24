@@ -153,15 +153,24 @@ class ReleaseInstallTests(unittest.TestCase):
                 '#!/bin/sh\nwhile [ "$1" != -o ]; do shift; done\ncp "$ROB_TEST_ARCHIVE" "$2"\n')
             (binaries / "id").write_text('#!/bin/sh\necho arduino\n')
             (binaries / "python3").write_text(
-                '#!/bin/sh\nprintf "called" > "$ROB_TEST_MARKER"\n')
+                '#!/bin/sh\nprintf "%s" "$1" > "$ROB_TEST_MARKER"\n')
             for path in binaries.iterdir():
                 path.chmod(0o755)
             marker = root / "called"
-            env = dict(os.environ, PATH=str(binaries) + ":" + os.environ["PATH"],
+            home = root / "home"
+            home.mkdir()
+            env = dict(os.environ, PATH=str(binaries) + ":" + os.environ["PATH"], HOME=str(home),
                        ROB_TEST_ARCHIVE=str(archive), ROB_TEST_MARKER=str(marker))
             subprocess.run(["sh", str(rendered), "uno-q"], env=env, check=True,
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.assertTrue(marker.exists())
+            # The Uno Q's /tmp is a RAM disk: the release unpacks under $HOME
+            # on /home and the working folder is removed afterwards.
+            installer = Path(marker.read_text())
+            # <home>/.rob-vision-install.XXXXXX/rob-vision/scripts/install.py
+            self.assertEqual(installer.parents[3], home)
+            self.assertTrue(installer.parents[2].name.startswith(".rob-vision-install."))
+            self.assertEqual(list(home.iterdir()), [])
             marker.unlink()
             rendered.write_text(template.replace("@VERSION@", "v0.1.0")
                                 .replace("@SHA256@", "0" * 64))
