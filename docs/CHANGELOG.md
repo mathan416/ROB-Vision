@@ -7,6 +7,7 @@
 - The Uno Q release command downloads and unpacks under the arduino home instead of `/tmp`, which is a RAM disk on the Uno Q.
 - The Uno Q installer installs the boot-order and console-halt helpers itself, asking for the arduino password through `sudo`, as VirtualGlove's installer does. It still prints the `NEXT` command when it cannot ask.
 - Controller Router 0.4.1 refuses a second Router installation while one is running, so R.O.B. Vision and VirtualGlove upgrades on the same Uno Q can no longer interleave.
+- Controller Router no longer copies retired files or old `.before-…` backup copies into the installed Router, and removes any it finds there.
 
 ## 0.4.2 - 2026-11-19
 
