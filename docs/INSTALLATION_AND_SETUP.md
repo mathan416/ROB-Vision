@@ -20,7 +20,7 @@ curl -fsSL https://github.com/mathan416/ROB-Vision/releases/latest/download/inst
 
 Leave the terminal open until installation finishes. The first shared Matrix build may take several minutes.
 
-On the UNO Q, follow the `NEXT` command printed by the installer. It runs the bundled boot-order helper with `sudo`; enter your password on that device. This step protects a R.O.B. Vision-only installation and is safe to repeat on upgrades. If the helper says the ordering drop-in is already installed and effective, continue. It does not start a disabled bootloader writer.
+On the UNO Q, the installer runs the bundled boot-order and console-halt helpers with `sudo` at the end; enter the arduino password when it asks. If it cannot ask (for example, with no terminal), or with release 0.4.2 and earlier, it prints a `NEXT` command instead; run that on the device. This step protects a R.O.B. Vision-only installation and is safe to repeat on upgrades. If the helper says the ordering drop-in is already installed and effective, continue. It does not start a disabled bootloader writer.
 
 The installer prints links using both the UNO Q's `.local` name and LAN IP address. Open its **Setup** link on your computer, tablet, or phone.
 

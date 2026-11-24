@@ -257,6 +257,39 @@ def keep_one_backup(destination: Path, backup: Path) -> None:
         print(f"NOTE  Older R.O.B. Vision backups could not all be removed: {error}", flush=True)
 
 
+def sudo_can_ask() -> bool:
+    """Report whether sudo can run here: a terminal to ask on, or no password needed.
+
+    sudo reads its password from the controlling terminal, so this also works
+    when the installer itself arrives through `curl ... | sh`.
+    """
+    if shutil.which("sudo") is None:
+        return False
+    try:
+        os.close(os.open("/dev/tty", os.O_RDWR))
+        return True
+    except OSError:
+        return subprocess.run(["sudo", "-n", "true"], stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL, check=False).returncode == 0
+
+
+def install_uno_host_helpers(destination: Path) -> bool:
+    """Install the shared boot-order and console-halt helpers with sudo, as VirtualGlove does.
+
+    Returns False, leaving the printed command for later, when sudo cannot ask
+    for the arduino password here or a helper fails.
+    """
+    helpers = [destination / "router_shared/uno_boot_order.py", destination / "router_shared/uno_halt.py"]
+    if not all(helper.is_file() for helper in helpers) or not sudo_can_ask():
+        return False
+    print("Installing the UNO Q boot-order and console-halt helpers; sudo may ask for the arduino password.",
+          flush=True)
+    for helper in helpers:
+        if subprocess.run(["sudo", "/usr/bin/python3", str(helper)], check=False).returncode != 0:
+            return False
+    return True
+
+
 def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
     if sys.version_info < (3, 9):
         raise RuntimeError("Python 3.9 or newer is required by the UNO Q controller.")
@@ -368,10 +401,13 @@ def install_uno(source: Path = SOURCE, destination: Path = UNO_DEST) -> None:
         raise
     keep_one_backup(destination, backup)
     print(f"R.O.B. Vision service installed and running at {destination}; select it from Controller Router.")
-    print("NEXT  To protect UNO Q first-boot MCU upload ordering and let a paired console halt this "
-          "controller when it shuts down, run: sudo sh -c '/usr/bin/python3 "
-          + str(destination / "router_shared/uno_boot_order.py") + " && /usr/bin/python3 "
-          + str(destination / "router_shared/uno_halt.py") + "'")
+    if install_uno_host_helpers(destination):
+        print("PASS  UNO Q boot-order and console-halt helpers installed.")
+    else:
+        print("NEXT  To protect UNO Q first-boot MCU upload ordering and let a paired console halt this "
+              "controller when it shuts down, run: sudo sh -c '/usr/bin/python3 "
+              + str(destination / "router_shared/uno_boot_order.py") + " && /usr/bin/python3 "
+              + str(destination / "router_shared/uno_halt.py") + "'")
     if backup.exists():
         print(f"Previous app retained at {backup}; remove it after checking the new app.")
     print_uno_dashboard_urls()

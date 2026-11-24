@@ -133,6 +133,55 @@ class InstallerTests(unittest.TestCase):
             self.assertFalse((target / "._module.py").exists())
             self.assertFalse((target / ".DS_Store").exists())
 
+    def test_sudo_can_ask_on_a_terminal_or_without_a_password(self):
+        from scripts.install import sudo_can_ask
+        ok, refused = SimpleNamespace(returncode=0), SimpleNamespace(returncode=1)
+        with patch("scripts.install.shutil.which", return_value=None):
+            self.assertFalse(sudo_can_ask())
+        with patch("scripts.install.shutil.which", return_value="/usr/bin/sudo"), \
+             patch("scripts.install.os.open", return_value=99), patch("scripts.install.os.close"), \
+             patch("scripts.install.subprocess.run") as run:
+            self.assertTrue(sudo_can_ask())
+            run.assert_not_called()
+        for result, expected in ((ok, True), (refused, False)):
+            with patch("scripts.install.shutil.which", return_value="/usr/bin/sudo"), \
+                 patch("scripts.install.os.open", side_effect=OSError("no tty")), \
+                 patch("scripts.install.subprocess.run", return_value=result) as run:
+                self.assertEqual(sudo_can_ask(), expected)
+            self.assertEqual(run.call_args[0][0], ["sudo", "-n", "true"])
+
+    def test_uno_installer_runs_its_host_helpers_with_sudo_when_it_can(self):
+        from scripts.install import install_uno_host_helpers
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory)
+            boot = destination / "router_shared/uno_boot_order.py"
+            halt = destination / "router_shared/uno_halt.py"
+            with patch("scripts.install.sudo_can_ask", return_value=True), \
+                 patch("scripts.install.subprocess.run") as run:
+                self.assertFalse(install_uno_host_helpers(destination))  # helpers missing
+                run.assert_not_called()
+            boot.parent.mkdir()
+            boot.write_text("# boot\n")
+            halt.write_text("# halt\n")
+            with patch("scripts.install.sudo_can_ask", return_value=False), \
+                 patch("scripts.install.subprocess.run") as run:
+                self.assertFalse(install_uno_host_helpers(destination))
+                run.assert_not_called()
+            with patch("scripts.install.sudo_can_ask", return_value=True), \
+                 patch("scripts.install.subprocess.run",
+                       return_value=SimpleNamespace(returncode=0)) as run, \
+                 patch("builtins.print"):
+                self.assertTrue(install_uno_host_helpers(destination))
+            self.assertEqual([call[0][0] for call in run.call_args_list],
+                             [["sudo", "/usr/bin/python3", str(boot)],
+                              ["sudo", "/usr/bin/python3", str(halt)]])
+            with patch("scripts.install.sudo_can_ask", return_value=True), \
+                 patch("scripts.install.subprocess.run",
+                       return_value=SimpleNamespace(returncode=1)) as run, \
+                 patch("builtins.print"):
+                self.assertFalse(install_uno_host_helpers(destination))
+            run.assert_called_once()  # stops at the first failure
+
     def test_uno_stages_app_and_preserves_private_token_on_upgrade(self):
         with tempfile.TemporaryDirectory(prefix="rv-", dir="/tmp") as directory:
             root = Path(directory)
