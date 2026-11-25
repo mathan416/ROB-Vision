@@ -1,8 +1,8 @@
 # R.O.B. Vision changelog
 
-## 0.4.3 - Unreleased
+## 0.4.3 - 2026-11-24
 
-- Bundle Controller Router 0.4.1. The UNO Q runs R.O.B. Vision, VirtualGlove and the Controller Router page on the App Lab base image that App Lab itself uses (python-apps-base 0.13.2 today). Older copies of that image are removed when the services start, which frees about 900 MB on the UNO Q's system disk.
+- Bundle Controller Router 0.4.1. The UNO Q runs R.O.B. Vision, VirtualGlove and the Controller Router page on the App Lab base image that App Lab itself uses (python-apps-base 0.13.2 today). Older copies of that image are removed when the services start, which frees about 900 MB on the UNO Q's system disk. See the [0.4.3 release notes](RELEASE_NOTES_0.4.3.md).
 - The Controller Router page warns when the UNO Q's system disk has less than 1 GB free, and its Help explains how to free space.
 - The Uno Q release command downloads and unpacks under the arduino home instead of `/tmp`, which is a RAM disk on the Uno Q.
 - The Uno Q installer installs the boot-order and console-halt helpers itself, asking for the arduino password through `sudo`, as VirtualGlove's installer does. It still prints the `NEXT` command when it cannot ask.

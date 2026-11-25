@@ -11,7 +11,7 @@ R.O.B. Vision is a frame-driven virtual robot companion for Gyromite and Stack-U
 
 [Meet Buddy](docs/MEET_BUDDY.md), [see the Mission page](dashboard/index.html), or [print a desk-sized Buddy](models/buddy/README.md). The companion [public website](website/README.md) is a separate static site for manual publishing.
 
-The stable release is **v0.4.2**. See the [release notes](docs/RELEASE_NOTES_0.4.2.md) for changes and qualification scope.
+The stable release is **v0.4.3**. See the [release notes](docs/RELEASE_NOTES_0.4.3.md) for changes and qualification scope.
 
 The release bundles Controller Router 0.3.0 and its independently versioned UNO Q portal 0.3.3. Use the installation guide packaged with the version you install; GitHub's `releases/latest` URL selects a stable release, not a prerelease.
 
@@ -32,7 +32,7 @@ curl -fsSL https://github.com/mathan416/ROB-Vision/releases/latest/download/inst
   sh -s -- console your-controller.local
 ```
 
-These commands install the **latest published stable release**. A prerelease requires its versioned installer. On the UNO Q, follow the installer's printed `NEXT` command for the privileged boot-order helper; an existing rule is checked without changing it. See [Install and set up R.O.B. Vision](docs/INSTALLATION_AND_SETUP.md) for platform checks, repair, and first-game verification.
+These commands install the **latest published stable release**. A prerelease requires its versioned installer. On the UNO Q, enter the arduino password when the installer asks; it uses `sudo` only to install the boot-order and console-halt helpers, and checks an existing rule without changing it. If it cannot ask, it prints a `NEXT` command to run instead. See [Install and set up R.O.B. Vision](docs/INSTALLATION_AND_SETUP.md) for platform checks, repair, and first-game verification.
 
 ## Connect and play
 
